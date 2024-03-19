@@ -16,6 +16,9 @@ def execute_main():
     params_path = args_dict['path_params']
     data_path = args_dict['file_folders']
 
+    if not os.path.exists(data_path):
+        raise FileNotFoundError("Configuration file with path to data and analysis results cannot be found.")
+
     # open config file
     with open(data_path, 'r') as file:
         data_dict = json.load(file)
