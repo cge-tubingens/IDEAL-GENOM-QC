@@ -255,7 +255,7 @@ class VariantQC:
             .sort_values(by=df_markers.columns[0], inplace=False)
 
         df_markers.to_csv(
-            os.path.join(result_path, output_name+'.clean-fail-markers-qc.txt'),
+            os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt'),
             header=False,
             index=False
         )
