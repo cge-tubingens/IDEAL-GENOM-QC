@@ -1,5 +1,5 @@
-from classes.SampleQC import SampleQC
-from classes.VariantQC import VariantQC
+from cge_comrare_pipeline.SampleQC import SampleQC
+from cge_comrare_pipeline.VariantQC import VariantQC
 
 INPUT_PATH = '/mnt/0A2AAC152AABFBB7/PipeLine/data/inputData'
 INPUT_NAME = 'test_1'
