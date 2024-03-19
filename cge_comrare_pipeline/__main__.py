@@ -4,7 +4,6 @@ import pandas as pd
 
 from cge_comrare_pipeline.Helpers import arg_parser
 
-
 def execute_main():
 
     args = arg_parser()
@@ -16,6 +15,7 @@ def execute_main():
     params_path = args_dict['path_params']
     data_path = args_dict['file_folders']
 
+    # check path to config file
     if not os.path.exists(data_path):
         raise FileNotFoundError("Configuration file with path to data and analysis results cannot be found.")
 
@@ -23,7 +23,7 @@ def execute_main():
     with open(data_path, 'r') as file:
         data_dict = json.load(file)
 
-    # ini
+    # class instances
     sample_qc = SampleQC(
         input_path      =data_dict['input_directory'],
         input_name      =data_dict['input_prefix'],
@@ -42,6 +42,7 @@ def execute_main():
         dependables_path=data_dict['dependables_directory']
     )
 
+    # pipeline steps
     steps = {
         'ld_prune'      : sample_qc.run_ld_prune,
         'heterozygosity': sample_qc.run_heterozygosity_rate,
@@ -55,6 +56,7 @@ def execute_main():
         'delete_markers': variant_qc.remove_markers
     }
 
+    # execute pipeline
     for step in steps.keys():
         step()
 
