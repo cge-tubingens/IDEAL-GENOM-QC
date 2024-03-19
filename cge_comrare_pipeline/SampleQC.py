@@ -128,7 +128,7 @@ class SampleQC:
             raise ValueError("hwe should be between 0.00000001 and 0.001")
         
         # check existence of high LD regions file
-        high_ld_regions_file = os.path.join(dependables_path, ld_region_file)
+        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
         if not os.path.exists(high_ld_regions_file):
             raise FileNotFoundError("File with high LD region was not found")
 
@@ -521,7 +521,7 @@ class SampleQC:
         step = "preparation_for_pca"
 
         # generate prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --autosome   --exclude {os.path.join(dependables_path, ld_region_file)} --geno {geno} --hwe {hwe} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --maf {maf} --mind {mind} --out {os.path.join(result_path, output_name+'.pre_ind_clean')} --range"
+        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --autosome   --exclude {os.path.join(dependables_path, 'high-LD-regions.txt')} --geno {geno} --hwe {hwe} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --maf {maf} --mind {mind} --out {os.path.join(result_path, output_name+'.pre_ind_clean')} --range"
 
         # generate clean binary files
         plink_cmd2 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --extract {os.path.join(result_path, output_name+'.pre_ind_clean.prune.in')} --keep-allele-order --make-bed --out {os.path.join(result_path, output_name+'.pre_ind_clean.pca_ready')}"
