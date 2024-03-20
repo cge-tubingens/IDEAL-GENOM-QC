@@ -36,6 +36,6 @@ These two files contain all the information necessary to run the pipeline.
 
 ### Paths to project folders
 
-## Outpu data
+## Output data
 
 ## Usage
