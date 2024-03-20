@@ -271,7 +271,7 @@ class VariantQC:
             os.mkdir(self.clean_variant_dir)
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --exclude {os.path.join(result_path, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(self.clean_variant_dir, output_name+'.clean.final')}"
+        plink_cmd = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(self.clean_variant_dir, output_name+'.clean.final')}"
 
         # execute PLink command
         shell_do(plink_cmd, log=True)

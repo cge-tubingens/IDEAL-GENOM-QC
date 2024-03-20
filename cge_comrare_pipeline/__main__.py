@@ -9,8 +9,8 @@ def execute_main():
     args = arg_parser()
     args_dict = vars(args)
 
-    from cge_comrare_pipeline import SampleQC
-    from cge_comrare_pipeline import VariantQC
+    from cge_comrare_pipeline.SampleQC import SampleQC
+    from cge_comrare_pipeline.VariantQC import VariantQC
 
     params_path = args_dict['path_params']
     data_path = args_dict['file_folders']
@@ -58,7 +58,7 @@ def execute_main():
 
     # execute pipeline
     for step in steps.keys():
-        step()
+        steps[step]()
 
     return None
 

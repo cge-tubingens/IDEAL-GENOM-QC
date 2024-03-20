@@ -67,7 +67,7 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def run_ld_prune(self, ld_region_file:str)->dict:
+    def run_ld_prune(self)->dict:
 
         """
         Funtion to prunes samples based on Linkage Disequilibrium
@@ -496,7 +496,7 @@ class SampleQC:
 
         return out_dict
 
-    def divergent_ancestry_step_one(self, ld_region_file)->dict:
+    def divergent_ancestry_step_one(self)->dict:
 
         """
         Function to identify subject with divergent ancestry.
