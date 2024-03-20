@@ -15,13 +15,32 @@ def execute_main():
     params_path = args_dict['path_params']
     data_path = args_dict['file_folders']
 
-    # check path to config file
+    # check path to config files
     if not os.path.exists(data_path):
         raise FileNotFoundError("Configuration file with path to data and analysis results cannot be found.")
+    
+    if not os.path.exists(params_path):
+        raise FileNotFoundError("Configuration file with pipeline parameters cannot be found.")
 
     # open config file
     with open(data_path, 'r') as file:
         data_dict = json.load(file)
+
+    if params_path is None:
+        params_dict = {
+                "maf" : 0.05,
+                "geno": 0.1,
+                "mind": 0.1,
+                "hwe" : 0.00000005,
+                "sex_check": [0.2, 0.8],
+                "indep-pairwise": [50, 5, 0.2],
+                "chr": 24,
+                "outlier_threshold": 6,
+                "pca": 10
+                }
+    else:
+        with open(params_path, 'r') as file:
+            params_dict = json.loads(file)
 
     # class instances
     sample_qc = SampleQC(
@@ -29,7 +48,7 @@ def execute_main():
         input_name      =data_dict['input_prefix'],
         output_path     =data_dict['output_directory'],
         output_name     =data_dict['output_prefix'],
-        config_path     =params_path,
+        config_dict     =params_dict,
         dependables_path=data_dict['dependables_directory']
     )
 

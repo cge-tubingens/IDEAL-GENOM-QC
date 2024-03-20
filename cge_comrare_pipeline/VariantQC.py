@@ -13,7 +13,7 @@ from cge_comrare_pipeline.Helpers import shell_do
 
 class VariantQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_path:str, dependables_path:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
 
         # check if paths are set
         if input_path is None or output_path is None or dependables_path is None:
@@ -46,8 +46,7 @@ class VariantQC:
         self.dependables = dependables_path
         self.clean_sample_folder = os.path.join(self.output_path, 'clean_samples')
 
-        with open(config_path, 'r') as file:
-            self.config_dict = json.load(file)
+        self.config_dict = config_dict
 
         # create results folder if not existent
         self.results_dir = os.path.join(output_path, 'variant_qc_results')
