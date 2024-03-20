@@ -33,8 +33,35 @@ These two files contain all the information necessary to run the pipeline.
 
 ### Quality control pipeline parameters
 
+The file `parameters.JSON` contains values for `PLINK` commands that will be used in the pipeline. If this file is not provided, the default values of the pipeline will be taken into account. These are
+
+```
+    "maf" : 0.05,
+    "geno": 0.1,
+    "mind": 0.1,
+    "hwe" : 0.00000005,
+    "sex_check": [0.2, 0.8],
+    "indep-pairwise": [50, 5, 0.2],
+    "chr": 24,
+    "outlier_threshold": 6,
+    "pca": 10.
+```
+
+If one wants to change at least one of the default values, please provide the full information in the configuration file. In repository can be found the `.JSON` file corresponding to the `cge-comrare-pipeline` default parameters.
 
 ### Paths to project folders
+
+The file `paths.JSON` contain the addresses to the project folder as well as the prefix of the input and output data. The file must contain the following fields:
+
+```
+{
+    "input_directory"      : "<path to folder with project input data>",
+    "input_prefix"         : "<prefix of the input data>",
+    "output_directory"     : "<path to folder where the output data will go>",
+    "output_prefix"        : "<prefix for the output data>",
+    "dependables_directory": "<path to folder with dependables files>"
+}
+```
 
 ## Output data
 
