@@ -1,0 +1,20 @@
+name: comrare
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python==3.11.0
+  - matplotlib
+  - pip
+  - numpy
+  - pandas
+  - bioconda::plink
+  - conda-lock
+  - ca-certificates
+  - openssl
+  - poetry
+  - certifi
+
+platforms:
+  - linux-64
