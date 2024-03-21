@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import argparse
+import os
 
 def shell_do(command, print_cmd=False, log=False, return_log=False, err=False):
 
@@ -37,3 +38,17 @@ def arg_parser()->dict:
     args = parser.parse_args()
 
     return args
+
+def delete_temp_files(folder_path:str, extension:str, remove_folder:bool=False)->None:
+
+    for file in os.listdir(folder_path):
+        file_name = file.split('.')
+        if len(file_name)>1 and file_name[-1] != extension:
+            os.remove(
+                os.path.join(folder_path, file)
+            )
+
+    if remove_folder:
+        os.rmdir(folder_path)
+
+    return None
