@@ -46,8 +46,7 @@ class SampleQC:
         self.input_name     = input_name
         self.output_name    = output_name
         self.dependables    = dependables_path
-        self.fst_pruned_dir = None
-
+        # self.fst_pruned_dir = None
         self.config_dict = config_dict
 
         # create results folder
@@ -79,19 +78,21 @@ class SampleQC:
             * 'output': Dictionary containing paths to the generated output files.
         """
 
+        input_path = self.input_path
+        input_name = self.input_name
         output_name= self.output_name
         result_path= self.results_dir
         plots_path = self.plots_dir
-        fst_pruned_dir= self.fst_pruned_dir
+        #fst_pruned_dir= self.fst_pruned_dir
         fails_dir= self.fails_dir
 
         step = "heterozygosity_rate"
 
         # create .imiss and .lmiss files
-        plink_cmd1 = f"plink --bfile {os.path.join(fst_pruned_dir, output_name)} --keep-allele-order --missing --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --out {os.path.join(result_path, output_name+'_1')}"
 
         # create .het file
-        plink_cmd2 = f"plink --bfile {os.path.join(fst_pruned_dir, output_name)} --keep-allele-order --het --autosome --extract {os.path.join(fst_pruned_dir, output_name+'.prune.in')} --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --het --autosome --out {os.path.join(result_path, output_name+'_1')}"
 
         # execute PLink commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -110,7 +111,7 @@ class SampleQC:
         )
 
         # create cleaned binary file
-        plink_cmd3 = f"plink --bfile {os.path.join(fst_pruned_dir, output_name)} --keep-allele-order --remove {fails_path} --make-bed --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd3 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --remove {fails_path} --make-bed --out {os.path.join(result_path, output_name+'_1')}"
 
         # execute PLink command
         shell_do(plink_cmd3, log=True)
@@ -144,7 +145,7 @@ class SampleQC:
 
         output_name= self.output_name
         result_path= self.results_dir
-        fst_pruned_dir= self.fst_pruned_dir
+        #fst_pruned_dir= self.fst_pruned_dir
         fails_dir = self.fails_dir
 
         sex_check = self.config_dict['sex_check']
@@ -167,7 +168,7 @@ class SampleQC:
         step = "sex_check"
 
         # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'_1')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(fst_pruned_dir, output_name+'.prune.in')} --out {os.path.join(result_path, output_name+'_2')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'_1')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name+'_2')}"
 
         # execute PLink command
         shell_do(plink_cmd1, log=True)
@@ -231,14 +232,13 @@ class SampleQC:
         result_path= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
-        fst_pruned_dir=self.fst_pruned_dir
 
         step = "duplicate_relative_prune"
 
         to_remove = pd.DataFrame(columns=['FID', 'IID'])
 
         # run genome
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'_2')} --keep-allele-order --extract {os.path.join(fst_pruned_dir, output_name+'.prune.in')} --genome --out {os.path.join(result_path, output_name+'_3')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'_2')} --keep-allele-order --genome --out {os.path.join(result_path, output_name+'_3')}"
 
         # Generate new .imiss file
         plink_cmd2 = f"plink --bfile {os.path.join(result_path, output_name+'_2')} --keep-allele-order --missing --out {os.path.join(result_path, output_name+'_3')}"
@@ -332,10 +332,8 @@ class SampleQC:
         result_path= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
-        fst_pruned_dir=self.fst_pruned_dir
 
         step = "delete_sample_failed_QC"
-
 
         # load files with samples who failed one or several QC steps
         df_sex = pd.read_csv(
@@ -376,8 +374,13 @@ class SampleQC:
             index =False
         )
 
+        # create folder for cleaned files
+        self.clean_samples_dir = os.path.join(self.output_path, 'clean_samples')
+        if not os.path.exists(self.clean_samples_dir):
+            os.mkdir(self.clean_samples_dir)
+
         # generate cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --remove {os.path.join(fails_dir, output_name+'.fail-qc_1-inds.txt')} --make-bed --out {os.path.join(result_path, output_name+'.pre_ind_clean')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --remove {os.path.join(fails_dir, output_name+'.fail-qc_1-inds.txt')} --make-bed --out {os.path.join(self.clean_samples_dir, output_name+'.smpl_clean')}"
 
         # execute PLink command
         shell_do(plink_cmd, log=True)
@@ -397,116 +400,7 @@ class SampleQC:
 
         return out_dict
 
-    def divergent_ancestry_step_one(self)->dict:
-
-        """
-        Function to identify subject with divergent ancestry.
-
-        Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
-        """
-
-        result_path= self.results_dir
-        output_name= self.output_name
-        dependables_path = self.dependables
-
-        maf = self.config_dict['maf']
-        geno = self.config_dict['geno']
-        hwe = self.config_dict['hwe']
-        ind_pair = self.config_dict['indep-pairwise']
-        mind = self.config_dict['mind']
-
-        step = "preparation_for_pca"
-
-        # generate prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --autosome   --exclude {os.path.join(dependables_path, 'high-LD-regions.txt')} --geno {geno} --hwe {hwe} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --maf {maf} --mind {mind} --out {os.path.join(result_path, output_name+'.pre_ind_clean')} --range"
-
-        # generate clean binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --extract {os.path.join(result_path, output_name+'.pre_ind_clean.prune.in')} --keep-allele-order --make-bed --out {os.path.join(result_path, output_name+'.pre_ind_clean.pca_ready')}"
-
-        # execute PLink commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
     
-    def run_pca_analysis(self)->dict:
-
-        """
-        Funtion to prunes samples .....
-
-        Parameters:
-        - ld_region_file: string
-            file name with regions with high Linkage Distribution
-
-        Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
-        """
-
-        output_name = self.output_name
-        result_path = self.results_dir
-        fails_dir   = self.fails_dir
-        threshold   = self.config_dict['outlier_threshold']
-        pca         = self.config_dict['pca']
-
-        step = "pca_analysis"
-
-        # check `pca` type
-        if not isinstance(pca, int):
-            raise TypeError("pca should be an integer value")
-
-        # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean.pca_ready')}   --keep-allele-order --out {os.path.join(result_path, output_name+'.pca')} --pca {pca}"
-
-        # executes Plink command
-        shell_do(plink_cmd1, log=True)
-
-        ancestry_fails = self.fail_pca(result_path, output_name, fails_dir, threshold)
-
-        # create folder for cleaned files
-        self.clean_samples_dir = os.path.join(self.output_path, 'clean_samples')
-        if not os.path.exists(self.clean_samples_dir):
-            os.mkdir(self.clean_samples_dir)
-
-        # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(result_path, output_name+'.pre_ind_clean')} --allow-no-sex --remove {ancestry_fails} --make-bed --out {os.path.join(self.clean_samples_dir, output_name+'.clean')}"
-
-        shell_do(plink_cmd2, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
 
     @staticmethod
     def plot_imiss_het(logFMISS, meanHET, figs_folder):
@@ -576,34 +470,3 @@ class SampleQC:
         )
 
         return df_imiss['logF_MISS'], df_het['meanHet']
-
-    @staticmethod
-    def fail_pca(folder_path:str, file_name:str, output_folder:str, threshold:int):
-
-        # load .eigenvec file
-        df_eigenvec = pd.read_csv(
-            os.path.join(folder_path, file_name+'.pca.eigenvec'),
-            header=None,
-            sep='\s+'
-        )
-        eigenvecs_mat = df_eigenvec[df_eigenvec.columns[2:]].copy()
-
-        means = eigenvecs_mat.mean()
-        std   = eigenvecs_mat.std()
-
-        for k in eigenvecs_mat.columns:
-            eigenvecs_mat[k] = (np.abs(eigenvecs_mat[k] -means[k]) > threshold*std[k] )
-
-        df_outs = df_eigenvec[df_eigenvec.columns[:2]].copy()
-        df_outs['is_outlier'] = (np.sum(eigenvecs_mat, axis=1) >0)
-
-        df_outs = df_outs[df_outs['is_outlier']].reset_index(drop=True).drop(columns='is_outlier')
-
-        df_outs.to_csv(
-            os.path.join(output_folder, file_name+'.fail-ancestry-qc.txt'),
-            header=None,
-            index=False,
-            sep=' '
-        )
-
-        return os.path.join(output_folder, file_name+'.fail-ancestry-qc.txt')
