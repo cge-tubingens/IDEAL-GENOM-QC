@@ -2,9 +2,9 @@ import os
 import json
 import pandas as pd
 
-from cge_comrare_pipeline.Helpers import arg_parser
+from cge_comrare_pipeline.Helpers import arg_parser, delete_temp_files
 
-def execute_main():
+def execute_main()->None:
 
     args = arg_parser()
     args_dict = vars(args)
@@ -40,7 +40,7 @@ def execute_main():
                 }
     else:
         with open(params_path, 'r') as file:
-            params_dict = json.loads(file)
+            params_dict = json.load(file)
 
     # class instances
     sample_qc = SampleQC(
@@ -57,7 +57,7 @@ def execute_main():
         input_name      =data_dict['input_prefix'],
         output_path     =data_dict['output_directory'],
         output_name     =data_dict['output_prefix'],
-        config_path     =params_path,
+        config_dict     =params_dict,
         dependables_path=data_dict['dependables_directory']
     )
 
@@ -78,6 +78,12 @@ def execute_main():
     # execute pipeline
     for step in steps.keys():
         steps[step]()
+
+    samples_results_dir = os.path.join(data_dict['output_directory'], 'sample_qc_results')
+    variants_results_dir = os.path.join(data_dict['output_directory'], 'variant_qc_results')
+
+    delete_temp_files(samples_results_dir, 'log')
+    delete_temp_files(variants_results_dir, 'log')
 
     return None
 
