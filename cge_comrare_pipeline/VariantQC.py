@@ -44,8 +44,6 @@ class VariantQC:
         self.input_name = input_name
         self.output_name= output_name
         self.dependables = dependables_path
-        self.clean_sample_folder = os.path.join(self.output_path, 'clean_samples')
-
         self.config_dict = config_dict
 
         # create results folder if not existent
@@ -75,10 +73,11 @@ class VariantQC:
             * 'output': Dictionary containing paths to the generated output files.
         """
 
+        input_path = self.input_path
+        input_name = self.input_name
         result_path = self.results_dir
         output_name = self.output_name
         fails_dir   = self.fails_dir
-        cleaned_samples = self.clean_sample_folder
         fig_folder = self.plots_dir
 
         chr = self.config_dict['chr']
@@ -93,10 +92,10 @@ class VariantQC:
         step = 'high_rate_missing_data'
 
         #
-        plink_cmd1 = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --missing --filter-males --chr {chr} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --filter-males --chr {chr} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
 
         #
-        plink_cmd2 = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --missing --not-chr {chr} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --not-chr {chr} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
 
         # execute PLink commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -168,15 +167,16 @@ class VariantQC:
             * 'output': Dictionary containing paths to the generated output files.
         """
 
+        input_path = self.input_path
+        input_name = self.input_name
         result_path = self.results_dir
         output_name = self.output_name
         fails_dir   = self.fails_dir
-        cleaned_samples = self.clean_sample_folder
 
         step = 'different_genotype_case_control'
 
         # 
-        plink_cmd = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --test-missing --out {os.path.join(result_path, output_name+'.clean_1')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --test-missing --out {os.path.join(result_path, output_name+'.clean_1')}"
 
         # execute PLink command
         shell_do(plink_cmd, log=True)
@@ -221,10 +221,11 @@ class VariantQC:
             * 'output': Dictionary containing paths to the generated output files.
         """
 
-        result_path      = self.results_dir
-        output_name      = self.output_name
-        fails_dir   = self.fails_dir
-        cleaned_samples = self.clean_sample_folder
+        input_path = self.input_path
+        input_name = self.input_name
+        result_path= self.results_dir
+        output_name= self.output_name
+        fails_dir  = self.fails_dir
 
         maf = self.config_dict['maf']
         geno= self.config_dict['geno']
@@ -270,7 +271,7 @@ class VariantQC:
             os.mkdir(self.clean_variant_dir)
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(cleaned_samples, output_name+'.clean')} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(self.clean_variant_dir, output_name+'.clean.final')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(self.clean_variant_dir, output_name+'.vrnt_clean')}"
 
         # execute PLink command
         shell_do(plink_cmd, log=True)
