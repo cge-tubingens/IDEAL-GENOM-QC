@@ -66,3 +66,10 @@ The file `paths.JSON` contain the addresses to the project folder as well as the
 ## Output data
 
 ## Usage
+
+The pipeline is easy to use. Once installed in the system or in a virtual enviroment one needs to run the following command:
+
+```
+python3 cge_comrare_pipeline --path_params <path to parameters.JSON> --file_folders <path to paths.JSON>
+```
+
