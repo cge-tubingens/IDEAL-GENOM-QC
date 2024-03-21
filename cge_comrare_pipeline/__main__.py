@@ -72,6 +72,11 @@ def execute_main()->None:
     )
 
     # pipeline steps
+    pca_steps = {
+        'ld_prune'      : pca_qc.run_ld_prune,
+        'ancestry_one'  : pca_qc.divergent_ancestry_step_one,
+        'run_pca'       : pca_qc.run_pca_analysis,
+    }
     smpl_steps = {
         'heterozygosity': sample_qc.run_heterozygosity_rate,
         'sex_check'     : sample_qc.run_sex_check,
@@ -83,13 +88,8 @@ def execute_main()->None:
         'call_rate'     : variant_qc.different_genotype_call_rate,
         'delete_markers': variant_qc.remove_markers
     }
-    pca_steps = {
-        'ld_prune'      : pca_qc.run_ld_prune,
-        'ancestry_one'  : pca_qc.divergent_ancestry_step_one,
-        'run_pca'       : pca_qc.run_pca_analysis,
-    }
 
-    pipeline = [smpl_steps, vrnt_steps, pca_steps]
+    pipeline = [pca_steps, smpl_steps, vrnt_steps]
 
     # execute pipeline
     for pipe in pipeline:
@@ -100,7 +100,7 @@ def execute_main()->None:
     variants_results_dir = os.path.join(data_dict['output_directory'], 'variant_qc_results')
 
     delete_temp_files(samples_results_dir, 'log')
-    #delete_temp_files(variants_results_dir, 'log')
+    delete_temp_files(variants_results_dir, 'log')
 
     return None
 
