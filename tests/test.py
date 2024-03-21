@@ -22,7 +22,7 @@ sample_QC = SampleQC(
     dependables_path=DEPEND_PATH
 )
 
-sample_QC.run_ld_prune()
+sample_QC.run_ld_prune() # remove from here
 
 sample_QC.run_heterozygosity_rate()
 
@@ -32,7 +32,7 @@ sample_QC.run_relatedness_prune()
 
 sample_QC.delete_failing_QC()
 
-sample_QC.divergent_ancestry_step_one(ld_region_file='high-LD-regions.txt')
+sample_QC.divergent_ancestry_step_one()
 
 sample_QC.run_pca_analysis()
 
@@ -50,6 +50,3 @@ variant_QC.missing_data_rate()
 variant_QC.different_genotype_call_rate()
 
 variant_QC.remove_markers()
-
-import json
-
