@@ -2,6 +2,7 @@ import subprocess
 import sys
 import argparse
 import os
+import shutil
 
 def shell_do(command, print_cmd=False, log=False, return_log=False, err=False):
 
@@ -39,16 +40,24 @@ def arg_parser()->dict:
 
     return args
 
-def delete_temp_files(folder_path:str, extension:str, remove_folder:bool=False)->None:
+def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
 
-    for file in os.listdir(folder_path):
-        file_name = file.split('.')
-        if len(file_name)>1 and file_name[-1] != extension:
-            os.remove(
-                os.path.join(folder_path, file)
+    for file in os.listdir(path_to_folder):
+            file_split = file.split('.')
+            if file_split[-1]!='log' and file not in files_to_keep:
+                os.remove(
+                    os.path.join(path_to_folder, file)
+                )
+        
+    # create log folder for dependables
+    logs_dir = os.path.join(path_to_folder, 'log_files')
+    os.mkdir(logs_dir)
+
+    for file in os.listdir(path_to_folder):
+        if file.split('.')[-1]=='log':
+            shutil.move(
+                os.path.join(path_to_folder, file),
+                os.path.join(logs_dir, file)
             )
 
-    if remove_folder:
-        os.rmdir(folder_path)
-
-    return None
+        pass
