@@ -1,12 +1,9 @@
-from cge_comrare_pipeline.SampleQC import SampleQC
-from cge_comrare_pipeline.VariantQC import VariantQC
-from cge_comrare_pipeline.PCA import PCA
-
-import pandas as pd
-
 import json
 import os
 
+from cge_comrare_pipeline.SampleQC import SampleQC
+from cge_comrare_pipeline.VariantQC import VariantQC
+from cge_comrare_pipeline.PCA import PCA
 
 INPUT_PATH = '/mnt/0A2AAC152AABFBB7/PipeLine/data/inputData'
 INPUT_NAME = 'subsetluxgiant'
@@ -20,11 +17,11 @@ with open(data_path, 'r') as file:
     parameters = json.load(file)
 
 pca = PCA(
-    input_path=INPUT_PATH,
-    input_name=INPUT_NAME,
-    output_path=OUTPUT_PATH,
-    output_name=OUTPUT_NAME,
-    config_dict=parameters,
+    input_path      =INPUT_PATH,
+    input_name      =INPUT_NAME,
+    output_path     =OUTPUT_PATH,
+    output_name     =OUTPUT_NAME,
+    config_dict     =parameters,
     dependables_path=DEPEND_PATH
 )
 
