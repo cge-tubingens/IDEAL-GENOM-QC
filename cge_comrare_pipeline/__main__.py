@@ -43,10 +43,19 @@ def execute_main()->None:
         with open(params_path, 'r') as file:
             params_dict = json.load(file)
 
-    # class instances
-    sample_qc = SampleQC(
+    # class instances        
+    pca_qc = PCA(
         input_path      =data_dict['input_directory'],
         input_name      =data_dict['input_prefix'],
+        output_path     =data_dict['output_directory'],
+        output_name     =data_dict['output_prefix'],
+        config_dict     =params_dict,
+        dependables_path=data_dict['dependables_directory']
+    )
+
+    sample_qc = SampleQC(
+        input_path      =os.path.join(data_dict['output_directory'], 'pca_results'),
+        input_name      =data_dict['output_prefix']+'.clean',
         output_path     =data_dict['output_directory'],
         output_name     =data_dict['output_prefix'],
         config_dict     =params_dict,
@@ -62,20 +71,17 @@ def execute_main()->None:
         dependables_path=data_dict['dependables_directory']
     )
 
-    pca_qc = PCA(
-        input_path      =data_dict['input_directory'],
-        input_name      =data_dict['input_prefix'],
-        output_path     =data_dict['output_directory'],
-        output_name     =data_dict['output_prefix'],
-        config_dict     =params_dict,
-        dependables_path=data_dict['dependables_directory']
-    )
-
     # pipeline steps
     pca_steps = {
-        'ld_prune'      : pca_qc.run_ld_prune,
-        'ancestry_one'  : pca_qc.divergent_ancestry_step_one,
-        'run_pca'       : pca_qc.run_pca_analysis,
+        'filter_snps'              : pca_qc.filter_problematic_snps,
+        'LD_pruning'               : pca_qc.ld_pruning,
+        'reference_pruning'        : pca_qc.prune_reference_panel,
+        'chr_missmatch'            : pca_qc.chromosome_missmatch,
+        'pos_missmatch_allele_flip': pca_qc.position_missmatch_allele_flip,
+        'remove_missmatch'         : pca_qc.remove_missmatch,
+        'merging'                  : pca_qc.merge_with_reference,
+        'pca_analysis'             : pca_qc.run_pca_analysis,
+        'pca_plot'                 : pca_qc.pca_plot
     }
     smpl_steps = {
         'heterozygosity': sample_qc.run_heterozygosity_rate,
