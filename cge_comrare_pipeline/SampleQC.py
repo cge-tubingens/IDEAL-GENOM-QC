@@ -1,5 +1,5 @@
 """
-Python module to perform sample quality control
+Module to perform sample quality control
 """
 
 import os
@@ -84,7 +84,7 @@ class SampleQC:
         output_name= self.output_name
         result_path= self.results_dir
         plots_path = self.plots_dir
-        fails_dir= self.fails_dir
+        fails_dir  = self.fails_dir
 
         step = "heterozygosity_rate"
 
@@ -145,7 +145,6 @@ class SampleQC:
 
         output_name= self.output_name
         result_path= self.results_dir
-        #fst_pruned_dir= self.fst_pruned_dir
         fails_dir = self.fails_dir
 
         sex_check = self.config_dict['sex_check']

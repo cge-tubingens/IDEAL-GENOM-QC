@@ -1,5 +1,8 @@
+"""
+Module to perform principal component analysis to identify ethnicity outliers.
+"""
+
 import os
-import shutil
 import subprocess
 
 import pandas as pd
@@ -93,8 +96,8 @@ class PCA:
 
         input_path = self.input_path
         input_name = self.input_name
-        results_dir = self.results_dir
-        dependables = self.dependables
+        results_dir= self.results_dir
+        dependables= self.dependables
 
         reference_panel = 'all_phase3'
 
@@ -150,12 +153,12 @@ class PCA:
         output_path      = self.output_path
         output_name      = self.output_name
         dependables_path = self.dependables
-        results_dir = self.results_dir
+        results_dir      = self.results_dir
 
-        maf = self.config_dict['maf']
-        geno= self.config_dict['geno']
-        mind= self.config_dict['mind']
-        hwe = self.config_dict['hwe']
+        maf      = self.config_dict['maf']
+        geno     = self.config_dict['geno']
+        mind     = self.config_dict['mind']
+        hwe      = self.config_dict['hwe']
         ind_pair = self.config_dict['indep-pairwise']
 
         # Check type of maf
@@ -386,6 +389,20 @@ class PCA:
 
         step = "merge reference panel with study data"
 
+        awk_cmd1 = f"awk < {os.path.join(results_dir, input_name+'.pruned.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(results_dir, input_name+'.names')}"
+
+        awk_cmd2 = f"awk < {os.path.join(results_dir, input_name+'.pruned.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(results_dir, input_name+'.pruned.bim')}"
+
+        awk_cmd3 = f"awk < {os.path.join(dependables, 'all_phase3.clean.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(dependables, 'all_phase3.clean.names')}"
+
+        awk_cmd4 = f"awk < {os.path.join(dependables, 'all_phase3.clean.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(dependables, 'all_phase3.clean.bim')}"
+
+        logs = []
+        cmds = [awk_cmd1, awk_cmd2, awk_cmd3, awk_cmd4]
+        for cmd in cmds:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            logs.append([result.stderr, result.stdout])
+
         plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')}"
 
         shell_do(plink_cmd, log=True)
@@ -401,7 +418,8 @@ class PCA:
         out_dict = {
             'pass': process_complete,
             'step': step,
-            'output': outfiles_dict
+            'output': outfiles_dict,
+            'awk_logs': logs
         }
 
         return out_dict
