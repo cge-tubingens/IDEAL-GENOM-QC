@@ -599,26 +599,3 @@ class PCA:
         df_fam.columns = ['ID1', 'ID2', 'SuperPop']
 
         return pd.concat([df_fam, df_psam], axis=0)
-
-    @staticmethod
-    def clean_dependables_folder(files_to_keep:list, dependables_path:str)->None:
-
-        for file in os.listdir(dependables_path):
-            file_split = file.split('.')
-            if file_split[-1]!='log' and file not in files_to_keep:
-                os.remove(
-                    os.path.join(dependables_path, file)
-                )
-        
-        # create log folder for dependables
-        logs_dir = os.path.join(dependables_path, 'log_files')
-        os.mkdir(logs_dir)
-
-        for file in os.listdir(dependables_path):
-            if file_split[-1]=='log':
-                shutil.move(
-                    os.path.join(dependables_path, file),
-                    os.path.join(logs_dir, file)
-                )
-
-        pass
