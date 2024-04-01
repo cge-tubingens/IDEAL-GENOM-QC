@@ -42,16 +42,28 @@ def arg_parser()->dict:
 
 def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
 
+    """
+    Function to delete temporary files that were created during the pipeline execution. Moreover, it creates a directory called 'log_files' to save al `.log` files originated from the pipeline execution.
+
+    Parameters
+    ----------
+    files_to_keep: list
+        list of strings where its elements are the names of files and folders that should be kept.
+    path_to_folder: str
+        full path to the folder where the temporary files are located.
+    """
+
     for file in os.listdir(path_to_folder):
-            file_split = file.split('.')
-            if file_split[-1]!='log' and file not in files_to_keep:
-                os.remove(
-                    os.path.join(path_to_folder, file)
-                )
+        file_split = file.split('.')
+        if file_split[-1]!='log' and file not in files_to_keep:
+            os.remove(
+                os.path.join(path_to_folder, file)
+            )
         
     # create log folder for dependables
     logs_dir = os.path.join(path_to_folder, 'log_files')
-    os.mkdir(logs_dir)
+    if not os.path.exists(logs_dir):
+        os.mkdir(logs_dir)
 
     for file in os.listdir(path_to_folder):
         if file.split('.')[-1]=='log':
@@ -60,4 +72,4 @@ def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
                 os.path.join(logs_dir, file)
             )
 
-        pass
+    pass
