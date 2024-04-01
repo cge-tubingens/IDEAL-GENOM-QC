@@ -1,6 +1,5 @@
 from cge_comrare_pipeline.SampleQC import SampleQC
 from cge_comrare_pipeline.VariantQC import VariantQC
-#from cge_comrare_pipeline.PCA import PCA
 from cge_comrare_pipeline.PCA import PCA
 
 import pandas as pd
@@ -18,7 +17,7 @@ DEPEND_PATH= '/mnt/0A2AAC152AABFBB7/PipeLine/data/auxiliarData'
 
 data_path = '/mnt/0A2AAC152AABFBB7/PipeLine/data/config_files/parameters.JSON'
 with open(data_path, 'r') as file:
-        parameters = json.load(file)
+    parameters = json.load(file)
 
 pca = PCA(
     input_path=INPUT_PATH,
@@ -65,8 +64,8 @@ sample_QC.run_relatedness_prune()
 sample_QC.delete_failing_QC()
 
 variant_QC = VariantQC(
-    input_path=os.path.join(OUTPUT_PATH, 'clean_samples'),
-    input_name=OUTPUT_NAME+'.smpl_clean',
+    input_path=os.path.join(OUTPUT_PATH, 'sample_qc_results'),
+    input_name=OUTPUT_NAME+'.clean',
     output_path=OUTPUT_PATH,
     output_name=OUTPUT_NAME,
     config_dict=parameters,
