@@ -505,9 +505,9 @@ class PCA:
 
         for s in df['SuperPop'].unique():
             ax.scatter(
-                df.pc_1[df.SuperPop==s],
-                df.pc_2[df.SuperPop==s],
-                df.pc_3[df.SuperPop==s], 
+                xs=df.pc_1[df.SuperPop==s],
+                ys=df.pc_2[df.SuperPop==s],
+                zs=df.pc_3[df.SuperPop==s], 
                 label=s
             )
         ax.legend()
