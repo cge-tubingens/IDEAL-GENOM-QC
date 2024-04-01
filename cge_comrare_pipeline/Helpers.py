@@ -55,7 +55,7 @@ def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
 
     for file in os.listdir(path_to_folder):
         file_split = file.split('.')
-        if file_split[-1]!='log' and file not in files_to_keep:
+        if file_split[-1]!='log' and file not in files_to_keep and file_split[-1]!='hh':
             os.remove(
                 os.path.join(path_to_folder, file)
             )
@@ -66,7 +66,7 @@ def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
         os.mkdir(logs_dir)
 
     for file in os.listdir(path_to_folder):
-        if file.split('.')[-1]=='log':
+        if file.split('.')[-1]=='log' or file.split('.')[-1]=='hh':
             shutil.move(
                 os.path.join(path_to_folder, file),
                 os.path.join(logs_dir, file)
