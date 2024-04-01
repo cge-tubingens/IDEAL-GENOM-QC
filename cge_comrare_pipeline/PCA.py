@@ -92,6 +92,51 @@ class PCA:
 
         pass
 
+    def shorten_variant_id(self)->dict:
+
+        input_path       = self.input_path
+        input_name       = self.input_name
+        output_path      = self.output_path
+        output_name      = self.output_name
+        dependables_path = self.dependables
+        results_dir      = self.results_dir
+
+        step = "shorten length of variant IDs"
+
+        awk_cmd1 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(input_path, input_name+'.names')}"
+
+        awk_cmd2 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(input_path, input_name+'_0.bim')}"
+
+        os.rename(
+            {os.path.join(input_path, input_name+'.bed')}, 
+            {os.path.join(input_path, input_name+'_0.bim')}
+        )
+        os.rename(
+            {os.path.join(input_path, input_name+'.fam')}, 
+            {os.path.join(input_path, input_name+'_0.fam')}
+        )
+
+        logs = []
+        cmds = [awk_cmd1, awk_cmd2]
+        for cmd in cmds:
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            logs.append([result.stderr, result.stdout])
+        
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'output': input_path
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
     def filter_problematic_snps(self)->dict:
 
         input_path = self.input_path
@@ -107,9 +152,9 @@ class PCA:
 
         self.filter_non_AT_or_GC_snps(input_dir=dependables, input_name=reference_panel, results_dir=dependables)
 
-        plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
+        plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
 
-        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
+        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
 
         cmds = [plink_cmd1, plink_cmd2]
 
@@ -389,20 +434,6 @@ class PCA:
 
         step = "merge reference panel with study data"
 
-        awk_cmd1 = f"awk < {os.path.join(results_dir, input_name+'.pruned.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(results_dir, input_name+'.names')}"
-
-        awk_cmd2 = f"awk < {os.path.join(results_dir, input_name+'.pruned.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(results_dir, input_name+'.pruned.bim')}"
-
-        awk_cmd3 = f"awk < {os.path.join(dependables, 'all_phase3.clean.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(dependables, 'all_phase3.clean.names')}"
-
-        awk_cmd4 = f"awk < {os.path.join(dependables, 'all_phase3.clean.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(dependables, 'all_phase3.clean.bim')}"
-
-        logs = []
-        cmds = [awk_cmd1, awk_cmd2, awk_cmd3, awk_cmd4]
-        for cmd in cmds:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            logs.append([result.stderr, result.stdout])
-
         plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')}"
 
         shell_do(plink_cmd, log=True)
@@ -418,8 +449,7 @@ class PCA:
         out_dict = {
             'pass': process_complete,
             'step': step,
-            'output': outfiles_dict,
-            'awk_logs': logs
+            'output': outfiles_dict
         }
 
         return out_dict
@@ -464,7 +494,7 @@ class PCA:
         ancestry_fails = self.fail_pca(results_dir, output_name, fails_dir, threshold)
 
         # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --chr 1-22 --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
 
         self.results_to_keep.append(output_name+'.clean.bed')
         self.results_to_keep.append(output_name+'.clean.bim')
