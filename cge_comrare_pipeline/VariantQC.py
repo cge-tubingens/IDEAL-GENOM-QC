@@ -3,7 +3,6 @@ Python module to perform variant quality control
 """
 
 import os
-import json
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -225,6 +224,7 @@ class VariantQC:
         input_name = self.input_name
         result_path= self.results_dir
         output_name= self.output_name
+        output_path= self.output_path
         fails_dir  = self.fails_dir
 
         maf = self.config_dict['maf']
@@ -242,7 +242,8 @@ class VariantQC:
             df_lmiss = pd.read_csv(
                 lmiss_path,
                 header=None,
-                index_col=False
+                index_col=False,
+                sep='\s+'
             )
         
         # load markers with different genotype call rate
@@ -265,13 +266,8 @@ class VariantQC:
             index=False
         )
 
-        # create folder for cleaned files
-        self.clean_variant_dir = os.path.join(self.output_path, 'clean_variants')
-        if not os.path.exists(self.clean_variant_dir):
-            os.mkdir(self.clean_variant_dir)
-
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(self.clean_variant_dir, output_name+'.vrnt_clean')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'.vrnt_clean')}"
 
         # execute PLink command
         shell_do(plink_cmd, log=True)
