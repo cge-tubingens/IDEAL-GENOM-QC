@@ -4,6 +4,7 @@ Module to perform principal component analysis to identify ethnicity outliers.
 
 import os
 import subprocess
+import shutil
 
 import pandas as pd
 import numpy as np
@@ -94,6 +95,10 @@ class PCA:
 
     def shorten_variant_id(self)->dict:
 
+        """
+        Function to deal with long variant IDs. It will be done at a later stage.
+        """
+
         input_path       = self.input_path
         input_name       = self.input_name
         output_path      = self.output_path
@@ -101,23 +106,37 @@ class PCA:
         dependables_path = self.dependables
         results_dir      = self.results_dir
 
+        reference_panel = 'all_phase3'
+
         step = "shorten length of variant IDs"
 
         awk_cmd1 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(input_path, input_name+'.names')}"
 
         awk_cmd2 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(input_path, input_name+'_0.bim')}"
 
-        os.rename(
-            {os.path.join(input_path, input_name+'.bed')}, 
-            {os.path.join(input_path, input_name+'_0.bim')}
+        awk_cmd3 = f"awk < {os.path.join(dependables_path, reference_panel+'.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(dependables_path, reference_panel+'.names')}"
+
+        awk_cmd4 = f"awk < {os.path.join(dependables_path, reference_panel+'.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(dependables_path, reference_panel+'_0.bim')}"
+
+        shutil.copy(
+            os.path.join(input_path, input_name+'.bed'), 
+            os.path.join(input_path, input_name+'_0.bed')
         )
-        os.rename(
-            {os.path.join(input_path, input_name+'.fam')}, 
-            {os.path.join(input_path, input_name+'_0.fam')}
+        shutil.copy(
+            os.path.join(input_path, input_name+'.fam'), 
+            os.path.join(input_path, input_name+'_0.fam')
+        )
+        shutil.copy(
+            os.path.join(dependables_path, reference_panel+'.bed'), 
+            os.path.join(dependables_path, reference_panel+'_0.bed')
+        )
+        shutil.copy(
+            os.path.join(dependables_path, reference_panel+'.fam'), 
+            os.path.join(dependables_path, reference_panel+'_0.fam')
         )
 
         logs = []
-        cmds = [awk_cmd1, awk_cmd2]
+        cmds = [awk_cmd1, awk_cmd2, awk_cmd3, awk_cmd4]
         for cmd in cmds:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             logs.append([result.stderr, result.stdout])
@@ -157,7 +176,6 @@ class PCA:
         plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
 
         cmds = [plink_cmd1, plink_cmd2]
-
         for cmd in cmds:
             shell_do(cmd, log=True)
 
@@ -404,7 +422,7 @@ class PCA:
         self.dependables_to_keep.append('all_phase3.clean.bim')
         self.dependables_to_keep.append('all_phase3.clean.fam')
 
-        delete_temp_files(self.dependables_to_keep, dependables)
+        # delete_temp_files(self.dependables_to_keep, dependables)
 
         # report
         process_complete = True
@@ -494,7 +512,7 @@ class PCA:
         ancestry_fails = self.fail_pca(results_dir, output_name, fails_dir, threshold)
 
         # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --chr 1-22 --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
 
         self.results_to_keep.append(output_name+'.clean.bed')
         self.results_to_keep.append(output_name+'.clean.bim')
@@ -561,7 +579,7 @@ class PCA:
         ax.legend()
         plt.savefig(os.path.join(self.plots_dir, 'pca_3d.pdf'), format='pdf')
 
-        delete_temp_files(self.results_to_keep, results_dir)
+        # delete_temp_files(self.results_to_keep, results_dir)
 
         # report
         process_complete = True
