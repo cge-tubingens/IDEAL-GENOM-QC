@@ -84,8 +84,8 @@ def execute_main()->None:
         'pca_plot'                 : pca_qc.pca_plot
     }
     smpl_steps = {
-        'heterozygosity': sample_qc.run_heterozygosity_rate,
         'sex_check'     : sample_qc.run_sex_check,
+        'heterozygosity': sample_qc.run_heterozygosity_rate,
         'relatedness'   : sample_qc.run_relatedness_prune,
         'delete_samples': sample_qc.delete_failing_QC,
     }
@@ -101,12 +101,6 @@ def execute_main()->None:
     for pipe in pipeline:
         for step in pipe.keys():
             pipe[step]()
-
-    samples_results_dir = os.path.join(data_dict['output_directory'], 'sample_qc_results')
-    variants_results_dir = os.path.join(data_dict['output_directory'], 'variant_qc_results')
-
-    delete_temp_files(samples_results_dir, 'log')
-    delete_temp_files(variants_results_dir, 'log')
 
     return None
 
