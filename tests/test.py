@@ -43,7 +43,7 @@ pca.merge_with_reference()
 
 pca.run_pca_analysis()
 
-pca.pca_plot()# checked
+pca.pca_plot()
 
 sample_QC = SampleQC(
     input_path      =os.path.join(OUTPUT_PATH, 'pca_results'),
@@ -63,11 +63,11 @@ sample_QC.run_relatedness_prune()
 sample_QC.delete_failing_QC()
 
 variant_QC = VariantQC(
-    input_path=os.path.join(OUTPUT_PATH, 'sample_qc_results'),
-    input_name=OUTPUT_NAME+'.clean',
-    output_path=OUTPUT_PATH,
-    output_name=OUTPUT_NAME,
-    config_dict=parameters,
+    input_path      =os.path.join(OUTPUT_PATH, 'sample_qc_results'),
+    input_name      =OUTPUT_NAME+'.clean',
+    output_path     =OUTPUT_PATH,
+    output_name     =OUTPUT_NAME,
+    config_dict     =parameters,
     dependables_path=DEPEND_PATH
 )
 
