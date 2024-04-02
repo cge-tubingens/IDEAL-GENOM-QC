@@ -25,6 +25,8 @@ pca = PCA(
     dependables_path=DEPEND_PATH
 )
 
+# pca.shorten_variant_id()
+
 pca.filter_problematic_snps()
 
 pca.ld_pruning()
@@ -52,9 +54,9 @@ sample_QC = SampleQC(
     dependables_path=DEPEND_PATH
 )
 
-sample_QC.run_heterozygosity_rate()
-
 sample_QC.run_sex_check()
+
+sample_QC.run_heterozygosity_rate()
 
 sample_QC.run_relatedness_prune()
 
