@@ -67,6 +67,82 @@ class SampleQC:
 
         pass
     
+    def run_sex_check(self)->dict:
+
+        """
+        Function to identify individuals with discordant sex information.
+
+        Returns:
+        - dict: A structured dictionary containing:
+            * 'pass': Boolean indicating the successful completion of the process.
+            * 'step': The label for this procedure ('ld_prune').
+            * 'output': Dictionary containing paths to the generated output files.
+        """
+
+        input_path = self.input_path
+        input_name = self.input_name
+        output_name= self.output_name
+        result_path= self.results_dir
+        fails_dir = self.fails_dir
+
+        sex_check = self.config_dict['sex_check']
+
+        # check type sex_check
+        if not isinstance(sex_check, list):
+            raise TypeError("sex_check should be a list")
+        if len(sex_check)!=2:
+            raise ValueError("sex_check must be a list of length 2")
+        
+        for value in sex_check:
+            if not isinstance(value, float):
+                raise TypeError("sex_check values should be float")
+            if 0 > value or value > 1:
+                raise ValueError("sex_check values must be between 0 and 1")
+        
+        if sum(sex_check) != 1:
+            raise ValueError("sex_check values should add to 1")
+        
+        step = "sex_check"
+
+        # create .sexcheck file
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name+'_1')}"
+
+        # execute PLink command
+        shell_do(plink_cmd1, log=True)
+
+        # load file with sex analysis
+        df = pd.read_csv(
+            os.path.join(result_path, output_name+'_1.sexcheck'),
+            sep='\s+'
+        )
+
+        # filter problematic samples and save file
+        df_probs = df[df['STATUS']=='PROBLEM'].reset_index(drop=True)
+
+        # save IDs of samples who failed sex check QC
+        df_probs = df_probs.iloc[:,0:2].copy()
+        df_probs.to_csv(
+            os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt'),
+            index  =False,
+            header =False,
+            sep    =' '
+        )
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': result_path
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
     def run_heterozygosity_rate(self)->dict:
 
         """
@@ -110,97 +186,6 @@ class SampleQC:
             logFMISS, meanHET, plots_path
         )
 
-        # create cleaned binary file
-        plink_cmd3 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --remove {fails_path} --make-bed --out {os.path.join(result_path, output_name+'_1')}"
-
-        # execute PLink command
-        shell_do(plink_cmd3, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def run_sex_check(self)->dict:
-
-        """
-        Function to identify individuals with discordant sex information.
-
-        Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
-        """
-
-        output_name= self.output_name
-        result_path= self.results_dir
-        fails_dir = self.fails_dir
-
-        sex_check = self.config_dict['sex_check']
-
-        # check type sex_check
-        if not isinstance(sex_check, list):
-            raise TypeError("sex_check should be a list")
-        if len(sex_check)!=2:
-            raise ValueError("sex_check must be a list of length 2")
-        
-        for value in sex_check:
-            if not isinstance(value, float):
-                raise TypeError("sex_check values should be float")
-            if 0 > value or value > 1:
-                raise ValueError("sex_check values must be between 0 and 1")
-        
-        if sum(sex_check) != 1:
-            raise ValueError("sex_check values should add to 1")
-        
-        step = "sex_check"
-
-        # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(result_path, output_name+'_1')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name+'_2')}"
-
-        # execute PLink command
-        shell_do(plink_cmd1, log=True)
-
-        # load file with sex analysis
-        df = pd.read_csv(
-            os.path.join(result_path, output_name+'_2.sexcheck'),
-            sep='\s+'
-        )
-
-        # filter problematic samples and save file
-        df_probs = df[df['STATUS']=='PROBLEM'].reset_index(drop=True)
-        df_probs.to_csv(
-            os.path.join(result_path, output_name+'_2.sexprobs'),
-            index =False,
-            sep   ='\t'
-        )
-
-        # save IDs of samples who failed sex check QC
-        df_probs = df_probs.iloc[:,0:2].copy()
-        df_probs.to_csv(
-            os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt'),
-            index  =False,
-            header =False,
-            sep    =' '
-        )
-
-        # generate clean file
-        plink_cmd2 = f"plink --bfile {os.path.join(result_path, output_name+'_1')} --keep-allele-order --remove {os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt')} --make-bed --out {os.path.join(result_path, output_name+'_2')}"
-
-        # execute PLink command
-        shell_do(plink_cmd2, log=True)
-
         # report
         process_complete = True
 
@@ -238,7 +223,6 @@ class SampleQC:
         maf = self.config_dict['maf']
         geno= self.config_dict['geno']
         mind= self.config_dict['mind']
-        hwe = self.config_dict['hwe']
         ind_pair = self.config_dict['indep-pairwise']
 
         high_ld_regions_file = os.path.join(dependables, 'high-LD-regions.txt')
@@ -248,13 +232,13 @@ class SampleQC:
         to_remove = pd.DataFrame(columns=['FID', 'IID'])
 
         # generates prune.in and prune.out
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --exclude {high_ld_regions_file} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
 
-        # run genome
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, output_name+'_2')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name+'_3')}"
+        # prune and run genome [compute IBD]
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name+'_3')}"
 
-        # Generate new .imiss file
-        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, output_name+'_2')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
+        # generate new .imiss file
+        plink_cmd3 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
@@ -305,12 +289,6 @@ class SampleQC:
             header=False,
             sep=" "
         )
-
-        # create cleaned binary files
-        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, output_name+'_2')} --keep-allele-order --remove {os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt')} --make-bed --out {os.path.join(results_dir, output_name+'_3')}"
-
-        # execute PLink command
-        shell_do(plink_cmd3, log=True)
 
         # report
         process_complete = True
@@ -410,7 +388,7 @@ class SampleQC:
         self.files_to_keep.append(output_name+'.clean.fam')
 
         # delete temporary files
-        delete_temp_files(self.files_to_keep, result_path)
+        # delete_temp_files(self.files_to_keep, result_path)
 
         # report
         process_complete = True
