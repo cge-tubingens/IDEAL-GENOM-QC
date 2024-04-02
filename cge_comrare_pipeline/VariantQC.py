@@ -19,24 +19,24 @@ class VariantQC:
             raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
 
         # Check path validity
-        bed_path = os.path.join(input_path, input_name + '.bed')
-        fam_path = os.path.join(input_path, input_name + '.fam')
-        bim_path = os.path.join(input_path, input_name + '.bim')
-
-        bed_check = os.path.exists(bed_path)
-        fam_check = os.path.exists(fam_path)
-        bim_check = os.path.exists(bim_path)
-
-        if not os.path.exists(input_path) or not os.path.exists(output_path):
-            raise FileNotFoundError("input_path or output_path is not a valid path")
-        if not os.path.exists(dependables_path):
-            raise FileNotFoundError("dependables_path is not a valid path")
-        if not bed_check:
-            raise FileNotFoundError(".bed file not found")
-        if not fam_check:
-            raise FileNotFoundError(".fam file not found")
-        if not bim_check:
-            raise FileNotFoundError(".bim file not found")
+#        bed_path = os.path.join(input_path, input_name + '.bed')
+#        fam_path = os.path.join(input_path, input_name + '.fam')
+#        bim_path = os.path.join(input_path, input_name + '.bim')
+#
+#        bed_check = os.path.exists(bed_path)
+#        fam_check = os.path.exists(fam_path)
+#        bim_check = os.path.exists(bim_path)
+#
+#        if not os.path.exists(input_path) or not os.path.exists(output_path):
+#            raise FileNotFoundError("input_path or output_path is not a valid path")
+#        if not os.path.exists(dependables_path):
+#            raise FileNotFoundError("dependables_path is not a valid path")
+#        if not bed_check:
+#            raise FileNotFoundError(".bed file not found")
+#        if not fam_check:
+#            raise FileNotFoundError(".fam file not found")
+#        if not bim_check:
+#            raise FileNotFoundError(".bim file not found")
 
         self.input_path = input_path
         self.output_path= output_path
