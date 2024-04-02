@@ -509,7 +509,19 @@ class PCA:
         # executes Plink command
         shell_do(plink_cmd1, log=True)
 
-        ancestry_fails = self.fail_pca(results_dir, output_name, fails_dir, threshold)
+        df = self.population_tags(
+            psam_path= os.path.join(dependables, 'all_phase3.psam'),
+            study_fam_path=os.path.join(input_path, input_name+'.fam')
+        )
+        df['ID1'] = df['ID1'].astype(str)
+
+        ancestry_fails = self.pca_fail(
+            df_tags      =df, 
+            results_dir  =results_dir,
+            output_folder=fails_dir,
+            output_name  =output_name, 
+            threshold    =threshold
+        )
 
         # create cleaned binary files
         plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
@@ -611,37 +623,6 @@ class PCA:
         return logs
     
     @staticmethod
-    def fail_pca(folder_path:str, file_name:str, output_folder:str, threshold:int):
-
-        # load .eigenvec file
-        df_eigenvec = pd.read_csv(
-            os.path.join(folder_path, file_name+'.pca.eigenvec'),
-            header=None,
-            sep='\s+'
-        )
-        eigenvecs_mat = df_eigenvec[df_eigenvec.columns[2:]].copy()
-
-        means = eigenvecs_mat.mean()
-        std   = eigenvecs_mat.std()
-
-        for k in eigenvecs_mat.columns:
-            eigenvecs_mat[k] = (np.abs(eigenvecs_mat[k] -means[k]) > threshold*std[k] )
-
-        df_outs = df_eigenvec[df_eigenvec.columns[:2]].copy()
-        df_outs['is_outlier'] = (np.sum(eigenvecs_mat, axis=1) >0)
-
-        df_outs = df_outs[df_outs['is_outlier']].reset_index(drop=True).drop(columns='is_outlier')
-
-        df_outs.to_csv(
-            os.path.join(output_folder, file_name+'.fail-ancestry-qc.txt'),
-            header=None,
-            index=False,
-            sep=' '
-        )
-
-        return os.path.join(output_folder, file_name+'.fail-ancestry-qc.txt')
-
-    @staticmethod
     def population_tags(psam_path:str, study_fam_path:str)->pd.DataFrame:
 
         df_psam = pd.read_csv(
@@ -665,3 +646,53 @@ class PCA:
         df_fam.columns = ['ID1', 'ID2', 'SuperPop']
 
         return pd.concat([df_fam, df_psam], axis=0)
+
+    @staticmethod
+    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, threshold:int)->str:
+
+        mask1 = (df_tags['SuperPop']=='SAS')
+        mask2 = (df_tags['SuperPop']=='StPop')
+
+        df_ref = df_tags[mask1].reset_index(drop=True)
+        df_stu = df_tags[mask2].reset_index(drop=True)
+
+        df_eigenvec = pd.read_csv(
+            os.path.join(results_dir, output_name+'.pca.eigenvec'),
+            header=None,
+            sep=' '
+        )
+
+        new_col_names = []
+        for k in range(df_eigenvec.shape[1]):
+            if k<2:
+                new_col_names.append(f"ID{k+1}")
+            else:
+                new_col_names.append(f"pc_{k-1}")
+        df_eigenvec.columns = new_col_names
+
+        df_ref = df_ref.merge(df_eigenvec, on=['ID1', 'ID2'])\
+            .drop(columns=['SuperPop'], inplace=False)
+        df_stu = df_stu.merge(df_eigenvec, on=['ID1', 'ID2'])\
+            .drop(columns=['SuperPop'], inplace=False)
+
+        mean_ref = df_ref[df_ref.columns[2:]].mean()
+        std_ref = df_ref[df_ref.columns[2:]].std()
+
+        outliers = pd.DataFrame(columns=df_ref.columns)
+        outliers[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
+
+        for col in outliers.columns[2:]:
+            outliers[col] = (np.abs(df_stu[col] - mean_ref[col]) > threshold*std_ref[col])
+
+        outliers['is_out'] = (np.sum(outliers.iloc[:,2:], axis=1) >0)
+
+        df = outliers[outliers['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
+
+        df.to_csv(
+            os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt'),
+            header=None,
+            index=False,
+            sep=' '
+        )
+
+        return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
