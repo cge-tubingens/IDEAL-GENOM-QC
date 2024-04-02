@@ -101,10 +101,7 @@ class PCA:
 
         input_path       = self.input_path
         input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
         dependables_path = self.dependables
-        results_dir      = self.results_dir
 
         reference_panel = 'all_phase3'
 
@@ -318,10 +315,7 @@ class PCA:
 
     def chromosome_missmatch(self)->dict:
 
-        input_path       = self.input_path
         input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
         dependables = self.dependables
         results_dir = self.results_dir
 
@@ -355,10 +349,7 @@ class PCA:
 
     def position_missmatch_allele_flip(self)->dict:
 
-        input_path       = self.input_path
-        input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
+        input_name  = self.input_name
         dependables = self.dependables
         results_dir = self.results_dir
 
@@ -400,10 +391,7 @@ class PCA:
 
     def remove_missmatch(self)->dict:
 
-        input_path       = self.input_path
-        input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
+        input_name  = self.input_name
         dependables = self.dependables
         results_dir = self.results_dir
 
@@ -422,7 +410,7 @@ class PCA:
         self.dependables_to_keep.append('all_phase3.clean.bim')
         self.dependables_to_keep.append('all_phase3.clean.fam')
 
-        # delete_temp_files(self.dependables_to_keep, dependables)
+        delete_temp_files(self.dependables_to_keep, dependables)
 
         # report
         process_complete = True
@@ -443,10 +431,7 @@ class PCA:
     
     def merge_with_reference(self)->dict:
 
-        input_path       = self.input_path
         input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
         dependables = self.dependables
         results_dir = self.results_dir
 
@@ -549,10 +534,9 @@ class PCA:
 
     def pca_plot(self)->dict:
 
-        input_path       = self.input_path
-        input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
+        input_path  = self.input_path
+        input_name  = self.input_name
+        output_name = self.output_name
         dependables = self.dependables
         results_dir = self.results_dir
 
@@ -591,7 +575,7 @@ class PCA:
         ax.legend()
         plt.savefig(os.path.join(self.plots_dir, 'pca_3d.pdf'), format='pdf')
 
-        # delete_temp_files(self.results_to_keep, results_dir)
+        delete_temp_files(self.results_to_keep, results_dir)
 
         # report
         process_complete = True
