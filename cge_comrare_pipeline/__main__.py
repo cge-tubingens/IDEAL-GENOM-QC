@@ -63,8 +63,8 @@ def execute_main()->None:
     )
 
     variant_qc = VariantQC(
-        input_path      =data_dict['input_directory'],
-        input_name      =data_dict['input_prefix'],
+        input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results'),
+        input_name      =data_dict['output_prefix']+'.clean',
         output_path     =data_dict['output_directory'],
         output_name     =data_dict['output_prefix'],
         config_dict     =params_dict,
