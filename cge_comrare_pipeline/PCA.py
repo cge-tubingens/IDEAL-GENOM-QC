@@ -472,19 +472,31 @@ class PCA:
 
     def remove_missmatch(self)->dict:
 
+        """
+        Function to remove mismatched alleles after allele flipping.
+
+        Returns:
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
         input_name  = self.input_name
         dependables = self.dependables
         results_dir = self.results_dir
 
         step = "remove missmatch"
 
+        # identify alleles that do not match after allele flipping
         awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$1$2$4]=$5$6; next}} ($1$2$4 in a && a[$1$2$4] != $5$6 && a[$1$2$4] != $6$5) {{print $2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.flipped.bim')} > {os.path.join(dependables, 'all_phase3.missmatch')}"
 
+        # executes awk command
         result = subprocess.run(awk_cmd, shell=True, capture_output=True, text=True)
         log = [result.stderr, result.stdout]
 
+        # generates cleaned binary files
         plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.flipped')} --exclude {os.path.join(dependables, 'all_phase3.missmatch')} --make-bed --out {os.path.join(dependables, 'all_phase3.clean')}"
 
+        # executes PLINK command
         shell_do(plink_cmd, log=True)
 
         self.dependables_to_keep.append('all_phase3.clean.bed')
@@ -512,14 +524,23 @@ class PCA:
     
     def merge_with_reference(self)->dict:
 
+        """
+        Function to merge reference panel with study data.
+
+        Returns:
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
         input_name       = self.input_name
         dependables = self.dependables
         results_dir = self.results_dir
 
         step = "merge reference panel with study data"
 
+        # merge refenrence and study data
         plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')}"
 
+        # executes PLINK command
         shell_do(plink_cmd, log=True)
 
         # report
