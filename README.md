@@ -23,7 +23,7 @@ projectFolder
 
 2. The folder `outputData` will contain the resultant files of the quality control pipeline. Bellow it will be treated in detail the pipeline output.
 
-3. The folder `dependables` is designed to contain necessary files for the pipeline. It should contain the file `high_LD_regions.txt`. In future versions it might contain additional files.
+3. The folder `dependables` is designed to contain necessary files for the pipeline.
 
 4. The folder `configFiles` is essential for the pipeline correct functioning. It should contain two configuration files: `parameters.JSON` and `paths.JSON`.
 
@@ -47,7 +47,7 @@ The file `parameters.JSON` contains values for `PLINK` commands that will be use
     "pca": 10.
 ```
 
-If one wants to change at least one of the default values, please provide the full information in the configuration file. In repository can be found the `.JSON` file corresponding to the `cge-comrare-pipeline` default parameters.
+If one wants to change at least one of the default values, please provide the full information in the configuration file. In the repository can be found the `.JSON` file corresponding to the `cge-comrare-pipeline` default parameters.
 
 ### Paths to project folders
 
@@ -62,6 +62,26 @@ The file `paths.JSON` contain the addresses to the project folder as well as the
     "dependables_directory": "<path to folder with dependables files>"
 }
 ```
+
+## Dependable files
+
+In this folder should be allocated additional files to run the quality control pipeline. The structure inside the directory should be as follows:
+
+```
+dependables
+    |
+    |---all_phase3.bed
+    |
+    |---all_phase3.bim
+    |
+    |---all_phase3.fam
+    |
+    |---all_phase3.psam
+    |
+    |---high-LD-regions.txt
+```
+
+Notice that the files `all_phase3.bed`, 
 
 ## Output data
 
