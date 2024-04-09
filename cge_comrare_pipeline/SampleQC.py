@@ -17,29 +17,26 @@ class SampleQC:
 
     def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
 
+        """
+        Initialize the SampleQC object.
+
+        Parameters:
+        -----------
+        - input_path (str): Path to the input data.
+        - input_name (str): Name of the input data.
+        - output_path (str): Path to store output data.
+        - output_name (str): Name of the output data.
+        - config_dict (str): Configuration dictionary.
+        - dependables_path (str): Path to dependent files.
+
+        Raises:
+        ------
+        - ValueError: If values for input_path, output_path, and dependables_path are not provided upon initialization.
+        """
+
         # check if paths are set
         if input_path is None or output_path is None or dependables_path is None:
             raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
-
-        # Check path validity
-#        bed_path = os.path.join(input_path, input_name + '.bed')
-#        fam_path = os.path.join(input_path, input_name + '.fam')
-#        bim_path = os.path.join(input_path, input_name + '.bim')
-#
-#        bed_check = os.path.exists(bed_path)
-#        fam_check = os.path.exists(fam_path)
-#        bim_check = os.path.exists(bim_path)
-#
-#        if not os.path.exists(input_path) or not os.path.exists(output_path):
-#            raise FileNotFoundError("input_path or output_path is not a valid path")
-#        if not os.path.exists(dependables_path):
-#            raise FileNotFoundError("dependables_path is not a valid path")
-#        if not bed_check:
-#            raise FileNotFoundError(".bed file not found")
-#        if not fam_check:
-#            raise FileNotFoundError(".fam file not found")
-#        if not bim_check:
-#            raise FileNotFoundError(".bim file not found")
 
         self.input_path = input_path
         self.output_path= output_path
@@ -65,25 +62,28 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-        pass
-    
     def run_sex_check(self)->dict:
 
         """
-        Function to identify individuals with discordant sex information.
+        Identify individuals with discordant sex information.
+
+        This function performs a sex check analysis on input data using PLINK to identify individuals with discordant sex information.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+
+        Raises:
+        -------
+        - TypeError: If sex_check in config_dict is not a list or if its values are not floats.
+        - ValueError: If the length of sex_check is not 2, if the values in sex_check are not between 0 and 1, or if the sum of sex_check values is not equal to 1.
         """
 
         input_path = self.input_path
         input_name = self.input_name
         output_name= self.output_name
         result_path= self.results_dir
-        fails_dir = self.fails_dir
+        fails_dir  = self.fails_dir
 
         sex_check = self.config_dict['sex_check']
 
@@ -107,10 +107,10 @@ class SampleQC:
         # create .sexcheck file
         plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name+'_1')}"
 
-        # execute PLink command
+        # execute PLINK command
         shell_do(plink_cmd1, log=True)
 
-        # load file with sex analysis
+        # load .sexcheck file
         df = pd.read_csv(
             os.path.join(result_path, output_name+'_1.sexcheck'),
             sep='\s+'
@@ -146,13 +146,13 @@ class SampleQC:
     def run_heterozygosity_rate(self)->dict:
 
         """
-        Function to identify individuals with elevated missing data rates or outlying heterozygosity rate.
+        Identify individuals with elevated missing data rates or outlying heterozygosity rate.
+
+        This function performs a heterozygosity rate analysis on input data using PLINK to identify individuals with elevated missing data rates or outlying heterozygosity rates.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
         input_path = self.input_path
@@ -170,11 +170,12 @@ class SampleQC:
         # create .het file
         plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --het --autosome --out {os.path.join(result_path, output_name+'_1')}"
 
-        # execute PLink commands
+        # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
+        # save samples that failed QC
         fails_path = os.path.join(fails_dir, output_name+'.fail-imisshet-qc.txt')
         logFMISS, meanHET = self.fail_imiss_het(
             result_path, output_name+'_1',
