@@ -23,15 +23,29 @@ class SampleQC:
         Parameters:
         -----------
         - input_path (str): Path to the input data.
-        - input_name (str): Name of the input data.
-        - output_path (str): Path to store output data.
+        - input_name (str): Name of the input data files (without extension).
+        - output_path (str): Path to the folder where the output will be saved.
         - output_name (str): Name of the output data.
-        - config_dict (str): Configuration dictionary.
+        - config_dict (str): Dictionary containing configuration settings.
         - dependables_path (str): Path to dependent files.
 
         Raises:
         ------
         - ValueError: If values for input_path, output_path, and dependables_path are not provided upon initialization.
+
+        Attributes:
+        -----------
+        - input_path (str): Path to the folder containing the input data files.
+        - output_path (str): Path to the folder where the output will be saved.
+        - input_name (str): Name of the input data files (without extension).
+        - output_name (str): Name for the output files.
+        - dependables (str): Path to the folder containing reference data.
+        - config_dict (str): Dictionary containing configuration settings.
+        - dependables_to_keep (list): List of reference data files to keep.
+        - results_to_keep (list): List of result files to keep.
+        - results_dir (str): Path to the folder where PCA results will be saved.
+        - fails_dir (str): Path to the folder where failed samples will be saved.
+        - plots_dir (str): Path to the folder where plots will be saved.
         """
 
         # check if paths are set

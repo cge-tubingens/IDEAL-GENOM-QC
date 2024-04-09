@@ -17,6 +17,40 @@ class PCA:
     
     def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
 
+        """
+        Initialize the PCA (Principal Component Analysis) object.
+
+        This method initializes the PCA object by checking the paths and the existence of necessary files. It ensures that the input and output paths, as well as the path to dependables, are set upon initialization. Additionally, it verifies the existence of required input files (.bed, .fam, .bim) and reference data from the dependables folder. If any of the necessary files or paths are missing, it raises appropriate errors.
+
+        Parameters:
+        -----------
+        - input_path (str): Path to the folder containing the input data files.
+        - input_name (str): Name of the input data files (without extension).
+        - output_path (str): Path to the folder where the output will be saved.
+        - output_name (str): Name for the output files.
+        - config_dict (str): Dictionary containing configuration settings.
+        - dependables_path (str): Path to the folder containing reference data.
+
+        Raises:
+        -------
+        - ValueError: If input_path, output_path, or dependables_path are not set upon initialization.
+        - FileNotFoundError: If any of the required files or paths are missing.
+
+        Attributes:
+        -----------
+        - input_path (str): Path to the folder containing the input data files.
+        - output_path (str): Path to the folder where the output will be saved.
+        - input_name (str): Name of the input data files (without extension).
+        - output_name (str): Name for the output files.
+        - dependables (str): Path to the folder containing reference data.
+        - config_dict (str): Dictionary containing configuration settings.
+        - dependables_to_keep (list): List of reference data files to keep.
+        - results_to_keep (list): List of result files to keep.
+        - results_dir (str): Path to the folder where PCA results will be saved.
+        - fails_dir (str): Path to the folder where failed samples will be saved.
+        - plots_dir (str): Path to the folder where plots will be saved.
+        """
+
         # check if paths are set
         if input_path is None or output_path is None or dependables_path is None:
             raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
@@ -90,8 +124,6 @@ class PCA:
         self.plots_dir = os.path.join(output_path, 'plots')
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
-
-        pass
 
     def shorten_variant_id(self)->dict:
 
