@@ -187,11 +187,13 @@ class VariantQC:
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
+        # load .missing files
         df_missing = pd.read_csv(
             os.path.join(result_path, output_name+'.clean_1.missing'),
             sep='\s+'
         )
 
+        # filter subjects
         df_missing = df_missing[df_missing['P']< 0.00001].reset_index(drop=True)
         df_missing = df_missing[['SNP']].copy()
         df_missing.to_csv(
@@ -218,20 +220,19 @@ class VariantQC:
     def remove_markers(self)->dict:
 
         """
-        Function to remove markers failing quality control.
+        Remove markers failing quality control.
 
+        This function removes markers failing quality control based on specified thresholds for minor allele frequency (MAF), genotype call rate (geno), missing genotype rate (mind), and Hardy-Weinberg equilibrium (hwe).
+    
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure.
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
         input_path = self.input_path
         input_name = self.input_name
         result_path= self.results_dir
         output_name= self.output_name
-        output_path= self.output_path
         fails_dir  = self.fails_dir
 
         maf = self.config_dict['maf']
@@ -276,7 +277,7 @@ class VariantQC:
         # create cleaned binary files
         plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'.vrnt_clean')}"
 
-        # execute PLink command
+        # execute PLINK command
         shell_do(plink_cmd, log=True)
 
         # report
@@ -295,7 +296,23 @@ class VariantQC:
         return out_dict
 
     @staticmethod
-    def make_histogram(F_MISS, figs_folder, output_name):
+    def make_histogram(F_MISS:pd.Series, figs_folder:str, output_name:str)->None:
+
+        """
+        Generate a histogram plot of missing data fraction.
+
+        This static method generates a histogram plot of the missing data fraction (F_MISS) for Single Nucleotide Polymorphisms (SNPs).
+
+        Parameters:
+        -----------
+        - F_MISS (array-like): Array-like object containing the fraction of missing data for each SNP.
+        - figs_folder (str): Path to the folder where the histogram plot will be saved.
+        - output_name (str): Name of the output histogram plot file.
+
+        Returns:
+        --------
+        None
+        """
 
         values = F_MISS.copy()
 
