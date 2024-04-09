@@ -25,8 +25,6 @@ pca = PCA(
     dependables_path=DEPEND_PATH
 )
 
-# pca.shorten_variant_id()
-
 pca.filter_problematic_snps()
 
 pca.ld_pruning()
