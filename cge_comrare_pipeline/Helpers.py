@@ -35,6 +35,9 @@ def arg_parser()->dict:
     # path to data and names of files
     parser.add_argument('--file_folders', type=str, nargs='?', default=None, const=None, help='Full path to the JSON file containing folder names and locations for genotype quality control data.')
 
+    # path to steps of the pipeline to be executed
+    parser.add_argument('--steps', type=str, nargs='?', default=None, const=None, help='Full path to the JSON file containing the pipeline steps to be executed.')
+
     # parse args and turn into dict
     args = parser.parse_args()
 
