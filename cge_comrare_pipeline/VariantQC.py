@@ -14,36 +14,33 @@ class VariantQC:
 
     def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
 
+        """
+        Initialize the VariantQC object.
+
+        Parameters:
+        -----------
+        - input_path (str): Path to input data.
+        - input_name (str): Name of the input files.
+        - output_path (str): Path to store output data.
+        - output_name (str): Name of the output files.
+        - config_dict (str): Configuration dictionary.
+        - dependables_path (str): Path to dependent files.
+
+        Raises:
+        -------
+        - ValueError: If values for input_path, output_path, and dependables_path are not provided upon initialization.
+        """
+
         # check if paths are set
         if input_path is None or output_path is None or dependables_path is None:
             raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
-
-        # Check path validity
-#        bed_path = os.path.join(input_path, input_name + '.bed')
-#        fam_path = os.path.join(input_path, input_name + '.fam')
-#        bim_path = os.path.join(input_path, input_name + '.bim')
-#
-#        bed_check = os.path.exists(bed_path)
-#        fam_check = os.path.exists(fam_path)
-#        bim_check = os.path.exists(bim_path)
-#
-#        if not os.path.exists(input_path) or not os.path.exists(output_path):
-#            raise FileNotFoundError("input_path or output_path is not a valid path")
-#        if not os.path.exists(dependables_path):
-#            raise FileNotFoundError("dependables_path is not a valid path")
-#        if not bed_check:
-#            raise FileNotFoundError(".bed file not found")
-#        if not fam_check:
-#            raise FileNotFoundError(".fam file not found")
-#        if not bim_check:
-#            raise FileNotFoundError(".bim file not found")
 
         self.input_path = input_path
         self.output_path= output_path
         self.input_name = input_name
         self.output_name= output_name
-        self.dependables = dependables_path
-        self.config_dict = config_dict
+        self.dependables= dependables_path
+        self.config_dict= config_dict
 
         # create results folder if not existent
         self.results_dir = os.path.join(output_path, 'variant_qc_results')
@@ -63,20 +60,25 @@ class VariantQC:
     def missing_data_rate(self)->dict:
 
         """
-        Function to identify all markers with an excessive missing rate.
+        Identify markers with an excessive missing rate.
+
+        This function performs marker missing data analysis on input data using PLINK. It filters markers based on their missing rate.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure.
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+
+        Raises:
+        -------
+        TypeError: If 'chr' in config_dict is not an integer.
+        ValueError: If 'chr' in config_dict is not between 0 and 26 (inclusive).
         """
 
         input_path = self.input_path
         input_name = self.input_name
-        result_path = self.results_dir
-        output_name = self.output_name
-        fails_dir   = self.fails_dir
+        result_path= self.results_dir
+        output_name= self.output_name
+        fails_dir  = self.fails_dir
         fig_folder = self.plots_dir
 
         chr = self.config_dict['chr']
@@ -90,23 +92,25 @@ class VariantQC:
 
         step = 'high_rate_missing_data'
 
-        #
+        # generates  .lmiss and .imiss files for male subjects
         plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --filter-males --chr {chr} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
 
-        #
+        # generates .lmiss and. imiss files for female subjects
         plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --not-chr {chr} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
 
-        # execute PLink commands
+        # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
+        # load .lmiss file for male subjects
         df_males = pd.read_csv(
             os.path.join(result_path, output_name+'.clean_m_only.lmiss'),
             sep="\s+"
         )
         self.make_histogram(df_males['F_MISS'], fig_folder, 'missing_data_male.pdf')
 
+        # filter male subjects
         df_males = df_males[df_males['F_MISS']>0.2].reset_index(drop=True)
         df_males = df_males[['SNP']].copy()
         df_males.to_csv(
@@ -116,12 +120,14 @@ class VariantQC:
             index=False
         )
 
+        # load .lmiss file for female subjects
         df_females = pd.read_csv(
             os.path.join(result_path, output_name+'.clean_not_y.lmiss'),
             sep="\s+"
         )
         self.make_histogram(df_females['F_MISS'], fig_folder, 'missing_data_female.pdf')
 
+        # filter female subjects
         df_females = df_females[df_females['F_MISS']>0.2].reset_index(drop=True)
         df_females = df_females[['SNP']].copy()
         df_females.to_csv(
@@ -131,6 +137,7 @@ class VariantQC:
             index=False
         )
 
+        # concatenate female and male subjects who failed QC
         df_fails = pd.concat([df_females, df_males], axis=0)
         df_fails.to_csv(
             os.path.join(fails_dir, output_name+'.clean-fail-lmiss-qc.txt'),
@@ -157,27 +164,27 @@ class VariantQC:
     def different_genotype_call_rate(self)->dict:
 
         """
-        Funtion to identify test markers for different genotype call rates between cases and controls.
+        Identify markers with different genotype call rates between cases and controls.
 
+        This function performs a test for different genotype call rates between cases and controls using PLINK.
+    
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure.
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
         input_path = self.input_path
         input_name = self.input_name
-        result_path = self.results_dir
-        output_name = self.output_name
-        fails_dir   = self.fails_dir
+        result_path= self.results_dir
+        output_name= self.output_name
+        fails_dir  = self.fails_dir
 
         step = 'different_genotype_case_control'
 
-        # 
+        # generates .missing file
         plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --test-missing --out {os.path.join(result_path, output_name+'.clean_1')}"
 
-        # execute PLink command
+        # execute PLINK command
         shell_do(plink_cmd, log=True)
 
         df_missing = pd.read_csv(
