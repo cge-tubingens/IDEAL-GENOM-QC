@@ -99,12 +99,12 @@ class PCA:
         if not ld_region_check:
             raise FileNotFoundError("high LD regions file not found")
 
-        self.input_path     = input_path
-        self.output_path    = output_path
-        self.input_name     = input_name
-        self.output_name    = output_name
-        self.dependables    = dependables_path
-        self.config_dict = config_dict
+        self.input_path = input_path
+        self.output_path= output_path
+        self.input_name = input_name
+        self.output_name= output_name
+        self.dependables= dependables_path
+        self.config_dict= config_dict
 
         self.dependables_to_keep = ['all_phase3.bed', 'all_phase3.fam','all_phase3.bim', 'all_phase3.psam', 'high-LD-regions.txt']
 
@@ -131,9 +131,9 @@ class PCA:
         Function to deal with long variant IDs. It will be done at a later stage.
         """
 
-        input_path       = self.input_path
-        input_name       = self.input_name
-        dependables_path = self.dependables
+        input_path      = self.input_path
+        input_name      = self.input_name
+        dependables_path= self.dependables
 
         reference_panel = 'all_phase3'
 
@@ -187,6 +187,16 @@ class PCA:
 
     def filter_problematic_snps(self)->dict:
 
+        """
+        Filter out problematic SNPs (Single Nucleotide Polymorphisms) from the study and reference datasets.
+
+        This method filters SNPs that are non-A-T or non-G-C from the study and reference datasets. It first filters these SNPs from the input dataset and the reference panel separately using the 'filter_non_AT_or_GC_snps' method. Then, it excludes these filtered SNPs from both datasets using PLINK commands, creating new datasets without the problematic SNPs.
+
+        Returns
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
         input_path = self.input_path
         input_name = self.input_name
         results_dir= self.results_dir
@@ -196,14 +206,19 @@ class PCA:
 
         step = "fiter non A-T or G-C snps"
 
+        # find A->T and C->G SNPs in study data
         self.filter_non_AT_or_GC_snps(input_dir=input_path, input_name=input_name, results_dir=results_dir)
 
+        # find A->T and C->G SNPs in reference data
         self.filter_non_AT_or_GC_snps(input_dir=dependables, input_name=reference_panel, results_dir=dependables)
 
+        # generate cleaned study data files
         plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
 
+        # generate cleaned reference data files
         plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
 
+        # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
@@ -227,25 +242,24 @@ class PCA:
     def ld_pruning(self)->dict:
 
         """
-        Funtion to prunes samples based on Linkage Disequilibrium
+        Prune samples based on Linkage Disequilibrium (LD).
 
-        Parameters:
-        - ld_region_file: string
-            file name with regions with high Linkage Distribution
+        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
+
+        Raises:
+        -------
+        - TypeError: If maf, geno, mind, or hwe is not of type float.
+        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
+        - FileNotFoundError: If the file with high LD regions is not found.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_path       = self.input_path
-        input_name       = self.input_name
-        output_path      = self.output_path
-        output_name      = self.output_name
-        dependables_path = self.dependables
-        results_dir      = self.results_dir
+        input_name      = self.input_name
+        dependables_path= self.dependables
+        results_dir     = self.results_dir
 
         maf      = self.config_dict['maf']
         geno     = self.config_dict['geno']
@@ -292,13 +306,13 @@ class PCA:
 
         step = "ld_prune"
 
-        # generates prune.in and prune.out
+        # generates prune.in and prune.out files
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
 
-        # execute Plink commands
+        # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
@@ -320,14 +334,26 @@ class PCA:
     
     def prune_reference_panel(self)->dict:
 
+        """
+        Prune the reference panel based on the pruned SNPs of the study data.
+
+        This method prunes the reference panel dataset based on the SNPs pruned from the study data during LD-based pruning. It generates a new binary file for the pruned reference panel.
+
+        Returns
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
         input_name = self.input_name
         dependables= self.dependables
         results_dir= self.results_dir
 
         step = "prune reference panel"
 
+        # generates a pruned reference data files
         plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --keep-allele-order --allow-extra-chr --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(dependables, 'all_phase3.pruned')}"
 
+        # executes PLINK command
         shell_do(plink_cmd, log=True)
         
         # report
@@ -347,20 +373,33 @@ class PCA:
 
     def chromosome_missmatch(self)->dict:
 
-        input_name       = self.input_name
-        dependables = self.dependables
-        results_dir = self.results_dir
+        """
+        Correct chromosome mismatch between study data and reference panel.
+
+        This method corrects any chromosome mismatch between the pruned study data and the pruned reference panel by updating the chromosome information in the reference panel to match that of the study data. It generates a new binary file for the corrected reference panel.
+
+        Returns
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
+        input_name = self.input_name
+        dependables= self.dependables
+        results_dir= self.results_dir
 
         step = "chromosome missmatch"
 
+        # check that the variant IDs of the reference data have the same chr. ID as the study data
         awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$2]=$1; next}} ($2 in a && a[$2] != $1) {{print a[$2],$2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} | sed -n '/^[XY]/!p' > {os.path.join(dependables, 'all_phase3.toUpdateChr')}"
 
         result = subprocess.run(awk_cmd, shell=True, capture_output=True, text=True)
 
         logs = [result.stderr, result.stdout]
 
+        # generates cleaned reference data files
         plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.pruned')} --allow-extra-chr --update-chr {os.path.join(dependables, 'all_phase3.toUpdateChr')} 1 2 --make-bed --out {os.path.join(dependables, 'all_phase3.updateChr')}"
 
+        # execute PLINK command
         shell_do(plink_cmd, log=True)
 
         # report
@@ -381,6 +420,14 @@ class PCA:
 
     def position_missmatch_allele_flip(self)->dict:
 
+        """
+        Function to handle position mismatch and allele flips.
+
+        Returns
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
         input_name  = self.input_name
         dependables = self.dependables
         results_dir = self.results_dir
@@ -393,6 +440,7 @@ class PCA:
         # possible allele flips
         awk_cmd2 = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$1$2$4]=$5$6; next}} ($1$2$4 in a && a[$1$2$4] != $5$6 && a[$1$2$4] != $6$5)  {{print $2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} > {os.path.join(dependables, 'all_phase3.toFlip')}"
 
+        # executes awk commands
         awks = [awk_cmd1, awk_cmd2]
         logs = []
         for awk in awks:
@@ -402,6 +450,7 @@ class PCA:
         # update positions and flip alleles
         plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.updateChr')} --update-map {os.path.join(dependables, 'all_phase3.toUpdatePos')} 1 2 --flip {os.path.join(dependables, 'all_phase3.toFlip')} --make-bed --out {os.path.join(dependables, 'all_phase3.flipped')}"
 
+        # executes PLINK command
         shell_do(plink_cmd, log=True)
 
         # report
