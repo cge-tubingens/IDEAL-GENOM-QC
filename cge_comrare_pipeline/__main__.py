@@ -2,7 +2,7 @@ import os
 import json
 import pandas as pd
 
-from cge_comrare_pipeline.Helpers import arg_parser, delete_temp_files
+from cge_comrare_pipeline.Helpers import arg_parser
 
 def execute_main()->None:
 
@@ -15,6 +15,7 @@ def execute_main()->None:
 
     params_path = args_dict['path_params']
     data_path = args_dict['file_folders']
+    steps_path = args_dict['steps']
 
     # check path to config files
     if not os.path.exists(data_path):
@@ -22,6 +23,9 @@ def execute_main()->None:
     
     if not os.path.exists(params_path):
         raise FileNotFoundError("Configuration file with pipeline parameters cannot be found.")
+    
+    if not os.path.exists(steps_path):
+        raise FileNotFoundError("Configuration file with pipeline steps cannot be found.")
 
     # open config file
     with open(data_path, 'r') as file:
@@ -43,64 +47,78 @@ def execute_main()->None:
         with open(params_path, 'r') as file:
             params_dict = json.load(file)
 
-    # class instances        
-    pca_qc = PCA(
-        input_path      =data_dict['input_directory'],
-        input_name      =data_dict['input_prefix'],
-        output_path     =data_dict['output_directory'],
-        output_name     =data_dict['output_prefix'],
-        config_dict     =params_dict,
-        dependables_path=data_dict['dependables_directory']
-    )
+    with open(steps_path, 'r') as file:
+        steps_dict = json.load(file)
 
-    sample_qc = SampleQC(
-        input_path      =os.path.join(data_dict['output_directory'], 'pca_results'),
-        input_name      =data_dict['output_prefix']+'.clean',
-        output_path     =data_dict['output_directory'],
-        output_name     =data_dict['output_prefix'],
-        config_dict     =params_dict,
-        dependables_path=data_dict['dependables_directory']
-    )
+    # execute step by step
+    if steps_dict['pca']:
 
-    variant_qc = VariantQC(
-        input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results'),
-        input_name      =data_dict['output_prefix']+'.clean',
-        output_path     =data_dict['output_directory'],
-        output_name     =data_dict['output_prefix'],
-        config_dict     =params_dict,
-        dependables_path=data_dict['dependables_directory']
-    )
+        # instantiate PCA class 
+        pca_qc = PCA(
+            input_path      =data_dict['input_directory'],
+            input_name      =data_dict['input_prefix'],
+            output_path     =data_dict['output_directory'],
+            output_name     =data_dict['output_prefix'],
+            config_dict     =params_dict,
+            dependables_path=data_dict['dependables_directory']
+        )
 
-    # pipeline steps
-    pca_steps = {
-        'filter_snps'              : pca_qc.filter_problematic_snps,
-        'LD_pruning'               : pca_qc.ld_pruning,
-        'reference_pruning'        : pca_qc.prune_reference_panel,
-        'chr_missmatch'            : pca_qc.chromosome_missmatch,
-        'pos_missmatch_allele_flip': pca_qc.position_missmatch_allele_flip,
-        'remove_missmatch'         : pca_qc.remove_missmatch,
-        'merging'                  : pca_qc.merge_with_reference,
-        'pca_analysis'             : pca_qc.run_pca_analysis,
-        'pca_plot'                 : pca_qc.pca_plot
-    }
-    smpl_steps = {
+        # pipeline steps
+        pca_steps = {
+            'filter_snps'              : pca_qc.filter_problematic_snps,
+            'LD_pruning'               : pca_qc.ld_pruning,
+            'reference_pruning'        : pca_qc.prune_reference_panel,
+            'chr_missmatch'            : pca_qc.chromosome_missmatch,
+            'pos_missmatch_allele_flip': pca_qc.position_missmatch_allele_flip,
+            'remove_missmatch'         : pca_qc.remove_missmatch,
+            'merging'                  : pca_qc.merge_with_reference,
+            'pca_analysis'             : pca_qc.run_pca_analysis,
+            'pca_plot'                 : pca_qc.pca_plot
+        }
+
+        for step in pca_steps.keys():
+            pca_steps[step]()
+
+    if steps_dict['sample']:
+        # instantiate SampleQC class
+        sample_qc = SampleQC(
+            input_path      =os.path.join(data_dict['output_directory'], 'pca_results'),
+            input_name      =data_dict['output_prefix']+'.clean',
+            output_path     =data_dict['output_directory'],
+            output_name     =data_dict['output_prefix'],
+            config_dict     =params_dict,
+            dependables_path=data_dict['dependables_directory']
+        )
+
+        # pipeline steps
+        smpl_steps = {
         'sex_check'     : sample_qc.run_sex_check,
         'heterozygosity': sample_qc.run_heterozygosity_rate,
         'relatedness'   : sample_qc.run_relatedness_prune,
         'delete_samples': sample_qc.delete_failing_QC,
-    }
-    vrnt_steps = {
-        'miss_data'     : variant_qc.missing_data_rate,
-        'call_rate'     : variant_qc.different_genotype_call_rate,
-        'delete_markers': variant_qc.remove_markers
-    }
+        }
 
-    pipeline = [pca_steps, smpl_steps, vrnt_steps]
+        for step in smpl_steps.keys():
+            smpl_steps[step]()
 
-    # execute pipeline
-    for pipe in pipeline:
-        for step in pipe.keys():
-            pipe[step]()
+    if steps_dict['variant']:
+        variant_qc = VariantQC(
+            input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results'),
+            input_name      =data_dict['output_prefix']+'.clean',
+            output_path     =data_dict['output_directory'],
+            output_name     =data_dict['output_prefix'],
+            config_dict     =params_dict,
+            dependables_path=data_dict['dependables_directory']
+        )
+
+        vrnt_steps = {
+            'miss_data'     : variant_qc.missing_data_rate,
+            'call_rate'     : variant_qc.different_genotype_call_rate,
+            'delete_markers': variant_qc.remove_markers
+        }
+
+        for step in vrnt_steps.keys():
+            vrnt_steps[step]()
 
     return None
 
