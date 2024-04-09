@@ -16,62 +16,72 @@ data_path = '/mnt/0A2AAC152AABFBB7/PipeLine/data/config_files/parameters.JSON'
 with open(data_path, 'r') as file:
     parameters = json.load(file)
 
-pca = PCA(
-    input_path      =INPUT_PATH,
-    input_name      =INPUT_NAME,
-    output_path     =OUTPUT_PATH,
-    output_name     =OUTPUT_NAME,
-    config_dict     =parameters,
-    dependables_path=DEPEND_PATH
-)
+STEPS_PATH = '/mnt/0A2AAC152AABFBB7/PipeLine/data/config_files/steps.JSON'
+with open(STEPS_PATH, 'r') as file:
+    steps = json.load(file)
 
-pca.filter_problematic_snps()
+steps
 
-pca.ld_pruning()
+if steps['pca']:
+    pca = PCA(
+        input_path      =INPUT_PATH,
+        input_name      =INPUT_NAME,
+        output_path     =OUTPUT_PATH,
+        output_name     =OUTPUT_NAME,
+        config_dict     =parameters,
+        dependables_path=DEPEND_PATH
+    )
 
-pca.prune_reference_panel()
+    pca.filter_problematic_snps()
 
-pca.chromosome_missmatch()
+    pca.ld_pruning()
 
-pca.position_missmatch_allele_flip()
+    pca.prune_reference_panel()
 
-pca.remove_missmatch()
+    pca.chromosome_missmatch()
 
-pca.merge_with_reference()
+    pca.position_missmatch_allele_flip()
 
-pca.run_pca_analysis()
+    pca.remove_missmatch()
 
-pca.pca_plot()
+    pca.merge_with_reference()
 
-sample_QC = SampleQC(
-    input_path      =os.path.join(OUTPUT_PATH, 'pca_results'),
-    input_name      =OUTPUT_NAME+'.clean',
-    output_path     =OUTPUT_PATH,
-    output_name     =OUTPUT_NAME,
-    config_dict     =parameters,
-    dependables_path=DEPEND_PATH
-)
+    pca.run_pca_analysis()
 
-sample_QC.run_sex_check()
+    pca.pca_plot()
 
-sample_QC.run_heterozygosity_rate()
+if steps['sample']:
+    sample_QC = SampleQC(
+        input_path      =os.path.join(OUTPUT_PATH, 'pca_results'),
+        input_name      =OUTPUT_NAME+'.clean',
+        output_path     =OUTPUT_PATH,
+        output_name     =OUTPUT_NAME,
+        config_dict     =parameters,
+        dependables_path=DEPEND_PATH
+    )
 
-sample_QC.run_relatedness_prune()
+    sample_QC.run_sex_check()
 
-sample_QC.delete_failing_QC()
+    sample_QC.run_heterozygosity_rate()
 
-variant_QC = VariantQC(
-    input_path      =os.path.join(OUTPUT_PATH, 'sample_qc_results'),
-    input_name      =OUTPUT_NAME+'.clean',
-    output_path     =OUTPUT_PATH,
-    output_name     =OUTPUT_NAME,
-    config_dict     =parameters,
-    dependables_path=DEPEND_PATH
-)
+    sample_QC.run_relatedness_prune()
 
-variant_QC.missing_data_rate()
+    sample_QC.delete_failing_QC()
 
-variant_QC.different_genotype_call_rate()
+if steps['variant']:
 
-variant_QC.remove_markers()
+    variant_QC = VariantQC(
+        input_path      =os.path.join(OUTPUT_PATH, 'sample_qc_results'),
+        input_name      =OUTPUT_NAME+'.clean',
+        output_path     =OUTPUT_PATH,
+        output_name     =OUTPUT_NAME,
+        config_dict     =parameters,
+        dependables_path=DEPEND_PATH
+    )
+    
+    variant_QC.missing_data_rate()
+    
+    variant_QC.different_genotype_call_rate()
+    
+    variant_QC.remove_markers()
 
