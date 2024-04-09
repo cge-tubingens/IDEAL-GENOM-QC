@@ -81,7 +81,7 @@ dependables
     |---high-LD-regions.txt
 ```
 
-Notice that the files `all_phase3.bed`, 
+Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the built 38, in order to be consistent with 1000 Genomes phase 3 built.
 
 ## Output data
 
