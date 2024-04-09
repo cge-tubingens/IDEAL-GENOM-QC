@@ -205,26 +205,26 @@ class SampleQC:
     def run_relatedness_prune(self)->dict:
 
         """
-        Function to identify duplicated or related individuals.
+        Identify duplicated or related individuals.
+
+        This function performs a relatedness pruning analysis on input data using PLINK to identify duplicated or related individuals.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_name=self.input_name
-        input_path=self.input_path
+        input_name =self.input_name
+        input_path =self.input_path
         results_dir= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
-        dependables = self.dependables
+        dependables= self.dependables
 
-        maf = self.config_dict['maf']
-        geno= self.config_dict['geno']
-        mind= self.config_dict['mind']
-        ind_pair = self.config_dict['indep-pairwise']
+        maf     = self.config_dict['maf']
+        geno    = self.config_dict['geno']
+        mind    = self.config_dict['mind']
+        ind_pair= self.config_dict['indep-pairwise']
 
         high_ld_regions_file = os.path.join(dependables, 'high-LD-regions.txt')
 
@@ -309,13 +309,13 @@ class SampleQC:
     def delete_failing_QC(self)->None:
 
         """
-        Function to remove samples that failed quality control.
+        Remove samples that failed quality control.
+
+        This function removes samples that failed one or several quality control (QC) steps based on the generated fail files. It generates cleaned binary files without the failing samples using PLINK.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('delete_sample_failed_QC').
-            * 'output': Dictionary containing paths to the generated output files.
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
         input_path = self.input_path
@@ -326,7 +326,7 @@ class SampleQC:
 
         step = "delete_sample_failed_QC"
 
-        # load files with samples who failed one or several QC steps
+        # load samples who failed sex check
         sex_path = os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt')
         if os.path.getsize(sex_path)==0:
             df_sex = pd.DataFrame()
@@ -338,6 +338,7 @@ class SampleQC:
                 header   =None
             )
 
+        # load samples who failed heterozygosity check
         imiss_path = os.path.join(fails_dir, output_name+'.fail-imisshet-qc.txt')
         if os.path.getsize(imiss_path)==0:
             df_imiss = pd.DataFrame()
@@ -349,6 +350,7 @@ class SampleQC:
                 header   =None
             )
 
+        # load samples who failed IBD check
         ibd1_path = os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt')
         if os.path.getsize(ibd1_path)==0:
             df_ibd1 = pd.DataFrame()
@@ -387,9 +389,6 @@ class SampleQC:
         self.files_to_keep.append(output_name+'.clean.bed')
         self.files_to_keep.append(output_name+'.clean.bim')
         self.files_to_keep.append(output_name+'.clean.fam')
-
-        # delete temporary files
-        # delete_temp_files(self.files_to_keep, result_path)
 
         # report
         process_complete = True
