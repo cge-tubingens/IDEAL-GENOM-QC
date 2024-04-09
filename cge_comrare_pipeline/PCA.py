@@ -562,17 +562,16 @@ class PCA:
     def run_pca_analysis(self)->dict:
 
         """
-        Function to prunes samples .....
+        Run Principal Component Analysis (PCA) on the study data and perform ancestry inference to filter samples based on population outliers.
 
-        Parameters:
-        - ld_region_file: string
-            file name with regions with high Linkage Distribution
+        This function executes PCA analysis on the study data merged with the reference panel. It then performs ancestry inference to identify population outliers using predefined population tags and a specified threshold. Samples identified as population outliers are removed from the study data.
 
         Returns:
-        - dict: A structured dictionary containing:
-            * 'pass': Boolean indicating the successful completion of the process.
-            * 'step': The label for this procedure ('ld_prune').
-            * 'output': Dictionary containing paths to the generated output files.
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+
+        Raises:
+        - TypeError: If the PCA parameter is not of type int.
         """
 
         input_path = self.input_path
@@ -593,15 +592,17 @@ class PCA:
         # runs pca analysis
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca}"
 
-        # executes Plink command
+        # executes PLINK command
         shell_do(plink_cmd1, log=True)
 
+        # add population tags to pca output
         df = self.population_tags(
-            psam_path= os.path.join(dependables, 'all_phase3.psam'),
+            psam_path     =os.path.join(dependables, 'all_phase3.psam'),
             study_fam_path=os.path.join(input_path, input_name+'.fam')
         )
         df['ID1'] = df['ID1'].astype(str)
 
+        # filter samples who are ethnicity outliers
         ancestry_fails = self.pca_fail(
             df_tags      =df, 
             results_dir  =results_dir,
@@ -636,20 +637,31 @@ class PCA:
 
     def pca_plot(self)->dict:
 
-        input_path  = self.input_path
-        input_name  = self.input_name
-        output_name = self.output_name
-        dependables = self.dependables
-        results_dir = self.results_dir
+        """
+        Generate Principal Component Analysis (PCA) plots for the study data.
+
+        This function generates PCA plots based on the results of PCA analysis previously     performed on the study data merged with the reference panel. Two types of plots are     generated: a 2D scatter plot showing the first two principal components and a 3D scatter plot showing the first three principal components. The plots are colored according to the population supergroup (SuperPop) obtained from the population tags.
+
+        Returns:
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
+        input_path = self.input_path
+        input_name = self.input_name
+        output_name= self.output_name
+        dependables= self.dependables
+        results_dir= self.results_dir
 
         step = "generate pca plots"
 
+        # add population tags to pca output
         df = self.population_tags(
             psam_path= os.path.join(dependables, 'all_phase3.psam'),
             study_fam_path=os.path.join(input_path, input_name+'.fam')
         )
         df['ID1'] = df['ID1'].astype(str)
 
+        # load .eigenvec file and keep the first three principal components
         df_eigenvec = pd.read_csv(
             os.path.join(results_dir, output_name+'.pca.eigenvec'),
             header=None,
@@ -659,11 +671,14 @@ class PCA:
         df_eigenvec.columns = ['ID1', 'ID2', 'pc_1', 'pc_2', 'pc_3']
         df_eigenvec['ID1'] = df_eigenvec['ID1'].astype(str)
 
+        # merge to get data with tagged populations
         df = pd.merge(df_eigenvec, df, on=['ID1', 'ID2'])
 
+        # generates a 2D scatter plot
         fig1 = sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop')
         plt.savefig(os.path.join(self.plots_dir, 'pca.pdf'), format='pdf')
 
+        # generates a 3D scatter plot
         fig2 = plt.figure()
         ax = fig2.add_subplot(111, projection='3d')
 
@@ -677,6 +692,7 @@ class PCA:
         ax.legend()
         plt.savefig(os.path.join(self.plots_dir, 'pca_3d.pdf'), format='pdf')
 
+        # delete temporary files
         delete_temp_files(self.results_to_keep, results_dir)
 
         # report
@@ -697,6 +713,21 @@ class PCA:
     @staticmethod
     def filter_non_AT_or_GC_snps(input_dir:str, input_name:str, results_dir:str)->list:
 
+        """
+        Filters out single nucleotide polymorphisms (SNPs) that do not belong to the categories AT, TA, GC, or CG.
+
+        This method filters SNPs from the input file based on their nucleotide sequences. It selects SNPs with sequences GC, CG, AT, or TA and writes their IDs to a file for further processing.
+
+        Parameters:
+        -----------
+        - input_dir (str): The directory containing the input files.
+        - input_name (str): The name of the input file.
+        - results_dir (str): The directory where the results will be stored.
+
+        Returns:
+        - list: A list containing stdout and stderr outputs from the execution of the AWK command.
+        """
+
         bim_target = os.path.join(input_dir, input_name+'.bim')
         ac_gt_snps = os.path.join(results_dir, input_name+'.ac_get_snps')
 
@@ -711,43 +742,89 @@ class PCA:
     @staticmethod
     def population_tags(psam_path:str, study_fam_path:str)->pd.DataFrame:
 
+        """
+        Creates a DataFrame containing population tags by merging information from two input files.
+
+        This method reads population information from a .psam file and individual IDs from a .fam file. It creates a DataFrame containing individual IDs and their corresponding population tags.
+
+        Parameters:
+        -----------
+        - psam_path (str): The path to the .psam file containing population information.
+        - study_fam_path (str): The path to the study .fam file containing individual IDs.
+
+        Returns:
+        --------
+        - pd.DataFrame: A DataFrame containing population tags with individual IDs.
+        """
+
+        # Read population information from the .psam file
         df_psam = pd.read_csv(
             psam_path,
             sep='\t',
             usecols=['#IID', 'SuperPop']
         )
 
+        # Set an ID column and rename columns for consistency
         df_psam['ID'] = 0
         df_psam = df_psam[['ID', '#IID', 'SuperPop']].copy()
         df_psam.columns = ['ID1', 'ID2', 'SuperPop']
 
+        # read individual IDs from the study .fam file
         df_fam = pd.read_csv(
             study_fam_path,
             sep=' ',
             header=None,
             index_col=False
         )
+
+        # select relevant columns, assign a placeholder population tag, and rename columns
         df_fam = df_fam[df_fam.columns[:2]].copy()
         df_fam['SuperPop'] = 'StPop'
         df_fam.columns = ['ID1', 'ID2', 'SuperPop']
 
+        # concatenate the two DataFrames to merge the information
         return pd.concat([df_fam, df_psam], axis=0)
 
     @staticmethod
     def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, threshold:int)->str:
 
+        """
+        Identifies samples failing ancestry quality control based on principal component analysis (PCA).
+
+        This method identifies samples failing ancestry quality control based on PCA results.
+        It compares the PCA coordinates of study samples with reference population samples.
+        Samples with PCA coordinates outside a certain threshold from the reference mean are considered outliers.
+
+        Parameters:
+        -----------
+        - df_tags (pd.DataFrame): DataFrame containing population tags and PCA information.
+        - results_dir (str): Directory path containing PCA results.
+        - output_folder (str): Directory path to save output files.
+        - output_name (str): Prefix for the output file names.
+        - threshold (int): Threshold value for identifying outliers.
+
+        Returns:
+        --------
+        - str: Path to the file containing the list of samples failing ancestry quality control.
+        """
+
+        # filters South Asian subjects
         mask1 = (df_tags['SuperPop']=='SAS')
+        # filters subjects from study data
         mask2 = (df_tags['SuperPop']=='StPop')
 
+        # generates two data frames with filtered subjects
         df_ref = df_tags[mask1].reset_index(drop=True)
         df_stu = df_tags[mask2].reset_index(drop=True)
 
+        # read .eigenvec file
         df_eigenvec = pd.read_csv(
             os.path.join(results_dir, output_name+'.pca.eigenvec'),
             header=None,
             sep=' '
         )
 
+        # renames columns for consistency
         new_col_names = []
         for k in range(df_eigenvec.shape[1]):
             if k<2:
@@ -756,17 +833,21 @@ class PCA:
                 new_col_names.append(f"pc_{k-1}")
         df_eigenvec.columns = new_col_names
 
+        # merge filtered subjects with its principal components
         df_ref = df_ref.merge(df_eigenvec, on=['ID1', 'ID2'])\
             .drop(columns=['SuperPop'], inplace=False)
         df_stu = df_stu.merge(df_eigenvec, on=['ID1', 'ID2'])\
             .drop(columns=['SuperPop'], inplace=False)
 
+        # computes mean and standard deviation by columns in reference data
         mean_ref = df_ref[df_ref.columns[2:]].mean()
         std_ref = df_ref[df_ref.columns[2:]].std()
 
+        # creates empty data frame
         outliers = pd.DataFrame(columns=df_ref.columns)
         outliers[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
 
+        # identifies subjects with more than `threshold` std deviations from the refenrence mean
         for col in outliers.columns[2:]:
             outliers[col] = (np.abs(df_stu[col] - mean_ref[col]) > threshold*std_ref[col])
 
@@ -774,6 +855,7 @@ class PCA:
 
         df = outliers[outliers['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
 
+        # save samples considered as ethnicity outliers
         df.to_csv(
             os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt'),
             header=None,
