@@ -25,7 +25,7 @@ projectFolder
 
 3. The folder `dependables` is designed to contain necessary files for the pipeline.
 
-4. The folder `configFiles` is essential for the pipeline correct functioning. It should contain two configuration files: `parameters.JSON` and `paths.JSON`.
+4. The folder `configFiles` is essential for the pipeline correct functioning. It should contain two configuration files: `parameters.JSON`, `paths.JSON` and `steps.JSON`.
 
 ## Configuration files
 
@@ -36,6 +36,7 @@ These two files contain all the information necessary to run the pipeline.
 The file `parameters.JSON` contains values for `PLINK` commands that will be used in the pipeline. If this file is not provided, the default values of the pipeline will be taken into account. These are
 
 ```
+{
     "maf" : 0.05,
     "geno": 0.1,
     "mind": 0.1,
@@ -44,7 +45,8 @@ The file `parameters.JSON` contains values for `PLINK` commands that will be use
     "indep-pairwise": [50, 5, 0.2],
     "chr": 24,
     "outlier_threshold": 6,
-    "pca": 10.
+    "pca": 10
+}
 ```
 
 If one wants to change at least one of the default values, please provide the full information in the configuration file. In the repository can be found the `.JSON` file corresponding to the `cge-comrare-pipeline` default parameters.
@@ -62,6 +64,30 @@ The file `paths.JSON` contain the addresses to the project folder as well as the
     "dependables_directory": "<path to folder with dependables files>"
 }
 ```
+
+### Pipeline steps
+
+The file `steps.JSON` has the following structure:
+
+```
+{
+    "pca"    : true,
+    "sample" : true,
+    "variant": true
+}
+```
+
+With the above configuration all three steps will run seamlessly, which is the recommended initial configuration. If some step want to be skipped the value should be change to `false`. For example,
+
+```
+{
+    "pca"    : false,
+    "sample" : true,
+    "variant": true
+}
+```
+
+allows to run only the sample and variant quality control. Notice that the an exception will be raised if the PCA steps has not be run.
 
 ## Dependable files
 
