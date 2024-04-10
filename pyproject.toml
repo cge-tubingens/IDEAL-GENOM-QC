@@ -1,9 +1,18 @@
 [tool.poetry]
 name = "cge-comrare-pipeline"
 version = "0.1.0"
-description = ""
-authors = ["luisggon <luisggon@flyde.io>", "Amabel Tenghe <tenghe.amabel@gmail.com>"]
+description = "package to run a genotype quality control pipeline"
+authors = ["Luis Giraldo González <luisggon@protonmail.com>", "Amabel Tenghe <tenghe.amabel@gmail.com>"]
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/cge-tubingens/cge-comrare-pipeline"
+Issues = "https://github.com/cge-tubingens/cge-comrare-pipeline/issues"
 
 [tool.poetry.dependencies]
 python = "^3.11"
