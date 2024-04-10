@@ -1,12 +1,12 @@
 # Genotype Quality Control Pipeline
 
-This is a Python package designed to perform a genotype quality control pipeline. It encapsulates several years of research at CGE Tübingen.
+This Python package is designed to execute a genotype quality control pipeline, encapsulating several years of research at CGE Tübingen.
 
 ## Basic requirements
 
-The quality control pipeline is build on `PLINK 1.9` as main tool. The `cge-comrare-pipeline` works as a wrapper for the different pipeline steps. Then, to run the pipeline, `PLINK 1.9` must be installed in the system. 
+The quality control pipeline is built on `PLINK 1.9` as the main tool. The `cge-comrare-pipeline` serves as a wrapper for the various pipeline steps. To run the pipeline, `PLINK 1.9` must be installed on the system.
 
-The pipeline is designed to run seamlessly with a "minimum" input and get cleaned binary files as result. In order to accomplish this, it is expected the following folder structure:
+The pipeline is designed to seamlessly run with minimal input and produce cleaned binary files as a result. To accomplish this, the following folder structure is expected:
 
 ```
 projectFolder
@@ -19,21 +19,21 @@ projectFolder
     |
     |---configFiles
 ```
-1. The folder `inputData` should contain the binary files with the genotype data to analyze in `PLINK` format (`.bed`, `.bim`, `.fam` files).
+1. The `inputData` folder should contain the binary files with the genotype data to be analyzed in `PLINK` format (`.bed`, `.bim`, `.fam` files).
 
-2. The folder `outputData` will contain the resultant files of the quality control pipeline. Bellow it will be treated in detail the pipeline output.
+2. The `outputData` folder will contain the resultant files of the quality control pipeline. Below, the pipeline output will be detailed.
 
-3. The folder `dependables` is designed to contain necessary files for the pipeline.
+3. The `dependables` folder is designed to contain necessary files for the pipeline.
 
-4. The folder `configFiles` is essential for the pipeline correct functioning. It should contain two configuration files: `parameters.JSON`, `paths.JSON` and `steps.JSON`.
+4. The `configFiles` older is essential for the correct functioning of the pipeline. It should contain three configuration files: `parameters.JSON`, `paths.JSON` and `steps.JSON`.
 
-## Configuration files
+## Configuration Files
 
 These two files contain all the information necessary to run the pipeline.
 
-### Quality control pipeline parameters
+### Quality Control Pipeline Parameters
 
-The file `parameters.JSON` contains values for `PLINK` commands that will be used in the pipeline. If this file is not provided, the default values of the pipeline will be taken into account. These are
+The `parameters.JSON` file contains values for `PLINK` commands that will be used in the pipeline. If this file is not provided, the default values of the pipeline will be taken into account. These are
 
 ```
 {
@@ -49,11 +49,11 @@ The file `parameters.JSON` contains values for `PLINK` commands that will be use
 }
 ```
 
-If one wants to change at least one of the default values, please provide the full information in the configuration file. In the repository can be found the `.JSON` file corresponding to the `cge-comrare-pipeline` default parameters.
+If you wish to change at least one of the default values, please provide the full information in the configuration file. The corresponding `.JSON` file for the `cge-comrare-pipeline` default parameters can be found in the repository.
 
-### Paths to project folders
+### Paths to Project Folders
 
-The file `paths.JSON` contain the addresses to the project folder as well as the prefix of the input and output data. The file must contain the following fields:
+The `paths.JSON` file contains the addresses to the project folder as well as the prefix of the input and output data. The file must contain the following fields:
 
 ```
 {
@@ -65,9 +65,9 @@ The file `paths.JSON` contain the addresses to the project folder as well as the
 }
 ```
 
-### Pipeline steps
+### Pipeline Steps
 
-The file `steps.JSON` has the following structure:
+The `steps.JSON` file has the following structure:
 
 ```
 {
@@ -77,7 +77,7 @@ The file `steps.JSON` has the following structure:
 }
 ```
 
-With the above configuration all three steps will run seamlessly, which is the recommended initial configuration. If some step want to be skipped the value should be change to `false`. For example,
+With the above configuration, all three steps will run seamlessly, which is the recommended initial configuration. If you want to skip some steps, change the value to `false`. For example,
 
 ```
 {
@@ -87,11 +87,11 @@ With the above configuration all three steps will run seamlessly, which is the r
 }
 ```
 
-allows to run only the sample and variant quality control. Notice that the an exception will be raised if the PCA steps has not be run, because the necessary files to run the sample steps would no be available.
+allows you to run only the sample and variant quality control. Note that an exception will be raised if the PCA step has not been run, as the necessary files for the sample steps would not be available.
 
-## Dependable files
+## Dependable Files
 
-In this folder should be allocated additional files to run the quality control pipeline. The structure inside the directory should be as follows:
+This folder should contain additional files to run the quality control pipeline. The structure inside the directory should be as follows:
 
 ```
 dependables
@@ -107,9 +107,9 @@ dependables
     |---high-LD-regions.txt
 ```
 
-Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the built 38, in order to be consistent with 1000 Genomes phase 3 built.
+Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the build 38, in order to be consistent with 1000 Genomes phase 3 build.
 
-## Output data
+## Output Data
 
 ## Usage
 
