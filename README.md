@@ -87,7 +87,7 @@ With the above configuration all three steps will run seamlessly, which is the r
 }
 ```
 
-allows to run only the sample and variant quality control. Notice that the an exception will be raised if the PCA steps has not be run.
+allows to run only the sample and variant quality control. Notice that the an exception will be raised if the PCA steps has not be run, because the necessary files to run the sample steps would no be available.
 
 ## Dependable files
 
@@ -116,6 +116,6 @@ Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `
 The pipeline is easy to use. Once installed in the system or in a virtual enviroment one needs to run the following command:
 
 ```
-python3 cge_comrare_pipeline --path_params <path to parameters.JSON> --file_folders <path to paths.JSON>
+python3 cge_comrare_pipeline --path_params <path to parameters.JSON> --file_folders <path to paths.JSON> --steps <path to steps.JSON>
 ```
 
