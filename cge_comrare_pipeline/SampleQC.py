@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib import colormaps
 
-from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
+from cge_comrare_pipeline.Helpers import shell_do
 
 class SampleQC:
 
@@ -94,6 +94,100 @@ class SampleQC:
         self.plots_dir = os.path.join(output_path, 'plots')
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
+
+    def ld_pruning(self)->dict:
+
+        """
+        Prune samples based on Linkage Disequilibrium (LD).
+
+        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
+
+        Raises:
+        -------
+        - TypeError: If maf, geno, mind, or hwe is not of type float.
+        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
+        - FileNotFoundError: If the file with high LD regions is not found.
+
+        Returns:
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
+        input_path      = self.input_path
+        input_name      = self.input_name
+        dependables_path= self.dependables
+        results_dir     = self.results_dir
+
+        maf      = self.config_dict['maf']
+        geno     = self.config_dict['geno']
+        mind     = self.config_dict['mind']
+        hwe      = self.config_dict['hwe']
+        ind_pair = self.config_dict['indep-pairwise']
+
+        # Check type of maf
+        if not isinstance(maf, float):
+             raise TypeError("maf should be of type float.")
+
+        # Check type of geno
+        if not isinstance(geno, float):
+            raise TypeError("geno should be of type float.")
+
+        # Check type of mind
+        if not isinstance(mind, float):
+            raise TypeError("mind should be of type float.")
+        
+        # Check type of hwe
+        if not isinstance(hwe, float):
+            raise TypeError("hwe should be of type float.")
+        
+        # Check if maf is in range
+        if maf < 0.05 or maf > 0.1:
+            raise ValueError("maf should be between 0.05 and 0.1")
+        
+        # Check if geno is in range
+        if geno < 0.05 or geno > 0.1:
+            raise ValueError("geno should be between 0.05 and 0.1")
+        
+        # Check if mind is in range
+        if mind < 0.1 or mind > 0.15:
+            raise ValueError("mind should be between 0.1 and 0.15")
+        
+        # Check if hwe is in range
+        if hwe < 0.00000001 or hwe > 0.001:
+            raise ValueError("hwe should be between 0.00000001 and 0.001")
+        
+        # check existence of high LD regions file
+        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
+        if not os.path.exists(high_ld_regions_file):
+            raise FileNotFoundError("File with high LD region was not found")
+
+        step = "ld_prune"
+
+        # generates prune.in and prune.out files
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
+
+        # prune and creates a filtered binary file
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
 
     def run_sex_check(self)->dict:
 
