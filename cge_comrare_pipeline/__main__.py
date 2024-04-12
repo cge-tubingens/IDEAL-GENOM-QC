@@ -13,8 +13,8 @@ def execute_main()->None:
     from cge_comrare_pipeline.VariantQC import VariantQC
     from cge_comrare_pipeline.PCA import PCA
 
-    params_path = args_dict['path_params']
-    data_path = args_dict['file_folders']
+    params_path= args_dict['path_params']
+    data_path  = args_dict['file_folders']
     steps_path = args_dict['steps']
 
     # check path to config files
@@ -79,6 +79,8 @@ def execute_main()->None:
         for step in pca_steps.keys():
             pca_steps[step]()
 
+        print("Ethnicity outliers analysis done.")
+
     if steps_dict['sample']:
         # instantiate SampleQC class
         sample_qc = SampleQC(
@@ -92,6 +94,7 @@ def execute_main()->None:
 
         # pipeline steps
         smpl_steps = {
+        'ld_prune'      : sample_qc.ld_pruning,
         'sex_check'     : sample_qc.run_sex_check,
         'heterozygosity': sample_qc.run_heterozygosity_rate,
         'relatedness'   : sample_qc.run_relatedness_prune,
@@ -100,6 +103,8 @@ def execute_main()->None:
 
         for step in smpl_steps.keys():
             smpl_steps[step]()
+
+        print("Sample quality control done.")
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
@@ -119,6 +124,8 @@ def execute_main()->None:
 
         for step in vrnt_steps.keys():
             vrnt_steps[step]()
+
+        print("Variant quality control done.")
 
     return None
 
