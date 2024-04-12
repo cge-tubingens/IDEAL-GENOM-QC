@@ -59,9 +59,10 @@ def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
     for file in os.listdir(path_to_folder):
         file_split = file.split('.')
         if file_split[-1]!='log' and file not in files_to_keep and file_split[-1]!='hh':
-            os.remove(
-                os.path.join(path_to_folder, file)
-            )
+            if os.path.isfile(os.path.join(path_to_folder, file)):
+                os.remove(
+                    os.path.join(path_to_folder, file)
+                )
         
     # create log folder for dependables
     logs_dir = os.path.join(path_to_folder, 'log_files')
