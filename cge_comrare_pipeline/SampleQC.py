@@ -206,11 +206,11 @@ class SampleQC:
         - ValueError: If the length of sex_check is not 2, if the values in sex_check are not between 0 and 1, or if the sum of sex_check values is not equal to 1.
         """
 
-        input_path = self.input_path
         input_name = self.input_name
         output_name= self.output_name
         result_path= self.results_dir
         fails_dir  = self.fails_dir
+        results_dir= self.results_dir
 
         sex_check = self.config_dict['sex_check']
 
@@ -232,14 +232,14 @@ class SampleQC:
         step = "sex_check"
 
         # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --out {os.path.join(result_path, output_name)}"
 
         # execute PLINK command
         shell_do(plink_cmd1, log=True)
 
         # load .sexcheck file
         df = pd.read_csv(
-            os.path.join(result_path, output_name+'_1.sexcheck'),
+            os.path.join(result_path, output_name+'.sexcheck'),
             sep='\s+'
         )
 
@@ -282,20 +282,19 @@ class SampleQC:
         - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_path = self.input_path
         input_name = self.input_name
         output_name= self.output_name
-        result_path= self.results_dir
+        results_dir = self.results_dir
         plots_path = self.plots_dir
         fails_dir  = self.fails_dir
 
         step = "heterozygosity_rate"
 
         # create .imiss and .lmiss files
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name)}"
 
         # create .het file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --het --autosome --out {os.path.join(result_path, output_name+'_1')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --out {os.path.join(results_dir, output_name)}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -305,7 +304,7 @@ class SampleQC:
         # save samples that failed QC
         fails_path = os.path.join(fails_dir, output_name+'.fail-imisshet-qc.txt')
         logFMISS, meanHET = self.fail_imiss_het(
-            result_path, output_name+'_1',
+            results_dir, output_name,
             fails_path
         )
 
@@ -318,7 +317,7 @@ class SampleQC:
         process_complete = True
 
         outfiles_dict = {
-            'plink_out': result_path
+            'plink_out': results_dir
         }
 
         out_dict = {
@@ -342,34 +341,22 @@ class SampleQC:
         """
 
         input_name =self.input_name
-        input_path =self.input_path
         results_dir= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
-        dependables= self.dependables
-
-        maf     = self.config_dict['maf']
-        geno    = self.config_dict['geno']
-        mind    = self.config_dict['mind']
-        ind_pair= self.config_dict['indep-pairwise']
-
-        high_ld_regions_file = os.path.join(dependables, 'high-LD-regions.txt')
 
         step = "duplicate_relative_prune"
 
         to_remove = pd.DataFrame(columns=['FID', 'IID'])
 
-        # generates prune.in and prune.out
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --exclude {high_ld_regions_file} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
-
         # prune and run genome [compute IBD]
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name+'_3')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name)}"
 
         # generate new .imiss file
-        plink_cmd3 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
+        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
 
         # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
+        cmds = [plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
@@ -380,7 +367,7 @@ class SampleQC:
         )
         # load .genome file
         df_genome = pd.read_csv(
-            os.path.join(results_dir, output_name+'_3.genome'),
+            os.path.join(results_dir, output_name+'.genome'),
             sep='\s+'
         )
 
