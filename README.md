@@ -121,3 +121,6 @@ python3 cge_comrare_pipeline --path_params <path to parameters.JSON>
                              --steps <path to steps.JSON>
 ```
 
+## Docker Container
+
+The Docker container for the pipeline is under construction.
