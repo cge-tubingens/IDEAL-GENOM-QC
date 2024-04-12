@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.11
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,10 +17,13 @@ RUN apt-get update && apt-get install -y wget
 RUN wget -O /tmp/plink19.zip https://s3.amazonaws.com/plink1-assets/plink_linux_x86_64_20231211.zip
 
 # Extract the downloaded app
-RUN unzip /tmp/app.tar.gz -C /usr/local/bin/
+RUN unzip /tmp/plink19.zip -d /usr/local/bin/
+
+# Make PLINK1.9 executable
+# RUN chmod +x /usr/local/bin/plink/plink
 
 # Make the entry point script executable
-RUN chmod +x entrypoint.sh
+# RUN chmod +x entrypoint.sh
 
 # Define the entry point command
-CMD ["./entrypoint.sh"]
+CMD ["bash"]
