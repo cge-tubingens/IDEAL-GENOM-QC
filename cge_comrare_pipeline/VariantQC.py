@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from cge_comrare_pipeline.Helpers import shell_do
+from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class VariantQC:
 
@@ -74,6 +74,8 @@ class VariantQC:
         self.output_name= output_name
         self.dependables= dependables_path
         self.config_dict= config_dict
+
+        self.files_to_keep = ['fail_samples']
 
         # create results folder if not existent
         self.results_dir = os.path.join(output_path, 'variant_qc_results')
@@ -312,6 +314,14 @@ class VariantQC:
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
+
+        # add cleaned files to list with files to keep
+        self.files_to_keep.append(output_name+'.vrnt_clean.bed')
+        self.files_to_keep.append(output_name+'.vrnt_clean.bim')
+        self.files_to_keep.append(output_name+'.vrnt_clean.fam')
+
+        # delete temporary files
+        delete_temp_files(self.files_to_keep, result_path)
 
         # report
         process_complete = True
