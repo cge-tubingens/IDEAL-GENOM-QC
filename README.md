@@ -65,6 +65,8 @@ The `paths.JSON` file contains the addresses to the project folder as well as th
 }
 ```
 
+If the CLI is run locally you should provide the full path to the directories.
+
 ### Pipeline Steps
 
 The `steps.JSON` file has the following structure:
@@ -119,8 +121,17 @@ The pipeline is easy to use. Once installed in the system or in a virtual enviro
 python3 cge_comrare_pipeline --path_params <path to parameters.JSON> 
                              --file_folders <path to paths.JSON> 
                              --steps <path to steps.JSON>
+                             --pca-first <true or false>
 ```
+
+The first three parameters are the path to the three configuration files. The fourth 
 
 ## Docker Container
 
-The Docker container for the pipeline is under construction.
+With the `Dockerfile` one can create a Docker container for the pipeline. Notice that the container needs to intereact with physical files. Then, we recommend the usage of the following command:
+
+```
+docker run -v <path to project folder>:/data <docker_container_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> --pca-first false
+```
+
+
