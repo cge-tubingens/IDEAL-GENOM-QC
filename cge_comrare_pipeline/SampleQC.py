@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib import colormaps
 
-from cge_comrare_pipeline.Helpers import shell_do
+from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
@@ -503,6 +503,9 @@ class SampleQC:
         self.files_to_keep.append(output_name+'.clean.bed')
         self.files_to_keep.append(output_name+'.clean.bim')
         self.files_to_keep.append(output_name+'.clean.fam')
+
+        # delete temporary files
+        delete_temp_files(self.files_to_keep, result_path)
 
         # report
         process_complete = True
