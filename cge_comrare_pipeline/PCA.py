@@ -617,6 +617,7 @@ class PCA:
         self.results_to_keep.append(output_name+'.clean.bed')
         self.results_to_keep.append(output_name+'.clean.bim')
         self.results_to_keep.append(output_name+'.clean.fam')
+        self.results_to_keep.append(output_name+'.pca.eigenvec')
 
         shell_do(plink_cmd2, log=True)
 
