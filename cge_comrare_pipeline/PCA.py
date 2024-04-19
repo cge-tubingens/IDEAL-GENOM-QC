@@ -580,7 +580,9 @@ class PCA:
         results_dir= self.results_dir
         fails_dir  = self.fails_dir
         dependables= self.dependables
-        threshold  = self.config_dict['outlier_threshold']
+        ref_threshold= self.config_dict['ref_threshold']
+        stu_threshold= self.config_dict['stu_threshold']
+        reference_pop= self.config_dict['reference_pop']
         pca        = self.config_dict['pca']
 
         step = "pca_analysis"
@@ -608,7 +610,9 @@ class PCA:
             results_dir  =results_dir,
             output_folder=fails_dir,
             output_name  =output_name, 
-            threshold    =threshold
+            ref_threshold=ref_threshold,
+            stu_threshold=stu_threshold,
+            reference_pop=reference_pop
         )
 
         # create cleaned binary files
@@ -787,7 +791,7 @@ class PCA:
         return pd.concat([df_fam, df_psam], axis=0)
 
     @staticmethod
-    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, threshold:int)->str:
+    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, ref_threshold:int, stu_threshold:int, reference_pop:str)->str:
 
         """
         Identifies samples failing ancestry quality control based on principal component analysis (PCA).
@@ -810,7 +814,7 @@ class PCA:
         """
 
         # filters South Asian subjects
-        mask1 = (df_tags['SuperPop']=='SAS')
+        mask1 = (df_tags['SuperPop']==reference_pop)
         # filters subjects from study data
         mask2 = (df_tags['SuperPop']=='StPop')
 
@@ -841,20 +845,38 @@ class PCA:
             .drop(columns=['SuperPop'], inplace=False)
 
         # computes mean and standard deviation by columns in reference data
-        mean_ref = df_ref[df_ref.columns[2:]].mean()
+        mean_ref= df_ref[df_ref.columns[2:]].mean()
         std_ref = df_ref[df_ref.columns[2:]].std()
 
         # creates empty data frame
-        outliers = pd.DataFrame(columns=df_ref.columns)
-        outliers[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
+        outliers_1 = pd.DataFrame(columns=df_ref.columns)
+        outliers_1[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
 
-        # identifies subjects with more than `threshold` std deviations from the refenrence mean
-        for col in outliers.columns[2:]:
-            outliers[col] = (np.abs(df_stu[col] - mean_ref[col]) > threshold*std_ref[col])
+        # identifies subjects with more than `ref_threshold` std deviations from the reference mean
+        for col in outliers_1.columns[2:]:
+            outliers_1[col] = (np.abs(df_stu[col] - mean_ref[col]) > ref_threshold*std_ref[col])
 
-        outliers['is_out'] = (np.sum(outliers.iloc[:,2:], axis=1) >0)
+        outliers_1['is_out'] = (np.sum(outliers_1.iloc[:,2:], axis=1) >0)
 
-        df = outliers[outliers['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
+        df_1 = outliers_1[outliers_1['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
+
+        # computes mean and standard deviation by columns in study data
+        mean_stu= df_stu[df_stu.columns[2:]].mean()
+        std_stu = df_stu[df_stu.columns[2:]].std()
+
+        # creates empty data frame
+        outliers_2 = pd.DataFrame(columns=df_ref.columns)
+        outliers_2[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
+
+        # identifies subjects with more than `stu_threshold` std deviation from the study mean
+        for col in outliers_2.columns[2:]:
+            outliers_2[col] = (np.abs(df_stu[col] - mean_stu[col]) > stu_threshold*std_stu[col])
+
+        outliers_2['is_out'] = (np.sum(outliers_2.iloc[:,2:], axis=1) >0)
+
+        df_2 = outliers_2[outliers_2['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
+
+        df = pd.merge(df_1, df_2, on=['ID1', 'ID2'])
 
         # save samples considered as ethnicity outliers
         df.to_csv(
