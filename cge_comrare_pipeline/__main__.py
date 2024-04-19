@@ -182,9 +182,6 @@ def execute_main()->str:
     steps_path = args_dict['steps']
     pca_first  = args_dict['pca_first'].lower()
 
-    print(pca_first)
-    print(data_path)
-
     # check path to config files
     if not os.path.exists(data_path):
         raise FileNotFoundError("Configuration file with path to data and analysis results cannot be found.")
@@ -217,8 +214,6 @@ def execute_main()->str:
 
     with open(steps_path, 'r') as file:
         steps_dict = json.load(file)
-
-    print(type(pca_first))
 
     if pca_first=='true':
         print("pca will be done first")
