@@ -43,7 +43,7 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
     "hwe" : 0.00000005,
     "sex_check": [0.2, 0.8],
     "indep-pairwise": [50, 5, 0.2],
-    "chr": 24,
+    "chr_y": 24,
     "ref_threshold": 4,
     "stu_threshold": 6,
     "reference_pop": "SAS",
