@@ -105,8 +105,8 @@ class VariantQC:
 
         Raises:
         -------
-        TypeError: If 'chr' in config_dict is not an integer.
-        ValueError: If 'chr' in config_dict is not between 0 and 26 (inclusive).
+        TypeError: If 'chr_y' in config_dict is not an integer.
+        ValueError: If 'chr_y' in config_dict is not between 0 and 26 (inclusive).
         """
 
         input_path = self.input_path
@@ -116,22 +116,22 @@ class VariantQC:
         fails_dir  = self.fails_dir
         fig_folder = self.plots_dir
 
-        chr = self.config_dict['chr']
+        chr_y = self.config_dict['chr_y']
 
-        # check type for chr
-        if not isinstance(chr, int):
-            raise TypeError("chr should be of type integer.")
+        # check type for chr_y
+        if not isinstance(chr_y, int):
+            raise TypeError("chr_y should be of type integer.")
         
-        if chr < 0 or chr > 26:
-            raise ValueError("chr should be between 1 and 26")
+        if chr_y < 0 or chr_y > 26:
+            raise ValueError("chr_y should be between 1 and 26")
 
         step = 'high_rate_missing_data'
 
         # generates  .lmiss and .imiss files for male subjects
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --filter-males --chr {chr} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --filter-males --chr {chr_y} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
 
         # generates .lmiss and. imiss files for female subjects
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --not-chr {chr} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --not-chr {chr_y} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
