@@ -159,7 +159,7 @@ class SampleQC:
         # check existence of high LD regions file
         high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
         if not os.path.exists(high_ld_regions_file):
-            raise FileNotFoundError("File with high LD region was not found")
+            raise FileNotFoundError(f"File with high LD region was not found: {high_ld_regions_file}")
 
         step = "ld_prune"
 
