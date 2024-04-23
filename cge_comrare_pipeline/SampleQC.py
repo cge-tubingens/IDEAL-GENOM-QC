@@ -232,7 +232,7 @@ class SampleQC:
         step = "sex_check"
 
         # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'prune.in')} --out {os.path.join(result_path, output_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --out {os.path.join(result_path, output_name)}"
 
         # execute PLINK command
         shell_do(plink_cmd1, log=True)
@@ -294,7 +294,7 @@ class SampleQC:
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name)}"
 
         # create .het file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --extract {os.path.join(results_dir, input_name+'prune.in')} --out {os.path.join(results_dir, output_name)}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --extract {os.path.join(results_dir, input_name+'.prune.in')} --out {os.path.join(results_dir, output_name)}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
