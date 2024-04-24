@@ -680,13 +680,13 @@ class PCA:
         df = pd.merge(df_eigenvec, df, on=['ID1', 'ID2'])
 
         # generates a 2D scatter plot
-        scatter_plot = sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop')
+        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop')
         scatter_fig = scatter_plot.get_figure()
         scatter_fig.savefig(os.path.join(self.plots_dir, 'pca.pdf'))
 
         # generates a 3D scatter plot
-        fig2 = plt.figure()
-        ax = fig2.add_subplot(111, projection='3d')
+        fig2= plt.figure()
+        ax  = fig2.add_subplot(111, projection='3d')
 
         for s in df['SuperPop'].unique():
             ax.scatter(
