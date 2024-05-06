@@ -8,7 +8,7 @@ from cge_comrare_pipeline.SampleQC import SampleQC
 from cge_comrare_pipeline.VariantQC import VariantQC
 from cge_comrare_pipeline.PCA import PCA
 
-def pipe_OutSamVar(params_dict, data_dict, steps_dict)->None:
+def pipe_OutSamVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
 
     # execute step by step
     if steps_dict['pca']:
@@ -50,7 +50,8 @@ def pipe_OutSamVar(params_dict, data_dict, steps_dict)->None:
             output_path     =data_dict['output_directory'],
             output_name     =data_dict['output_prefix'],
             config_dict     =params_dict,
-            dependables_path=data_dict['dependables_directory']
+            dependables_path=data_dict['dependables_directory'],
+            use_kingship    =use_kingship
         )
 
         # pipeline steps
@@ -90,7 +91,7 @@ def pipe_OutSamVar(params_dict, data_dict, steps_dict)->None:
 
     pass
 
-def pipe_SamOutVar(params_dict, data_dict, steps_dict)->None:
+def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
 
     if steps_dict['sample']:
         # instantiate SampleQC class
@@ -100,7 +101,8 @@ def pipe_SamOutVar(params_dict, data_dict, steps_dict)->None:
             output_path     =data_dict['output_directory'],
             output_name     =data_dict['output_prefix'],
             config_dict     =params_dict,
-            dependables_path=data_dict['dependables_directory']
+            dependables_path=data_dict['dependables_directory'],
+            use_kingship    =use_kingship
         )
 
         # pipeline steps
@@ -177,10 +179,11 @@ def execute_main()->str:
     args = arg_parser()
     args_dict = vars(args)
 
-    params_path= args_dict['path_params']
-    data_path  = args_dict['file_folders']
-    steps_path = args_dict['steps']
-    pca_first  = args_dict['pca_first'].lower()
+    params_path = args_dict['path_params']
+    data_path   = args_dict['file_folders']
+    steps_path  = args_dict['steps']
+    pca_first   = args_dict['pca_first'].lower()
+    use_kingship= args_dict['use_kingship'].lower()
 
     # check path to config files
     if not os.path.exists(data_path):
@@ -218,16 +221,18 @@ def execute_main()->str:
     if pca_first=='true':
         print("pca will be done first")
         pipe_OutSamVar(
-            params_dict=params_dict,
-            data_dict  =data_dict,
-            steps_dict =steps_dict
+            params_dict =params_dict,
+            data_dict   =data_dict,
+            steps_dict  =steps_dict,
+            use_kingship=use_kingship
         )
     else:
         print("sampleQC will be done first")
         pipe_SamOutVar(
-            params_dict=params_dict,
-            data_dict  =data_dict,
-            steps_dict =steps_dict
+            params_dict =params_dict,
+            data_dict   =data_dict,
+            steps_dict  =steps_dict,
+            use_kingship=use_kingship
         )
 
     return "Pipeline is completed"
