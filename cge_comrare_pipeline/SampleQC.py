@@ -340,12 +340,12 @@ class SampleQC:
         - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_name =self.input_name
+        input_name = self.input_name
         results_dir= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
 
-        step = "duplicate_relative_prune"
+        step = "duplicates_and_relatives_prune"
 
         to_remove = pd.DataFrame(columns=['FID', 'IID'])
 
