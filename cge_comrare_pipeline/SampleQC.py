@@ -384,17 +384,17 @@ class SampleQC:
         else:
 
             # Compute kinship-coefficient matrix for all samples
-            plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --make-king triangle bin --out {os.path.join(results_dir, "kinship-coefficient-matrix")} --memory {memory} --threads {max_threads}"
+            plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --make-king triangle bin --out {os.path.join(results_dir, 'kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
             # Prune for Monozygotic Twins OR Duplicates
-            plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --king-cutoff {os.path.join(results_dir, "kinship-coefficient-matrix")} {kingship} --out {os.path.join(results_dir, "2-kinship-pruned0.duplicates")} --memory {memory} --threads {max_threads}"
+            plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --king-cutoff {os.path.join(results_dir, 'kinship-coefficient-matrix')} {kingship} --out {os.path.join(results_dir, '2-kinship-pruned0.duplicates')} --memory {memory} --threads {max_threads}"
 
             cmds2 = [plink2_cmd1, plink2_cmd2]
             for cmd in cmds2:
                 shell_do(cmd, log=True)
 
-            self.files_to_keep.append("kinship-coefficient-matrix"+".king.bin")
-            self.files_to_keep.append("kinship-coefficient-matrix"+".king.id")
+            self.files_to_keep.append('kinship-coefficient-matrix"+".king.bin')
+            self.files_to_keep.append('kinship-coefficient-matrix"+".king.id')
 
             df_fail = pd.read_csv(
                 os.path.join(results_dir, "2-kinship-pruned0.duplicates"+'.king.cutoff.out.id'),
