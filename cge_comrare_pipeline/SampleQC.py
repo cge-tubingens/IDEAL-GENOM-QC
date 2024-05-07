@@ -361,7 +361,7 @@ class SampleQC:
 
         step = "duplicates_and_relatives_prune"
 
-        if not use_kingship:
+        if use_kingship!='true':
 
             # prune and run genome [compute IBD]
             plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name)}"
