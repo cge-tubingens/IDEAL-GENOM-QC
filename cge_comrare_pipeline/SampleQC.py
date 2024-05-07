@@ -383,7 +383,7 @@ class SampleQC:
 
         else:
 
-            # Compute kinship-coefficient matrix for all samples ; --make-king binary format, triangular shape, either precision ok
+            # Compute kinship-coefficient matrix for all samples
             plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --make-king triangle bin --out {os.path.join(results_dir, "kinship-coefficient-matrix")} --memory {memory} --threads {max_threads}"
 
             # Prune for Monozygotic Twins OR Duplicates
