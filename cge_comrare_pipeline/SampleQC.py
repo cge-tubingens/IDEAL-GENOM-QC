@@ -3,6 +3,7 @@ Module to perform sample quality control
 """
 
 import os
+import psutil
 
 import pandas as pd
 import numpy as np
