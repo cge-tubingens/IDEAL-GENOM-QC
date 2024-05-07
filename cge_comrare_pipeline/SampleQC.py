@@ -15,7 +15,7 @@ from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str, use_kingship:str) -> None:
 
         """
         Initialize the SampleQC object.
@@ -71,12 +71,13 @@ class SampleQC:
             raise FileNotFoundError(".bim file not found")
         
 
-        self.input_path = input_path
-        self.output_path= output_path
-        self.input_name = input_name
-        self.output_name= output_name
-        self.dependables= dependables_path
-        self.config_dict= config_dict
+        self.input_path  = input_path
+        self.output_path = output_path
+        self.input_name  = input_name
+        self.output_name = output_name
+        self.dependables = dependables_path
+        self.config_dict = config_dict
+        self.use_kingship= use_kingship
 
         self.files_to_keep = ['fail_samples']
 
@@ -340,70 +341,71 @@ class SampleQC:
         - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_name = self.input_name
-        results_dir= self.results_dir
-        output_name= self.output_name
-        fails_dir  = self.fails_dir
+        input_name  = self.input_name
+        results_dir = self.results_dir
+        output_name = self.output_name
+        fails_dir   = self.fails_dir
+        use_kingship= self.use_kingship
+        kingship    = self.config_dict['kingship']
+        ibd_thres   = self.config_dict['ibd_thres']
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        memory = psutil.virtual_memory()
+        memory = memory.total
+        memory = round(3*memory/5,0)
 
         step = "duplicates_and_relatives_prune"
 
-        to_remove = pd.DataFrame(columns=['FID', 'IID'])
+        if not use_kingship:
 
-        # prune and run genome [compute IBD]
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name)}"
+            # prune and run genome [compute IBD]
+            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name)}"
 
-        # generate new .imiss file
-        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
+            # generate new .imiss file
+            plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
 
-        # execute PLINK commands
-        cmds = [plink_cmd2, plink_cmd3]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+            # execute PLINK commands
+            cmds = [plink_cmd1, plink_cmd2]
+            for cmd in cmds:
+                shell_do(cmd, log=True)
 
-        # load .imiss file
-        df_imiss = pd.read_csv(
-            os.path.join(results_dir, output_name+'_3.imiss'),
-            sep='\s+'
-        )
-        # load .genome file
-        df_genome = pd.read_csv(
-            os.path.join(results_dir, output_name+'.genome'),
-            sep='\s+'
-        )
+            self.find_fail_ibd(
+                output_prefix = output_name, 
+                results_folder= results_dir, 
+                fails_folder  =fails_dir, 
+                ibd_threshold =ibd_thres
+            )
 
-        # isolate duplicates or related samples
-        df_dup = df_genome[df_genome['PI_HAT']>0.185].reset_index(drop=True)
+        else:
 
-        df_1 = pd.merge(
-            df_dup[['FID1', 'IID1']], 
-            df_imiss[['FID', 'IID', 'F_MISS']], 
-            left_on =['FID1', 'IID1'],
-            right_on=['FID', 'IID']
-        ).drop(columns=['FID', 'IID'], inplace=False)
+            # Compute kinship-coefficient matrix for all samples ; --make-king binary format, triangular shape, either precision ok
+            plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --make-king triangle bin --out {os.path.join(results_dir, "kinship-coefficient-matrix")} --memory {memory} --threads {max_threads}"
 
-        df_2 = pd.merge(
-            df_dup[['FID2', 'IID2']], 
-            df_imiss[['FID', 'IID', 'F_MISS']], 
-            left_on=['FID2', 'IID2'],
-            right_on=['FID', 'IID']
-        ).drop(columns=['FID', 'IID'], inplace=False)
+            # Prune for Monozygotic Twins OR Duplicates
+            plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --king-cutoff {os.path.join(results_dir, "kinship-coefficient-matrix")} {kingship} --out {os.path.join(results_dir, "2-kinship-pruned0.duplicates")} --memory {memory} --threads {max_threads}"
 
-        for k in range(len(df_dup)):
+            cmds2 = [plink2_cmd1, plink2_cmd2]
+            for cmd in cmds2:
+                shell_do(cmd, log=True)
 
-            if df_1.iloc[k,2]>df_2.iloc[k,2]:
-                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
-            elif df_1.iloc[k,2]<df_2.iloc[k,2]:
-                to_remove.loc[k] = df_2.iloc[k,0:2].to_list()
-            else:
-                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+            self.files_to_keep.append("kinship-coefficient-matrix"+".king.bin")
+            self.files_to_keep.append("kinship-coefficient-matrix"+".king.id")
 
-        to_remove = to_remove.drop_duplicates(keep='last')
-        to_remove.to_csv(
-            os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt'),
-            index=False,
-            header=False,
-            sep=" "
-        )
+            df_fail = pd.read_csv(
+                os.path.join(results_dir, "2-kinship-pruned0.duplicates"+'.king.cutoff.out.id'),
+                sep='\t'
+            )
+
+            df_fail.to_csv(
+                os.path.join(fails_dir, "kingship_fails.txt"), 
+                index=False,
+                header=False,
+                sep=" "                           
+            )
 
         # report
         process_complete = True
@@ -432,11 +434,12 @@ class SampleQC:
         - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_path = self.input_path
-        input_name = self.input_name
-        result_path= self.results_dir
-        output_name= self.output_name
-        fails_dir  = self.fails_dir
+        input_path  = self.input_path
+        input_name  = self.input_name
+        result_path = self.results_dir
+        output_name = self.output_name
+        fails_dir   = self.fails_dir
+        use_kingship=self.use_kingship
 
         step = "delete_sample_failed_QC"
 
@@ -464,20 +467,33 @@ class SampleQC:
                 header   =None
             )
 
-        # load samples who failed IBD check
-        ibd1_path = os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt')
-        if os.path.getsize(ibd1_path)==0:
-            df_ibd1 = pd.DataFrame()
+        if use_kingship:
+            # load samples who failed kingship check
+            king_path = os.path.join(fails_dir, "kingship_fails.txt")
+            if os.path.getsize(king_path)==0:
+                df_dup = pd.DataFrame()
+            else:
+                df_dup = pd.read_csv(
+                    king_path,
+                    sep = ' ',
+                    index_col=False,
+                    header=None
+                )
         else:
-            df_ibd1 = pd.read_csv(
-                ibd1_path,
-                sep      =' ',
-                index_col=False,
-                header   =None
-            )
+            # load samples who failed IBD check
+            ibd1_path = os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt')
+            if os.path.getsize(ibd1_path)==0:
+                df_dup = pd.DataFrame()
+            else:
+                df_dup = pd.read_csv(
+                    ibd1_path,
+                    sep      =' ',
+                    index_col=False,
+                    header   =None
+                )
 
         # concatenate all failings samples
-        df = pd.concat([df_sex, df_imiss, df_ibd1], axis=0)
+        df = pd.concat([df_sex, df_imiss, df_dup], axis=0)
 
         # sort values by the first column
         df.sort_values(by=df.columns[0], inplace=True)
@@ -622,3 +638,57 @@ class SampleQC:
         )
 
         return df_imiss['logF_MISS'], df_het['meanHet']
+
+    @staticmethod
+    def find_fail_ibd(output_prefix:str, results_folder:str, fails_folder:str, ibd_threshold:float)->None:
+
+        # empty dataframe
+        to_remove = pd.DataFrame(columns=['FID', 'IID'])
+
+        # load .imiss file
+        df_imiss = pd.read_csv(
+            os.path.join(results_folder, output_prefix+'_3.imiss'),
+            sep='\s+'
+        )
+        # load .genome file
+        df_genome = pd.read_csv(
+            os.path.join(results_folder, output_prefix+'.genome'),
+            sep='\s+'
+        )
+
+        # isolate duplicates or related samples
+        df_dup = df_genome[df_genome['PI_HAT']>ibd_threshold].reset_index(drop=True)
+
+        df_1 = pd.merge(
+            df_dup[['FID1', 'IID1']], 
+            df_imiss[['FID', 'IID', 'F_MISS']], 
+            left_on =['FID1', 'IID1'],
+            right_on=['FID', 'IID']
+        ).drop(columns=['FID', 'IID'], inplace=False)
+
+        df_2 = pd.merge(
+            df_dup[['FID2', 'IID2']], 
+            df_imiss[['FID', 'IID', 'F_MISS']], 
+            left_on=['FID2', 'IID2'],
+            right_on=['FID', 'IID']
+        ).drop(columns=['FID', 'IID'], inplace=False)
+
+        for k in range(len(df_dup)):
+
+            if df_1.iloc[k,2]>df_2.iloc[k,2]:
+                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+            elif df_1.iloc[k,2]<df_2.iloc[k,2]:
+                to_remove.loc[k] = df_2.iloc[k,0:2].to_list()
+            else:
+                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+
+        to_remove = to_remove.drop_duplicates(keep='last')
+        to_remove.to_csv(
+            os.path.join(fails_folder, output_prefix+'.fail-IBD1-qc.txt'),
+            index=False,
+            header=False,
+            sep=" "
+        )
+
+        return None
+    
