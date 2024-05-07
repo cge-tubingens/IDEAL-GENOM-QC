@@ -392,5 +392,6 @@ class VariantQC:
         plt.axvline(x=np.log10(0.2), linestyle='--', color='black')
 
         plt.savefig(fig_path)
+        plt.close()
 
         return None
