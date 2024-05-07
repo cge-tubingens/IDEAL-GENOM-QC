@@ -182,8 +182,8 @@ def execute_main()->str:
     params_path = args_dict['path_params']
     data_path   = args_dict['file_folders']
     steps_path  = args_dict['steps']
-    pca_first   = args_dict['pca_first']
-    use_kingship= args_dict['use_kingship']
+    pca_first   = args_dict['pca_first'].lower()
+    use_kingship= args_dict['use_kingship'].lower()
 
     # check path to config files
     if not os.path.exists(data_path):
