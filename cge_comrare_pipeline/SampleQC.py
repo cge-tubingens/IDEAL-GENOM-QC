@@ -580,6 +580,7 @@ class SampleQC:
         plt.axvline(-1.522879, color='red', linestyle='--')
         plt.grid(True)
         plt.savefig(fig_path)
+        plt.close()
 
         return None
 
