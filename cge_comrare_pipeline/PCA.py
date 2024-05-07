@@ -697,6 +697,7 @@ class PCA:
             )
         ax.legend()
         plt.savefig(os.path.join(self.plots_dir, 'pca_3d.pdf'), format='pdf')
+        plt.close()
 
         # delete temporary files
         delete_temp_files(self.results_to_keep, results_dir)
