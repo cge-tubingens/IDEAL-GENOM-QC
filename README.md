@@ -47,7 +47,9 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
     "ref_threshold": 4,
     "stu_threshold": 6,
     "reference_pop": "SAS",
-    "pca": 10
+    "pca": 10,
+    "ibd_thres": 0.185,
+    "kingship": 0.354
 }
 ```
 
@@ -113,7 +115,57 @@ dependables
 
 Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the build 38, in order to be consistent with 1000 Genomes phase 3 build.
 
+In a future realease is intended to add this step in the pipeline.
+
 ## Output Data
+
+This folder has the following structure:
+```
+outputData
+    |
+    |---pca_results
+    |
+    |---plots
+    |
+    |---sample_qc_results
+    |
+    |---variant_qc_results
+```
+
+### Results of PCA analysis
+
+This folder contains the results from the PCA analysis. Once the process is finished the folder will contain two folders and four files. The two folders are
+1. `fail_samples`: it contains a `.txt` file with the samples that failed the ancestry check; 
+2. `log_files`: it contains the `.log` files of all the `PLINK` executed commands.
+The four files are 
+1. `results.clean.bim`, `results.clean.bed` and `results.clean.fam`: `PLINK` binary files with the samples who passed the quality control;
+2. `results.pca.eigenvec`: matrix with the eigenvectors from the principal component decomposition.
+
+Recall that the cleaned binary files will feed the next steps.
+
+### Plots
+
+In this folder one can find the plots that are generated along the pipeline.
+
+### Results of Sample Quality Control
+
+This folder contains the results from the Sample Quality Control. Once the process is done the folder will contain two folders and three files. The two folders are
+1. `fail_samples`: it contains `.txt` files with the samples that failed the different stages of the sample qc; 
+2. `log_files`: it contains the `.log` files of all the `PLINK` executed commands.
+The three files are 
+1. `results.clean.bim`, `results.clean.bed` and `results.clean.fam`: `PLINK` binary files with the samples who passed the quality control.
+
+Recall that the cleaned binary files will feed the next steps.
+
+### Results of Variant Quality Control
+
+This folder contains the results from the Variant Quality Control. Once the process is done the folder will contain two folders and three files. The two folders are
+1. `fail_samples`: it contains `.txt` files with the samples that failed the different stages of the variant qc; 
+2. `log_files`: it contains the `.log` files of all the `PLINK` executed commands.
+The three files are 
+1. `results.clean.bim`, `results.clean.bed` and `results.clean.fam`: `PLINK` binary files without the variants that failed the quality control.
+
+These cleaned binary files are ready for the next steps of the GWAS analysis.
 
 ## Usage
 
@@ -124,16 +176,18 @@ python3 cge_comrare_pipeline --path_params <path to parameters.JSON>
                              --file_folders <path to paths.JSON> 
                              --steps <path to steps.JSON>
                              --pca-first <true or false>
+                             --use-kingship <true or false>
 ```
 
-The first three parameters are the path to the three configuration files. The fourth 
+The first three parameters are the path to the three configuration files. The fourth and fifth parameters are used to control the pipeline behavior.
 
 ## Docker Container
 
 With the `Dockerfile` one can create a Docker container for the pipeline. Notice that the container needs to intereact with physical files. Then, we recommend the usage of the following command:
 
 ```
-docker run -v <path to project folder>:/data <docker_container_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> --pca-first false
+docker run -v <path to project folder>:/data <docker_image_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> --pca-first false --use-kingship false
 ```
 
+It is important to remark that the path to the files in `paths.JSON` must be relative to their location inside `data` folder in the Docker container.
 
