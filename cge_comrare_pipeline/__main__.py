@@ -33,6 +33,7 @@ def pipe_OutSamVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             'remove_missmatch'         : pca_qc.remove_missmatch,
             'merging'                  : pca_qc.merge_with_reference,
             'pca_analysis'             : pca_qc.run_pca_analysis,
+            'umap_plot'                : pca_qc.reference_umap_plot,
             'pca_plot'                 : pca_qc.pca_plot
         }
 
@@ -142,6 +143,7 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             'remove_missmatch'         : pca_qc.remove_missmatch,
             'merging'                  : pca_qc.merge_with_reference,
             'pca_analysis'             : pca_qc.run_pca_analysis,
+            'umap_plot'                : pca_qc.reference_umap_plot,
             'pca_plot'                 : pca_qc.pca_plot
         }
 
