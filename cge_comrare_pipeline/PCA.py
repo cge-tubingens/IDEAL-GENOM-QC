@@ -5,6 +5,7 @@ Module to perform principal component analysis to identify ethnicity outliers.
 import os
 import subprocess
 import shutil
+import umap
 
 import pandas as pd
 import numpy as np
@@ -639,6 +640,110 @@ class PCA:
         }
 
         return out_dict
+    
+    def reference_umap_plot(self)->dict:
+
+        input_path = self.input_path
+        input_name = self.input_name
+        output_name= self.output_name
+        dependables= self.dependables
+        results_dir= self.results_dir
+
+        n_neighbors = self.config_dict["umap_n_neighbors"]
+        min_dist    = self.config_dict["umap_min_dist"]
+        metric      = self.config_dict["umap_metric"]
+        pca         = self.config_dict['pca']
+
+        step = "generate umap plots"
+
+        # add population tags to pca output
+        df = self.population_tags(
+            psam_path= os.path.join(dependables, 'all_phase3.psam'),
+            study_fam_path=os.path.join(input_path, input_name+'.fam')
+        )
+        df['ID1'] = df['ID1'].astype(str)
+
+        # load .eigenvec file
+        df_eigenvec = pd.read_csv(
+            os.path.join(results_dir, output_name+'.pca.eigenvec'),
+            header=None,
+            sep=' '
+        )
+        new_cols = [f"pca_{k}" for k in range(1,pca+1)]
+        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
+
+        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
+        df_vals= df_eigenvec[new_cols].to_numpy()
+
+        del df_eigenvec
+
+        D2_redux = umap.UMAP(
+            n_components=2,
+            n_neighbors =n_neighbors,
+            min_dist    =min_dist,
+            metric      =metric
+        )
+
+        D3_redux = umap.UMAP(
+            n_components=3,
+            n_neighbors =n_neighbors,
+            min_dist    =min_dist,
+            metric      =metric
+        )
+
+        umap_2D_proj = D2_redux.fit_transform(df_vals)
+        umap_3D_proj = D3_redux.fit_transform(df_vals)
+
+        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['proj_1', 'proj_2'])], axis=1)
+        df_3D = pd.concat([df_ids, pd.DataFrame(data=umap_3D_proj, columns=['proj_1', 'proj_2', 'proj_3'])], axis=1)
+        
+        df_2D = pd.merge(df_2D, df, on=['ID1', 'ID2'])
+        df_3D = pd.merge(df_3D, df, on=['ID1', 'ID2'])
+
+        # generates a 2D scatter plot
+        fig, ax = plt.subplots(figsize=(10,10))
+        scatter_plot= sns.scatterplot(
+            data=df_2D, 
+            x='proj_1', 
+            y='proj_2', 
+            hue='SuperPop',
+            marker='.',
+            alpha=0.6,
+            ax=ax
+        )
+        scatter_fig = scatter_plot.get_figure()
+        scatter_fig.savefig(os.path.join(self.plots_dir, 'umap_2d.pdf'))
+
+        # generates a 3D scatter plot
+        fig2= plt.figure(figsize=(10,10))
+        ax  = fig2.add_subplot(111, projection='3d')
+
+        for s in df['SuperPop'].unique():
+            ax.scatter(
+                xs=df_3D.proj_1[df_3D.SuperPop==s],
+                ys=df_3D.proj_2[df_3D.SuperPop==s],
+                zs=df_3D.proj_3[df_3D.SuperPop==s], 
+                label=s,
+                marker='.'
+            )
+        ax.legend()
+        plt.savefig(os.path.join(self.plots_dir, 'umap_3d.pdf'), format='pdf')
+        plt.close()
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plots_out': self.plots_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
 
     def pca_plot(self)->dict:
 
@@ -680,7 +785,8 @@ class PCA:
         df = pd.merge(df_eigenvec, df, on=['ID1', 'ID2'])
 
         # generates a 2D scatter plot
-        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop')
+        fig, ax = plt.subplots(figsize=(10,10))
+        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.')
         scatter_fig = scatter_plot.get_figure()
         scatter_fig.savefig(os.path.join(self.plots_dir, 'pca.pdf'))
 
@@ -700,7 +806,7 @@ class PCA:
         plt.close()
 
         # delete temporary files
-        delete_temp_files(self.results_to_keep, results_dir)
+        # delete_temp_files(self.results_to_keep, results_dir)
 
         # report
         process_complete = True
