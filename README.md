@@ -49,7 +49,10 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
     "reference_pop": "SAS",
     "pca": 10,
     "ibd_thres": 0.185,
-    "kingship": 0.354
+    "kingship": 0.354,
+    "umap_n_neighbors": 15,
+    "umap_min_dist": 0.1,
+    "umap_metric": "euclidean"
 }
 ```
 
