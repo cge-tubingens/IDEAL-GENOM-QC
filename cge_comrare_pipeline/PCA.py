@@ -207,6 +207,11 @@ class PCA:
 
         step = "fiter non A-T or G-C snps"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # find A->T and C->G SNPs in study data
         self.filter_non_AT_or_GC_snps(input_dir=input_path, input_name=input_name, results_dir=results_dir)
 
@@ -214,10 +219,10 @@ class PCA:
         self.filter_non_AT_or_GC_snps(input_dir=dependables, input_name=reference_panel, results_dir=dependables)
 
         # generate cleaned study data files
-        plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
+        plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
 
         # generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
+        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --threads {max_threads} --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -307,11 +312,16 @@ class PCA:
 
         step = "ld_prune"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -351,8 +361,13 @@ class PCA:
 
         step = "prune reference panel"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # generates a pruned reference data files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --keep-allele-order --allow-extra-chr --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(dependables, 'all_phase3.pruned')}"
+        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --keep-allele-order --allow-extra-chr --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(dependables, 'all_phase3.pruned')}"
 
         # executes PLINK command
         shell_do(plink_cmd, log=True)
@@ -390,6 +405,11 @@ class PCA:
 
         step = "chromosome missmatch"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # check that the variant IDs of the reference data have the same chr. ID as the study data
         awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$2]=$1; next}} ($2 in a && a[$2] != $1) {{print a[$2],$2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} | sed -n '/^[XY]/!p' > {os.path.join(dependables, 'all_phase3.toUpdateChr')}"
 
@@ -398,7 +418,7 @@ class PCA:
         logs = [result.stderr, result.stdout]
 
         # generates cleaned reference data files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.pruned')} --allow-extra-chr --update-chr {os.path.join(dependables, 'all_phase3.toUpdateChr')} 1 2 --make-bed --out {os.path.join(dependables, 'all_phase3.updateChr')}"
+        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.pruned')} --allow-extra-chr --update-chr {os.path.join(dependables, 'all_phase3.toUpdateChr')} 1 2 --threads {max_threads} --make-bed --out {os.path.join(dependables, 'all_phase3.updateChr')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
