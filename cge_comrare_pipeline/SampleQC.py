@@ -165,11 +165,16 @@ class SampleQC:
 
         step = "ld_prune"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -233,8 +238,13 @@ class SampleQC:
         
         step = "sex_check"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --out {os.path.join(result_path, output_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(result_path, output_name)}"
 
         # execute PLINK command
         shell_do(plink_cmd1, log=True)
@@ -292,11 +302,16 @@ class SampleQC:
 
         step = "heterozygosity_rate"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
         # create .imiss and .lmiss files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --threads {max_threads} --out {os.path.join(results_dir, output_name)}"
 
         # create .het file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --extract {os.path.join(results_dir, input_name+'.prune.in')} --out {os.path.join(results_dir, output_name)}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(results_dir, output_name)}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
