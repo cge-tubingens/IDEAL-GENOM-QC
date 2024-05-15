@@ -747,6 +747,14 @@ class PCA:
 
     def population_umap_plot(self)->dict:
 
+        """
+        Generates UMAP projection plots for raw and cleaned population data using PCA results, and saves the plots to files. Also runs PCA analysis on the data using PLINK.
+
+        Returns:
+        --------
+        dict: A dictionary containing the status of the process, the step name, and the output file paths.
+        """
+
         output_path= self.output_path
         output_name= self.output_name
         results_dir= self.results_dir
@@ -757,8 +765,10 @@ class PCA:
         metric     = self.config_dict["umap_metric"]
         pca        = self.config_dict['pca']
 
+        # path to file with geographical info
         geo_info_path = os.path.join(dependables, 'geographic_info.txt')
 
+        # returns empty dict if there is no geographic info
         if not os.path.isfile(geo_info_path):
             return {}
 
@@ -769,10 +779,12 @@ class PCA:
 
         plink_cmd2 = f"plink --bfile {os.path.join(self.results_dir, output_name+'.clean')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.cleaned.pca')} --pca {pca}"
 
+        # execute plink commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
+        # generate umap plot for data that passed Sample QC
         self.umap_plots(
             path_to_data=os.path.join(results_dir, output_name+'.raw_data.pca.eigenvec'),
             output_file =os.path.join(self.plots_dir, 'raw_data_umap_2d.pdf'),
@@ -782,6 +794,7 @@ class PCA:
             metric      =metric
         )
 
+        # generate umap plot for data that passed Sample QC and Ethnicity check
         self.umap_plots(
             path_to_data=os.path.join(results_dir, output_name+'.cleaned.pca.eigenvec'),
             output_file =os.path.join(self.plots_dir, 'cleaned_umap_2d.pdf'),
