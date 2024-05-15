@@ -805,7 +805,7 @@ class PCA:
             shell_do(cmd, log=True)
 
         # generate umap plot for data that passed Sample QC
-        self.umap_plots(
+        df_samp = self.umap_plots(
             path_to_data=os.path.join(results_dir, output_name+'.raw_data.pca.eigenvec'),
             output_file =os.path.join(self.plots_dir, 'raw_data_umap_2d.pdf'),
             geo_path=geo_info_path,
@@ -814,8 +814,15 @@ class PCA:
             metric      =metric
         )
 
+        df_samp.to_csv(
+            os.path.join(results_dir, 'raw_data_umap_2d.txt'),
+            sep=' ',
+            index=False
+        )
+        self.results_to_keep.append('raw_data_umap_2d.txt')
+
         # generate umap plot for data that passed Sample QC and Ethnicity check
-        self.umap_plots(
+        df_out = self.umap_plots(
             path_to_data=os.path.join(results_dir, output_name+'.cleaned.pca.eigenvec'),
             output_file =os.path.join(self.plots_dir, 'cleaned_umap_2d.pdf'),
             geo_path=geo_info_path,
@@ -823,6 +830,14 @@ class PCA:
             min_dist    =min_dist,
             metric      =metric
         )
+
+        df_out.to_csv(
+            os.path.join(results_dir, 'cleaned_umap_2d.txt'),
+            sep=' ',
+            index=False
+        )
+        
+        self.results_to_keep.append('cleaned_umap_2d.txt')
 
         # report
         process_complete = True
