@@ -745,6 +745,67 @@ class PCA:
 
         return out_dict
 
+    def population_umap_plot(self)->dict:
+
+        output_path= self.output_path
+        output_name= self.output_name
+        results_dir= self.results_dir
+        dependables= self.dependables
+
+        n_neighbors= self.config_dict["umap_n_neighbors"]
+        min_dist   = self.config_dict["umap_min_dist"]
+        metric     = self.config_dict["umap_metric"]
+        pca        = self.config_dict['pca']
+
+        geo_info_path = os.path.join(dependables, 'geographic_info.txt')
+
+        if not os.path.isfile(geo_info_path):
+            return {}
+
+        step = "umap_study_population"
+
+        # runs pca analysis
+        plink_cmd1 = f"plink --bfile {os.path.join(output_path, 'sample_qc_results', output_name+'.clean')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.raw_data.pca')} --pca {pca}"
+
+        plink_cmd2 = f"plink --bfile {os.path.join(self.results_dir, output_name+'.clean')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.cleaned.pca')} --pca {pca}"
+
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        self.umap_plots(
+            path_to_data=os.path.join(results_dir, output_name+'.raw_data.pca.eigenvec'),
+            output_file =os.path.join(self.plots_dir, 'raw_data_umap_2d.pdf'),
+            geo_path=geo_info_path,
+            n_neighbors =n_neighbors,
+            min_dist    =min_dist,
+            metric      =metric
+        )
+
+        self.umap_plots(
+            path_to_data=os.path.join(results_dir, output_name+'.cleaned.pca.eigenvec'),
+            output_file =os.path.join(self.plots_dir, 'cleaned_umap_2d.pdf'),
+            geo_path=geo_info_path,
+            n_neighbors =n_neighbors,
+            min_dist    =min_dist,
+            metric      =metric
+        )
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plots_out': self.plots_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+    
     def pca_plot(self)->dict:
 
         """
