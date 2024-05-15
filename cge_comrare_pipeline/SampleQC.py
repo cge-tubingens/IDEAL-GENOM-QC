@@ -252,7 +252,8 @@ class SampleQC:
         # load .sexcheck file
         df = pd.read_csv(
             os.path.join(result_path, output_name+'.sexcheck'),
-            sep='\s+'
+            sep='\s+',
+            engine='python'
         )
 
         # filter problematic samples and save file
@@ -622,11 +623,13 @@ class SampleQC:
         # load .het and .imiss files
         df_het = pd.read_csv(
             os.path.join(folder_path, file_name+'.het'),
-            sep="\s+"
+            sep="\s+",
+            engine='python'
         )
         df_imiss = pd.read_csv(
             os.path.join(folder_path, file_name+'.imiss'),
-            sep="\s+"
+            sep="\s+",
+            engine='python'
         )
 
         # compute Het mean
@@ -665,12 +668,14 @@ class SampleQC:
         # load .imiss file
         df_imiss = pd.read_csv(
             os.path.join(results_folder, output_prefix+'_3.imiss'),
-            sep='\s+'
+            sep='\s+',
+            engine='python'
         )
         # load .genome file
         df_genome = pd.read_csv(
             os.path.join(results_folder, output_prefix+'.genome'),
-            sep='\s+'
+            sep='\s+',
+            engine='python'
         )
 
         # isolate duplicates or related samples
