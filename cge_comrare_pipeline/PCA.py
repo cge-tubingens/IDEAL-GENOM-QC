@@ -1060,6 +1060,29 @@ class PCA:
     @staticmethod
     def umap_plots(path_to_data:str, output_file:str, geo_path:str, n_neighbors:int, min_dist:float, metric:str)->None:
 
+        """
+        Generates a 2D UMAP projection plot with geographic information and saves it to a file.
+
+        Parameters:
+        -----------
+        path_to_data (str): 
+            Path to the .eigenvec file containing the PCA data.
+        output_file (str): 
+            Path to the output file where the generated plot will be saved.
+        geo_path (str): 
+            Path to the file containing geographic information.
+        n_neighbors (int): 
+            The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
+        min_dist (float): 
+            The minimum distance between points in the low-dimensional space.
+        metric (str): 
+            The metric to use for the UMAP algorithm.
+
+        Returns:
+        --------
+        None
+        """
+
         # load file with geographic info
         df_geo = pd.read_csv(
             geo_path,
@@ -1074,6 +1097,7 @@ class PCA:
             sep=' '
         )
 
+        # rename columns
         num_pc = df_eigenvec.shape[1]-2
         new_cols = [f"pca_{k}" for k in range(1,num_pc+1)]
         df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
@@ -1083,6 +1107,7 @@ class PCA:
 
         del df_eigenvec
 
+        # instantiate umap class
         D2_redux = umap.UMAP(
             n_components=2,
             n_neighbors =n_neighbors,
@@ -1090,10 +1115,12 @@ class PCA:
             metric      =metric
         )
 
+        # generates umap projection
         umap_2D_proj = D2_redux.fit_transform(df_vals)
 
         del df_vals
 
+        # prepares data for plotting
         df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['proj_1', 'proj_2'])], axis=1)
         df_2D = pd.merge(
             df_2D,
@@ -1102,7 +1129,7 @@ class PCA:
             right_on=df_geo.columns[0]
         ).drop(columns=[df_geo.columns[0]])
 
-        # generates a 2D scatter plot
+        # generates and saves a 2D scatter plot
         fig, ax = plt.subplots(figsize=(10,10))
         scatter_plot= sns.scatterplot(
             data=df_2D, 
