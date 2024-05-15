@@ -915,7 +915,7 @@ class PCA:
         plt.close()
 
         # delete temporary files
-        # delete_temp_files(self.results_to_keep, results_dir)
+        delete_temp_files(self.results_to_keep, results_dir)
 
         # report
         process_complete = True
