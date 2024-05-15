@@ -1056,3 +1056,64 @@ class PCA:
         )
 
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
+
+    @staticmethod
+    def umap_plots(path_to_data:str, output_file:str, geo_path:str, n_neighbors:int, min_dist:float, metric:str)->None:
+
+        # load file with geographic info
+        df_geo = pd.read_csv(
+            geo_path,
+            sep=' ',
+            index_col=False
+        )
+
+        # load .eigenvec file
+        df_eigenvec = pd.read_csv(
+            path_to_data,
+            header=None,
+            sep=' '
+        )
+
+        num_pc = df_eigenvec.shape[1]-2
+        new_cols = [f"pca_{k}" for k in range(1,num_pc+1)]
+        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
+
+        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
+        df_vals= df_eigenvec[new_cols].to_numpy()
+
+        del df_eigenvec
+
+        D2_redux = umap.UMAP(
+            n_components=2,
+            n_neighbors =n_neighbors,
+            min_dist    =min_dist,
+            metric      =metric
+        )
+
+        umap_2D_proj = D2_redux.fit_transform(df_vals)
+
+        del df_vals
+
+        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['proj_1', 'proj_2'])], axis=1)
+        df_2D = pd.merge(
+            df_2D,
+            df_geo,
+            left_on='ID2',
+            right_on=df_geo.columns[0]
+        ).drop(columns=[df_geo.columns[0]])
+
+        # generates a 2D scatter plot
+        fig, ax = plt.subplots(figsize=(10,10))
+        scatter_plot= sns.scatterplot(
+            data=df_2D, 
+            x='proj_1', 
+            y='proj_2', 
+            hue=df_geo.columns[1],
+            marker='.',
+            alpha=0.6,
+            ax=ax
+        )
+        scatter_fig = scatter_plot.get_figure()
+        scatter_fig.savefig(output_file)
+
+        return None
