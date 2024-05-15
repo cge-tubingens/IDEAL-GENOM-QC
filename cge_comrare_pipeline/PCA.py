@@ -1106,7 +1106,7 @@ class PCA:
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
 
     @staticmethod
-    def umap_plots(path_to_data:str, output_file:str, geo_path:str, n_neighbors:int, min_dist:float, metric:str)->None:
+    def umap_plots(path_to_data:str, output_file:str, geo_path:str, n_neighbors:int, min_dist:float, metric:str)->pd.DataFrame:
 
         """
         Generates a 2D UMAP projection plot with geographic information and saves it to a file.
@@ -1128,7 +1128,7 @@ class PCA:
 
         Returns:
         --------
-        None
+        pandas.DataFrame
         """
 
         # load file with geographic info
@@ -1191,4 +1191,4 @@ class PCA:
         scatter_fig = scatter_plot.get_figure()
         scatter_fig.savefig(output_file)
 
-        return None
+        return df_2D
