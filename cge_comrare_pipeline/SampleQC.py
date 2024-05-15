@@ -484,7 +484,7 @@ class SampleQC:
                 header   =None
             )
 
-        if use_kingship:
+        if use_kingship=='true':
             # load samples who failed kingship check
             king_path = os.path.join(fails_dir, "kingship_fails.txt")
             if os.path.getsize(king_path)==0:
