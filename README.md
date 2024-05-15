@@ -111,9 +111,13 @@ dependables
     |---all_phase3.psam
     |
     |---high-LD-regions.txt
+    |
+    |---geographic_info.txt
 ```
 
 Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the build 38, in order to be consistent with 1000 Genomes phase 3 build.
+
+The file `geographic_info.txt` is optional. It should contain two columns: the first one for individual ids, and the second one with geographical (or another categorical information that allows to split the study population) information. With this file it can be built a plot to see the genes distribution by categories. If the file is not present the plot will not be generated. The separator between the two columns must be a blank space.
 
 In a future realease is intended to add this step in the pipeline.
 
