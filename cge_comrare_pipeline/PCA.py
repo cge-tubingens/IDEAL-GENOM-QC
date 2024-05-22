@@ -1169,7 +1169,7 @@ class PCA:
         del df_vals
 
         # prepares data for plotting
-        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['proj_1', 'proj_2'])], axis=1)
+        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_projection_1', 'umap_projection_2'])], axis=1)
         df_2D = pd.merge(
             df_2D,
             df_geo,
@@ -1181,8 +1181,8 @@ class PCA:
         fig, ax = plt.subplots(figsize=(10,10))
         scatter_plot= sns.scatterplot(
             data=df_2D, 
-            x='proj_1', 
-            y='proj_2', 
+            x='umap_projection_1', 
+            y='umap_projection_2', 
             hue=df_geo.columns[1],
             marker='.',
             alpha=0.6,
