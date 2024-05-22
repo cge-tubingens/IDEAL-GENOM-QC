@@ -63,16 +63,54 @@ class UMAPplot:
         if not os.path.exists(output_path):
             raise FileNotFoundError("output_path is not a valid path")
 
-        self.sampleQC_path = sampleQC_path
-        self.pcaQC_path= pcaQC_path
-        self.sampleQC_name = sampleQC_name
-        self.pcaQC_name= pcaQC_name
-        self.dependables= dependables_path
-        self.config_dict= config_dict
+        self.sampleQC_path= sampleQC_path
+        self.pcaQC_path   = pcaQC_path
+        self.sampleQC_name= sampleQC_name
+        self.pcaQC_name   = pcaQC_name
+        self.dependables  = dependables_path
+        self.config_dict  = config_dict
 
-        self.files_to_keep = []
-        
-        # create figures folder
-        self.plots_dir = os.path.join(output_path, 'plots')
-        if not os.path.exists(self.plots_dir):
-            os.mkdir(self.plots_dir)
+        self.files_to_keep= []
+
+        # create results folder
+        self.results_dir = os.path.join(output_path, 'umap_plots')
+        if not os.path.exists(self.results_dir):
+            os.mkdir(self.results_dir)
+
+    def compute_pcas(self)->None:
+
+        sampleQC_path= self.sampleQC_path
+        pcaQC_path   = self.pcaQC_path
+        sampleQC_name= self.sampleQC_name
+        pcaQC_name   = self.pcaQC_name
+        results_dir  = self.results_dir
+
+        pca = self.config_dict['pca']
+
+        step= "compute_pca_for_umap_plots"
+
+        # runs pca analysis
+        plink_cmd1 = f"plink --bfile {os.path.join(sampleQC_path, sampleQC_name)} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, '.sampleQC.pca')} --pca {pca}"
+
+        plink_cmd2 = f"plink --bfile {os.path.join(pcaQC_path, pcaQC_name)} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, '.nooutliers.pca')} --pca {pca}"
+
+        # execute plink commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plots_out': self.results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
