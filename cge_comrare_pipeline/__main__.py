@@ -7,6 +7,7 @@ from cge_comrare_pipeline.Helpers import arg_parser
 from cge_comrare_pipeline.SampleQC import SampleQC
 from cge_comrare_pipeline.VariantQC import VariantQC
 from cge_comrare_pipeline.PCA import PCA
+from cge_comrare_pipeline.UMAPplot import UMAPplot
 
 def pipe_OutSamVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
 
@@ -34,7 +35,6 @@ def pipe_OutSamVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             'merging'                  : pca_qc.merge_with_reference,
             'pca_analysis'             : pca_qc.run_pca_analysis,
             'umap_plot'                : pca_qc.reference_umap_plot,
-            'population_umap'          : pca_qc.population_umap_plot,
             'pca_plot'                 : pca_qc.pca_plot
         }
 
@@ -70,6 +70,29 @@ def pipe_OutSamVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
 
         print("Sample quality control done.")
 
+    if steps_dict['umap_plots']:
+
+        # instantiate umap class
+        umap_plots = UMAPplot(
+            sampleQC_path   =os.path.join(data_dict['output_directory'], 'sample_qc_results'), 
+            sampleQC_name   =data_dict['output_prefix']+'.clean', 
+            pcaQC_path      =os.path.join(data_dict['output_directory'], 'pca_results'), 
+            pcaQC_name      =data_dict['output_prefix']+'.clean', 
+            dependables_path=data_dict['dependables_directory'],
+            config_dict     =params_dict,
+            output_path     =data_dict['output_directory']
+        )
+        umap_steps = {
+            'comp_pca': umap_plots.compute_pcas,
+            'draw_plots': umap_plots.generate_plots
+        }
+
+        for step in umap_steps.keys():
+            print(step)
+            umap_steps[step]()
+
+        print("UMAP plots done.")
+    
     if steps_dict['variant']:
         variant_qc = VariantQC(
             input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results'),
@@ -145,7 +168,6 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             'merging'                  : pca_qc.merge_with_reference,
             'pca_analysis'             : pca_qc.run_pca_analysis,
             'umap_plot'                : pca_qc.reference_umap_plot,
-            'raw_pop_umap'             : pca_qc.population_umap_plot,
             'pca_plot'                 : pca_qc.pca_plot
         }
 
@@ -154,6 +176,29 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             pca_steps[step]()
 
         print("Ethnicity outliers analysis done.")
+
+    if steps_dict['umap_plots']:
+
+        # instantiate umap class
+        umap_plots = UMAPplot(
+            sampleQC_path   =os.path.join(data_dict['output_directory'], 'sample_qc_results'), 
+            sampleQC_name   =data_dict['output_prefix']+'.clean', 
+            pcaQC_path      =os.path.join(data_dict['output_directory'], 'pca_results'), 
+            pcaQC_name      =data_dict['output_prefix']+'.clean', 
+            dependables_path=data_dict['dependables_directory'],
+            config_dict     =params_dict,
+            output_path     =data_dict['output_directory']
+        )
+        umap_steps = {
+            'comp_pca': umap_plots.compute_pcas,
+            'draw_plots': umap_plots.generate_plots
+        }
+
+        for step in umap_steps.keys():
+            print(step)
+            umap_steps[step]()
+
+        print("UMAP plots done.")
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
