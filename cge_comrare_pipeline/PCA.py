@@ -669,10 +669,7 @@ class PCA:
         dependables= self.dependables
         results_dir= self.results_dir
 
-        n_neighbors = self.config_dict["umap_n_neighbors"]
-        min_dist    = self.config_dict["umap_min_dist"]
-        metric      = self.config_dict["umap_metric"]
-        pca         = self.config_dict['pca']
+        pca        = self.config_dict['pca']
 
         step = "generate umap plots"
 
@@ -699,16 +696,16 @@ class PCA:
 
         D2_redux = umap.UMAP(
             n_components=2,
-            n_neighbors =n_neighbors,
-            min_dist    =min_dist,
-            metric      =metric
+            n_neighbors =10,
+            min_dist    =0.1,
+            metric      ="euclidean"
         )
 
         D3_redux = umap.UMAP(
             n_components=3,
-            n_neighbors =n_neighbors,
-            min_dist    =min_dist,
-            metric      =metric
+            n_neighbors =10,
+            min_dist    =0.1,
+            metric      ="euclidean"
         )
 
         umap_2D_proj = D2_redux.fit_transform(df_vals)
