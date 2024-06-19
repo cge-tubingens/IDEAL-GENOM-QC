@@ -711,8 +711,8 @@ class PCA:
         umap_2D_proj = D2_redux.fit_transform(df_vals)
         umap_3D_proj = D3_redux.fit_transform(df_vals)
 
-        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['proj_1', 'proj_2'])], axis=1)
-        df_3D = pd.concat([df_ids, pd.DataFrame(data=umap_3D_proj, columns=['proj_1', 'proj_2', 'proj_3'])], axis=1)
+        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_1', 'umap_2'])], axis=1)
+        df_3D = pd.concat([df_ids, pd.DataFrame(data=umap_3D_proj, columns=['umap_1', 'umap_2', 'umap_3'])], axis=1)
         
         df_2D = pd.merge(df_2D, df, on=['ID1', 'ID2'])
         df_3D = pd.merge(df_3D, df, on=['ID1', 'ID2'])
@@ -721,8 +721,8 @@ class PCA:
         fig, ax = plt.subplots(figsize=(10,10))
         scatter_plot= sns.scatterplot(
             data=df_2D, 
-            x='proj_1', 
-            y='proj_2', 
+            x='umap_1', 
+            y='umap_2', 
             hue='SuperPop',
             marker='.',
             alpha=0.6,
@@ -737,9 +737,9 @@ class PCA:
 
         for s in df['SuperPop'].unique():
             ax.scatter(
-                xs=df_3D.proj_1[df_3D.SuperPop==s],
-                ys=df_3D.proj_2[df_3D.SuperPop==s],
-                zs=df_3D.proj_3[df_3D.SuperPop==s], 
+                xs=df_3D.umap_1[df_3D.SuperPop==s],
+                ys=df_3D.umap_2[df_3D.SuperPop==s],
+                zs=df_3D.umap_3[df_3D.SuperPop==s], 
                 label=s,
                 marker='.'
             )
