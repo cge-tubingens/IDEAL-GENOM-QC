@@ -270,7 +270,7 @@ class UMAPplot:
             )
 
             # prepares data for plotting
-            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_1', 'umap_2'])], axis=1)
+            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
             df_2D = pd.merge(
                 df_2D,
                 df_geo,
@@ -279,30 +279,32 @@ class UMAPplot:
             ).drop(columns=[df_geo.columns[0]])
 
             # generates and saves a 2D scatter plot
+            sns.set_context(font_scale=0.9)
             fig, ax = plt.subplots(figsize=(10,10))
             scatter_plot= sns.scatterplot(
                 data=df_2D, 
-                x='umap_1', 
-                y='umap_2', 
+                x='umap1', 
+                y='umap2', 
                 hue=df_geo.columns[1],
                 marker='.',
                 alpha=0.6,
                 ax=ax,
                 style="Phenotype"
             )
+            plt.legend(fontsize='10', markerscale=2)
             scatter_fig = scatter_plot.get_figure()
             scatter_fig.savefig(output_file)
             plt.close()
         else:
             # prepares data for plotting
-            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_1', 'umap_2'])], axis=1)
+            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
 
             # generates and saves a 2D scatter plot
             fig, ax = plt.subplots(figsize=(10,10))
             scatter_plot= sns.scatterplot(
                 data=df_2D, 
-                x='umap_1',
-                y='umap_2',
+                x='umap1',
+                y='umap2',
                 marker='.',
                 alpha=0.6,
                 ax=ax,
