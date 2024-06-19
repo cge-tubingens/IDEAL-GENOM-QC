@@ -117,6 +117,10 @@ class UMAPplot:
     
     def generate_plots(self)->None:
 
+        sampleQC_path= self.sampleQC_path
+        pcaQC_path   = self.pcaQC_path
+        sampleQC_name= self.sampleQC_name
+        pcaQC_name   = self.pcaQC_name
         results_dir  = self.results_dir
         dependables  = self.dependables
 
@@ -128,7 +132,7 @@ class UMAPplot:
 
         params_dict = {
             'n_neighbors': n_neighbors,
-            'min_dist'    : min_dist,
+            'min_dist'   : min_dist,
             'metric'     : metric
         }
         param_grid = ParameterGrid(params_dict)
@@ -146,6 +150,7 @@ class UMAPplot:
                 path_to_data=os.path.join(results_dir, '.sampleQC.pca.eigenvec'),
                 output_file =os.path.join(results_dir, f"sampleQC_umap_2d_{count}.pdf"),
                 geo_path=geo_info_path,
+                fam_path=os.path.join(sampleQC_path, sampleQC_name+".fam"),
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric']
@@ -156,6 +161,7 @@ class UMAPplot:
                 path_to_data=os.path.join(results_dir, '.nooutliers.pca.eigenvec'),
                 output_file =os.path.join(results_dir, f"nooutliers_umap_2d_{count}.pdf"),
                 geo_path=geo_info_path,
+                fam_path=os.path.join(pcaQC_path, pcaQC_name+".fam"),
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric']
@@ -188,7 +194,7 @@ class UMAPplot:
         return out_dict
     
     @staticmethod
-    def umap_plots(path_to_data:str, output_file:str, geo_path:str, n_neighbors:int, min_dist:float, metric:str)->pd.DataFrame:
+    def umap_plots(path_to_data:str, output_file:str, geo_path:str, fam_path:str, n_neighbors:int, min_dist:float, metric:str)->pd.DataFrame:
 
         """
         Generates a 2D UMAP projection plot with geographic information and saves it to a file.
@@ -220,6 +226,15 @@ class UMAPplot:
             sep=' '
         )
 
+        df_fam = pd.read_csv(
+            fam_path,
+            header=None,
+            sep=' '
+        )
+        df_fam.columns = ["ID1", "ID2", "F_ID", "M_ID", "Sex", "Phenotype"]
+        recode = {1:'control', 2:'case'}
+        df_fam["Phenotype"] = df_fam["Phenotype"].map(recode)
+
         # rename columns
         num_pc = df_eigenvec.shape[1]-2
         new_cols = [f"pca_{k}" for k in range(1,num_pc+1)]
@@ -228,7 +243,9 @@ class UMAPplot:
         df_ids = df_eigenvec[['ID1', 'ID2']].copy()
         df_vals= df_eigenvec[new_cols].to_numpy()
 
-        del df_eigenvec
+        df_ids = df_ids.merge(df_fam[["ID1", "ID2", "Phenotype"]], on=['ID1', 'ID2'])
+
+        del df_eigenvec, df_fam
 
         # instantiate umap class
         D2_redux = umap.UMAP(
@@ -249,11 +266,11 @@ class UMAPplot:
             df_geo = pd.read_csv(
                 geo_path,
                 sep=' ',
-                index_col=False
+                index_col=False 
             )
 
             # prepares data for plotting
-            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_projection_1', 'umap_projection_2'])], axis=1)
+            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_1', 'umap_2'])], axis=1)
             df_2D = pd.merge(
                 df_2D,
                 df_geo,
@@ -265,29 +282,31 @@ class UMAPplot:
             fig, ax = plt.subplots(figsize=(10,10))
             scatter_plot= sns.scatterplot(
                 data=df_2D, 
-                x='umap_projection_1', 
-                y='umap_projection_2', 
+                x='umap_1', 
+                y='umap_2', 
                 hue=df_geo.columns[1],
                 marker='.',
                 alpha=0.6,
-                ax=ax
+                ax=ax,
+                style="Phenotype"
             )
             scatter_fig = scatter_plot.get_figure()
             scatter_fig.savefig(output_file)
             plt.close()
         else:
             # prepares data for plotting
-            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_projection_1', 'umap_projection_2'])], axis=1)
+            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap_1', 'umap_2'])], axis=1)
 
             # generates and saves a 2D scatter plot
             fig, ax = plt.subplots(figsize=(10,10))
             scatter_plot= sns.scatterplot(
                 data=df_2D, 
-                x='umap_projection_1',
-                y='umap_projection_2',
+                x='umap_1',
+                y='umap_2',
                 marker='.',
                 alpha=0.6,
-                ax=ax
+                ax=ax,
+                style="Phenotype"
             )
             scatter_fig = scatter_plot.get_figure()
             scatter_fig.savefig(output_file)
