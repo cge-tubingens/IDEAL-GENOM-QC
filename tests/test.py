@@ -84,5 +84,3 @@ if steps['variant']:
     variant_QC.different_genotype_call_rate()
     
     variant_QC.remove_markers()
-
-
