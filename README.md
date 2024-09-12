@@ -29,7 +29,7 @@ projectFolder
 
 ## Configuration Files
 
-These two files contain all the information necessary to run the pipeline.
+These three files contain all the information necessary to run the pipeline.
 
 ### Quality Control Pipeline Parameters
 
