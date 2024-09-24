@@ -142,7 +142,7 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
         for step in smpl_steps.keys():
             smpl_steps[step]()
 
-        print("Sample quality control done.")
+        print("\033[92mSample quality control done.\033[0m")
 
     # execute step by step
     if steps_dict['pca']:
@@ -175,7 +175,7 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             print(step)
             pca_steps[step]()
 
-        print("Ethnicity outliers analysis done.")
+        print("\033[92mEthnicity outliers analysis done.\033[0m")
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
@@ -196,7 +196,7 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
         for step in vrnt_steps.keys():
             vrnt_steps[step]()
 
-        print("Variant quality control done.")
+        print("\033[92mVariant quality control done.\033[0m")
 
     if steps_dict['umap_plots']:
 
@@ -218,7 +218,7 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             print(step)
             umap_steps[step]()
 
-        print("UMAP plots done.")        
+        print("\033[92mUMAP plots done.\033[0m")       
 
     pass
 
