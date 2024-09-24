@@ -29,11 +29,11 @@ projectFolder
 
 ## Configuration Files
 
-These two files contain all the information necessary to run the pipeline.
+These three files contain all the information necessary to run the pipeline.
 
 ### Quality Control Pipeline Parameters
 
-The `parameters.JSON` file contains values for `PLINK` commands that will be used in the pipeline. If this file is not provided, the default values of the pipeline will be taken into account. These are
+The `parameters.JSON` file contains values for `PLINK` commands that will be used in the pipeline as well as other parameters to tailor other steps. The parameters that the pipeline excpect are (notice that the values may be adjusted according to each one requirements)
 
 ```
 {
