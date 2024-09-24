@@ -177,29 +177,6 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
 
         print("Ethnicity outliers analysis done.")
 
-    if steps_dict['umap_plots']:
-
-        # instantiate umap class
-        umap_plots = UMAPplot(
-            sampleQC_path   =os.path.join(data_dict['output_directory'], 'sample_qc_results'), 
-            sampleQC_name   =data_dict['output_prefix']+'.clean', 
-            pcaQC_path      =os.path.join(data_dict['output_directory'], 'pca_results'), 
-            pcaQC_name      =data_dict['output_prefix']+'.clean', 
-            dependables_path=data_dict['dependables_directory'],
-            config_dict     =params_dict,
-            output_path     =data_dict['output_directory']
-        )
-        umap_steps = {
-            'comp_pca': umap_plots.compute_pcas,
-            'draw_plots': umap_plots.generate_plots
-        }
-
-        for step in umap_steps.keys():
-            print(step)
-            umap_steps[step]()
-
-        print("UMAP plots done.")
-
     if steps_dict['variant']:
         variant_qc = VariantQC(
             input_path      =os.path.join(data_dict['output_directory'], 'pca_results'),
@@ -220,6 +197,28 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             vrnt_steps[step]()
 
         print("Variant quality control done.")
+
+    if steps_dict['umap_plots']:
+
+        # instantiate umap class
+        umap_plots = UMAPplot(
+            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results'), 
+            input_name      =data_dict['output_prefix']+'.vrnt_clean', 
+            dependables_path=data_dict['dependables_directory'],
+            config_dict     =params_dict,
+            output_path     =data_dict['output_directory']
+        )
+        umap_steps = {
+            'ld_pruning': umap_plots.ld_pruning,
+            'comp_pca'  : umap_plots.compute_pcas,
+            'draw_plots': umap_plots.generate_plots
+        }
+
+        for step in umap_steps.keys():
+            print(step)
+            umap_steps[step]()
+
+        print("UMAP plots done.")        
 
     pass
 
