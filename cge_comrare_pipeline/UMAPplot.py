@@ -62,27 +62,120 @@ class UMAPplot:
         if not os.path.exists(self.results_dir):
             os.mkdir(self.results_dir)
 
+        pass
+
+    def ld_pruning(self)->dict:
+
+        """
+        Prune samples based on Linkage Disequilibrium (LD).
+
+        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
+
+        Raises:
+        -------
+        - TypeError: If maf, geno, mind, or hwe is not of type float.
+        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
+        - FileNotFoundError: If the file with high LD regions is not found.
+
+        Returns:
+        --------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
+        input_path      = self.input_path
+        input_name      = self.input_name
+        dependables_path= self.dependables
+        results_dir     = self.results_dir
+
+        maf      = self.config_dict['maf']
+        geno     = self.config_dict['geno']
+        mind     = self.config_dict['mind']
+        hwe      = self.config_dict['hwe']
+        ind_pair = self.config_dict['indep-pairwise']
+
+        # Check type of maf
+        if not isinstance(maf, float):
+             raise TypeError("maf should be of type float.")
+
+        # Check type of geno
+        if not isinstance(geno, float):
+            raise TypeError("geno should be of type float.")
+
+        # Check type of mind
+        if not isinstance(mind, float):
+            raise TypeError("mind should be of type float.")
+        
+        # Check type of hwe
+        if not isinstance(hwe, float):
+            raise TypeError("hwe should be of type float.")
+        
+        # Check if maf is in range
+        if maf < 0.05 or maf > 0.1:
+            raise ValueError("maf should be between 0.05 and 0.1")
+        
+        # Check if geno is in range
+        if geno < 0.05 or geno > 0.1:
+            raise ValueError("geno should be between 0.05 and 0.1")
+        
+        # Check if mind is in range
+        if mind < 0.1 or mind > 0.15:
+            raise ValueError("mind should be between 0.1 and 0.15")
+        
+        # Check if hwe is in range
+        if hwe < 0.00000001 or hwe > 0.001:
+            raise ValueError("hwe should be between 0.00000001 and 0.001")
+        
+        # check existence of high LD regions file
+        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
+        if not os.path.exists(high_ld_regions_file):
+            raise FileNotFoundError(f"File with high LD region was not found: {high_ld_regions_file}")
+
+        step = "ld_prune"
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # generates prune.in and prune.out files
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+
+        # prune and creates a filtered binary file
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
     def compute_pcas(self)->None:
 
-        sampleQC_path= self.sampleQC_path
-        pcaQC_path   = self.pcaQC_path
-        sampleQC_name= self.sampleQC_name
-        pcaQC_name   = self.pcaQC_name
-        results_dir  = self.results_dir
-
-        pca = self.config_dict['pca']
+        input_name = self.input_name
+        results_dir= self.results_dir
 
         step= "compute_pca_for_umap_plots"
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(sampleQC_path, sampleQC_name)} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, '.sampleQC.pca')} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, 'cleaned_samples.pca')} --pca {15}"
 
-        plink_cmd2 = f"plink --bfile {os.path.join(pcaQC_path, pcaQC_name)} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, '.nooutliers.pca')} --pca {pca}"
-
-        # execute plink commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        # execute plink command
+        cmd = plink_cmd1
+        shell_do(cmd, log=True)
 
         # report
         process_complete = True
