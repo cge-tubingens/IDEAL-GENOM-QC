@@ -165,10 +165,12 @@ class UMAPplot:
         input_name = self.input_name
         results_dir= self.results_dir
 
+        pca = self.config_dict['umap_pca']
+
         step= "compute_pca_for_umap_plots"
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, 'cleaned_samples.pca')} --pca {15}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, 'cleaned_samples.pca')} --pca {pca}"
 
         # execute plink command
         cmd = plink_cmd1
