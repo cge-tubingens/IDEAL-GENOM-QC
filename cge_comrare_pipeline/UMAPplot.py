@@ -365,7 +365,7 @@ class UMAPplot:
                 plt.legend(fontsize='10', markerscale=2)
                 
                 # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}, metric={metric}."
-                plt.figtext(0.5, 0.05, wrap=True, horizontalalignment='center', fontsize=12)
+                # plt.figtext(0.5, 0.05, wrap=True, horizontalalignment='center', fontsize=12)
 
                 scatter_fig = scatter_plot.get_figure()
                 scatter_fig.savefig(output_file)
@@ -387,7 +387,7 @@ class UMAPplot:
                 )
                 
                 # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}."
-                plt.figtext(0.5, -0.05, wrap=True, horizontalalignment='center', fontsize=12)
+                # plt.figtext(0.5, -0.05, wrap=True, horizontalalignment='center', fontsize=12)
 
                 scatter_fig = scatter_plot.get_figure()
                 scatter_fig.savefig(output_file)
