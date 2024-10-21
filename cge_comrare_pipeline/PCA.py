@@ -601,10 +601,11 @@ class PCA:
         results_dir= self.results_dir
         fails_dir  = self.fails_dir
         dependables= self.dependables
+
         ref_threshold= self.config_dict['ref_threshold']
         stu_threshold= self.config_dict['stu_threshold']
         reference_pop= self.config_dict['reference_pop']
-        pca        = self.config_dict['pca']
+        pca          = self.config_dict['pca']
 
         step = "pca_analysis"
 
