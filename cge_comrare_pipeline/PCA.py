@@ -290,16 +290,16 @@ class PCA:
             raise TypeError("hwe should be of type float.")
         
         # Check if maf is in range
-        if maf < 0.05 or maf > 0.1:
-            raise ValueError("maf should be between 0.05 and 0.1")
+        #if maf < 0.05 or maf > 0.1:
+        #    raise ValueError("maf should be between 0.05 and 0.1")
         
         # Check if geno is in range
         if geno < 0.05 or geno > 0.1:
             raise ValueError("geno should be between 0.05 and 0.1")
         
         # Check if mind is in range
-        if mind < 0.1 or mind > 0.15:
-            raise ValueError("mind should be between 0.1 and 0.15")
+        #if mind < 0.1 or mind > 0.15:
+        #    raise ValueError("mind should be between 0.1 and 0.15")
         
         # Check if hwe is in range
         if hwe < 0.00000001 or hwe > 0.001:
