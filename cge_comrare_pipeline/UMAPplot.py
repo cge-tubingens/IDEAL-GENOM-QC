@@ -231,7 +231,7 @@ class UMAPplot:
             # generate umap plot for data that passed Sample QC
             warnings = self.umap_plots(
                 path_to_data=os.path.join(results_dir, 'cleaned_samples.pca.eigenvec'),
-                output_file =os.path.join(results_dir, f"umap_2d_{count}.png"),
+                output_file =os.path.join(results_dir, f"umap_2d_{count}.jpeg"),
                 geo_path=geo_info_path,
                 fam_path=os.path.join(input_path, input_name+".fam"),
                 n_neighbors =params['n_neighbors'],
