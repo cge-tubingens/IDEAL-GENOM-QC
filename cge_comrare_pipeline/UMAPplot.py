@@ -328,7 +328,8 @@ class UMAPplot:
             n_components=2,
             n_neighbors =n_neighbors,
             min_dist    =min_dist,
-            metric      =metric
+            metric      =metric,
+            random_state=42
         )
 
         with warnings.catch_warnings(record=True) as w:
