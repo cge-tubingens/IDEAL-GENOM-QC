@@ -4,6 +4,7 @@ Module to draw plots based on UMAP dimension reduction
 
 import os
 import umap
+import warnings
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -107,20 +108,24 @@ class UMAPplot:
             raise TypeError("hwe should be of type float.")
         
         # Check if maf is in range
-        #if maf < 0.05 or maf > 0.1:
-        #    raise ValueError("maf should be between 0.05 and 0.1")
+        if maf < 0.0 or maf > 0.5:
+            raise ValueError("maf should be between 0 and 0.5")
         
         # Check if geno is in range
         if geno < 0.05 or geno > 0.1:
             raise ValueError("geno should be between 0.05 and 0.1")
         
         # Check if mind is in range
-        #if mind < 0.1 or mind > 0.15:
-        #    raise ValueError("mind should be between 0.1 and 0.15")
+        if mind < 0 or mind > 1:
+            raise ValueError("mind should be between 0 and 1")
         
+        # Check if mind is around typical values
+        if mind <= 0.02 and mind >= 0.1:
+            warnings.warn(f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1.", UserWarning)
+
         # Check if hwe is in range
-        if hwe < 0.00000001 or hwe > 0.001:
-            raise ValueError("hwe should be between 0.00000001 and 0.001")
+        if hwe < 0 or hwe > 1:
+            raise ValueError("hwe should be between 0 and 1")
         
         # check existence of high LD regions file
         high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
@@ -166,6 +171,10 @@ class UMAPplot:
         results_dir= self.results_dir
 
         pca = self.config_dict['umap_pca']
+
+        # Check type of pca
+        if not isinstance(pca, int):
+            raise TypeError("pca should be of type int.")
 
         step= "compute_pca_for_umap_plots"
 
