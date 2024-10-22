@@ -15,7 +15,7 @@ from sklearn.model_selection import ParameterGrid
 
 class UMAPplot:
 
-    def __init__(self, input_path:str, input_name:str, dependables_path:str, config_dict:dict, output_path:str) -> None:
+    def __init__(self, input_path:str, input_name:str, dependables_path:str, config_dict:dict, output_path:str, compute_all:bool=True) -> None:
 
         """
         
@@ -52,6 +52,7 @@ class UMAPplot:
         self.input_name = input_name
         self.dependables= dependables_path
         self.config_dict= config_dict
+        self.compute_all= compute_all
 
         self.files_to_keep= []
 
@@ -84,6 +85,7 @@ class UMAPplot:
         input_name      = self.input_name
         dependables_path= self.dependables
         results_dir     = self.results_dir
+        compute_all     = self.compute_all
 
         maf      = self.config_dict['maf']
         geno     = self.config_dict['geno']
@@ -145,10 +147,17 @@ class UMAPplot:
         # prune and creates a filtered binary file
         plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
 
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        self.files_to_keep.append(input_name+'.pruned.bed')
+        self.files_to_keep.append(input_name+'.pruned.bim')
+        self.files_to_keep.append(input_name+'.pruned.fam')
+
+        if compute_all:
+            # execute PLINK commands
+            cmds = [plink_cmd1, plink_cmd2]
+            for cmd in cmds:
+                shell_do(cmd, log=True)
+        else:
+            print(f"\033[1m LD prunning already performed.\033[0m")
 
         # report
         process_complete = True
@@ -169,6 +178,7 @@ class UMAPplot:
 
         input_name = self.input_name
         results_dir= self.results_dir
+        compute_all= self.compute_all
 
         pca = self.config_dict['umap_pca']
 
@@ -181,9 +191,14 @@ class UMAPplot:
         # runs pca analysis
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, 'cleaned_samples.pca')} --pca {pca}"
 
-        # execute plink command
-        cmd = plink_cmd1
-        shell_do(cmd, log=True)
+        if compute_all:
+            # execute plink command
+            cmd = plink_cmd1
+            shell_do(cmd, log=True)
+        else:
+            print(f"\033[1m Principal components already computed.\033[0m")
+
+        self.files_to_keep.append('cleaned_samples.pca.eigenvec')
 
         # report
         process_complete = True
@@ -228,7 +243,7 @@ class UMAPplot:
 
         for params in param_grid:
 
-            # generate umap plot for data that passed Sample QC
+            # generate umap plot for data that passed QC
             warnings = self.umap_plots(
                 path_to_data=os.path.join(results_dir, 'cleaned_samples.pca.eigenvec'),
                 output_file =os.path.join(results_dir, f"umap_2d_{count}.jpeg"),
