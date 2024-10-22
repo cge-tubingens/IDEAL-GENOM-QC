@@ -240,6 +240,8 @@ class UMAPplot:
                 fig_num=count
             )
 
+            self.files_to_keep.append(f"umap_2d_{count}.jpeg")
+
             df_params.loc[count, 'n_neighbors']= params['n_neighbors']
             df_params.loc[count, 'min_dist']   = params['min_dist']
             df_params.loc[count, 'metric']     = params['metric']
@@ -251,6 +253,11 @@ class UMAPplot:
             os.path.join(results_dir, 'plots_parameters.csv'),
             index=True
         )
+
+        self.files_to_keep.append('plots_parameters.csv')
+
+        # delete temporary files
+        delete_temp_files(self.files_to_keep, results_dir)
 
         # report
         process_complete = True
