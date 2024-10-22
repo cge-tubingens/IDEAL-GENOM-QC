@@ -359,38 +359,59 @@ class UMAPplot:
                 ).drop(columns=[df_geo.columns[0]])
 
                 # generates and saves a 2D scatter plot
+                # size given in inches
                 sns.set_context(font_scale=0.9)
-                fig, ax = plt.subplots(figsize=(10,10))
+                fig, ax = plt.subplots(figsize=(4.7,4.7))
                 scatter_plot= sns.scatterplot(
                     data=df_2D, 
                     x='umap1', 
                     y='umap2', 
                     hue=df_geo.columns[1],
                     marker='.',
+                    s=10,
                     alpha=0.6,
                     ax=ax,
                     style="Phenotype"
                 )
-                plt.legend(fontsize='10', markerscale=2)
+                plt.legend(
+                    bbox_to_anchor=(0., 1.02, 1., .102), 
+                    loc='lower left',
+                    ncols=3, 
+                    mode="expand", 
+                    borderaxespad=0.,
+                    fontsize=6,
+                    markerscale=2
+                )
                 
                 # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}, metric={metric}."
                 # plt.figtext(0.5, 0.05, wrap=True, horizontalalignment='center', fontsize=12)
 
+                # Set tick label size
+                ax.tick_params(axis='both', labelsize=7)
+
+                # Set axis label size
+                ax.set_xlabel('UMAP1', fontsize=7)
+                ax.set_ylabel('UMAP2', fontsize=7)
+
+                plt.tight_layout()
+
                 scatter_fig = scatter_plot.get_figure()
-                scatter_fig.savefig(output_file)
+                scatter_fig.savefig(output_file, dpi=600)
                 plt.close()
             else:
                 # prepares data for plotting
                 df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
 
                 # generates and saves a 2D scatter plot
-                fig, ax = plt.subplots(figsize=(10,10))
+                # size given in inches
+                fig, ax = plt.subplots(figsize=(4.7,4.7))
                 scatter_plot= sns.scatterplot(
                     data=df_2D, 
                     x='umap1',
                     y='umap2',
                     marker='.',
                     alpha=0.6,
+                    s=10,
                     ax=ax,
                     style="Phenotype"
                 )
@@ -398,8 +419,16 @@ class UMAPplot:
                 # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}."
                 # plt.figtext(0.5, -0.05, wrap=True, horizontalalignment='center', fontsize=12)
 
+                # Set tick label size
+                ax.tick_params(axis='both', labelsize=7)
+
+                # Set axis label size
+                ax.set_xlabel('UMAP1', fontsize=7)
+                ax.set_ylabel('UMAP2', fontsize=7)
+
                 scatter_fig = scatter_plot.get_figure()
-                scatter_fig.savefig(output_file)
+                plt.tight_layout()
+                scatter_fig.savefig(output_file, dpi=600)
                 plt.close()
 
             if isinstance(w, list):
