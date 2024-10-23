@@ -452,7 +452,9 @@ class UMAPplot:
                 plt.close()
             else:
                 # prepares data for plotting
-                df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
+                df_2D = pd.concat(
+                    [df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1
+                )
 
                 # generates and saves a 2D scatter plot
                 # size given in inches
