@@ -203,7 +203,7 @@ class UMAPplot:
         step= "compute_pca_for_umap_plots"
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, 'cleaned_samples.pca')} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
 
         if compute_all:
             # execute plink command
@@ -212,7 +212,7 @@ class UMAPplot:
         else:
             print(f"\033[1m Principal components already computed.\033[0m")
 
-        self.files_to_keep.append('cleaned_samples.pca.eigenvec')
+        self.files_to_keep.append(input_name+'.eigenvec')
 
         # report
         process_complete = True
@@ -264,14 +264,13 @@ class UMAPplot:
 
             # generate umap plot for data that passed QC
             warnings = self.umap_plots(
-                path_to_data=os.path.join(results_dir, 'cleaned_samples.pca.eigenvec'),
+                path_to_data=os.path.join(results_dir, input_name+'.eigenvec'),
                 output_file =os.path.join(results_dir, f"umap_2d_{count}.jpeg"),
-                geo_path=geo_info_path,
-                fam_path=os.path.join(input_path, input_name+".fam"),
+                geo_path    =geo_info_path,
+                fam_path    =os.path.join(input_path, input_name+".fam"),
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric'],
-                fig_num=count
             )
 
             self.files_to_keep.append(f"umap_2d_{count}.jpeg")
@@ -310,8 +309,8 @@ class UMAPplot:
         return out_dict
     
     @staticmethod
-    def umap_plots(path_to_data:str, output_file:str, geo_path:str, fam_path:str, n_neighbors:int, min_dist:float, metric:str, fig_num:int=1):
-
+    def umap_plots(path_to_data:str, output_file:str, geo_path:str, fam_path:str, n_neighbors:int, min_dist:float, metric:str):
+        
         """
         Generates UMAP plots from PCA eigenvector data and saves the plot to a .jpeg file.
 
