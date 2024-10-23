@@ -68,7 +68,7 @@ class UMAPplot:
         """
         Prune samples based on Linkage Disequilibrium (LD).
 
-        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
+        This method performs LD-based sample pruning using PLINK1.9 commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
 
         Raises:
         -------
@@ -175,6 +175,20 @@ class UMAPplot:
         return out_dict
 
     def compute_pcas(self)->None:
+    
+        """
+        Compute Principal Component Analysis (PCA) to feed UMAP algorithm and generate plots.
+
+        This method performs PCA analysis using PLINK1.9 on the input dataset specified by `input_name` and stores the results in the `results_dir`. The number of principal components to compute is defined in the configuration dictionary under the key 'umap_pca'. If `compute_all` is set to True, the PCA analysis is executed; otherwise, it assumes the principal components have already been computed.
+
+        Raises:
+        -------
+            TypeError: If the 'umap_pca' value in the configuration dictionary is not an integer.
+
+        Returns:
+        --------
+            dict: A dictionary containing the status of the process, the step name, and the output directory for the plots.
+        """
 
         input_name = self.input_name
         results_dir= self.results_dir
@@ -228,6 +242,7 @@ class UMAPplot:
 
         step = "draw_umap_plots"
 
+        # generate a parameter grid
         params_dict = {
             'n_neighbors': n_neighbors,
             'min_dist'   : min_dist,
@@ -237,9 +252,13 @@ class UMAPplot:
 
         count=1
 
+        # path to geographic information
         geo_info_path = os.path.join(dependables, 'geographic_info.txt')
 
-        df_params = pd.DataFrame(columns=['n_neighbors', 'min_dist', 'metric', 'warnings'])
+        # create a dataframe to store parameters
+        df_params = pd.DataFrame(
+            columns=['n_neighbors', 'min_dist', 'metric', 'warnings']
+        )
 
         for params in param_grid:
 
@@ -264,6 +283,7 @@ class UMAPplot:
 
             count +=1
 
+        # save parameters to a csv file
         df_params.to_csv(
             os.path.join(results_dir, 'plots_parameters.csv'),
             index=True
@@ -293,26 +313,35 @@ class UMAPplot:
     def umap_plots(path_to_data:str, output_file:str, geo_path:str, fam_path:str, n_neighbors:int, min_dist:float, metric:str, fig_num:int=1):
 
         """
-        Generates a 2D UMAP projection plot with geographic information and saves it to a file.
+        Generates UMAP plots from PCA eigenvector data and saves the plot to a .jpeg file.
 
         Parameters:
         -----------
-        path_to_data (str): 
-            Path to the .eigenvec file containing the PCA data.
-        output_file (str): 
-            Path to the output file where the generated plot will be saved.
-        geo_path (str): 
-            Path to the file containing geographic information.
-        n_neighbors (int): 
+        path_to_data : str
+            Path to the .eigenvec file containing PCA eigenvector data.
+        output_file : str
+            Path to the output file where the UMAP plot will be saved.
+        geo_path : str
+            Path to the file containing geographic information. If the file does not exist, the plot will be generated without geographic information acting as hue.
+        fam_path : str
+            Path to the .fam (PLINK1.9 file format) file containing family information.
+        n_neighbors : int
             The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
-        min_dist (float): 
-            The minimum distance between points in the low-dimensional space.
-        metric (str): 
-            The metric to use for the UMAP algorithm.
+        min_dist : float
+            The effective minimum distance between embedded points used for manifold approximation.
+        metric : str
+            The metric to use for distance computation during manifold approximation.
 
         Returns:
         --------
-        pandas.DataFrame
+        list or None
+            A list of warning messages if any warnings were raised during the UMAP projection, otherwise None.
+        
+        Notes:
+        ------
+        The function reads PCA eigenvector data (from .eigenvec file) and family information (from .fam file), performs UMAP dimensionality reduction, and generates a 2D scatter plot. To ensure reproducibility of the plot, the random state is set to 42.
+
+        If geographic information is provided, it will be included in the plot. The plot is saved to the specified output file in a .jpeg file.
         """
 
         import warnings
@@ -324,6 +353,7 @@ class UMAPplot:
             sep=' '
         )
 
+        # load .fam file
         df_fam = pd.read_csv(
             fam_path,
             header=None,
@@ -341,7 +371,9 @@ class UMAPplot:
         df_ids = df_eigenvec[['ID1', 'ID2']].copy()
         df_vals= df_eigenvec[new_cols].to_numpy()
 
-        df_ids = df_ids.merge(df_fam[["ID1", "ID2", "Phenotype"]], on=['ID1', 'ID2'])
+        df_ids = df_ids.merge(
+            df_fam[["ID1", "ID2", "Phenotype"]], on=['ID1', 'ID2']
+        )
 
         del df_eigenvec, df_fam
 
@@ -406,13 +438,10 @@ class UMAPplot:
                     markerscale=2
                 )
                 
-                # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}, metric={metric}."
-                # plt.figtext(0.5, 0.05, wrap=True, horizontalalignment='center', fontsize=12)
-
                 # Set tick label size
                 ax.tick_params(axis='both', labelsize=7)
 
-                # Set axis label size
+                # Set axis label and size
                 ax.set_xlabel('UMAP1', fontsize=7)
                 ax.set_ylabel('UMAP2', fontsize=7)
 
@@ -438,14 +467,11 @@ class UMAPplot:
                     ax=ax,
                     style="Phenotype"
                 )
-                
-                # caption = f"Figure {fig_num}: min_dis={min_dist}, n_neighbors={n_neighbors}."
-                # plt.figtext(0.5, -0.05, wrap=True, horizontalalignment='center', fontsize=12)
 
                 # Set tick label size
                 ax.tick_params(axis='both', labelsize=7)
 
-                # Set axis label size
+                # Set axis label and size
                 ax.set_xlabel('UMAP1', fontsize=7)
                 ax.set_ylabel('UMAP2', fontsize=7)
 
