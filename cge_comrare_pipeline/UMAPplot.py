@@ -415,7 +415,7 @@ class UMAPplot:
                 # generates and saves a 2D scatter plot
                 # size given in inches
                 sns.set_context(font_scale=0.9)
-                fig, ax = plt.subplots(figsize=(4.7,4.7))
+                fig, ax = plt.subplots(figsize=(5,5))
                 scatter_plot= sns.scatterplot(
                     data=df_2D, 
                     x='umap1', 
@@ -433,7 +433,7 @@ class UMAPplot:
                     ncols=3, 
                     mode="expand", 
                     borderaxespad=0.,
-                    fontsize=6,
+                    fontsize=7,
                     markerscale=2
                 )
                 
@@ -457,7 +457,7 @@ class UMAPplot:
 
                 # generates and saves a 2D scatter plot
                 # size given in inches
-                fig, ax = plt.subplots(figsize=(4.7,4.7))
+                fig, ax = plt.subplots(figsize=(5,5))
                 scatter_plot= sns.scatterplot(
                     data=df_2D, 
                     x='umap1',
