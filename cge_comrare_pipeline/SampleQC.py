@@ -466,6 +466,69 @@ class SampleQC:
 
         return out_dict
 
+    
+    @staticmethod
+    def compute_heterozigozity(ped_file: str, map_file: str=None)->None:
+
+        """
+        Processes a PED file to compute heterozygosity and homozygosity statistics
+        for each individual and writes the results to a summary file.
+
+        Parameters:
+        - ped_file (str): Path to the PED file.
+        - map_file (str): Path to the MAP file (currently unused).
+        """
+        # Define output file name
+        summary_file = f"Summary-{os.path.basename(ped_file)}"
+        output_path = os.path.join(os.path.dirname(ped_file), summary_file)
+
+        try:
+            with open(ped_file, 'r') as ped, open(output_path, 'w') as output:
+                # Write the header to the summary file
+                output.write("ID\ttotal\tnum_hom\tnum_het\tPercent_hom\tPercent_het\n")
+
+                for line in ped:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    
+                    # Split the line into columns
+                    columns = line.split()
+                    individual_id = columns[1]  # Individual ID (second column)
+                    genotype_data = columns[6:]  # Genotype data starts at the 7th column
+
+                    # Initialize counters
+                    total = 0
+                    hom = 0
+                    het = 0
+
+                    # Iterate through genotype pairs
+                    for i in range(0, len(genotype_data), 2):
+                        allele1 = genotype_data[i]
+                        allele2 = genotype_data[i + 1]
+
+                        if allele1 == allele2:
+                            if allele1 not in ['0', 'N']:  # Exclude missing alleles
+                                hom += 1
+                                total += 1
+                        elif allele1 != allele2:
+                            het += 1
+                            total += 1
+
+                    # Calculate percentages
+                    hom_percent = (hom / total) * 100 if total > 0 else 0.0
+                    het_percent = (het / total) * 100 if total > 0 else 0.0
+
+                    # Write the statistics to the output file
+                    output.write(f"{individual_id}\t{total}\t{hom}\t{het}\t"
+                                 f"{hom_percent:.2f}\t{het_percent:.2f}\n")
+
+            print(f"Summary written to {summary_file}")
+        except FileNotFoundError:
+            print(f"Error: File {ped_file} not found.")
+        except IOError as e:
+            print(f"Error: {e}")
+
     def delete_failing_QC(self)->None:
 
         """
