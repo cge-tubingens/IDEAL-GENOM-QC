@@ -16,7 +16,7 @@ from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str, use_kingship:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str)->None:#, dependables_path:str, use_kingship:str) -> None:
 
         """
         Initialize the SampleQC object.
@@ -77,8 +77,8 @@ class SampleQC:
         self.input_name  = input_name
         self.output_name = output_name
         self.dependables = dependables_path
-        self.config_dict = config_dict
-        self.use_kingship= use_kingship
+        #self.config_dict = config_dict
+        #self.use_kingship= use_kingship
 
         self.files_to_keep = ['fail_samples']
 
@@ -97,7 +97,7 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def ld_pruning(self)->dict:
+    def ld_pruning(self, maf:float, geno:float, mind:float, hwe:float, ind_pair:list)->dict:
 
         """
         Prune samples based on Linkage Disequilibrium (LD).
@@ -120,11 +120,11 @@ class SampleQC:
         dependables_path= self.dependables
         results_dir     = self.results_dir
 
-        maf      = self.config_dict['maf']
-        geno     = self.config_dict['geno']
-        mind     = self.config_dict['mind']
-        hwe      = self.config_dict['hwe']
-        ind_pair = self.config_dict['indep-pairwise']
+        #maf      = self.config_dict['maf']
+        #geno     = self.config_dict['geno']
+        #mind     = self.config_dict['mind']
+        #hwe      = self.config_dict['hwe']
+        #ind_pair = self.config_dict['indep-pairwise']
 
         # Check type of maf
         if not isinstance(maf, float):
