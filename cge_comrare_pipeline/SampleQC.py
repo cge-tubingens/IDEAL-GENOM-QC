@@ -544,6 +544,7 @@ class SampleQC:
         df_call_rate = pd.read_csv(
             imiss_file,
             sep='\s+',
+            engine='python'
         )
 
         return df_call_rate
