@@ -263,6 +263,24 @@ class SampleQC:
     
     def execute_sex_check(self, sex_check:list)->dict:
 
+        """
+        Executes a sex check using PLINK commands on genetic data.
+
+        Parameters:
+        -----------
+        sex_check (list): A list containing two float elements that represent the sex check thresholds. 
+                  The list should either be empty or contain exactly two float elements that sum to 1. 
+                  If None or an empty list is provided, the samples will not be excluded and the estimates 
+        Returns:
+        dict: A dictionary containing the following keys:
+              - 'pass': A boolean indicating if the process completed successfully.
+              - 'step': A string describing the step performed.
+              - 'output': A dictionary with the key 'plink_out' pointing to the results directory.
+        Raises:
+        TypeError: If sex_check is not a list or if its elements are not floats.
+        ValueError: If sex_check does not have exactly two elements or if the elements do not sum to 1.
+        """
+
         input_name = self.input_name
         output_name= self.output_name
         result_path= self.results_dir
