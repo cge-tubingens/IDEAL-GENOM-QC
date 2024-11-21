@@ -340,7 +340,7 @@ class SampleQC:
 
         return out_dict
 
-    def run_heterozygosity_rate(self)->dict:
+    def execute_heterozygosity_rate(self, maf:float)->dict:
 
         """
         Identify individuals with elevated missing data rates or outlying heterozygosity rate.
