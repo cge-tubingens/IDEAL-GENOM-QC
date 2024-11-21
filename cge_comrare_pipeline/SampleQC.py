@@ -265,63 +265,50 @@ class SampleQC:
         input_name = self.input_name
         output_name= self.output_name
         result_path= self.results_dir
-        fails_dir  = self.fails_dir
         results_dir= self.results_dir
 
-        sex_check = self.config_dict['sex_check']
-
         # check type sex_check
-        if not isinstance(sex_check, list):
-            raise TypeError("sex_check should be a list")
-        if len(sex_check)!=2:
-            raise ValueError("sex_check must be a list of length 2")
+        if sex_check is not None:
+            if not isinstance(sex_check, list):
+                TypeError('sex_check should be a list or None')
+            if len(sex_check)>2:
+                ValueError('sex_check should have a maximum of two elements')
+            elif len(sex_check)==1:
+                ValueError('sex_check should have two elements or an empty list')
+            elif not isinstance(sex_check[0], float) or not isinstance(sex_check[1], float):
+                TypeError('elements of sex_check should be floats')
+            elif sum(sex_check)!=1:
+                ValueError('elements of sex_check should sum to 1')            
         
-        for value in sex_check:
-            if not isinstance(value, float):
-                raise TypeError("sex_check values should be float")
-            if 0 > value or value > 1:
-                raise ValueError("sex_check values must be between 0 and 1")
-        
-        if sum(sex_check) != 1:
-            raise ValueError("sex_check values should add to 1")
-        
-        step = "sex_check"
+        step = "discordant sex information"
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # create .sexcheck file
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(result_path, output_name)}"
+        # run sex checking
+        if sex_check is None or sex_check==[]:
+            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex --out {os.path.join(result_path, output_name+'-sexcheck')}"
+        else:
+            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(result_path, output_name)}"
 
-        # execute PLINK command
-        shell_do(plink_cmd1, log=True)
+        # extract xchr SNPs
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --chr 23 --make-bed --out {os.path.join(result_path, output_name+'-xchr')}"
 
-        # load .sexcheck file
-        df = pd.read_csv(
-            os.path.join(result_path, output_name+'.sexcheck'),
-            sep='\s+',
-            engine='python'
-        )
+        # run missingness on xchr SNPs
+        plink_cmd3 = f"plink --bfile {os.path.join(result_path, output_name+'-xchr')} --missing --out {os.path.join(result_path, output_name+'-xchr-missing')}"
 
-        # filter problematic samples and save file
-        df_probs = df[df['STATUS']=='PROBLEM'].reset_index(drop=True)
-
-        # save IDs of samples who failed sex check QC
-        df_probs = df_probs.iloc[:,0:2].copy()
-        df_probs.to_csv(
-            os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt'),
-            index  =False,
-            header =False,
-            sep    =' '
-        )
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
 
         # report
         process_complete = True
 
         outfiles_dict = {
-            'plink_out': result_path
+            'plink_out': results_dir
         }
 
         out_dict = {
