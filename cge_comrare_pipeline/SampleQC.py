@@ -441,7 +441,7 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
         
         # Compute kinship-coefficient matrix for all samples
-        plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --make-king triangle 'bin' --out {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
+        plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --make-king triangle bin --out {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
         # Prune for Monozygotic Twins OR Duplicates
         plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --king-cutoff {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} {kingship} --out {os.path.join(results_dir, output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
