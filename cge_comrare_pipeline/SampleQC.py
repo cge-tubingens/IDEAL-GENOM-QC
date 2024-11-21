@@ -355,8 +355,11 @@ class SampleQC:
         input_name = self.input_name
         output_name= self.output_name
         results_dir= self.results_dir
-        plots_path = self.plots_dir
-        fails_dir  = self.fails_dir
+
+        if not isinstance(maf, float):
+            raise TypeError("maf should be a float")
+        if maf < 0 or maf >0.5:
+            raise ValueError("maf should be between 0 and 0.5")
 
         step = "heterozygosity_rate"
 
@@ -365,27 +368,38 @@ class SampleQC:
         else:
             max_threads = 10
 
-        # create .imiss and .lmiss files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --threads {max_threads} --out {os.path.join(results_dir, output_name)}"
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
 
-        # create .het file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --het --autosome --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(results_dir, output_name)}"
+        # extract autosomal SNPS
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --autosome --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22')}"
+
+        # extract SNPs with minor allele frequency greater than threshold
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22')} --maf {maf} --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')}"
+
+        # extract SNPs with minor allele frequency less than threshold
+        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22')} --exclude {os.path.join(results_dir, output_name+'-chr1-22-mafgreater.bim')} --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22-mafless')}"
+
+        # get missingness to plot against het
+        plink_cmd4 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')} --missing --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing')}"
+        plink_cmd5 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafless')} --missing --out {os.path.join(results_dir, output_name+'-chr1-22-mafless-missing')}"
+
+        # convert both to ped/map files for heterozigosity computation
+        plink_cmd6 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')} --recode --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
+        plink_cmd7 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafless')} --recode --out {os.path.join(results_dir, output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # save samples that failed QC
-        fails_path = os.path.join(fails_dir, output_name+'.fail-imisshet-qc.txt')
-        logFMISS, meanHET = self.fail_imiss_het(
-            results_dir, output_name,
-            fails_path
+        self.compute_heterozigozity(
+            ped_file=os.path.join(results_dir, output_name+'-chr1-22-mafgreater-recode.ped')
         )
-
-        # generate plot
-        self.plot_imiss_het(
-            logFMISS, meanHET, plots_path
+        self.compute_heterozigozity(
+            ped_file=os.path.join(results_dir, output_name+'-chr1-22-mafless-recode.ped')
         )
 
         # report
