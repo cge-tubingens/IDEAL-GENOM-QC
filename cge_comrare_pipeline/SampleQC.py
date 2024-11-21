@@ -292,12 +292,14 @@ class SampleQC:
                 TypeError('sex_check should be a list or None')
             if len(sex_check)>2:
                 ValueError('sex_check should have a maximum of two elements')
-            elif len(sex_check)==1:
+            if len(sex_check)==1:
                 ValueError('sex_check should have two elements or an empty list')
-            elif not isinstance(sex_check[0], float) or not isinstance(sex_check[1], float):
-                TypeError('elements of sex_check should be floats')
-            elif sum(sex_check)!=1:
-                ValueError('elements of sex_check should sum to 1')            
+        
+            if len(sex_check)>0:
+                if not isinstance(sex_check[0], float) or not isinstance(sex_check[1], float):
+                    TypeError('elements of sex_check should be floats')
+                if sum(sex_check)!=1:
+                    ValueError('elements of sex_check should sum to 1')
         
         step = "discordant sex information"
 
