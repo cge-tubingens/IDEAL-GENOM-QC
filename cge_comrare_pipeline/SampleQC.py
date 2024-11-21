@@ -190,8 +190,8 @@ class SampleQC:
 
         return out_dict
 
-    def run_sex_check(self)->dict:
-
+    def execute_miss_genotype(self, mind:float)->dict:
+        
         """
         Executes PLINK commands to assess missing genotypes and filter samples based on a given missingness threshold.
 
