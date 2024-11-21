@@ -416,84 +416,40 @@ class SampleQC:
         }
 
         return out_dict
+    
+    def execute_dup_relatedness(self, kingship:float)->dict:
 
-    def run_relatedness_prune(self)->dict:
+        input_name = self.input_name
+        output_name= self.output_name
+        results_dir= self.results_dir
 
-        """
-        Identify duplicated or related individuals.
-
-        This function performs a relatedness pruning analysis on input data using PLINK to identify duplicated or related individuals.
-
-        Returns:
-        --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name  = self.input_name
-        results_dir = self.results_dir
-        output_name = self.output_name
-        fails_dir   = self.fails_dir
-        use_kingship= self.use_kingship
-        kingship    = self.config_dict['kingship']
-        ibd_thres   = self.config_dict['ibd_thres']
-
+        if not isinstance(kingship, float):
+            raise TypeError("kingship should be a float")
+        if kingship < 0 or kingship >1:
+            raise ValueError("kingship should be between 0 and 1")
+        
+        step = "duplicates_and_relatedness"
+        
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        memory = psutil.virtual_memory()
-        memory = memory.total
-        memory = round(3*memory/5,0)
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+        
+        # Compute kinship-coefficient matrix for all samples
+        plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --make-king triangle 'bin' --out {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
-        step = "duplicates_and_relatives_prune"
+        # Prune for Monozygotic Twins OR Duplicates
+        plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --king-cutoff {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} {kingship} --out {os.path.join(results_dir, output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
 
-        if use_kingship!='true':
-
-            # prune and run genome [compute IBD]
-            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --keep-allele-order --genome --out {os.path.join(results_dir, output_name)}"
-
-            # generate new .imiss file
-            plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --missing --out {os.path.join(results_dir, output_name+'_3')}"
-
-            # execute PLINK commands
-            cmds = [plink_cmd1, plink_cmd2]
-            for cmd in cmds:
-                shell_do(cmd, log=True)
-
-            self.find_fail_ibd(
-                output_prefix = output_name, 
-                results_folder= results_dir, 
-                fails_folder  =fails_dir, 
-                ibd_threshold =ibd_thres
-            )
-
-        else:
-
-            # Compute kinship-coefficient matrix for all samples
-            plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --make-king triangle bin --out {os.path.join(results_dir, 'kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
-
-            # Prune for Monozygotic Twins OR Duplicates
-            plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.pruned')} --king-cutoff {os.path.join(results_dir, 'kinship-coefficient-matrix')} {kingship} --out {os.path.join(results_dir, '2-kinship-pruned0.duplicates')} --memory {memory} --threads {max_threads}"
-
-            cmds2 = [plink2_cmd1, plink2_cmd2]
-            for cmd in cmds2:
-                shell_do(cmd, log=True)
-
-            self.files_to_keep.append('kinship-coefficient-matrix"+".king.bin')
-            self.files_to_keep.append('kinship-coefficient-matrix"+".king.id')
-
-            df_fail = pd.read_csv(
-                os.path.join(results_dir, "2-kinship-pruned0.duplicates"+'.king.cutoff.out.id'),
-                sep='\t'
-            )
-
-            df_fail.to_csv(
-                os.path.join(fails_dir, "kingship_fails.txt"), 
-                index=False,
-                header=False,
-                sep=" "                           
-            )
+        # execute PLINK commands
+        cmds = [plink2_cmd1, plink2_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
 
         # report
         process_complete = True
