@@ -97,71 +97,51 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def ld_pruning(self, maf:float, geno:float, mind:float, hwe:float, ind_pair:list)->dict:
-
+    def execute_ld_pruning(self, ind_pair:list)->dict:
+        
         """
-        Prune samples based on Linkage Disequilibrium (LD).
+        Executes LD pruning using PLINK.
 
-        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
+        This method performs linkage disequilibrium (LD) pruning on genetic data using PLINK.
+        It excludes high LD regions, performs an LD prune indep-pairwise test, and extracts
+        pruned SNPs.
 
-        Raises:
-        -------
-        - TypeError: If maf, geno, mind, or hwe is not of type float.
-        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
-        - FileNotFoundError: If the file with high LD regions is not found.
-
+        Parameters:
+        -----------
+        ind_pair (list): A list containing three integers representing the window size,
+                        step size, and r^2 threshold for the indep-pairwise test.
+        
         Returns:
         --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        dict: A dictionary containing the status of the process, the step name, and the
+                output directory path.
+        
+        Raises:
+        -------
+            FileNotFoundError: If the file with high LD regions is not found.
+            TypeError: If ind_pair is not a list.
+            TypeError: If the first two elements in ind_pair values are not integers.
+            TypeError: If the third element in ind_pair is not a float.
         """
 
         input_path      = self.input_path
         input_name      = self.input_name
         dependables_path= self.dependables
         results_dir     = self.results_dir
-
-        #maf      = self.config_dict['maf']
-        #geno     = self.config_dict['geno']
-        #mind     = self.config_dict['mind']
-        #hwe      = self.config_dict['hwe']
-        #ind_pair = self.config_dict['indep-pairwise']
-
-        # Check type of maf
-        if not isinstance(maf, float):
-             raise TypeError("maf should be of type float.")
-
-        # Check type of geno
-        if not isinstance(geno, float):
-            raise TypeError("geno should be of type float.")
-
-        # Check type of mind
-        if not isinstance(mind, float):
-            raise TypeError("mind should be of type float.")
-        
-        # Check type of hwe
-        if not isinstance(hwe, float):
-            raise TypeError("hwe should be of type float.")
-        
-        # Check if maf is in range
-        #if maf < 0.05 or maf > 0:
-        #    raise ValueError("maf should be between 0.05 and 0.1")
-        
-        # Check if geno is in range
-        if geno < 0.05 or geno > 0.1:
-            raise ValueError("geno should be between 0.05 and 0.1")
-        
-        # Check if mind is in range
-        #if mind < 0.1 or mind > 0.15:
-        #    raise ValueError("mind should be between 0.1 and 0.15")
-        
-        # Check if hwe is in range
-        if hwe < 0.00000001 or hwe > 0.001:
-            raise ValueError("hwe should be between 0.00000001 and 0.001")
         
         # check existence of high LD regions file
         high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
         if not os.path.exists(high_ld_regions_file):
             raise FileNotFoundError(f"File with high LD region was not found: {high_ld_regions_file}")
+        
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
+        
+        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
+            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
+        
+        if not isinstance(ind_pair[2], float):
+            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
 
         step = "ld_prune"
 
@@ -170,14 +150,22 @@ class SampleQC:
         else:
             max_threads = 10
 
-        # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
 
-        # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
+        # exclude complex regions
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {high_ld_regions_file} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded')}"
+
+        # LD prune indep-pairwise test
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning')}"
+
+
+        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --extract {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.LDpruned')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
