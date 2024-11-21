@@ -168,7 +168,6 @@ class SampleQC:
         # LD prune indep-pairwise test
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning')}"
 
-
         plink_cmd3 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --extract {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.LDpruned')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
