@@ -237,7 +237,7 @@ class SampleQC:
         step = "outlying_missing_genotype"
 
         # run mssingness across file genome-wide
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, output_name+'.-missing')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, output_name+'-missing')}"
 
         # produce a log file with samples excluded at CR 80% and generate plots
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, output_name+'.-mind')}"
