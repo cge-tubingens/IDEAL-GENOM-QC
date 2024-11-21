@@ -212,9 +212,55 @@ class SampleQC:
 
         Raises:
         -------
-        - TypeError: If sex_check in config_dict is not a list or if its values are not floats.
-        - ValueError: If the length of sex_check is not 2, if the values in sex_check are not between 0 and 1, or if the sum of sex_check values is not equal to 1.
+            TypeError: If mind is not a float.
+            ValueError: If mind is not between 0 and 1.
+            UserWarning: If mind is outside the recommended range
         """
+
+
+        input_name      = self.input_name
+        results_dir     = self.results_dir
+
+        if not isinstance(mind, float):
+            raise TypeError("mind should be a float")
+        
+        # Check if mind is in range
+        if mind < 0 or mind > 1:
+            raise ValueError("mind should be between 0 and 1")
+        
+        # Check if mind is around typical values
+        if mind <= 0.02 and mind >= 0.1:
+            warnings.warn(f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1.", UserWarning)
+
+        step = "outlying_missing_genotype"
+
+        # run mssingness across file genome-wide
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, input_name+'.-missing')}"
+
+        # produce a log file with samples excluded at CR 80% and generate plots
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, input_name+'.-mind')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+    
+    def execute_sex_check(self, sex_check:list)->dict:
 
         input_name = self.input_name
         output_name= self.output_name
