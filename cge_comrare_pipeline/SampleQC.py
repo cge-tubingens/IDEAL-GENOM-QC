@@ -106,6 +106,11 @@ class SampleQC:
         It excludes high LD regions, performs an LD prune indep-pairwise test, and extracts
         pruned SNPs.
 
+        This method runs three PLINK commands:
+        1. Exclude complex regions according to LD.
+        2. Run independent pairwise tests and generates prune.in and prune.out files.
+        3. Extract pruned SNPs and generate a new dataset.
+
         Parameters:
         -----------
         ind_pair (list): A list containing three integers representing the window size,
@@ -113,8 +118,10 @@ class SampleQC:
         
         Returns:
         --------
-        dict: A dictionary containing the status of the process, the step name, and the
-                output directory path.
+        dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
         
         Raises:
         -------
@@ -187,13 +194,22 @@ class SampleQC:
     def run_sex_check(self)->dict:
 
         """
-        Identify individuals with discordant sex information.
+        Executes PLINK commands to assess missing genotypes and filter samples based on a given missingness threshold.
 
-        This function performs a sex check analysis on input data using PLINK to identify individuals with discordant sex information.
-
+        This method runs two PLINK commands:
+        1. Computes missingness statistics genome-wide.
+        2. Filters samples based on the specified missingness threshold (mind) and generates a new dataset.
+        
+        Parameters:
+        -----------
+        mind (float): The missingness threshold for filtering samples.
+        
         Returns:
         --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+            dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
 
         Raises:
         -------
