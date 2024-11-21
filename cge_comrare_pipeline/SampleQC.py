@@ -220,6 +220,7 @@ class SampleQC:
 
 
         input_name      = self.input_name
+        output_name     = self.output_name
         results_dir     = self.results_dir
 
         if not isinstance(mind, float):
@@ -236,10 +237,10 @@ class SampleQC:
         step = "outlying_missing_genotype"
 
         # run mssingness across file genome-wide
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, input_name+'.-missing')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, output_name+'.-missing')}"
 
         # produce a log file with samples excluded at CR 80% and generate plots
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, input_name+'.-mind')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, output_name+'.-mind')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -312,7 +313,7 @@ class SampleQC:
         if sex_check is None or sex_check==[]:
             plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex --out {os.path.join(result_path, output_name+'-sexcheck')}"
         else:
-            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex {sex_check[0]} {sex_check[1]} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --out {os.path.join(result_path, output_name)}"
+            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {os.path.join(result_path, output_name+'-sexcheck')}"
 
         # extract xchr SNPs
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --chr 23 --make-bed --out {os.path.join(result_path, output_name+'-xchr')}"
@@ -529,121 +530,23 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def delete_failing_QC(self)->None:
-
-        """
-        Remove samples that failed quality control.
-
-        This function removes samples that failed one or several quality control (QC) steps based on the generated fail files. It generates cleaned binary files without the failing samples using PLINK.
-
-        Returns:
-        --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
+    def get_fail_samples(self)->None:
 
         input_path  = self.input_path
         input_name  = self.input_name
         result_path = self.results_dir
         output_name = self.output_name
-        fails_dir   = self.fails_dir
-        use_kingship=self.use_kingship
 
-        step = "delete_sample_failed_QC"
+        step = "get_fail samples"
 
-        # load samples who failed sex check
-        sex_path = os.path.join(fails_dir, output_name+'.fail-sexcheck-qc.txt')
-        if os.path.getsize(sex_path)==0:
-            df_sex = pd.DataFrame()
-        else:
-            df_sex = pd.read_csv(
-                sex_path,
-                sep      =' ',
-                index_col=False,
-                header   =None
-            )
-
-        # load samples who failed heterozygosity check
-        imiss_path = os.path.join(fails_dir, output_name+'.fail-imisshet-qc.txt')
-        if os.path.getsize(imiss_path)==0:
-            df_imiss = pd.DataFrame()
-        else:
-            df_imiss = pd.read_csv(
-                imiss_path,
-                sep      =' ',
-                index_col=False,
-                header   =None
-            )
-
-        if use_kingship=='true':
-            # load samples who failed kingship check
-            king_path = os.path.join(fails_dir, "kingship_fails.txt")
-            if os.path.getsize(king_path)==0:
-                df_dup = pd.DataFrame()
-            else:
-                df_dup = pd.read_csv(
-                    king_path,
-                    sep = ' ',
-                    index_col=False,
-                    header=None
-                )
-        else:
-            # load samples who failed IBD check
-            ibd1_path = os.path.join(fails_dir, output_name+'.fail-IBD1-qc.txt')
-            if os.path.getsize(ibd1_path)==0:
-                df_dup = pd.DataFrame()
-            else:
-                df_dup = pd.read_csv(
-                    ibd1_path,
-                    sep      =' ',
-                    index_col=False,
-                    header   =None
-                )
-
-        # concatenate all failings samples
-        df = pd.concat([df_sex, df_imiss, df_dup], axis=0)
-
-        # sort values by the first column
-        df.sort_values(by=df.columns[0], inplace=True)
-
-        # drop duplicates
-        df = df.drop_duplicates(keep='first')
-
-        # save file with samples who failed QC
-        df.to_csv(
-            os.path.join(fails_dir, output_name+'.fail-qc_1-inds.txt'),
-            sep   =' ',
-            header=False,
-            index =False
+        # load samples who failed call rate check
+        imiss_file = os.path.join(result_path, output_name+'-missing.imiss')
+        df_call_rate = pd.read_csv(
+            imiss_file,
+            sep='\s+',
         )
 
-        # generate cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --remove {os.path.join(fails_dir, output_name+'.fail-qc_1-inds.txt')} --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
-
-        # add cleaned files to list with files to keep
-        self.files_to_keep.append(output_name+'.clean.bed')
-        self.files_to_keep.append(output_name+'.clean.bim')
-        self.files_to_keep.append(output_name+'.clean.fam')
-
-        # delete temporary files
-        delete_temp_files(self.files_to_keep, result_path)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return df_call_rate
 
     @staticmethod
     def plot_imiss_het(logFMISS:pd.Series, meanHET:pd.Series, figs_folder:str)->None:
