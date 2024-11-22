@@ -272,12 +272,16 @@ class SampleQC:
         sex_check (list): A list containing two float elements that represent the sex check thresholds. 
                   The list should either be empty or contain exactly two float elements that sum to 1. 
                   If None or an empty list is provided, the samples will not be excluded and the estimates 
+        
         Returns:
+        --------
         dict: A dictionary containing the following keys:
               - 'pass': A boolean indicating if the process completed successfully.
               - 'step': A string describing the step performed.
               - 'output': A dictionary with the key 'plink_out' pointing to the results directory.
+        
         Raises:
+        -------
         TypeError: If sex_check is not a list or if its elements are not floats.
         ValueError: If sex_check does not have exactly two elements or if the elements do not sum to 1.
         """
@@ -342,15 +346,31 @@ class SampleQC:
         return out_dict
 
     def execute_heterozygosity_rate(self, maf:float)->dict:
-
+        
         """
-        Identify individuals with elevated missing data rates or outlying heterozygosity rate.
+        Executes the heterozygosity rate calculation using PLINK commands.
+        
+        This method performs a series of PLINK commands to calculate the heterozygosity rate
+        for a given minor allele frequency (MAF) threshold. It extracts autosomal SNPs, filters
+        SNPs based on the MAF threshold, computes missingness, and converts files for heterozygosity computation.
 
-        This function performs a heterozygosity rate analysis on input data using PLINK to identify individuals with elevated missing data rates or outlying heterozygosity rates.
-
+        Finally, computes heterozygosity for each individual and writes the results to a summary file.
+        
+        Parameters:
+        -----------
+            maf (float): The minor allele frequency threshold. Must be a float between 0 and 0.5.
+        
         Returns:
         --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+            dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
+
+        Raises:
+        -------
+            TypeError: If the provided MAF is not a float.
+            ValueError: If the provided MAF is not between 0 and 0.5.
         """
 
         input_name = self.input_name
@@ -419,6 +439,29 @@ class SampleQC:
         return out_dict
     
     def execute_dup_relatedness(self, kingship:float)->dict:
+        
+        """
+        Executes the duplicates and relatedness analysis using PLINK2.
+
+        This function computes the kinship-coefficient matrix for all samples and prunes for monozygotic twins or duplicates
+        based on the provided kinship threshold. It uses PLINK2 commands to perform these operations and logs the execution.
+
+        Parameters:
+        -----------
+            kingship (float): The kinship threshold value. Must be a float between 0 and 1.
+        
+        Returns:
+        --------
+            dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
+
+        Raises:
+        -------
+            TypeError: If the kingship parameter is not a float.
+            ValueError: If the kingship parameter is not between 0 and 1.
+        """
 
         input_name = self.input_name
         output_name= self.output_name
@@ -470,15 +513,34 @@ class SampleQC:
     
     @staticmethod
     def compute_heterozigozity(ped_file: str, map_file: str=None)->None:
-
+        
         """
-        Processes a PED file to compute heterozygosity and homozygosity statistics
-        for each individual and writes the results to a summary file.
+        Computes heterozygosity statistics for individuals in a PED file and writes the results to a summary file.
+
+        The function reads genotype data from the specified PED file, calculates the total number of genotypes,
+        the number of homozygous genotypes, the number of heterozygous genotypes, and their respective percentages
+        for each individual. The results are written to a summary file in the same directory as the PED file.
+        The summary file contains the following columns:
+            - ID: Individual ID
+            - total: Total number of genotypes
+            - num_hom: Number of homozygous genotypes
+            - num_het: Number of heterozygous genotypes
+            - Percent_hom: Percentage of homozygous genotypes
+            - Percent_het: Percentage of heterozygous genotypes
 
         Parameters:
-        - ped_file (str): Path to the PED file.
-        - map_file (str): Path to the MAP file (currently unused).
+        -----------
+            ped_file (str): Path to the PED file containing genotype data.
+            map_file (str, optional): Path to the MAP file. This parameter is currently not used. Defaults to None.
+
+        Returns:
+        --------
+            None
+
+        
+        If the PED file is not found or an I/O error occurs, an error message is printed.
         """
+        
         # Define output file name
         summary_file = f"Summary-{os.path.basename(ped_file)}"
         output_path = os.path.join(os.path.dirname(ped_file), summary_file)
