@@ -509,8 +509,7 @@ class SampleQC:
         }
 
         return out_dict
-
-    
+ 
     @staticmethod
     def compute_heterozigozity(ped_file: str, map_file: str=None)->None:
         
@@ -592,7 +591,7 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def get_fail_samples(self)->None:
+    def get_fail_samples(self, call_rate_thres:float)->None:
 
         input_path  = self.input_path
         input_name  = self.input_name
@@ -608,6 +607,13 @@ class SampleQC:
             sep='\s+',
             engine='python'
         )
+
+        # filter samples that fail call rate
+        fail_call_rate = df_call_rate[df_call_rate['F_MISS'] > call_rate_thres][['FID', 'IID']].reset_index(drop=True)
+
+        
+
+
 
         return df_call_rate
 
