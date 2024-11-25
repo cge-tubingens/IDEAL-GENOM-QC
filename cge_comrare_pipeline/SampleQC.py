@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib.colors import Normalize
 from matplotlib import colormaps
+import seaborn as sns
 
 from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
@@ -240,7 +241,7 @@ class SampleQC:
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, output_name+'-missing')}"
 
         # produce a log file with samples excluded at CR 80% and generate plots
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, output_name+'.-mind')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, output_name+'-mind')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -591,31 +592,308 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def get_fail_samples(self, call_rate_thres:float)->None:
+    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float)->None:
 
-        input_path  = self.input_path
-        input_name  = self.input_name
         result_path = self.results_dir
         output_name = self.output_name
+        plots_dir   = self.plots_dir
 
         step = "get_fail samples"
 
+        # ==========================================================================================================
+        #                                             CALL RATE CHECK
+        # ==========================================================================================================
+
         # load samples who failed call rate check
-        imiss_file = os.path.join(result_path, output_name+'-missing.imiss')
+        fail_call_rate = self.report_call_rate(
+            directory    =result_path, 
+            filename     =output_name+'-missing.imiss', 
+            threshold    =call_rate_thres, 
+            plots_dir    =plots_dir, 
+            y_axis_cap   =10
+        )
+
+        print('Call rate check done')
+
+        # ==========================================================================================================
+        #                                             SEX CHECK
+        # ==========================================================================================================
+
+        fail_sexcheck = self.report_sex_check(
+            directory    =result_path, 
+            sex_check_filename=output_name+'-sexcheck.sexcheck', 
+            xchr_imiss_filename=output_name+'-xchr-missing.imiss',
+            threshold    =call_rate_thres, 
+            plots_dir    =plots_dir, 
+            y_axis_cap   =10
+        )
+
+        print('Sex check done')
+
+        # ==========================================================================================================
+        #                                       HETETROZYGOSITY RATE CHECK
+        # ==========================================================================================================
+
+        # load samples that failed heterozygosity rate check with MAF > threshold
+        maf_greater_file = os.path.join(result_path, 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped')
+        df_maf_greater = pd.read_csv(
+            maf_greater_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # autosomal call rate per individual
+        autosomal_g_file = os.path.join(result_path, output_name+'-chr1-22-mafgreater-missing.imiss')
+        df_autosomal_g = pd.read_csv(
+            autosomal_g_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # merge both dataframes
+        df_het_greater = pd.merge(
+            df_maf_greater[['ID', 'Percent_het']],
+            df_autosomal_g[['FID', 'IID', 'F_MISS']],
+            left_on='ID',
+            right_on='IID',
+            how='inner'
+        )
+
+        del df_maf_greater, df_autosomal_g
+
+        mean_percent= df_het_greater['Percent_het'].mean()
+        sd_percent  = df_het_greater['Percent_het'].std()
+
+        mask_plus = df_het_greater['Percent_het'] > mean_percent + std_deviation_het*sd_percent
+        mask_minus= df_het_greater['Percent_het'] < mean_percent - std_deviation_het*sd_percent
+
+        fail_het_greater = df_het_greater[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
+        fail_het_greater['Failure'] = 'Heterozygosity rate greater'
+
+        # del df_het_greater
+
+        print('Heterozygosity rate check done for MAF > threshold')
+
+        # load samples that failed heterozygosity rate check with MAF < threshold
+        maf_less_file = os.path.join(result_path, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
+        df_maf_less = pd.read_csv(
+            maf_less_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # autosomal call rate per individual
+        autosomal_l_file = os.path.join(result_path, output_name+'-chr1-22-mafless-missing.imiss')
+        df_autosomal_l = pd.read_csv(
+            autosomal_l_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # merge both dataframes
+        df_het_less = pd.merge(
+            df_maf_less[['ID', 'Percent_het']],
+            df_autosomal_l[['FID', 'IID', 'F_MISS']],
+            left_on='ID',
+            right_on='IID',
+            how='inner'
+        )
+
+        del df_maf_less, df_autosomal_l
+
+        mean_percent = df_het_less['Percent_het'].mean()
+        sd_percent = df_het_less['Percent_het'].std()
+
+        mask_plus = df_het_less['Percent_het'] > mean_percent + std_deviation_het*sd_percent
+        mask_minus = df_het_less['Percent_het'] < mean_percent - std_deviation_het*sd_percent
+
+        fail_het_less = df_het_less[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
+        fail_het_less['Failure'] = 'Heterozygosity rate less'
+
+        del df_het_less
+
+        print('Heterozygosity rate check done for MAF < threshold')
+
+        # ==========================================================================================================
+        #                                       DUPLICATES-RELATEDNESS CHECK
+        # ==========================================================================================================
+
+        # load samples that failed duplicates and relatedness check
+        duplicates_file = os.path.join(result_path, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
+        df_duplicates = pd.read_csv(
+            duplicates_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # filter samples that failed duplicates and relatedness check
+        df_duplicates.columns = ['FID', 'IID']
+        fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
+        fail_duplicates['Failure'] = 'Duplicates and relatedness'
+
+        print('Duplicates and relatedness check done')
+
+        # ==========================================================================================================
+        #                                       MERGE ALL FAILURES
+        # ==========================================================================================================
+
+        print(fail_sexcheck.head())
+
+        fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
+
+        df = pd.concat(fails, axis=0).reset_index(drop=True)
+        
+
+        return df
+    
+    
+    def report_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
+
+        # load samples that failed sex check
         df_call_rate = pd.read_csv(
-            imiss_file,
-            sep='\s+',
+            os.path.join(directory, filename),
+            sep=r'\s+',
             engine='python'
         )
 
         # filter samples that fail call rate
-        fail_call_rate = df_call_rate[df_call_rate['F_MISS'] > call_rate_thres][['FID', 'IID']].reset_index(drop=True)
+        fail_call_rate = df_call_rate[df_call_rate['F_MISS'] > threshold][['FID', 'IID']].reset_index(drop=True)
+        fail_call_rate['Failure'] = 'Call rate'
 
-        
+        # Create the figure and subplots
+        fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 
+        # First subplot: Full histogram
+        axes1[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color='blue', alpha=0.7, ax=axes1[0])
+        axes1[0].set_title("Sample Call Rate Distribution")
+        axes1[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
+        axes1[0].set_ylabel("Frequency")
 
+        # Second subplot: Histogram with capped y-axis
+        axes1[1] = sns.histplot(df_call_rate['F_MISS'], bins=30, color='blue', alpha=0.7, ax=axes1[1])
+        axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
+        axes1[1].set_title("Sample Call Rate Distribution (Capped)")
+        axes1[1].set_xlabel("Proportion of missing SNPs (F_MISS)")
 
-        return df_call_rate
+        plt.tight_layout()
+        plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_histogram.jpeg"), dpi=400)
+        plt.show()
+
+        fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
+
+        # First subplot: capped y-axis
+        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color='blue', alpha=0.7, ax=axes2[0])
+        axes2[0].set_ylim(0, y_axis_cap)  # Cap y-axis
+        axes2[0].set_title("Sample Call Rate Distribution (Capped)")
+        axes2[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
+
+        # Add a vertical line at the threshold
+        axes2[0].axvline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+
+        # Second subplot: Number of samples vs F_MISS
+        df_call_rate_sorted = pd.DataFrame({
+            'Index': range(len(df_call_rate['F_MISS'])),
+            'F_MISS': sorted(df_call_rate['F_MISS'])
+        })
+
+        axes2[1] = sns.scatterplot(
+            data=df_call_rate_sorted,
+            x='Index',
+            y='F_MISS',
+            marker='o',  
+            color='blue',
+            #label="F_MISS",
+            ax=axes2[1]
+        ) 
+        axes2[1].set_title("Sample Call Rate")
+        axes2[1].set_xlabel(f"Number of samples")
+        axes2[1].set_ylabel("F_MISS")
+
+        # Add a vertical line at the threshold
+        axes2[1].axhline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+
+        # third subplot: Number of samples vs F_MISS
+        axes2[2] = sns.scatterplot(
+            x=df_call_rate['F_MISS'],
+            y=np.random.normal(size=len(df_call_rate['F_MISS'])),
+            markers='o',
+            s=20,
+        )
+        axes2[2].set_title("Sample Call Rate")
+        axes2[2].set_xlabel("Proportion of missing SNPs (F_MISS)")
+        axes2[2].set_ylabel(f"Samples")
+    
+
+        # Add a vertical line at the threshold
+        axes2[2].axvline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_scatterplot.jpeg"), dpi=400)
+        plt.show()
+
+        return fail_call_rate
+    
+    def report_sex_check(self, directory:str, sex_check_filename:str, xchr_imiss_filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
+
+        df_sexcheck = pd.read_csv(
+            os.path.join(directory, sex_check_filename),
+            sep=r'\s+',
+            engine='python'
+        )
+
+        df_xchr_imiss = pd.read_csv(
+            os.path.join(directory, xchr_imiss_filename),
+            sep=r'\s+',
+            engine='python'
+        )
+
+        df = pd.merge(df_sexcheck, df_xchr_imiss, on=['FID', 'IID'], how='inner')
+
+        print(df.columns)
+
+        fail_sexcheck = df[df['STATUS'] == 'PROBLEM'][['FID', 'IID']].reset_index(drop=True)
+        fail_sexcheck['Failure'] = 'Sex check'
+
+        df['Category'] = 'General'
+        df.loc[df['PEDSEX'] == "1", 'Category'] = 'Male PEDSEX'
+        df.loc[df['PEDSEX'] == "2", 'Category'] = 'Female PEDSEX'
+        df.loc[df['STATUS'] == "PROBLEM", 'Category'] = 'Problem Status'
+
+        # Set up the color palette
+        palette = {
+            'General': 'grey',
+            'Male PEDSEX': 'blue',
+            'Female PEDSEX': 'green',
+            'Problem Status': 'red'
+        }
+
+        # Create the scatter plot
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(
+            data=df,
+            x='F',
+            y='F_MISS',
+            #hue='Category',
+            #palette=palette,
+            #style='Category',  # Optionally, differentiate by style
+            #markers={'Problem Status': 'o', 'General': '.', 'Male PEDSEX': 'o', 'Female PEDSEX': 'o'},
+            #size='Category',
+            #sizes={'Problem Status': 50, 'General': 20, 'Male PEDSEX': 40, 'Female PEDSEX': 40}
+        )
+
+        # Add vertical lines
+        plt.axvline(x=0.8, color='red', linestyle='dotted')
+        plt.axvline(x=0.2, color='red', linestyle='dotted')
+
+        # Customize labels and legend
+        plt.title("Sex Check")
+        plt.xlabel("X chr inbreeding (homozygosity) estimate F")
+        plt.ylabel("Proportion of missing SNPs for the X chr")
+        plt.legend(title='Category', loc='upper left')
+
+    
+        return fail_sexcheck
+
 
     @staticmethod
     def plot_imiss_het(logFMISS:pd.Series, meanHET:pd.Series, figs_folder:str)->None:
@@ -685,12 +963,12 @@ class SampleQC:
         # load .het and .imiss files
         df_het = pd.read_csv(
             os.path.join(folder_path, file_name+'.het'),
-            sep="\s+",
+            sep=r"\s+",
             engine='python'
         )
         df_imiss = pd.read_csv(
             os.path.join(folder_path, file_name+'.imiss'),
-            sep="\s+",
+            sep=r"\s+",
             engine='python'
         )
 
@@ -730,13 +1008,13 @@ class SampleQC:
         # load .imiss file
         df_imiss = pd.read_csv(
             os.path.join(results_folder, output_prefix+'_3.imiss'),
-            sep='\s+',
+            sep=r'\s+',
             engine='python'
         )
         # load .genome file
         df_genome = pd.read_csv(
             os.path.join(results_folder, output_prefix+'.genome'),
-            sep='\s+',
+            sep=r'\s+',
             engine='python'
         )
 
