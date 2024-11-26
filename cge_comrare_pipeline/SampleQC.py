@@ -764,6 +764,51 @@ class SampleQC:
         summary = pd.concat([summary, total_row], ignore_index=True)
         
         return summary
+    
+    def execute_drop_samples(self)->dict:
+        
+        """
+        Executes the process of dropping samples using PLINK.
+
+        This method constructs and runs a PLINK command to remove samples listed in a specified file.
+        The resulting files are saved to the specified output directory with a modified name.
+
+        Returns:
+        --------
+        dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
+        """
+
+        input_path = self.input_path
+        input_name = self.input_name
+        output_path= self.output_path
+        output_name= self.output_name
+        fails_dir  = self.fails_dir
+
+        step = "drop_samples"
+
+        # drop samples
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(output_path, output_name+'-clean-samples')}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': output_path
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
   
     def report_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
         
