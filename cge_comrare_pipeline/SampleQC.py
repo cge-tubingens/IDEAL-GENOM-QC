@@ -883,6 +883,88 @@ class SampleQC:
         plt.savefig(os.path.join(plots_dir, 'sex_check.jpeg'), dpi=400)
 
         return fail_sexcheck
+    
+    def report_heterozygosity_rate(self, directory:str, summary_ped_filename:str, autosomal_filename:str, std_deviation_het:float, maf:float, split:str, plots_dir:str, y_axis_cap:float=80)->pd.DataFrame:
+
+        # load samples that failed heterozygosity rate check with MAF > threshold
+        maf_file = os.path.join(directory, summary_ped_filename)
+        df_maf = pd.read_csv(
+            maf_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # autosomal call rate per individual
+        autosomal_file = os.path.join(directory, autosomal_filename)
+        df_autosomal = pd.read_csv(
+            autosomal_file,
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # merge both dataframes
+        df_het = pd.merge(
+            df_maf[['ID', 'Percent_het']],
+            df_autosomal[['FID', 'IID', 'F_MISS']],
+            left_on='ID',
+            right_on='IID',
+            how='inner'
+        )
+
+        mean_percent= df_het['Percent_het'].mean()
+        sd_percent  = df_het['Percent_het'].std()
+
+        mask_plus = df_het['Percent_het'] > mean_percent + std_deviation_het*sd_percent
+        mask_minus= df_het['Percent_het'] < mean_percent - std_deviation_het*sd_percent
+
+        fail_het = df_het[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
+        fail_het['Failure'] = 'Heterozygosity rate greater'
+
+        # plots
+
+        fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
+
+        axes1[0] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[0])
+        axes1[0].set_title("Autosomal heterozygosity")
+        axes1[0].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
+        axes1[0].set_ylabel("Frequency")
+
+        axes1[1] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[1])
+        axes1[1].set_title("Autosomal heterozygosity (capped)")
+        axes1[1].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
+        axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
+        axes1[1].set_ylabel("Frequency")
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_{split}_{maf}_histogram.jpeg"), dpi=400)
+        plt.show()
+
+        df_het['Deviated'] = 'Not Excluded'
+        df_het.loc[mask_plus, 'Deviated'] = f'{std_deviation_het}xSD Excluded'
+        df_het.loc[mask_minus, 'Deviated']= f'{std_deviation_het}xSD Excluded'
+
+        # Create the scatter plot
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(
+            data=df_het,
+            x='Percent_het',
+            y='F_MISS',
+            hue='Deviated',
+            palette={'Not Excluded': 'blue', f'{std_deviation_het}xSD Excluded': 'red'},
+            markers={'Not Excluded': 'o', f'{std_deviation_het}xSD Excluded': 'o'},
+            size='Deviated',
+            sizes={'Not Excluded': 20, f'{std_deviation_het}xSD Excluded': 30}
+        )
+        plt.title("Autosomal heterozygosity and call rate")
+        plt.xlabel(f"% Heterozygosity MAF {split} {maf}")
+        plt.ylabel("Proportion of missing SNPs")
+        plt.legend(title='Exclusion', loc='best')
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_{split}_{maf}_scatterplot.jpeg"), dpi=400)
+        plt.show()
+
+        return fail_het
 
 
     @staticmethod
