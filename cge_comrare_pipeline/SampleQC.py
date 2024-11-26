@@ -708,11 +708,20 @@ class SampleQC:
         fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
 
         df = pd.concat(fails, axis=0).reset_index(drop=True)
-        
+        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.csv'), index=False)
 
-        return df
-    
-    
+        summary = df['Failure'].value_counts().reset_index()
+
+        totals = summary.select_dtypes(include="number").sum()
+
+        # Create the total row
+        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
+
+        # Append the total row to the DataFrame
+        summary = pd.concat([summary, total_row], ignore_index=True)
+        
+        return summary
+  
     def report_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
 
         # load samples that failed sex check
