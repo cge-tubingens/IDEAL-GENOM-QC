@@ -304,7 +304,7 @@ class SampleQC:
 
         return out_dict
     
-    def execute_sex_check(self, sex_check:list)->dict:
+    def execute_sex_check(self, sex_check:list=[])->dict:
 
         """
         Executes a sex check using PLINK commands on genetic data.
