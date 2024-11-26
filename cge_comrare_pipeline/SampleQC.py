@@ -97,6 +97,34 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
+    def execute_haploid_to_missing(self)->dict:
+
+        input_path = self.input_path
+        input_name = self.input_name
+
+        step = "haploid_to_missing"
+
+        # convert haploid genotypes to missing
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': input_path
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+    
     def execute_ld_pruning(self, ind_pair:list)->dict:
         
         """
