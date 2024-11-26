@@ -828,30 +828,45 @@ class SampleQC:
         fail_sexcheck['Failure'] = 'Sex check'
 
         df['Category'] = 'General'
-        df.loc[df['PEDSEX'] == "1", 'Category'] = 'Male PEDSEX'
-        df.loc[df['PEDSEX'] == "2", 'Category'] = 'Female PEDSEX'
-        df.loc[df['STATUS'] == "PROBLEM", 'Category'] = 'Problem Status'
+        df.loc[df['PEDSEX'] == 1, 'Category'] = 'Male PEDSEX'
+        df.loc[df['PEDSEX'] == 2, 'Category'] = 'Female PEDSEX'
 
-        # Set up the color palette
+        # Define the palette (color mapping)
         palette = {
-            'General': 'grey',
-            'Male PEDSEX': 'blue',
-            'Female PEDSEX': 'green',
-            'Problem Status': 'red'
+            "Male PEDSEX": "blue",
+            "Female PEDSEX": "green"
         }
 
-        # Create the scatter plot
-        plt.figure(figsize=(10, 6))
-        sns.scatterplot(
-            data=df,
-            x='F',
-            y='F_MISS',
-            #hue='Category',
-            #palette=palette,
-            #style='Category',  # Optionally, differentiate by style
-            #markers={'Problem Status': 'o', 'General': '.', 'Male PEDSEX': 'o', 'Female PEDSEX': 'o'},
-            #size='Category',
-            #sizes={'Problem Status': 50, 'General': 20, 'Male PEDSEX': 40, 'Female PEDSEX': 40}
+        # Define the size mapping
+        size_mapping = {
+            "Male PEDSEX": 40,
+            "Female PEDSEX": 40
+        }
+
+        # Create the Matplotlib scatter plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        # Iterate through categories to plot each group separately
+        for category, group in df.groupby("Category"):
+            ax.scatter(
+                group["F"], 
+                group["F_MISS"], 
+                edgecolors=palette[category],  # Map color
+                facecolors='none',            # Hollow circles
+                s=size_mapping[category],     # Map size
+                label=category                # Add label for legend
+            )
+
+        filtered_df = df[df['STATUS'] == 'PROBLEM'].reset_index(drop=True)[['F', 'F_MISS']].copy()
+
+        ax.scatter(
+            filtered_df["F"], 
+            filtered_df["F_MISS"], 
+            color='red',    # Red outline
+            #facecolors='none',   # Hollow markers
+            s=20,                # Marker size
+            marker='o',          # Circle marker
+            label='Problem Status'  # Label for legend (if needed)
         )
 
         # Add vertical lines
