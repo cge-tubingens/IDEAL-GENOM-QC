@@ -824,8 +824,6 @@ class SampleQC:
 
         df = pd.merge(df_sexcheck, df_xchr_imiss, on=['FID', 'IID'], how='inner')
 
-        print(df.columns)
-
         fail_sexcheck = df[df['STATUS'] == 'PROBLEM'][['FID', 'IID']].reset_index(drop=True)
         fail_sexcheck['Failure'] = 'Sex check'
 
