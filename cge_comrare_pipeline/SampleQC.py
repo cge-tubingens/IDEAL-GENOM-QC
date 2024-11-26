@@ -79,8 +79,6 @@ class SampleQC:
         self.input_name  = input_name
         self.output_name = output_name
         self.dependables = dependables_path
-        #self.config_dict = config_dict
-        #self.use_kingship= use_kingship
 
         self.files_to_keep = ['fail_samples']
 
