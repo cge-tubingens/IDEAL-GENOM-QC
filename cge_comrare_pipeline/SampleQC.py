@@ -646,12 +646,10 @@ class SampleQC:
         # ==========================================================================================================
 
         fail_sexcheck = self.report_sex_check(
-            directory    =result_path, 
-            sex_check_filename=output_name+'-sexcheck.sexcheck', 
+            directory          =result_path, 
+            sex_check_filename =output_name+'-sexcheck.sexcheck', 
             xchr_imiss_filename=output_name+'-xchr-missing.imiss',
-            threshold    =call_rate_thres, 
-            plots_dir    =plots_dir, 
-            y_axis_cap   =10
+            plots_dir          =plots_dir
         )
 
         print('Sex check done')
