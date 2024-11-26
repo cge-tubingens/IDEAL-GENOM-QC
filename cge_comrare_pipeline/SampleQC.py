@@ -877,9 +877,11 @@ class SampleQC:
         plt.title("Sex Check")
         plt.xlabel("X chr inbreeding (homozygosity) estimate F")
         plt.ylabel("Proportion of missing SNPs for the X chr")
-        plt.legend(title='Category', loc='upper left')
+        plt.legend(title='', loc='best')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(plots_dir, 'sex_check.jpeg'), dpi=400)
 
-    
         return fail_sexcheck
 
 
