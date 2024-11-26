@@ -191,7 +191,7 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
 
         # exclude complex regions
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {high_ld_regions_file} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name+'-hh-missing')} --exclude {high_ld_regions_file} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded')}"
 
         # LD prune indep-pairwise test
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning')}"
