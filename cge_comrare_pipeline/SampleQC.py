@@ -658,43 +658,15 @@ class SampleQC:
         #                                       HETETROZYGOSITY RATE CHECK
         # ==========================================================================================================
 
-        # load samples that failed heterozygosity rate check with MAF > threshold
-        maf_greater_file = os.path.join(result_path, 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped')
-        df_maf_greater = pd.read_csv(
-            maf_greater_file,
-            sep=r'\s+',
-            engine='python'
+        fail_het_greater = self.report_heterozygosity_rate(
+            directory           = result_path, 
+            summary_ped_filename= 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped', 
+            autosomal_filename  = output_name+'-chr1-22-mafgreater-missing.imiss', 
+            std_deviation_het   = std_deviation_het,
+            maf                 = maf_het,
+            split               = '>',
+            plots_dir           = plots_dir
         )
-
-        # autosomal call rate per individual
-        autosomal_g_file = os.path.join(result_path, output_name+'-chr1-22-mafgreater-missing.imiss')
-        df_autosomal_g = pd.read_csv(
-            autosomal_g_file,
-            sep=r'\s+',
-            engine='python'
-        )
-
-        # merge both dataframes
-        df_het_greater = pd.merge(
-            df_maf_greater[['ID', 'Percent_het']],
-            df_autosomal_g[['FID', 'IID', 'F_MISS']],
-            left_on='ID',
-            right_on='IID',
-            how='inner'
-        )
-
-        del df_maf_greater, df_autosomal_g
-
-        mean_percent= df_het_greater['Percent_het'].mean()
-        sd_percent  = df_het_greater['Percent_het'].std()
-
-        mask_plus = df_het_greater['Percent_het'] > mean_percent + std_deviation_het*sd_percent
-        mask_minus= df_het_greater['Percent_het'] < mean_percent - std_deviation_het*sd_percent
-
-        fail_het_greater = df_het_greater[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
-        fail_het_greater['Failure'] = 'Heterozygosity rate greater'
-
-        # del df_het_greater
 
         print('Heterozygosity rate check done for MAF > threshold')
 
