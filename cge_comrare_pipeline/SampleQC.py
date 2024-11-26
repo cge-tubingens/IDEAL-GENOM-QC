@@ -99,6 +99,21 @@ class SampleQC:
 
     def execute_haploid_to_missing(self)->dict:
 
+        """
+        Executes the conversion of haploid genotypes to missing values using PLINK.
+
+        This method constructs and runs a PLINK command to convert haploid genotypes
+        to missing values in a given dataset. The resulting files are saved with a 
+        suffix '-hh-missing' in the same directory as the input files.
+
+        Returns:
+        --------
+            dict: A dictionary containing the following keys:
+                - 'pass' (bool): Indicates if the process completed successfully.
+                - 'step' (str): The name of the step executed.
+                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
+        """
+
         input_path = self.input_path
         input_name = self.input_name
 
@@ -618,7 +633,25 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float, maf_het:float)->None:
+    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float, maf_het:float)->pd.DataFrame:
+        
+        """
+        Identifies and reports samples that fail various quality control checks.
+
+        Parameters:
+        -----------
+        call_rate_thres : float
+            The threshold for the call rate check. Samples with call rates above this threshold will be flagged.
+        std_deviation_het : float
+            The standard deviation threshold for the heterozygosity rate check. Samples with heterozygosity rates threshold*std away from the mean will be flagged.
+        maf_het : float
+            The minor allele frequency threshold for the heterozygosity rate check. Used to split the heterozygosity rate check into two parts: MAF > threshold and MAF < threshold.
+
+        Returns:
+        --------
+        pandas.DataFrame
+            The function saves the results of the failed samples to a file and returns a summary DataFrame of the failure counts.
+        """
 
         result_path = self.results_dir
         output_name = self.output_name
@@ -723,6 +756,28 @@ class SampleQC:
         return summary
   
     def report_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
+        
+        """
+        Generates a report on sample call rates, including histograms and scatter plots, and identifies samples that fail the call rate threshold.
+
+        Parameters:
+        -----------
+        directory (str): 
+            The directory where the input file is located.
+        filename (str): 
+            The name of the input file containing sample call rate data.
+        threshold (float): 
+            The threshold for the proportion of missing SNPs (F_MISS) above which samples are considered to have failed the call rate.
+        plots_dir (str): 
+            The directory where the output plots will be saved.
+        y_axis_cap (int, optional): 
+            The maximum value for the y-axis in the capped histogram. Default is 10.
+        
+        Returns:
+        --------
+        pandas.DataFrame: 
+            A DataFrame containing the samples that fail the call rate threshold, with columns 'FID', 'IID', and 'Failure'.
+        """
 
         # load samples that failed sex check
         df_call_rate = pd.read_csv(
@@ -809,6 +864,26 @@ class SampleQC:
         return fail_call_rate
     
     def report_sex_check(self, directory:str, sex_check_filename:str, xchr_imiss_filename:str, plots_dir:str)->pd.DataFrame:
+        
+        """
+        Generates a report for sex check and creates a scatter plot visualizing the results.
+        
+        Parameters:
+        -----------
+        directory (str): 
+            The directory where the input files are located.
+        sex_check_filename (str): 
+            The filename of the sex check data.
+        xchr_imiss_filename (str): 
+            The filename of the X chromosome missingness data.
+        plots_dir (str): 
+            The directory where the plot will be saved.
+        
+        Returns:
+        --------
+        pandas.DataFrame: 
+            A DataFrame containing the FID and IID of samples that failed the sex check.
+        """
 
         df_sexcheck = pd.read_csv(
             os.path.join(directory, sex_check_filename),
@@ -885,6 +960,34 @@ class SampleQC:
         return fail_sexcheck
     
     def report_heterozygosity_rate(self, directory:str, summary_ped_filename:str, autosomal_filename:str, std_deviation_het:float, maf:float, split:str, plots_dir:str, y_axis_cap:float=80)->pd.DataFrame:
+        
+        """
+        Generates a report on heterozygosity rate and plots histograms and scatter plots for visualization.
+
+        Parameters:
+        -----------
+        directory (str): 
+            The directory where the input files are located.
+        summary_ped_filename (str): 
+            The filename of the summary PED file containing heterozygosity rates.
+        autosomal_filename (str): 
+            The filename of the autosomal file containing call rates.
+        std_deviation_het (float): 
+            The standard deviation threshold for heterozygosity rate exclusion.
+        maf (float): 
+            Minor Allele Frequency threshold.
+        split (str): 
+            A string identifier for the split (e.g., 'train', 'test').
+        plots_dir (str): 
+            The directory where the plots will be saved.
+        y_axis_cap (float, optional): 
+            The cap for the y-axis in the histogram plot. Default is 80.
+        
+        Returns:
+        --------
+        pandas.DataFrame: 
+            A DataFrame containing samples that failed the heterozygosity rate check.
+        """
 
         # load samples that failed heterozygosity rate check with MAF > threshold
         maf_file = os.path.join(directory, summary_ped_filename)
