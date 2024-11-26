@@ -657,8 +657,6 @@ class SampleQC:
         output_name = self.output_name
         plots_dir   = self.plots_dir
 
-        step = "get_fail samples"
-
         # ==========================================================================================================
         #                                             CALL RATE CHECK
         # ==========================================================================================================
@@ -937,11 +935,10 @@ class SampleQC:
         ax.scatter(
             filtered_df["F"], 
             filtered_df["F_MISS"], 
-            color='red',    # Red outline
-            #facecolors='none',   # Hollow markers
-            s=20,                # Marker size
-            marker='o',          # Circle marker
-            label='Problem Status'  # Label for legend (if needed)
+            color='red',
+            s=20,
+            marker='o',
+            label='Problem Status'
         )
 
         # Add vertical lines
@@ -1068,7 +1065,6 @@ class SampleQC:
         plt.show()
 
         return fail_het
-
 
     @staticmethod
     def plot_imiss_het(logFMISS:pd.Series, meanHET:pd.Series, figs_folder:str)->None:
