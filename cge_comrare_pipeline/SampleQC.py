@@ -808,7 +808,7 @@ class SampleQC:
 
         return fail_call_rate
     
-    def report_sex_check(self, directory:str, sex_check_filename:str, xchr_imiss_filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
+    def report_sex_check(self, directory:str, sex_check_filename:str, xchr_imiss_filename:str, plots_dir:str)->pd.DataFrame:
 
         df_sexcheck = pd.read_csv(
             os.path.join(directory, sex_check_filename),
