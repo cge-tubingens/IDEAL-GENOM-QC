@@ -289,6 +289,8 @@ class SampleQC:
         for cmd in cmds:
             shell_do(cmd, log=True)
 
+        self.call_rate_miss = os.path.join(results_dir, output_name+'-missing.imiss')
+
         # report
         process_complete = True
 
@@ -371,6 +373,9 @@ class SampleQC:
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
+
+        self.sexcheck_miss = os.path.join(result_path, output_name+'-sexcheck')
+        self.xchr_miss = os.path.join(result_path, output_name+'-xchr-missing.imiss')
 
         # report
         process_complete = True
@@ -465,6 +470,11 @@ class SampleQC:
             ped_file=os.path.join(results_dir, output_name+'-chr1-22-mafless-recode.ped')
         )
 
+        self.summary_greater = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped')
+        self.summary_less = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
+        self.maf_greater_miss = os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing.imiss')
+        self.maf_less_miss = os.path.join(results_dir, output_name+'-chr1-22-mafless-missing.imiss')
+
         # report
         process_complete = True
 
@@ -536,6 +546,8 @@ class SampleQC:
         cmds = [plink2_cmd1, plink2_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
+
+        self.kinship_miss = os.path.join(results_dir, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
 
         # report
         process_complete = True
