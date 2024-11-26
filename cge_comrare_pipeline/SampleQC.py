@@ -670,43 +670,15 @@ class SampleQC:
 
         print('Heterozygosity rate check done for MAF > threshold')
 
-        # load samples that failed heterozygosity rate check with MAF < threshold
-        maf_less_file = os.path.join(result_path, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
-        df_maf_less = pd.read_csv(
-            maf_less_file,
-            sep=r'\s+',
-            engine='python'
+        fail_het_less = self.report_heterozygosity_rate(
+            directory           = result_path, 
+            summary_ped_filename= 'Summary-'+output_name+'-chr1-22-mafless-recode.ped', 
+            autosomal_filename  = output_name+'-chr1-22-mafless-missing.imiss', 
+            std_deviation_het   = std_deviation_het,
+            maf                 = maf_het,
+            split               = '<',
+            plots_dir           = plots_dir
         )
-
-        # autosomal call rate per individual
-        autosomal_l_file = os.path.join(result_path, output_name+'-chr1-22-mafless-missing.imiss')
-        df_autosomal_l = pd.read_csv(
-            autosomal_l_file,
-            sep=r'\s+',
-            engine='python'
-        )
-
-        # merge both dataframes
-        df_het_less = pd.merge(
-            df_maf_less[['ID', 'Percent_het']],
-            df_autosomal_l[['FID', 'IID', 'F_MISS']],
-            left_on='ID',
-            right_on='IID',
-            how='inner'
-        )
-
-        del df_maf_less, df_autosomal_l
-
-        mean_percent = df_het_less['Percent_het'].mean()
-        sd_percent = df_het_less['Percent_het'].std()
-
-        mask_plus = df_het_less['Percent_het'] > mean_percent + std_deviation_het*sd_percent
-        mask_minus = df_het_less['Percent_het'] < mean_percent - std_deviation_het*sd_percent
-
-        fail_het_less = df_het_less[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
-        fail_het_less['Failure'] = 'Heterozygosity rate less'
-
-        del df_het_less
 
         print('Heterozygosity rate check done for MAF < threshold')
 
