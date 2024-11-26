@@ -751,7 +751,7 @@ class SampleQC:
         fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
 
         df = pd.concat(fails, axis=0).reset_index(drop=True)
-        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.csv'), index=False)
+        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.txt'), index=False, sep='\t')
 
         summary = df['Failure'].value_counts().reset_index()
 
