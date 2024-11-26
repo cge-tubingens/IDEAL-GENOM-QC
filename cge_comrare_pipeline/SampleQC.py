@@ -618,7 +618,7 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float)->None:
+    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float, maf_het:float)->None:
 
         result_path = self.results_dir
         output_name = self.output_name
