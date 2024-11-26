@@ -705,8 +705,6 @@ class SampleQC:
         #                                       MERGE ALL FAILURES
         # ==========================================================================================================
 
-        print(fail_sexcheck.head())
-
         fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
 
         df = pd.concat(fails, axis=0).reset_index(drop=True)
