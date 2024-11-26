@@ -217,7 +217,7 @@ class SampleQC:
         }
 
         return out_dict
-
+    
     def execute_miss_genotype(self, mind:float)->dict:
         
         """
@@ -246,9 +246,9 @@ class SampleQC:
         """
 
 
-        input_name      = self.input_name
-        output_name     = self.output_name
-        results_dir     = self.results_dir
+        input_name  = self.input_name
+        output_name = self.output_name
+        results_dir = self.results_dir
 
         if not isinstance(mind, float):
             raise TypeError("mind should be a float")
