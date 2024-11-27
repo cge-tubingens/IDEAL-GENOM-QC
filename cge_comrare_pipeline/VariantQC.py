@@ -171,7 +171,6 @@ class VariantQC:
         input_name = self.input_name
         result_path= self.results_dir
         output_name= self.output_name
-        fails_dir  = self.fails_dir
 
         step = 'different_genotype_case_control'
 
