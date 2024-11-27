@@ -321,6 +321,57 @@ class VariantQC:
 
         return out_dict
 
+    def report_missing_data(self, directory:str, filename_male:str, filename_female:str, threshold:float, plots_dir:str, y_axis_cap:int=10):
+
+
+        # load .lmiss file for male subjects
+        df_males = pd.read_csv(
+            os.path.join(directory, filename_male),
+            sep=r"\s+",
+            engine='python'
+        )
+        
+        ## filter male subjects
+        fail_males = df_males[df_males['F_MISS']>threshold].reset_index(drop=True)
+        fail_males = fail_males[['SNP']].copy()
+        fail_males['Failure'] = 'Missin data rate on males'
+
+        # load .lmiss file for female subjects
+        df_females = pd.read_csv(
+            os.path.join(directory, filename_female),
+            sep=r"\s+",
+            engine='python'
+        )
+        
+        ## filter female subjects
+        fail_females = df_females[df_females['F_MISS']>threshold].reset_index(drop=True)
+        fail_females = fail_females[['SNP']].copy()
+        fail_females['Failure'] = 'Missin data rate on females'
+
+        #self.make_histogram(df_males['F_MISS'], fig_folder, 'missing_data_male.pdf')
+        #self.make_histogram(df_females['F_MISS'], fig_folder, 'missing_data_female.pdf')
+
+        # concatenate female and male subjects who failed QC
+        fails = pd.concat([fail_females, fail_males], axis=0)
+
+        return fails
+
+    def report_different_genotype_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str):
+
+        # load .missing file
+        df_diffmiss = pd.read_csv(
+            os.path.join(directory, filename),
+            sep=r"\s+",
+            engine='python'
+        )
+
+        # filter markers with different genotype call rate
+        fail_diffmiss = df_diffmiss[df_diffmiss['P']<threshold].reset_index(drop=True)
+        fail_diffmiss = fail_diffmiss[['SNP']].copy()
+        fail_diffmiss['Failure'] = 'Different genotype call rate'
+
+        return fail_diffmiss
+    
     @staticmethod
     def make_histogram(F_MISS:pd.Series, figs_folder:str, output_name:str)->None:
 
