@@ -270,7 +270,8 @@ class VariantQC:
                 lmiss_path,
                 header=None,
                 index_col=False,
-                sep='\s+'
+                sep=r'\s+',
+                engine='python'
             )
         
         # load markers with different genotype call rate
