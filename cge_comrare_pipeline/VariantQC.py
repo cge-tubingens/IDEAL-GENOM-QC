@@ -201,6 +201,39 @@ class VariantQC:
         }
 
         return out_dict
+    
+    def get_fail_variants(self)->pd.DataFrame:
+
+        result_path = self.results_dir
+        output_name = self.output_name
+        plots_dir   = self.plots_dir
+
+        # ==========================================================================================================
+        #                                             MARKERS WITH MISSING DATA 
+        # ==========================================================================================================
+
+        fail_miising_data = self.report_missing_data(
+            directory      =result_path, 
+            filename_male  =self.males_missing_data, 
+            filename_female=self.females_missing_data, \
+            threshold      =0.2, 
+            plots_dir      =plots_dir
+        )
+
+        # ==========================================================================================================
+        #                                             MARKERS WITH DIFFERENT GENOTYPE CALL RATE
+        # ==========================================================================================================
+
+        fail_genotype = self.report_different_genotype_call_rate(
+            directory=result_path, 
+            filename =self.case_control_missing, 
+            threshold=0.05, 
+            plots_dir=plots_dir
+        )
+
+        fails = pd.concat([fail_miising_data, fail_genotype], axis=0, ignore_index=True)
+
+        return fails['Failure'].value_counts()
 
     def remove_markers(self)->dict:
 
