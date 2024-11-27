@@ -90,7 +90,7 @@ class VariantQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def missing_data_rate(self)->dict:
+    def execute_missing_data_rate(self, chr_y:int=24)->dict:
 
         """
         Identify markers with an excessive missing rate.
@@ -194,7 +194,7 @@ class VariantQC:
 
         return out_dict
 
-    def different_genotype_call_rate(self)->dict:
+    def execute_different_genotype_call_rate(self)->dict:
 
         """
         Identify markers with different genotype call rates between cases and controls.
