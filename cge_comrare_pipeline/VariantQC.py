@@ -185,20 +185,7 @@ class VariantQC:
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # load .missing files
-        df_missing = pd.read_csv(
-            os.path.join(result_path, output_name+'.clean_1.missing'),
-            sep='\s+'
-        )
-
-        # filter subjects
-        df_missing = df_missing[df_missing['P']< 0.00001].reset_index(drop=True)
-        df_missing = df_missing[['SNP']].copy()
-        df_missing.to_csv(
-            os.path.join(fails_dir, output_name+'.clean-fail-diffmiss-qc.txt'),
-            header=False,
-            index=False
-        )
+        self.case_control_missing = os.path.join(result_path, output_name+'-case-control-missing.missing')
 
         # report
         process_complete = True
