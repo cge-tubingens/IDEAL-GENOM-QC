@@ -12,7 +12,7 @@ from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class VariantQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str) -> None:
 
         """
         Initialize the VariantQC object.
@@ -46,8 +46,8 @@ class VariantQC:
         """
 
         # check if paths are set
-        if input_path is None or output_path is None or dependables_path is None:
-            raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
+        if input_path is None or output_path is None:
+            raise ValueError("values for input_path and output_path must be set upon initialization.")
 
         # Check path validity of input data
         bed_path = os.path.join(input_path, input_name + '.bed')
@@ -72,8 +72,6 @@ class VariantQC:
         self.output_path= output_path
         self.input_name = input_name
         self.output_name= output_name
-        self.dependables= dependables_path
-        self.config_dict= config_dict
 
         self.files_to_keep = ['fail_samples']
 
