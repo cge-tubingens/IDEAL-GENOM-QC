@@ -140,49 +140,6 @@ class VariantQC:
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # load .lmiss file for male subjects
-        df_males = pd.read_csv(
-            os.path.join(result_path, output_name+'.clean_m_only.lmiss'),
-            sep="\s+"
-        )
-        self.make_histogram(df_males['F_MISS'], fig_folder, 'missing_data_male.pdf')
-
-        # filter male subjects
-        df_males = df_males[df_males['F_MISS']>0.2].reset_index(drop=True)
-        df_males = df_males[['SNP']].copy()
-        df_males.to_csv(
-            os.path.join(fails_dir, output_name+'.clean_m_only-fail-lmiss-qc.txt'),
-            sep=' ',
-            header=False,
-            index=False
-        )
-
-        # load .lmiss file for female subjects
-        df_females = pd.read_csv(
-            os.path.join(result_path, output_name+'.clean_not_y.lmiss'),
-            sep="\s+"
-        )
-        self.make_histogram(df_females['F_MISS'], fig_folder, 'missing_data_female.pdf')
-
-        # filter female subjects
-        df_females = df_females[df_females['F_MISS']>0.2].reset_index(drop=True)
-        df_females = df_females[['SNP']].copy()
-        df_females.to_csv(
-            os.path.join(fails_dir, output_name+'.clean_not_y-fail-lmiss-qc.txt'),
-            sep=' ',
-            header=False,
-            index=False
-        )
-
-        # concatenate female and male subjects who failed QC
-        df_fails = pd.concat([df_females, df_males], axis=0)
-        df_fails.to_csv(
-            os.path.join(fails_dir, output_name+'.clean-fail-lmiss-qc.txt'),
-            sep=' ',
-            header=False,
-            index=False
-        )
-
         # report
         process_complete = True
 
