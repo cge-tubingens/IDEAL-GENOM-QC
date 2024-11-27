@@ -86,7 +86,7 @@ class VariantQC:
             os.mkdir(self.fails_dir)
         
         # create figures folder if not existent
-        self.plots_dir = os.path.join(output_path, 'plots')
+        self.plots_dir = os.path.join(self.results_dir, 'variantQC_plots')
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
