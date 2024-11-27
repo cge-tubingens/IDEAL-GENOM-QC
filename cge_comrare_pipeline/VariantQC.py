@@ -127,10 +127,13 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # generates  .lmiss and .imiss files for male subjects
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --filter-males --chr {chr_y} --out {os.path.join(result_path, output_name+'.clean_m_only')}"
+        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --missing --filter-males --chr {chr_y} --out {os.path.join(result_path, output_name+'-missing-males-only')} --memory {memory}"
 
         # generates .lmiss and. imiss files for female subjects
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --missing --not-chr {chr_y} --out {os.path.join(result_path, output_name+'.clean_not_y')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --missing --not-chr {chr_y} --out {os.path.join(result_path, output_name+'-missing-not-y')} --memory {memory}"
+
+        self.males_missing_data = os.path.join(result_path, output_name+'-missing-males-only.lmiss')
+        self.females_missing_data = os.path.join(result_path, output_name+'-missing-not-y.lmiss')
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
