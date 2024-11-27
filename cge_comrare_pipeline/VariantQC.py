@@ -3,6 +3,7 @@ Python module to perform variant quality control
 """
 
 import os
+import psutil
 
 import matplotlib.pyplot as plt
 import pandas as pd
