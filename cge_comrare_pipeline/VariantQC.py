@@ -111,10 +111,6 @@ class VariantQC:
         input_name = self.input_name
         result_path= self.results_dir
         output_name= self.output_name
-        fails_dir  = self.fails_dir
-        fig_folder = self.plots_dir
-
-        chr_y = self.config_dict['chr_y']
 
         # check type for chr_y
         if not isinstance(chr_y, int):
