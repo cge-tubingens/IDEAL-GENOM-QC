@@ -180,7 +180,7 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # generates .missing file
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --test-missing --out {os.path.join(result_path, output_name+'.clean_1')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --test-missing --out {os.path.join(result_path, output_name+'-case-control-missing')} --memory {memory}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
