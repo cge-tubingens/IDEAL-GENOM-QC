@@ -205,9 +205,9 @@ class VariantQC:
     
     def get_fail_variants(self)->pd.DataFrame:
 
-        result_path = self.results_dir
-        output_name = self.output_name
-        plots_dir   = self.plots_dir
+        result_path= self.results_dir
+        fails_dir  = self.fails_dir
+        plots_dir  = self.plots_dir
 
         # ==========================================================================================================
         #                                             MARKERS WITH MISSING DATA 
@@ -233,6 +233,7 @@ class VariantQC:
         )
 
         fails = pd.concat([fail_miising_data, fail_genotype], axis=0, ignore_index=True)
+        fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), header=False, index=False)
 
         return fails['Failure'].value_counts()
 
