@@ -174,6 +174,11 @@ class VariantQC:
 
         step = 'different_genotype_case_control'
 
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # generates .missing file
         plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --test-missing --out {os.path.join(result_path, output_name+'.clean_1')}"
 
