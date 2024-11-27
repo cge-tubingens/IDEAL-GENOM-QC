@@ -374,7 +374,7 @@ class SampleQC:
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.sexcheck_miss = os.path.join(result_path, output_name+'-sexcheck')
+        self.sexcheck_miss = os.path.join(result_path, output_name+'-sexcheck.sexcheck')
         self.xchr_miss = os.path.join(result_path, output_name+'-xchr-missing.imiss')
 
         # report
@@ -1075,7 +1075,11 @@ class SampleQC:
         mask_minus= df_het['Percent_het'] < mean_percent - std_deviation_het*sd_percent
 
         fail_het = df_het[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
-        fail_het['Failure'] = 'Heterozygosity rate greater'
+
+        if split == '>':
+            fail_het['Failure'] = 'Heterozygosity rate greater'
+        else:
+            fail_het['Failure'] = 'Heterozygosity rate less'
 
         # plots
 
