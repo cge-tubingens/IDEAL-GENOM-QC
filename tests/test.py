@@ -3,7 +3,7 @@ import os
 
 from cge_comrare_pipeline.SampleQC import SampleQC
 from cge_comrare_pipeline.VariantQC import VariantQC
-from cge_comrare_pipeline.PCA import PCA
+from cge_comrare_pipeline.AncestryQC import AncestryQC
 
 INPUT_PATH = '/mnt/0A2AAC152AABFBB7/PipeLine/data/inputData'
 INPUT_NAME = 'subsetluxgiant'
@@ -23,7 +23,7 @@ with open(STEPS_PATH, 'r') as file:
 steps
 
 if steps['pca']:
-    pca = PCA(
+    pca = AncestryQC(
         input_path      =INPUT_PATH,
         input_name      =INPUT_NAME,
         output_path     =OUTPUT_PATH,
