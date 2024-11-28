@@ -614,6 +614,32 @@ class AncestryQC:
         # executes PLINK command
         shell_do(plink_cmd1, log=True)
 
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+    
+    def get_ancestry_outliers(self, ref_threshold:float, stu_threshold:float, reference_pop:str, num_pcs:int=2)->dict:
+
+        dependables= self.dependables
+        input_path = self.input_path
+        input_name = self.input_name
+        results_dir= self.results_dir
+        fails_dir  = self.fails_dir
+        output_name= self.output_name
+
+        step = "get ancestry outliers"
+
         # add population tags to pca output
         df = self.population_tags(
             psam_path     =os.path.join(dependables, 'all_phase3.psam'),
