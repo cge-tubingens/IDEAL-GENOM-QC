@@ -91,6 +91,11 @@ class SampleQC:
         self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
         if not os.path.exists(self.fails_dir):
             os.mkdir(self.fails_dir)
+
+        # create clean files folder
+        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
+        if not os.path.exists(self.clean_dir):
+            os.mkdir(self.clean_dir)
         
         # create figures folder
         self.plots_dir = os.path.join(self.results_dir, 'sampleQC_plots')
