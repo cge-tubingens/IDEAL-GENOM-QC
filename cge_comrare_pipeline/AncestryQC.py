@@ -112,7 +112,7 @@ class AncestryQC:
         self.results_to_keep = ['fail_samples']
 
         # create results folder
-        self.results_dir = os.path.join(output_path, 'pca_results')
+        self.results_dir = os.path.join(output_path, 'ancestry_results')
         if not os.path.exists(self.results_dir):
             os.mkdir(self.results_dir)
 
