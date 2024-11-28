@@ -262,14 +262,6 @@ class VariantQC:
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # add cleaned files to list with files to keep
-        self.files_to_keep.append(output_name+'.vrnt_clean.bed')
-        self.files_to_keep.append(output_name+'.vrnt_clean.bim')
-        self.files_to_keep.append(output_name+'.vrnt_clean.fam')
-
-        # delete temporary files
-        delete_temp_files(self.files_to_keep, result_path)
-
         # report
         process_complete = True
 
