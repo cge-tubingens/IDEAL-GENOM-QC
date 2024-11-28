@@ -106,7 +106,6 @@ class PCA:
         self.input_name = input_name
         self.output_name= output_name
         self.dependables= dependables_path
-        self.config_dict= config_dict
 
         self.dependables_to_keep = ['all_phase3.bed', 'all_phase3.fam','all_phase3.bim', 'all_phase3.psam', 'high-LD-regions.txt', 'geographic_info.txt']
 
