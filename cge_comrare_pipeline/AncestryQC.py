@@ -655,24 +655,15 @@ class AncestryQC:
             output_name  =output_name, 
             ref_threshold=ref_threshold,
             stu_threshold=stu_threshold,
-            reference_pop=reference_pop
+            reference_pop=reference_pop,
+            num_pcs      =num_pcs
         )
-
-        # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {ancestry_fails} --make-bed --out {os.path.join(self.results_dir, output_name+'.clean')}"
-
-        self.results_to_keep.append(output_name+'.clean.bed')
-        self.results_to_keep.append(output_name+'.clean.bim')
-        self.results_to_keep.append(output_name+'.clean.fam')
-        self.results_to_keep.append(output_name+'.pca.eigenvec')
-
-        shell_do(plink_cmd2, log=True)
 
         # report
         process_complete = True
 
         outfiles_dict = {
-            'plink_out': results_dir
+            'fail_samples': fails_dir
         }
 
         out_dict = {
@@ -683,97 +674,26 @@ class AncestryQC:
 
         return out_dict
     
-    def reference_umap_plot(self)->dict:
+    def execute_drop_ancestry_outliers(self)->dict:
 
         input_path = self.input_path
         input_name = self.input_name
         output_name= self.output_name
-        dependables= self.dependables
-        results_dir= self.results_dir
+        fails_dir  = self.fails_dir
 
-        pca        = self.config_dict['pca']
+        step = "drop ancestry outliers"
 
-        step = "generate umap plots"
+        # create cleaned binary files
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {os.path.join(fails_dir, output_name+'.fail-ancestry-qc.txt')} --make-bed --out {os.path.join(self.results_dir, output_name+'-ancestry-clean')}"
 
-        # add population tags to pca output
-        df = self.population_tags(
-            psam_path= os.path.join(dependables, 'all_phase3.psam'),
-            study_fam_path=os.path.join(input_path, input_name+'.fam')
-        )
-        df['ID1'] = df['ID1'].astype(str)
-
-        # load .eigenvec file
-        df_eigenvec = pd.read_csv(
-            os.path.join(results_dir, output_name+'.pca.eigenvec'),
-            header=None,
-            sep=' '
-        )
-        new_cols = [f"pca_{k}" for k in range(1,pca+1)]
-        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
-
-        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
-        df_vals= df_eigenvec[new_cols].to_numpy()
-
-        del df_eigenvec
-
-        D2_redux = umap.UMAP(
-            n_components=2,
-            n_neighbors =10,
-            min_dist    =0.1,
-            metric      ="euclidean"
-        )
-
-        D3_redux = umap.UMAP(
-            n_components=3,
-            n_neighbors =10,
-            min_dist    =0.1,
-            metric      ="euclidean"
-        )
-
-        umap_2D_proj = D2_redux.fit_transform(df_vals)
-        umap_3D_proj = D3_redux.fit_transform(df_vals)
-
-        df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
-        df_3D = pd.concat([df_ids, pd.DataFrame(data=umap_3D_proj, columns=['umap1', 'umap2', 'umap3'])], axis=1)
-        
-        df_2D = pd.merge(df_2D, df, on=['ID1', 'ID2'])
-        df_3D = pd.merge(df_3D, df, on=['ID1', 'ID2'])
-
-        # generates a 2D scatter plot
-        fig, ax = plt.subplots(figsize=(10,10))
-        scatter_plot= sns.scatterplot(
-            data=df_2D, 
-            x='umap1', 
-            y='umap2', 
-            hue='SuperPop',
-            marker='.',
-            alpha=0.6,
-            ax=ax
-        )
-        scatter_fig = scatter_plot.get_figure()
-        scatter_fig.savefig(os.path.join(self.plots_dir, 'umap_2d.pdf'))
-
-        # generates a 3D scatter plot
-        fig2= plt.figure(figsize=(10,10))
-        ax  = fig2.add_subplot(111, projection='3d')
-
-        for s in df['SuperPop'].unique():
-            ax.scatter(
-                xs=df_3D.umap1[df_3D.SuperPop==s],
-                ys=df_3D.umap2[df_3D.SuperPop==s],
-                zs=df_3D.umap3[df_3D.SuperPop==s], 
-                label=s,
-                marker='.'
-            )
-        ax.legend()
-        plt.savefig(os.path.join(self.plots_dir, 'umap_3d.pdf'), format='pdf')
-        plt.close()
+        # execute PLINK command
+        shell_do(plink_cmd2, log=True)
 
         # report
         process_complete = True
 
         outfiles_dict = {
-            'plots_out': self.plots_dir
+            'plink_out': self.results_dir
         }
 
         out_dict = {
@@ -825,9 +745,9 @@ class AncestryQC:
 
         # generates a 2D scatter plot
         fig, ax = plt.subplots(figsize=(10,10))
-        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.')
+        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
         scatter_fig = scatter_plot.get_figure()
-        scatter_fig.savefig(os.path.join(self.plots_dir, 'pca.pdf'))
+        scatter_fig.savefig(os.path.join(self.plots_dir, 'pca.jpeg'), dpi=400)
 
         # generates a 3D scatter plot
         fig2= plt.figure()
@@ -841,11 +761,8 @@ class AncestryQC:
                 label=s
             )
         ax.legend()
-        plt.savefig(os.path.join(self.plots_dir, 'pca_3d.pdf'), format='pdf')
+        plt.savefig(os.path.join(self.plots_dir, 'pca_3d.jpeg'), dpi=400)
         plt.close()
-
-        # delete temporary files
-        delete_temp_files(self.results_to_keep, results_dir)
 
         # report
         process_complete = True
@@ -938,7 +855,7 @@ class AncestryQC:
         return pd.concat([df_fam, df_psam], axis=0)
 
     @staticmethod
-    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, ref_threshold:int, stu_threshold:int, reference_pop:str)->str:
+    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, ref_threshold:int, stu_threshold:int, reference_pop:str, num_pcs:str=2)->str:
 
         """
         Identifies samples failing ancestry quality control based on principal component analysis (PCA).
@@ -960,6 +877,22 @@ class AncestryQC:
         - str: Path to the file containing the list of samples failing ancestry quality control.
         """
 
+        if not isinstance(ref_threshold, (float, int)):
+            raise TypeError("ref_threshold should be an integer or float value")
+        if not isinstance(stu_threshold, (float, int)):
+            raise TypeError("stu_threshold should be an integer or float value")
+        if stu_threshold<=0:
+            raise ValueError("stu_threshold should be a positive value")
+        if ref_threshold<=0:
+            raise ValueError("ref_threshold should be a positive value")
+        if not isinstance(reference_pop, str):
+            raise TypeError("reference_pop should be a string")
+        if not isinstance(num_pcs, int):
+            raise TypeError("num_pcs should be an integer value")
+        if num_pcs<1:
+            raise ValueError("num_pcs should be a positive integer")
+        
+
         # filters South Asian subjects
         mask1 = (df_tags['SuperPop']==reference_pop)
         # filters subjects from study data
@@ -976,9 +909,14 @@ class AncestryQC:
             sep=' '
         )
 
+        if num_pcs>df_eigenvec.shape[1]-2:
+            raise ValueError("num_pcs should be less than or equal to the number of principal components in the .eigenvec file")
+        
+        df_eigenvec = df_eigenvec[df_eigenvec.columns[:2+num_pcs]].copy()
+
         # renames columns for consistency
         new_col_names = []
-        for k in range(df_eigenvec.shape[1]):
+        for k in range(2+num_pcs):
             if k<2:
                 new_col_names.append(f"ID{k+1}")
             else:
@@ -1034,5 +972,3 @@ class AncestryQC:
         )
 
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
-
-    
