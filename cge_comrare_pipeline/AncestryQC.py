@@ -15,7 +15,7 @@ import seaborn as sns
 
 from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
-class PCA:
+class AncestryQC:
     
     def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str) -> None:
 
