@@ -6,6 +6,7 @@ import os
 import subprocess
 import shutil
 import umap
+import psutil
 
 import pandas as pd
 import numpy as np
@@ -212,6 +213,11 @@ class PCA:
         else:
             max_threads = 10
 
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # find A->T and C->G SNPs in study data
         self.filter_non_AT_or_GC_snps(input_dir=input_path, input_name=input_name, results_dir=results_dir)
 
@@ -222,7 +228,7 @@ class PCA:
         plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
 
         # generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory 10240 --threads {max_threads} --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
+        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -267,43 +273,16 @@ class PCA:
         dependables_path= self.dependables
         results_dir     = self.results_dir
 
-        maf      = self.config_dict['maf']
-        geno     = self.config_dict['geno']
-        mind     = self.config_dict['mind']
-        hwe      = self.config_dict['hwe']
         ind_pair = self.config_dict['indep-pairwise']
 
-        # Check type of maf
-        if not isinstance(maf, float):
-             raise TypeError("maf should be of type float.")
-
-        # Check type of geno
-        if not isinstance(geno, float):
-            raise TypeError("geno should be of type float.")
-
-        # Check type of mind
-        if not isinstance(mind, float):
-            raise TypeError("mind should be of type float.")
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
         
-        # Check type of hwe
-        if not isinstance(hwe, float):
-            raise TypeError("hwe should be of type float.")
+        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
+            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
         
-        # Check if maf is in range
-        #if maf < 0.05 or maf > 0.1:
-        #    raise ValueError("maf should be between 0.05 and 0.1")
-        
-        # Check if geno is in range
-        if geno < 0.05 or geno > 0.1:
-            raise ValueError("geno should be between 0.05 and 0.1")
-        
-        # Check if mind is in range
-        #if mind < 0.1 or mind > 0.15:
-        #    raise ValueError("mind should be between 0.1 and 0.15")
-        
-        # Check if hwe is in range
-        if hwe < 0.00000001 or hwe > 0.001:
-            raise ValueError("hwe should be between 0.00000001 and 0.001")
+        if not isinstance(ind_pair[2], float):
+            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
         
         # check existence of high LD regions file
         high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
@@ -318,10 +297,10 @@ class PCA:
             max_threads = 10
 
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -366,8 +345,13 @@ class PCA:
         else:
             max_threads = 10
 
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # generates a pruned reference data files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --keep-allele-order --allow-extra-chr --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(dependables, 'all_phase3.pruned')}"
+        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(dependables, 'all_phase3.pruned')} --memory {memory}"
 
         # executes PLINK command
         shell_do(plink_cmd, log=True)
@@ -558,8 +542,18 @@ class PCA:
 
         step = "merge reference panel with study data"
 
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # merge refenrence and study data
-        plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')}"
+        plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')} --memory {memory} --threads {max_threads}"
 
         # executes PLINK command
         shell_do(plink_cmd, log=True)
@@ -612,9 +606,21 @@ class PCA:
         # check `pca` type
         if not isinstance(pca, int):
             raise TypeError("pca should be an integer value")
+        if pca < 1:
+            raise ValueError("pca should be a positive integer")
+        
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca} --memory {memory} --threads {max_threads}"
 
         # executes PLINK command
         shell_do(plink_cmd1, log=True)
