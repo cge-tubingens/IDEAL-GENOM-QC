@@ -68,7 +68,6 @@ class VariantQC:
         if not bim_check:
             raise FileNotFoundError(".bim file not found")
         
-
         self.input_path = input_path
         self.output_path= output_path
         self.input_name = input_name
@@ -213,7 +212,7 @@ class VariantQC:
         #                                             MARKERS WITH MISSING DATA 
         # ==========================================================================================================
 
-        fail_miising_data = self.report_missing_data(
+        fail_missing_data = self.report_missing_data(
             directory      =result_path, 
             filename_male  =self.males_missing_data, 
             filename_female=self.females_missing_data, \
@@ -232,7 +231,7 @@ class VariantQC:
             plots_dir=plots_dir
         )
 
-        fails = pd.concat([fail_miising_data, fail_genotype], axis=0, ignore_index=True)
+        fails = pd.concat([fail_missing_data, fail_genotype], axis=0, ignore_index=True)
         fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), header=False, index=False)
 
         return fails['Failure'].value_counts()
@@ -404,7 +403,7 @@ class VariantQC:
         # log10 transform imput data
         Y = np.log10(values)
 
-        fig_path = os.path.join(figs_folder, f"{output_name}.pdf")
+        fig_path = os.path.join(figs_folder, f"{output_name}.jpeg")
 
         plt.hist(Y, bins=50, color='red')
         plt.xlabel('Fraction of missing data')
