@@ -120,6 +120,11 @@ class AncestryQC:
         self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
         if not os.path.exists(self.fails_dir):
             os.mkdir(self.fails_dir)
+
+        # create clean files folder
+        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
+        if not os.path.exists(self.clean_dir):
+            os.mkdir(self.clean_dir)
         
         # create figures folder
         self.plots_dir = os.path.join(self.results_dir, 'ancestryQC_plots')
@@ -680,11 +685,12 @@ class AncestryQC:
         input_name = self.input_name
         output_name= self.output_name
         fails_dir  = self.fails_dir
+        clean_dir  = self.clean_dir
 
         step = "drop ancestry outliers"
 
         # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {os.path.join(fails_dir, output_name+'.fail-ancestry-qc.txt')} --make-bed --out {os.path.join(self.results_dir, output_name+'-ancestry-clean')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {os.path.join(fails_dir, output_name+'.fail-ancestry-qc.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-ancestry-clean')}"
 
         # execute PLINK command
         shell_do(plink_cmd2, log=True)
@@ -693,7 +699,7 @@ class AncestryQC:
         process_complete = True
 
         outfiles_dict = {
-            'plink_out': self.results_dir
+            'plink_out': clean_dir
         }
 
         out_dict = {
