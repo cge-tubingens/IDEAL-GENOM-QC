@@ -256,39 +256,6 @@ class VariantQC:
 
         step = "remove_markers"
 
-        # load markers with high missing rate
-        lmiss_path = os.path.join(fails_dir, output_name+'.clean-fail-lmiss-qc.txt')
-        if os.path.getsize(lmiss_path)==0:
-            df_lmiss = pd.DataFrame()
-        else:
-            df_lmiss = pd.read_csv(
-                lmiss_path,
-                header=None,
-                index_col=False,
-                sep=r'\s+',
-                engine='python'
-            )
-        
-        # load markers with different genotype call rate
-        df_diffmiss = pd.read_csv(
-            os.path.join(fails_dir, output_name+'.clean-fail-diffmiss-qc.txt'),
-            header=None,
-            index_col=False
-        )
-
-        # marge information from previous steps
-        df_markers = pd.concat([df_lmiss, df_diffmiss], axis=0)
-        df_markers = df_markers\
-            .drop_duplicates(keep='first')\
-            .sort_values(by=df_markers.columns[0], inplace=False)
-
-        # save markers that failed variant quality control
-        df_markers.to_csv(
-            os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt'),
-            header=False,
-            index=False
-        )
-
         # create cleaned binary files
         plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'.vrnt_clean')}"
 
