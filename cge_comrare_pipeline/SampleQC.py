@@ -787,14 +787,14 @@ class SampleQC:
 
         input_path = self.input_path
         input_name = self.input_name
-        output_path= self.output_path
+        clean_dir  = self.clean_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
 
         step = "drop_samples"
 
         # drop samples
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(output_path, output_name+'-clean-samples')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-clean-samples')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -803,7 +803,7 @@ class SampleQC:
         process_complete = True
 
         outfiles_dict = {
-            'plink_out': output_path
+            'plink_out': clean_dir
         }
 
         out_dict = {
