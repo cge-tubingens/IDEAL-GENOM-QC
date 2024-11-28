@@ -17,7 +17,7 @@ from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class PCA:
     
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, config_dict:str, dependables_path:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str) -> None:
 
         """
         Initialize the PCA (Principal Component Analysis) object.
