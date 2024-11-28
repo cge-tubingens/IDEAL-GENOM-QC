@@ -186,7 +186,7 @@ class PCA:
 
         return out_dict
 
-    def filter_problematic_snps(self)->dict:
+    def execute_filter_prob_snps(self)->dict:
 
         """
         Filter out problematic SNPs (Single Nucleotide Polymorphisms) from the study and reference datasets.
@@ -250,7 +250,7 @@ class PCA:
 
         return out_dict
 
-    def ld_pruning(self)->dict:
+    def execute_ld_pruning(self, ind_pair:list)->dict:
 
         """
         Prune samples based on Linkage Disequilibrium (LD).
@@ -271,8 +271,6 @@ class PCA:
         input_name      = self.input_name
         dependables_path= self.dependables
         results_dir     = self.results_dir
-
-        ind_pair = self.config_dict['indep-pairwise']
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
