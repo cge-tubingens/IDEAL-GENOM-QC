@@ -254,11 +254,6 @@ class VariantQC:
         output_name= self.output_name
         fails_dir  = self.fails_dir
 
-        maf = self.config_dict['maf']
-        geno= self.config_dict['geno']
-        mind= self.config_dict['mind']
-        hwe = self.config_dict['hwe']
-
         step = "remove_markers"
 
         # load markers with high missing rate
