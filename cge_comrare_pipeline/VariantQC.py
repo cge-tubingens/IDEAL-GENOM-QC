@@ -236,7 +236,7 @@ class VariantQC:
 
         return fails['Failure'].value_counts()
 
-    def remove_markers(self)->dict:
+    def execute_drop_variants(self, maf:float=5e-8, geno:float=0.1, hwe:float=5e-8)->dict:
 
         """
         Remove markers failing quality control.
