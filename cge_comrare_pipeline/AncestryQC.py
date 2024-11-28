@@ -596,7 +596,6 @@ class PCA:
         ref_threshold= self.config_dict['ref_threshold']
         stu_threshold= self.config_dict['stu_threshold']
         reference_pop= self.config_dict['reference_pop']
-        pca          = self.config_dict['pca']
 
         step = "pca_analysis"
 
@@ -617,7 +616,7 @@ class PCA:
         memory = round(2*available_memory_mb/3,0)
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca} --memory {memory} --threads {max_threads}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf {maf} --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca} --memory {memory} --threads {max_threads}"
 
         # executes PLINK command
         shell_do(plink_cmd1, log=True)
