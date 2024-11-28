@@ -586,18 +586,11 @@ class AncestryQC:
         - TypeError: If the PCA parameter is not of type int.
         """
 
-        input_path = self.input_path
         input_name = self.input_name
         output_name= self.output_name
         results_dir= self.results_dir
-        fails_dir  = self.fails_dir
-        dependables= self.dependables
 
-        ref_threshold= self.config_dict['ref_threshold']
-        stu_threshold= self.config_dict['stu_threshold']
-        reference_pop= self.config_dict['reference_pop']
-
-        step = "pca_analysis"
+        step = "pca_decomposition"
 
         # check `pca` type
         if not isinstance(pca, int):
