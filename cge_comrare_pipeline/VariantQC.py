@@ -257,7 +257,7 @@ class VariantQC:
         step = "remove_markers"
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --exclude {os.path.join(fails_dir, output_name+'.clean-fail-markers-qc.txt')} --maf {maf} --mind {mind} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'.vrnt_clean')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {os.path.join(fails_dir, 'fail_markers.txt')} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'-variantQCed')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
