@@ -319,7 +319,7 @@ class PCA:
 
         return out_dict
     
-    def prune_reference_panel(self)->dict:
+    def execute_ld_prune_ref_panel(self)->dict:
 
         """
         Prune the reference panel based on the pruned SNPs of the study data.
@@ -368,7 +368,7 @@ class PCA:
 
         return out_dict
 
-    def chromosome_missmatch(self)->dict:
+    def execute_fix_chromosome_missmatch(self)->dict:
 
         """
         Correct chromosome mismatch between study data and reference panel.
@@ -420,7 +420,7 @@ class PCA:
 
         return out_dict
 
-    def position_missmatch_allele_flip(self)->dict:
+    def execute_fix_position_missmatch_allele_flip(self)->dict:
 
         """
         Function to handle position mismatch and allele flips.
@@ -472,7 +472,7 @@ class PCA:
 
         return out_dict
 
-    def remove_missmatch(self)->dict:
+    def execute_remove_missmatch(self)->dict:
 
         """
         Function to remove mismatched alleles after allele flipping.
@@ -524,7 +524,7 @@ class PCA:
 
         return out_dict
     
-    def merge_with_reference(self)->dict:
+    def execute_merge_ref_study(self)->dict:
 
         """
         Function to merge reference panel with study data.
@@ -571,7 +571,7 @@ class PCA:
 
         return out_dict
     
-    def run_pca_analysis(self)->dict:
+    def execute_pc_decomposition(self, pca:int, maf:float)->dict:
 
         """
         Run Principal Component Analysis (PCA) on the study data and perform ancestry inference to filter samples based on population outliers.
