@@ -265,7 +265,6 @@ class SampleQC:
             UserWarning: If mind is outside the recommended range
         """
 
-
         input_name  = self.input_name
         output_name = self.output_name
         results_dir = self.results_dir
