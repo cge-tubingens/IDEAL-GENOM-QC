@@ -294,7 +294,7 @@ class VariantQC:
         )
         
         ## filter male subjects
-        fail_males = df_males[df_males['F_MISS']>threshold].reset_index(drop=True)
+        fail_males = df_males[df_males['F_MISS']>=threshold].reset_index(drop=True)
         fail_males = fail_males[['SNP']].copy()
         fail_males['Failure'] = 'Missin data rate on males'
 
@@ -306,7 +306,7 @@ class VariantQC:
         )
         
         ## filter female subjects
-        fail_females = df_females[df_females['F_MISS']>threshold].reset_index(drop=True)
+        fail_females = df_females[df_females['F_MISS']>=threshold].reset_index(drop=True)
         fail_females = fail_females[['SNP']].copy()
         fail_females['Failure'] = 'Missin data rate on females'
 
