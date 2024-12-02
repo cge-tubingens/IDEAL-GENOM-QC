@@ -84,6 +84,11 @@ class VariantQC:
         self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
         if not os.path.exists(self.fails_dir):
             os.mkdir(self.fails_dir)
+
+        # create clean files folder if not existent
+        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
+        if not os.path.exists(self.clean_dir):
+            os.mkdir(self.clean_dir)
         
         # create figures folder if not existent
         self.plots_dir = os.path.join(self.results_dir, 'variantQC_plots')
@@ -253,11 +258,12 @@ class VariantQC:
         result_path= self.results_dir
         output_name= self.output_name
         fails_dir  = self.fails_dir
+        clean_dir = self.clean_dir
 
         step = "remove_markers"
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {os.path.join(fails_dir, 'fail_markers.txt')} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(result_path, output_name+'-variantQCed')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {os.path.join(fails_dir, 'fail_markers.txt')} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(clean_dir, output_name+'-variantQCed')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
