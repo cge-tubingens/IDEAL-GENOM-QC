@@ -207,7 +207,7 @@ class VariantQC:
 
         return out_dict
     
-    def get_fail_variants(self)->pd.DataFrame:
+    def get_fail_variants(self, marker_call_rate_thres:float=0.2, case_controls_thres:float=1e-5)->pd.DataFrame:
 
         result_path= self.results_dir
         fails_dir  = self.fails_dir
@@ -221,7 +221,7 @@ class VariantQC:
             directory      =result_path, 
             filename_male  =self.males_missing_data, 
             filename_female=self.females_missing_data, \
-            threshold      =0.2, 
+            threshold      =marker_call_rate_thres, 
             plots_dir      =plots_dir
         )
 
@@ -232,7 +232,7 @@ class VariantQC:
         fail_genotype = self.report_different_genotype_call_rate(
             directory=result_path, 
             filename =self.case_control_missing, 
-            threshold=0.05, 
+            threshold=case_controls_thres, 
             plots_dir=plots_dir
         )
 
