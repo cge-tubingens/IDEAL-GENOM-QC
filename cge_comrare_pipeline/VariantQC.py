@@ -354,8 +354,8 @@ class VariantQC:
         fail_females = fail_females[['SNP']].copy()
         fail_females['Failure'] = 'Missing data rate on females'
 
-        #self.make_histogram(df_males['F_MISS'], fig_folder, 'missing_data_male.pdf')
-        #self.make_histogram(df_females['F_MISS'], fig_folder, 'missing_data_female.pdf')
+        self.make_histogram(df_males['F_MISS'], self.plots_dir, 'missing_data_male')
+        self.make_histogram(df_females['F_MISS'], self.plots_dir, 'missing_data_female')
 
         # concatenate female and male subjects who failed QC
         fails = pd.concat([fail_females, fail_males], axis=0)
