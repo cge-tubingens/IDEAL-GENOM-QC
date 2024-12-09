@@ -340,7 +340,7 @@ class VariantQC:
         ## filter male subjects
         fail_males = df_males[df_males['F_MISS']>=threshold].reset_index(drop=True)
         fail_males = fail_males[['SNP']].copy()
-        fail_males['Failure'] = 'Missin data rate on males'
+        fail_males['Failure'] = 'Missing data rate on males'
 
         # load .lmiss file for female subjects
         df_females = pd.read_csv(
