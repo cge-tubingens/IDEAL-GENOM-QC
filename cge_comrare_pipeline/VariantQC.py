@@ -352,7 +352,7 @@ class VariantQC:
         ## filter female subjects
         fail_females = df_females[df_females['F_MISS']>=threshold].reset_index(drop=True)
         fail_females = fail_females[['SNP']].copy()
-        fail_females['Failure'] = 'Missin data rate on females'
+        fail_females['Failure'] = 'Missing data rate on females'
 
         #self.make_histogram(df_males['F_MISS'], fig_folder, 'missing_data_male.pdf')
         #self.make_histogram(df_females['F_MISS'], fig_folder, 'missing_data_female.pdf')
