@@ -208,6 +208,19 @@ class VariantQC:
         return out_dict
     
     def get_fail_variants(self, marker_call_rate_thres:float=0.2, case_controls_thres:float=1e-5)->pd.DataFrame:
+        
+        """
+        Identifies and reports variants that fail quality control checks based on missing data and genotype call rate.
+
+        Parameters:
+        ----------
+        marker_call_rate_thres (float): Threshold for marker call rate to identify markers with missing data. Default is 0.2.
+        case_controls_thres (float): Threshold for genotype call rate to identify markers with different genotype call rates between cases and controls. Default is 1e-5.
+        
+        Returns:
+        --------
+        pd.DataFrame: A DataFrame summarizing the counts of different failure types, including duplicated SNPs and total counts.
+        """
 
         result_path= self.results_dir
         fails_dir  = self.fails_dir
