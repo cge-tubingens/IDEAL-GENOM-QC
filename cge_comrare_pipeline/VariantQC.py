@@ -363,6 +363,24 @@ class VariantQC:
         return fails
 
     def report_different_genotype_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str):
+        """
+        Reports markers with different genotype call rates based on a given threshold.
+        This function reads a .missing file, filters markers with a different genotype call rate
+        below the specified threshold, and returns a DataFrame containing these markers.
+
+        Parameters:
+        -----------
+            directory (str): The directory where the .missing file is located.
+            filename (str): The name of the .missing file.
+            threshold (float): The threshold for filtering markers based on the P-value.
+            plots_dir (str): The directory where plots will be saved (not used in this function).
+        
+        Returns:
+        --------
+            pd.DataFrame: A DataFrame containing markers with different genotype call rates
+                          below the specified threshold. The DataFrame has two columns:
+                          'SNP' and 'Failure', where 'Failure' is set to 'Different genotype call rate'.
+        """
 
         # load .missing file
         df_diffmiss = pd.read_csv(
