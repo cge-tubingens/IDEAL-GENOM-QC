@@ -18,7 +18,7 @@ from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str)->None:#, dependables_path:str, use_kingship:str) -> None:
+    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str)->None:
 
         """
         Initialize the SampleQC object.
