@@ -102,7 +102,94 @@ class SampleQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def execute_haploid_to_missing(self)->dict:
+    def execute_rename_snps(self, rename:bool=True)->dict:
+        
+        """
+        Rename the SNPs in the .bim files following the standard format chr:pos:ref:alt in order to avoid very large SNP names that can cause issues in downstream analyses.
+
+        Parameters:
+        -----------
+            rename (bool): Flag to determine whether to rename SNPs or not. Default is True.
+
+        Returns:
+        --------
+            dict: A dictionary containing the status of the process, the step name, and the output file directory.
+        """
+
+        if not rename:
+            pass
+
+        input_path = self.input_path
+        input_name = self.input_name
+
+        step="snp_renaming"
+
+        df_bim = pd.read_csv(
+            os.path.join(input_path, input_name + '.bim'),
+            sep=r'\s+',
+            engine='python',
+            header=None,
+        )
+
+        df_linkage = pd.concat(
+            [df_bim[1] ,df_bim[0].astype(str) + ':' + df_bim[3].astype(str)+ ':' + df_bim[4].astype(str) + ':' + df_bim[5].astype(str)],
+            axis=1,
+        )
+        df_linkage.columns = ['old', 'new']
+
+        df_bim[1] = df_linkage['new'].copy()
+
+        df_bim.to_csv(
+            os.path.join(input_path, input_name + '.bim'),
+            sep='\t',
+            header=False,
+            index=False,
+        )
+
+        df_linkage.to_csv(
+            os.path.join(input_path, input_name + '.linkage'),
+            sep='\t',
+            header=False,
+            index=False,
+        )
+
+        # PLINK command
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --make-bed --out {os.path.join(input_path, input_name+'-renamed')}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        df_bim = pd.read_csv(
+            os.path.join(input_path, input_name + '.bim'),
+            sep=r'\s+',
+            engine='python',
+            header=None,
+        )
+        df_bim[1] = df_linkage['old'].copy()
+
+        df_bim.to_csv(
+            os.path.join(input_path, input_name + '.bim'),
+            sep='\t',
+            header=False,
+            index=False,
+        )
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': input_path
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+    
+    def execute_haploid_to_missing(self, renamed:bool=True)->dict:
 
         """
         Executes the conversion of haploid genotypes to missing values using PLINK.
