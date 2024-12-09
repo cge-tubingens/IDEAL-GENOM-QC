@@ -920,17 +920,22 @@ class SampleQC:
         fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
 
         df = pd.concat(fails, axis=0).reset_index(drop=True)
-        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.txt'), index=False, sep='\t')
 
         summary = df['Failure'].value_counts().reset_index()
+        num_dup = df.duplicated(subset=['FID', 'IID']).sum()
 
-        totals = summary.select_dtypes(include="number").sum()
+        df = df.drop_duplicates(subset=['FID', 'IID'])
+
+        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.txt'), index=False, sep='\t')
+
+        totals = summary.select_dtypes(include="number").sum() - num_dup
 
         # Create the total row
+        dups_row = pd.DataFrame({'Failure':['Duplicated Sample IDs'], 'count':[-num_dup]})
         total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
 
         # Append the total row to the DataFrame
-        summary = pd.concat([summary, total_row], ignore_index=True)
+        summary = pd.concat([summary, dups_row, total_row], ignore_index=True)
         
         return summary
     
