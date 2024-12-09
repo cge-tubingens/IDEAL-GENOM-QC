@@ -211,8 +211,12 @@ class SampleQC:
 
         step = "haploid_to_missing"
 
-        # convert haploid genotypes to missing
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
+        if renamed:
+            # convert haploid genotypes to missing
+            plink_cmd = f"plink --bfile {os.path.join(input_path, input_name+'-renamed')} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
+        else:
+            # convert haploid genotypes to missing
+            plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
