@@ -264,7 +264,7 @@ class VariantQC:
 
         fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), sep='\t', header=False, index=False)
 
-        return fails['Failure'].value_counts()
+        return pd.concat([summary, dups_row, total_row], ignore_index=True)
 
     def execute_drop_variants(self, maf:float=5e-8, geno:float=0.1, hwe:float=5e-8)->dict:
 
