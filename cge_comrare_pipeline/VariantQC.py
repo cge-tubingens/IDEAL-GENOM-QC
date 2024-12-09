@@ -435,7 +435,7 @@ class VariantQC:
         # Draw the vertical line indicating the cut off threshold
         plt.axvline(x=np.log10(0.2), linestyle='--', color='black')
 
-        plt.savefig(fig_path)
+        plt.savefig(fig_path, dpi=400)
         plt.close()
 
         return None
