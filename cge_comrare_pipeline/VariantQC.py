@@ -250,7 +250,19 @@ class VariantQC:
         )
 
         fails = pd.concat([fail_missing_data, fail_genotype], axis=0, ignore_index=True)
-        fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), header=False, index=False)
+
+        summary = fails['Failure'].value_counts().reset_index()
+        num_dup = fails.duplicated(subset=['SNP']).sum()
+
+        totals = summary.select_dtypes(include="number").sum() - num_dup
+        dups_row = pd.DataFrame({'Failure':['Duplicated SNPs'], 'count':[-num_dup]})
+        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
+
+        fails = fails.drop_duplicates(subset='SNP', keep='first', inplace=False)
+
+        fails = fails.drop(columns=['Failure'], inplace=False)
+
+        fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), sep='\t', header=False, index=False)
 
         return fails['Failure'].value_counts()
 
