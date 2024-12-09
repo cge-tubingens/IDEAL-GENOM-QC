@@ -431,20 +431,6 @@ class VariantQC:
         plt.xlabel('Fraction of missing data')
         plt.ylabel('Number of SNPs')
         plt.title('All SNPs')
-        plt.xlim(-4, 0)
-        plt.ylim(0, 100000)
-
-        # Label y-axis with the 'ylabels' values
-        plt.yticks([])
-        ylabels = ['0', '20000', '40000', '60000', '80000', '100000']
-        plt.gca().set_yticks([int(label) for label in ylabels])
-        plt.gca().set_yticklabels(ylabels)
-
-        # Label x-axis with the 'xlabels' values
-        plt.xticks([])
-        xlabels = ['-4', '-3', '-2', '-1', '0']
-        plt.gca().set_xticks([-4, -3, -2, -1, 0])
-        plt.gca().set_xticklabels(xlabels)
 
         # Draw the vertical line indicating the cut off threshold
         plt.axvline(x=np.log10(0.2), linestyle='--', color='black')
