@@ -964,7 +964,7 @@ class SampleQC:
         step = "drop_samples"
 
         # drop samples
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-clean-samples')}"
+        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name+'-hh-missing')} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-clean-samples')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
