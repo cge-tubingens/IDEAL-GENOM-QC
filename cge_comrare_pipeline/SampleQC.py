@@ -658,7 +658,81 @@ class SampleQC:
         }
 
         return out_dict
- 
+
+    def execute_recover_snp_names(self, rename:bool=True)->dict:
+        
+        """
+        Executes the recovery of SNP names by renaming them based on a linkage file and 
+        updating the corresponding .bim file. Optionally, it can skip the renaming process.
+
+        Parameters:
+        -----------
+            rename (bool): Flag to determine whether to rename SNPs or not. Default is True.
+
+        Returns:
+        --------
+            dict: A dictionary containing the status of the process, the step name, and the output file directory.
+
+        Raises:
+        -------
+            FileNotFoundError: If the file linking old names and new names is not found.
+        """
+
+        input_path = self.input_path
+        input_name = self.input_name
+        output_name = self.output_name
+
+        step = "recover_snp_names"
+
+        if not rename:
+            pass
+
+        if not os.path.isfile(os.path.join(input_path, input_name + '.linkage')):
+            raise FileNotFoundError("Linkage file not found.")
+
+        df_bim_cleaned = pd.read_csv(
+            os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
+            sep=r'\s+',
+            engine='python',
+            header=None,
+        )
+
+        df_linkage = pd.read_csv(
+            os.path.join(input_path, input_name + '.linkage'),
+            sep=r'\s+',
+            engine='python',
+            header=None,
+        )
+
+        df_bim_cleaned[1] = df_linkage[0].copy()
+        df_bim_cleaned.to_csv(
+            os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
+            sep='\t',
+            header=False,
+            index=False,
+        )
+
+        # PLINK command
+        plink_cmd = f"plink --bfile {os.path.join(self.clean_dir, output_name+'-clean-samples')} --make-bed --out {os.path.join(self.clean_dir, output_name+'-clean-samples')}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': self.clean_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
     @staticmethod
     def compute_heterozigozity(ped_file: str, map_file: str=None)->None:
         
