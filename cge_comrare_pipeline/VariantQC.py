@@ -309,7 +309,26 @@ class VariantQC:
         return out_dict
 
     def report_missing_data(self, directory:str, filename_male:str, filename_female:str, threshold:float, plots_dir:str, y_axis_cap:int=10):
+   
+        """
+        Reports SNPs with missing data rates above a specified threshold for male and female subjects.
+        This function reads .lmiss files for male and female subjects, filters SNPs with missing data rates
+        above the given threshold, and generates histograms for the missing data rates. It then concatenates
+        the filtered SNPs for both male and female subjects and returns them.
 
+        Parameters:
+        -----------
+        directory (str): The directory where the .lmiss files are located.
+        filename_male (str): The filename of the .lmiss file for male subjects.
+        filename_female (str): The filename of the .lmiss file for female subjects.
+        threshold (float): The threshold for the missing data rate. SNPs with missing data rates above this threshold will be reported.
+        plots_dir (str): The directory where the histograms will be saved.
+        y_axis_cap (int, optional): The maximum value for the y-axis in the histograms. Default is 10.
+
+        Returns:
+        --------
+        pd.DataFrame: A DataFrame containing the SNPs that failed the missing data rate threshold for both male and female subjects.
+        """
 
         # load .lmiss file for male subjects
         df_males = pd.read_csv(
