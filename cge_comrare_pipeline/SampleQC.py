@@ -585,7 +585,7 @@ class SampleQC:
 
         return out_dict
     
-    def execute_dup_relatedness(self, kingship:float)->dict:
+    def execute_kingship(self, kingship:float)->dict:
         
         """
         Executes the duplicates and relatedness analysis using PLINK2.
