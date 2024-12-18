@@ -1455,7 +1455,7 @@ class SampleQC:
             os.path.join(fails_folder, output_prefix+'.fail-IBD1-qc.txt'),
             index=False,
             header=False,
-            sep=" "
+            sep="\t"
         )
 
         return None
