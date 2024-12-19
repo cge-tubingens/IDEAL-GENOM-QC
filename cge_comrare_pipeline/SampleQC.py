@@ -1376,6 +1376,65 @@ class SampleQC:
 
         return fail_het
 
+    def report_ibd_analysis(self, ibd_threshold:float=0.185)->pd.DataFrame:
+
+        if not isinstance(ibd_threshold, float):
+            raise TypeError("ibd_threshold should be a float")
+        if self.use_king:
+            print("Skipping IBD analysis as use_king is set to True")
+            return pd.DataFrame()
+
+        results_dir = self.results_dir
+        output_name = self.output_name
+        fails_dir   = self.fails_dir
+
+        # empty dataframe
+        to_remove = pd.DataFrame(columns=['FID', 'IID'])
+
+        # load .imiss file
+        df_imiss = pd.read_csv(
+            os.path.join(results_dir, output_name+'-ibd-missing.imiss'),
+            sep=r'\s+',
+            engine='python'
+        )
+        # load .genome file
+        df_genome = pd.read_csv(
+            os.path.join(results_dir, output_name+'-ibd.genome'),
+            sep=r'\s+',
+            engine='python'
+        )
+
+        # isolate duplicates or related samples
+        df_dup = df_genome[df_genome['PI_HAT']>ibd_threshold].reset_index(drop=True)
+
+        df_1 = pd.merge(
+            df_dup[['FID1', 'IID1']], 
+            df_imiss[['FID', 'IID', 'F_MISS']], 
+            left_on =['FID1', 'IID1'],
+            right_on=['FID', 'IID']
+        ).drop(columns=['FID', 'IID'], inplace=False)
+
+        df_2 = pd.merge(
+            df_dup[['FID2', 'IID2']], 
+            df_imiss[['FID', 'IID', 'F_MISS']], 
+            left_on=['FID2', 'IID2'],
+            right_on=['FID', 'IID']
+        ).drop(columns=['FID', 'IID'], inplace=False)
+
+        for k in range(len(df_dup)):
+
+            if df_1.iloc[k,2]>df_2.iloc[k,2]:
+                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+            elif df_1.iloc[k,2]<df_2.iloc[k,2]:
+                to_remove.loc[k] = df_2.iloc[k,0:2].to_list()
+            else:
+                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+
+        to_remove = to_remove.drop_duplicates(keep='last').reset_index(drop=True)
+        to_remove['Failure'] = 'Duplicates and relatedness (IBD)'
+
+        return to_remove
+
     @staticmethod
     def plot_imiss_het(logFMISS:pd.Series, meanHET:pd.Series, figs_folder:str)->None:
 
