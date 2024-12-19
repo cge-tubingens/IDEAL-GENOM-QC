@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cge-comrare-pipeline"
+name = "ideal-genom-qc"
 version = "0.1.0"
 description = "package to run a genotype quality control pipeline"
 authors = ["Luis Giraldo González <luisggon@protonmail.com>", "Amabel Tenghe <tenghe.amabel@gmail.com>"]
