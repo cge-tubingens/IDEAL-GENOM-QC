@@ -43,7 +43,8 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, (sample_params['maf'],)),
             'duplicates_relatedness': (sample_qc.execute_duplicate_relatedness, (sample_params['kingship'], use_kingship,)),
             'get_fail_samples'      : (sample_qc.get_fail_samples, (sample_params['mind'], sample_params['het_deviation'], sample_params['maf'], sample_params['ibd_threshold'],)),
-            'drop_fail_samples'     : (sample_qc.execute_drop_samples, ())
+            'drop_fail_samples'     : (sample_qc.execute_drop_samples, ()),
+            'recover_SNPs_names'    : (sample_qc.execute_recover_snp_names, (True),)
         }
 
         step_description = {
