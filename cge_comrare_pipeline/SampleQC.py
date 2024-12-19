@@ -1239,15 +1239,14 @@ class SampleQC:
                 label=category                # Add label for legend
             )
 
-        filtered_df = df[df['STATUS'] == 'PROBLEM'].reset_index(drop=True)[['F', 'F_MISS']].copy()
-
         ax.scatter(
-            filtered_df["F"], 
-            filtered_df["F_MISS"], 
+            df_problem["F"], 
+            df_problem["F_MISS"], 
             color='red',
-            s=20,
+            s=25,
             marker='o',
-            label='Problem Status'
+            label='Problem Status',
+            edgecolors=palette['Female PEDSEX'],
         )
 
         # Add vertical lines
