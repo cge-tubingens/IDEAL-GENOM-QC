@@ -1378,61 +1378,91 @@ class SampleQC:
 
         return fail_het
 
-    def report_ibd_analysis(self, ibd_threshold:float=0.185)->pd.DataFrame:
+    def report_ibd_analysis(self, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> pd.DataFrame:
+        """
+        Identify individuals with high IBD (identity-by-descent) relatedness and report samples to remove.
 
+        Parameters:
+            ibd_threshold (float): Threshold for IBD (PI_HAT) above which samples are considered related.
+            chunk_size (int): Number of rows to process at a time from the .genome file.
+
+        Returns:
+            pd.DataFrame: A dataframe containing FID, IID, and the reason for removal.
+        """
         if not isinstance(ibd_threshold, float):
             raise TypeError("ibd_threshold should be a float")
+
         if self.use_king:
-            print("Skipping IBD analysis as use_king is set to True")
             return pd.DataFrame()
 
+        # File paths
         results_dir = self.results_dir
         output_name = self.output_name
-        fails_dir   = self.fails_dir
 
-        # empty dataframe
-        to_remove = pd.DataFrame(columns=['FID', 'IID'])
+        imiss_path = os.path.join(results_dir, output_name + '-ibd-missing.imiss')
+        genome_path = os.path.join(results_dir, output_name + '-ibd.genome')
 
-        # load .imiss file
-        df_imiss = pd.read_csv(
-            os.path.join(results_dir, output_name+'-ibd-missing.imiss'),
+        if not os.path.exists(imiss_path):
+            raise FileNotFoundError(f"Missing file: {imiss_path}")
+        if not os.path.exists(genome_path):
+            raise FileNotFoundError(f"Missing file: {genome_path}")
+
+        # Load .imiss file
+        df_imiss = pd.read_csv(imiss_path, sep=r'\s+', engine='python')
+
+        # Initialize dataframe for duplicates
+        duplicates = []
+
+        # Process the .genome file in chunks
+        for chunk in pd.read_csv(
+            genome_path,
+            usecols=['FID1', 'IID1', 'FID2', 'IID2', 'PI_HAT'],
             sep=r'\s+',
-            engine='python'
-        )
-        # load .genome file
-        df_genome = pd.read_csv(
-            os.path.join(results_dir, output_name+'-ibd.genome'),
-            sep=r'\s+',
-            engine='python'
-        )
+            engine='python',
+            chunksize=chunk_size,
+        ):
+            # Filter rows with PI_HAT > ibd_threshold
+            filtered_chunk = chunk[chunk['PI_HAT'] > ibd_threshold]
+            if not filtered_chunk.empty:
+                duplicates.append(filtered_chunk)
 
-        # isolate duplicates or related samples
-        df_dup = df_genome[df_genome['PI_HAT']>ibd_threshold].reset_index(drop=True)
+        if not duplicates:
+            return pd.DataFrame(columns=['FID', 'IID', 'Failure'])
 
-        df_1 = pd.merge(
-            df_dup[['FID1', 'IID1']], 
-            df_imiss[['FID', 'IID', 'F_MISS']], 
-            left_on =['FID1', 'IID1'],
-            right_on=['FID', 'IID']
-        ).drop(columns=['FID', 'IID'], inplace=False)
+        # Concatenate all filtered chunks
+        df_dup = pd.concat(duplicates, ignore_index=True)
 
-        df_2 = pd.merge(
-            df_dup[['FID2', 'IID2']], 
-            df_imiss[['FID', 'IID', 'F_MISS']], 
+        # Merge with missingness data
+        imiss_related1 = pd.merge(
+            df_dup[['FID1', 'IID1']],
+            df_imiss[['FID', 'IID', 'F_MISS']],
+            left_on=['FID1', 'IID1'],
+            right_on=['FID', 'IID'],
+        ).rename(columns={'F_MISS': 'F_MISS_1'})
+
+        imiss_related2 = pd.merge(
+            df_dup[['FID2', 'IID2']],
+            df_imiss[['FID', 'IID', 'F_MISS']],
             left_on=['FID2', 'IID2'],
-            right_on=['FID', 'IID']
-        ).drop(columns=['FID', 'IID'], inplace=False)
+            right_on=['FID', 'IID'],
+        ).rename(columns={'F_MISS': 'F_MISS_2'})
 
-        for k in range(len(df_dup)):
+        # Decide which samples to remove
+        to_remove = pd.concat(
+            [
+                imiss_related1[['FID1', 'IID1', 'F_MISS_1']],
+                imiss_related2[['FID2', 'IID2', 'F_MISS_2']],
+            ],
+            axis=1,
+        )
 
-            if df_1.iloc[k,2]>df_2.iloc[k,2]:
-                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
-            elif df_1.iloc[k,2]<df_2.iloc[k,2]:
-                to_remove.loc[k] = df_2.iloc[k,0:2].to_list()
-            else:
-                to_remove.loc[k] = df_1.iloc[k,0:2].to_list()
+        to_remove['FID'], to_remove['IID'] = np.where(
+            to_remove['F_MISS_1'] > to_remove['F_MISS_2'],
+            (to_remove['FID1'], to_remove['IID1']),
+            (to_remove['FID2'], to_remove['IID2']),
+        )
 
-        to_remove = to_remove.drop_duplicates(keep='last').reset_index(drop=True)
+        to_remove = to_remove[['FID', 'IID']].drop_duplicates().reset_index(drop=True)
         to_remove['Failure'] = 'Duplicates and relatedness (IBD)'
 
         return to_remove
