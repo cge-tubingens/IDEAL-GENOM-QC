@@ -699,6 +699,32 @@ class SampleQC:
         }
 
         return out_dict
+    
+    def execute_duplicate_relatedness(self, kingship:float=0.354, use_king:bool=True)->dict:
+
+        step = "duplicates_and_relatedness"
+        
+        if use_king:
+            self.execute_kingship(kingship)
+        else:
+            self.execute_ibd()
+
+        self.use_king = use_king
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': self.results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
 
     def execute_recover_snp_names(self, rename:bool=True)->dict:
         
