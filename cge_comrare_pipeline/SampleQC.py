@@ -584,7 +584,48 @@ class SampleQC:
         }
 
         return out_dict
-    
+
+    def execute_ibd(self)->dict:
+
+        input_name = self.input_name
+        output_name= self.output_name
+        results_dir= self.results_dir
+
+        step = "identity_by_descent"
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # PLINK commands
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --genome --out {os.path.join(results_dir, output_name+'-ibd')} --threads {max_threads}"
+
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'LDpruned')} --allow-no-sex --missing --out {os.path.join(results_dir, output_name+'-ibd-missing')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        self.ibd_miss = os.path.join(results_dir, output_name+'-ibd-missing.imiss')
+        self.genome = os.path.join(results_dir, output_name+'-ibd.genome')
+
+        # report
+        process_complete = True
+
+        outfiles_dict = {
+            'plink_out': results_dir
+        }
+
+        out_dict = {
+            'pass': process_complete,
+            'step': step,
+            'output': outfiles_dict
+        }
+
+        return out_dict
+
     def execute_kingship(self, kingship:float)->dict:
         
         """
