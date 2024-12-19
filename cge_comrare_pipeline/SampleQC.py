@@ -1210,6 +1210,9 @@ class SampleQC:
         df.loc[df['PEDSEX'] == 1, 'Category'] = 'Male PEDSEX'
         df.loc[df['PEDSEX'] == 2, 'Category'] = 'Female PEDSEX'
 
+        df_problem = df[df['STATUS'] == 'PROBLEM'].reset_index(drop=True)
+        df = df[df['STATUS'] != 'PROBLEM'].reset_index(drop=True)
+
         # Define the palette (color mapping)
         palette = {
             "Male PEDSEX": "blue",
