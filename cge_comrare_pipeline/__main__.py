@@ -6,7 +6,7 @@ from cge_comrare_pipeline.Helpers import arg_parser
 
 from cge_comrare_pipeline.SampleQC import SampleQC
 from cge_comrare_pipeline.VariantQC import VariantQC
-from cge_comrare_pipeline.AncestryQC import PCA
+from cge_comrare_pipeline.AncestryQC import AncestryQC
 from cge_comrare_pipeline.UMAPplot import UMAPplot
 
 def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
