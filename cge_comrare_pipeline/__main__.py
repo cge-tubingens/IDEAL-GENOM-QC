@@ -53,37 +53,48 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
         print("\033[92mSample quality control done.\033[0m")
 
     # execute step by step
-    if steps_dict['pca']:
+    if steps_dict['ancestry']:
 
         # instantiate PCA class 
-        pca_qc = PCA(
-            input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results'),
-            input_name      =data_dict['output_prefix']+'.clean',
+        ancestry_qc = AncestryQC(
+            input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results', 'clean_files'),
+            input_name      =data_dict['output_prefix']+'-clean-samples',
             output_path     =data_dict['output_directory'],
             output_name     =data_dict['output_prefix'],
-            config_dict     =params_dict,
             dependables_path=data_dict['dependables_directory']
         )
 
-        # pipeline steps
-        pca_steps = {
-            'filter_snps'              : pca_qc.filter_problematic_snps,
-            'LD_pruning'               : pca_qc.ld_pruning,
-            'reference_pruning'        : pca_qc.prune_reference_panel,
-            'chr_missmatch'            : pca_qc.chromosome_missmatch,
-            'pos_missmatch_allele_flip': pca_qc.position_missmatch_allele_flip,
-            'remove_missmatch'         : pca_qc.remove_missmatch,
-            'merging'                  : pca_qc.merge_with_reference,
-            'pca_analysis'             : pca_qc.run_pca_analysis,
-            'umap_plot'                : pca_qc.reference_umap_plot,
-            'pca_plot'                 : pca_qc.pca_plot
+        ancestry_qc_steps = {
+            'filter_snps'              : (ancestry_qc.execute_filter_prob_snps, ()),
+            'LD_pruning'               : (ancestry_qc.execute_ld_pruning, (ancestry_params['ind_pair'],)),
+            'reference_pruning'        : (ancestry_qc.execute_ld_prune_ref_panel, ()),
+            'chr_missmatch'            : (ancestry_qc.execute_fix_chromosome_missmatch,()),
+            'pos_missmatch_allele_flip': (ancestry_qc.execute_fix_position_missmatch_allele_flip, ()),
+            'remove_missmatch'         : (ancestry_qc.execute_remove_missmatch, ()),
+            'merging'                  : (ancestry_qc.execute_merge_ref_study, ()),
+            'pca_analysis'             : (ancestry_qc.execute_pc_decomposition, (ancestry_params['pca'], ancestry_params['maf'],)),
+            'get_outliers'             : (ancestry_qc.get_ancestry_outliers, (ancestry_params['ref_threshold'], ancestry_params['stu_threshold'], 'SAS', ancestry_params['num_pca'],)),
+            'pca_plot'                 : (ancestry_qc.pca_plot, ())
         }
 
-        for step in pca_steps.keys():
-            print(step)
-            pca_steps[step]()
+        step_description = {
+            'filter_snps'              : 'filter problematic snps',
+            'LD_pruning'               : 'LD prune study_population',
+            'reference_pruning'        : 'LD prune reference panel',
+            'chr_missmatch'            : 'fix any chromosome missmatch',
+            'pos_missmatch_allele_flip': 'fix any issue with position missmatch and allele flip',
+            'remove_missmatch'         : 'remove missmatchesd SNPs',
+            'merging'                  : 'merge reference panel and study population',
+            'pca_analysis'             : 'execute PC decomposition',
+            'get_outliers'             : 'find samples with discordant ancestry',
+            'pca_plot'                 : 'generate PCA plot'
+        }
 
-        print("\033[92mEthnicity outliers analysis done.\033[0m")
+        for name, (func, params) in ancestry_qc_steps.items():
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            func(*params)
+
+        print("\033[92mAncestry outliers analysis done.\033[0m")
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
