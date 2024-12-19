@@ -18,22 +18,37 @@ def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingsh
             input_name      =data_dict['input_prefix'],
             output_path     =data_dict['output_directory'],
             output_name     =data_dict['output_prefix'],
-            config_dict     =params_dict,
             dependables_path=data_dict['dependables_directory'],
-            use_kingship    =use_kingship
         )
 
         # pipeline steps
-        smpl_steps = {
-        'ld_prune'      : sample_qc.ld_pruning,
-        'sex_check'     : sample_qc.run_sex_check,
-        'heterozygosity': sample_qc.run_heterozygosity_rate,
-        'relatedness'   : sample_qc.run_relatedness_prune,
-        'delete_samples': sample_qc.delete_failing_QC,
+        sample_qc_steps = {
+            'rename SNPs'           : (sample_qc.execute_rename_snps, (True,)),
+            'hh_to_missing'         : (sample_qc.execute_haploid_to_missing, ()),
+            'ld_pruning'            : (sample_qc.execute_ld_pruning, (sample_params['ind_par'],)),
+            'miss_genotype'         : (sample_qc.execute_miss_genotype, (sample_params['mind'],)),
+            'sex_check'             : (sample_qc.execute_sex_check, (sample_params['sex_check'],)),
+            'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, (sample_params['maf'],)),
+            'duplicates_relatedness': (sample_qc.execute_duplicate_relatedness, (sample_params['kingship'], use_kingship,)),
+            'get_fail_samples'      : (sample_qc.get_fail_samples, (sample_params['mind'], sample_params['het_deviation'], sample_params['maf'], sample_params['ibd_threshold'],)),
+            'drop_fail_samples'     : (sample_qc.execute_drop_samples, ())
         }
 
-        for step in smpl_steps.keys():
-            smpl_steps[step]()
+        step_description = {
+            'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
+            'hh_to_missing'         : 'Solve hh warnings by setting to missing',
+            'ld_pruning'            : 'Perform LD pruning',
+            'miss_genotype'         : 'Get samples with high missing rate',
+            'sex_check'             : 'Get samples with discordant sex information',
+            'heterozygosity'        : 'Get samples with high heterozygosity rate',
+            'duplicates_relatedness': 'Get samples with high relatedness rate or duplicates',
+            'get_fail_samples'      : 'Get samples that failed quality control',
+            'drop_fail_samples'     : 'Drop samples that failed quality control'
+        }
+
+        for name, (func, params) in sample_qc_steps.items():
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            func(*params)
 
         print("\033[92mSample quality control done.\033[0m")
 
