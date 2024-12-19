@@ -114,7 +114,6 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             input_name      =data_dict['output_prefix']+'.clean',
             output_path     =data_dict['output_directory'],
             output_name     =data_dict['output_prefix'],
-            config_dict     =params_dict,
             dependables_path=data_dict['dependables_directory']
         )
 
@@ -177,26 +176,13 @@ def execute_main()->str:
     with open(data_path, 'r') as file:
         data_dict = json.load(file)
 
-    if params_path is None:
-        params_dict = {
-                "maf" : 0.05,
-                "geno": 0.1,
-                "mind": 0.1,
-                "hwe" : 0.00000005,
-                "sex_check": [0.2, 0.8],
-                "indep-pairwise": [50, 5, 0.2],
-                "chr": 24,
-                "outlier_threshold": 6,
-                "pca": 10
-                }
-    else:
-        with open(params_path, 'r') as file:
-            params_dict = json.load(file)
+    with open(params_path, 'r') as file:
+        params_dict = json.load(file)
 
     with open(steps_path, 'r') as file:
         steps_dict = json.load(file)
 
-    pipe_SamOutVar(
+    qc_pipeline(
         params_dict =params_dict,
         data_dict   =data_dict,
         steps_dict  =steps_dict,
