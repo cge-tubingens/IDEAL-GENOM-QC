@@ -601,7 +601,7 @@ class SampleQC:
         # PLINK commands
         plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --genome --out {os.path.join(results_dir, output_name+'-ibd')} --threads {max_threads}"
 
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'LDpruned')} --allow-no-sex --missing --out {os.path.join(results_dir, output_name+'-ibd-missing')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --allow-no-sex --missing --out {os.path.join(results_dir, output_name+'-ibd-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
