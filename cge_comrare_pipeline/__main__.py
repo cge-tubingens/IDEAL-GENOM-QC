@@ -9,7 +9,19 @@ from cge_comrare_pipeline.VariantQC import VariantQC
 from cge_comrare_pipeline.AncestryQC import AncestryQC
 from cge_comrare_pipeline.UMAPplot import UMAPplot
 
-def pipe_SamOutVar(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
+def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
+
+    sample_params = params_dict['sample_qc']
+    ancestry_params = params_dict['ancestry_qc']
+    variant_qc_params = params_dict['variant_qc']
+
+    use_kingship = use_kingship.lower()
+    if use_kingship == 'true':
+        use_kingship = True
+    else:
+        use_kingship = False
+
+    print('use kingship', type(use_kingship))
 
     if steps_dict['sample']:
         # instantiate SampleQC class
