@@ -965,20 +965,28 @@ class SampleQC:
         #                                       DUPLICATES-RELATEDNESS CHECK
         # ==========================================================================================================
 
-        # load samples that failed duplicates and relatedness check
-        duplicates_file = os.path.join(result_path, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
-        df_duplicates = pd.read_csv(
-            duplicates_file,
-            sep=r'\s+',
-            engine='python'
-        )
+        if self.use_king:
 
-        # filter samples that failed duplicates and relatedness check
-        df_duplicates.columns = ['FID', 'IID']
-        fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
-        fail_duplicates['Failure'] = 'Duplicates and relatedness'
+            # load samples that failed duplicates and relatedness check
+            duplicates_file = os.path.join(result_path, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
+            df_duplicates = pd.read_csv(
+                duplicates_file,
+                sep=r'\s+',
+                engine='python'
+            )
 
-        print('Duplicates and relatedness check done')
+            # filter samples that failed duplicates and relatedness check
+            df_duplicates.columns = ['FID', 'IID']
+            fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
+            fail_duplicates['Failure'] = 'Duplicates and relatedness (Kingship)'
+
+            print('Duplicates and relatedness check done with kingship')
+
+        else:
+
+            fail_duplicates = self.report_ibd_analysis(ibd_threshold)
+
+            print('Duplicates and relatedness check done with IBD')
 
         # ==========================================================================================================
         #                                       MERGE ALL FAILURES
