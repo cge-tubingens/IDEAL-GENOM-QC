@@ -14,7 +14,7 @@ from matplotlib.colors import Normalize
 from matplotlib import colormaps
 import seaborn as sns
 
-from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
@@ -1348,7 +1348,11 @@ class SampleQC:
         axes1[1].set_ylabel("Frequency")
 
         plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_{split}_{maf}_histogram.jpeg"), dpi=400)
+        if split == '>':
+            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_greater_{maf}_histogram.jpeg"), dpi=400)
+        else:
+            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_histogram.jpeg"), dpi=400)
+        
         plt.show()
 
         df_het['Deviated'] = 'Not Excluded'
@@ -1373,7 +1377,10 @@ class SampleQC:
         plt.legend(title='Exclusion', loc='best')
 
         plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_{split}_{maf}_scatterplot.jpeg"), dpi=400)
+        if split == '>':
+            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_greater_{maf}_scatterplot.jpeg"), dpi=400)
+        else:
+            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_scatterplot.jpeg"), dpi=400)
         plt.show()
 
         return fail_het
