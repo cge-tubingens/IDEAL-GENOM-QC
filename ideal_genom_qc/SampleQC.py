@@ -1571,7 +1571,7 @@ class SampleQC:
         # save samples that failed imiss-het QC
         df.to_csv(
             path_or_buf =output_file, 
-            sep         =' ', 
+            sep         ='\t', 
             index       =False, 
             header      =False
         )
