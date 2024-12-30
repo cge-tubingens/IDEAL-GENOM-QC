@@ -285,7 +285,8 @@ class UMAPplot:
         # save parameters to a csv file
         df_params.to_csv(
             os.path.join(results_dir, 'plots_parameters.csv'),
-            index=True
+            index=True,
+            sep='\t'
         )
 
         self.files_to_keep.append('plots_parameters.csv')
