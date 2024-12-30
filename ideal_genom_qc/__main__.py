@@ -37,7 +37,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         sample_qc_steps = {
             'rename SNPs'           : (sample_qc.execute_rename_snps, (True,)),
             'hh_to_missing'         : (sample_qc.execute_haploid_to_missing, ()),
-            'ld_pruning'            : (sample_qc.execute_ld_pruning, (sample_params['ind_par'],)),
+            'ld_pruning'            : (sample_qc.execute_ld_pruning, (sample_params['ind_pair'],)),
             'miss_genotype'         : (sample_qc.execute_miss_genotype, (sample_params['mind'],)),
             'sex_check'             : (sample_qc.execute_sex_check, (sample_params['sex_check'],)),
             'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, (sample_params['maf'],)),
@@ -56,7 +56,8 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'heterozygosity'        : 'Get samples with high heterozygosity rate',
             'duplicates_relatedness': 'Get samples with high relatedness rate or duplicates',
             'get_fail_samples'      : 'Get samples that failed quality control',
-            'drop_fail_samples'     : 'Drop samples that failed quality control'
+            'drop_fail_samples'     : 'Drop samples that failed quality control',
+            'recover_SNPs_names'    : 'Recover SNPs names'
         }
 
         for name, (func, params) in sample_qc_steps.items():
@@ -129,7 +130,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
 
         print("\033[92mVariant quality control done.\033[0m")
 
-    if steps_dict['umap_plots']:
+    if steps_dict['umap']:
 
         # instantiate umap class
         umap_plots = UMAPplot(
