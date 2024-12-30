@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 
 class AncestryQC:
     
