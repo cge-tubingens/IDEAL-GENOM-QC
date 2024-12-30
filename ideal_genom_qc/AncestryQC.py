@@ -131,66 +131,6 @@ class AncestryQC:
         if not os.path.exists(self.plots_dir):
             os.mkdir(self.plots_dir)
 
-    def shorten_variant_id(self)->dict:
-
-        """
-        Function to deal with long variant IDs. It will be done at a later stage.
-        """
-
-        input_path      = self.input_path
-        input_name      = self.input_name
-        dependables_path= self.dependables
-
-        reference_panel = 'all_phase3'
-
-        step = "shorten length of variant IDs"
-
-        awk_cmd1 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(input_path, input_name+'.names')}"
-
-        awk_cmd2 = f"awk < {os.path.join(input_path, input_name+'.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(input_path, input_name+'_0.bim')}"
-
-        awk_cmd3 = f"awk < {os.path.join(dependables_path, reference_panel+'.bim')} '{{print $1\":\"$4, $2}}' > {os.path.join(dependables_path, reference_panel+'.names')}"
-
-        awk_cmd4 = f"awk < {os.path.join(dependables_path, reference_panel+'.bim')} '{{$2=$1\":\"$4;print $0}}' > {os.path.join(dependables_path, reference_panel+'_0.bim')}"
-
-        shutil.copy(
-            os.path.join(input_path, input_name+'.bed'), 
-            os.path.join(input_path, input_name+'_0.bed')
-        )
-        shutil.copy(
-            os.path.join(input_path, input_name+'.fam'), 
-            os.path.join(input_path, input_name+'_0.fam')
-        )
-        shutil.copy(
-            os.path.join(dependables_path, reference_panel+'.bed'), 
-            os.path.join(dependables_path, reference_panel+'_0.bed')
-        )
-        shutil.copy(
-            os.path.join(dependables_path, reference_panel+'.fam'), 
-            os.path.join(dependables_path, reference_panel+'_0.fam')
-        )
-
-        logs = []
-        cmds = [awk_cmd1, awk_cmd2, awk_cmd3, awk_cmd4]
-        for cmd in cmds:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            logs.append([result.stderr, result.stdout])
-        
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'output': input_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
     def execute_filter_prob_snps(self)->dict:
 
         """
