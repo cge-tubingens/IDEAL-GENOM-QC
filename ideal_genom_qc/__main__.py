@@ -112,21 +112,24 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
-            input_path      =os.path.join(data_dict['output_directory'], 'pca_results'),
-            input_name      =data_dict['output_prefix']+'.clean',
+            input_path      =os.path.join(data_dict['output_directory'], 'ancestry_results', 'clean_files'),
+            input_name      =data_dict['output_prefix']+'-ancestry-clean',
             output_path     =data_dict['output_directory'],
-            output_name     =data_dict['output_prefix'],
-            dependables_path=data_dict['dependables_directory']
+            output_name     =data_dict['output_prefix']
         )
 
-        vrnt_steps = {
-            'miss_data'     : variant_qc.missing_data_rate,
-            'call_rate'     : variant_qc.different_genotype_call_rate,
-            'delete_markers': variant_qc.remove_markers
+        variant_qc_steps = {
+            'Missing data rate'         : (variant_qc.execute_missing_data_rate, (variant_qc_params['chr-y'],)),
+            'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, ())
         }
 
-        for step in vrnt_steps.keys():
-            vrnt_steps[step]()
+        step_description = {
+            'Missing data rate'         : 'Compute missing data rate for males and females',
+            'Different genotype'        : 'Case/control nonrandom missingness test'
+        }
+
+        for step in variant_qc_steps.keys():
+            variant_qc_steps[step]()
 
         print("\033[92mVariant quality control done.\033[0m")
 
