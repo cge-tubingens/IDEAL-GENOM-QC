@@ -2,12 +2,12 @@ import os
 import json
 import pandas as pd
 
-from cge_comrare_pipeline.Helpers import arg_parser
+from ideal_genom_qc.Helpers import arg_parser
 
-from cge_comrare_pipeline.SampleQC import SampleQC
-from cge_comrare_pipeline.VariantQC import VariantQC
-from cge_comrare_pipeline.AncestryQC import AncestryQC
-from cge_comrare_pipeline.UMAPplot import UMAPplot
+from ideal_genom_qc.SampleQC import SampleQC
+from ideal_genom_qc.VariantQC import VariantQC
+from ideal_genom_qc.AncestryQC import AncestryQC
+from ideal_genom_qc.UMAPplot import UMAPplot
 
 def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
 
