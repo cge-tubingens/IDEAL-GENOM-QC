@@ -141,16 +141,16 @@ class SampleQC:
 
         df_bim.to_csv(
             os.path.join(input_path, input_name + '.bim'),
-            sep='\t',
+            sep   ='\t',
             header=False,
-            index=False,
+            index =False,
         )
 
         df_linkage.to_csv(
             os.path.join(input_path, input_name + '.linkage'),
-            sep='\t',
+            sep   ='\t',
             header=False,
-            index=False,
+            index =False,
         )
 
         # PLINK command
@@ -161,7 +161,7 @@ class SampleQC:
 
         df_bim = pd.read_csv(
             os.path.join(input_path, input_name + '.bim'),
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python',
             header=None,
         )
@@ -169,9 +169,9 @@ class SampleQC:
 
         df_bim.to_csv(
             os.path.join(input_path, input_name + '.bim'),
-            sep='\t',
+            sep   ='\t',
             header=False,
-            index=False,
+            index =False,
         )
 
         # report
@@ -229,8 +229,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -322,8 +322,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -394,8 +394,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -480,8 +480,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -566,9 +566,9 @@ class SampleQC:
         )
 
         self.summary_greater = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped')
-        self.summary_less = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
-        self.maf_greater_miss = os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing.imiss')
-        self.maf_less_miss = os.path.join(results_dir, output_name+'-chr1-22-mafless-missing.imiss')
+        self.summary_less    = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
+        self.maf_greater_miss= os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing.imiss')
+        self.maf_less_miss   = os.path.join(results_dir, output_name+'-chr1-22-mafless-missing.imiss')
 
         # report
         process_complete = True
@@ -578,8 +578,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -619,8 +619,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -693,8 +693,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -719,8 +719,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -747,7 +747,7 @@ class SampleQC:
 
         input_path = self.input_path
         input_name = self.input_name
-        output_name = self.output_name
+        output_name= self.output_name
 
         step = "recover_snp_names"
 
@@ -759,14 +759,14 @@ class SampleQC:
 
         df_bim_cleaned = pd.read_csv(
             os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python',
             header=None,
         )
 
         df_linkage = pd.read_csv(
             os.path.join(input_path, input_name + '.linkage'),
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python',
             header=None,
         )
@@ -774,9 +774,9 @@ class SampleQC:
         df_bim_cleaned[1] = df_linkage[0].copy()
         df_bim_cleaned.to_csv(
             os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
-            sep='\t',
+            sep   ='\t',
             header=False,
-            index=False,
+            index =False,
         )
 
         # PLINK command
@@ -793,8 +793,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -826,12 +826,11 @@ class SampleQC:
         --------
             None
 
-        
         If the PED file is not found or an I/O error occurs, an error message is printed.
         """
         
         # Define output file name
-        summary_file = f"Summary-{os.path.basename(ped_file)}"
+        summary_file= f"Summary-{os.path.basename(ped_file)}"
         output_path = os.path.join(os.path.dirname(ped_file), summary_file)
 
         try:
@@ -850,9 +849,9 @@ class SampleQC:
                     genotype_data = columns[6:]  # Genotype data starts at the 7th column
 
                     # Initialize counters
-                    total = 0
-                    hom = 0
-                    het = 0
+                    total= 0
+                    hom  = 0
+                    het  = 0
 
                     # Iterate through genotype pairs
                     for i in range(0, len(genotype_data), 2):
@@ -971,7 +970,7 @@ class SampleQC:
             duplicates_file = os.path.join(result_path, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
             df_duplicates = pd.read_csv(
                 duplicates_file,
-                sep=r'\s+',
+                sep   =r'\s+',
                 engine='python'
             )
 
@@ -1007,7 +1006,7 @@ class SampleQC:
 
         # Create the total row
         dups_row = pd.DataFrame({'Failure':['Duplicated Sample IDs'], 'count':[-num_dup]})
-        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
+        total_row= pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
 
         # Append the total row to the DataFrame
         summary = pd.concat([summary, dups_row, total_row], ignore_index=True)
@@ -1052,8 +1051,8 @@ class SampleQC:
         }
 
         out_dict = {
-            'pass': process_complete,
-            'step': step,
+            'pass'  : process_complete,
+            'step'  : step,
             'output': outfiles_dict
         }
 
@@ -1131,13 +1130,12 @@ class SampleQC:
         })
 
         axes2[1] = sns.scatterplot(
-            data=df_call_rate_sorted,
-            x='Index',
-            y='F_MISS',
+            data  =df_call_rate_sorted,
+            x     ='Index',
+            y     ='F_MISS',
             marker='o',  
-            color='blue',
-            #label="F_MISS",
-            ax=axes2[1]
+            color ='blue',
+            ax    =axes2[1]
         ) 
         axes2[1].set_title("Sample Call Rate")
         axes2[1].set_xlabel(f"Number of samples")
@@ -1148,10 +1146,10 @@ class SampleQC:
 
         # third subplot: Number of samples vs F_MISS
         axes2[2] = sns.scatterplot(
-            x=df_call_rate['F_MISS'],
-            y=np.random.normal(size=len(df_call_rate['F_MISS'])),
+            x      =df_call_rate['F_MISS'],
+            y      =np.random.normal(size=len(df_call_rate['F_MISS'])),
             markers='o',
-            s=20,
+            s      =20,
         )
         axes2[2].set_title("Sample Call Rate")
         axes2[2].set_xlabel("Proportion of missing SNPs (F_MISS)")
@@ -1191,13 +1189,13 @@ class SampleQC:
 
         df_sexcheck = pd.read_csv(
             os.path.join(directory, sex_check_filename),
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python'
         )
 
         df_xchr_imiss = pd.read_csv(
             os.path.join(directory, xchr_imiss_filename),
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python'
         )
 
@@ -1215,13 +1213,13 @@ class SampleQC:
 
         # Define the palette (color mapping)
         palette = {
-            "Male PEDSEX": "blue",
+            "Male PEDSEX"  : "blue",
             "Female PEDSEX": "green"
         }
 
         # Define the size mapping
         size_mapping = {
-            "Male PEDSEX": 40,
+            "Male PEDSEX"  : 40,
             "Female PEDSEX": 40
         }
 
@@ -1233,19 +1231,19 @@ class SampleQC:
             ax.scatter(
                 group["F"], 
                 group["F_MISS"], 
-                edgecolors=palette[category],  # Map color
-                facecolors='none',            # Hollow circles
-                s=size_mapping[category],     # Map size
-                label=category                # Add label for legend
+                edgecolors=palette[category],     # Map color
+                facecolors='none',                # Hollow circles
+                s         =size_mapping[category],# Map size
+                label     =category               # Add label for legend
             )
 
         ax.scatter(
             df_problem["F"], 
             df_problem["F_MISS"], 
-            color='red',
-            s=25,
-            marker='o',
-            label='Problem Status',
+            color     ='red',
+            s         =25,
+            marker    ='o',
+            label     ='Problem Status',
             edgecolors=palette['Female PEDSEX'],
         )
 
@@ -1298,7 +1296,7 @@ class SampleQC:
         maf_file = os.path.join(directory, summary_ped_filename)
         df_maf = pd.read_csv(
             maf_file,
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python'
         )
 
@@ -1306,7 +1304,7 @@ class SampleQC:
         autosomal_file = os.path.join(directory, autosomal_filename)
         df_autosomal = pd.read_csv(
             autosomal_file,
-            sep=r'\s+',
+            sep   =r'\s+',
             engine='python'
         )
 
@@ -1314,9 +1312,9 @@ class SampleQC:
         df_het = pd.merge(
             df_maf[['ID', 'Percent_het']],
             df_autosomal[['FID', 'IID', 'F_MISS']],
-            left_on='ID',
+            left_on ='ID',
             right_on='IID',
-            how='inner'
+            how     ='inner'
         )
 
         mean_percent= df_het['Percent_het'].mean()
@@ -1362,14 +1360,14 @@ class SampleQC:
         # Create the scatter plot
         plt.figure(figsize=(10, 6))
         sns.scatterplot(
-            data=df_het,
-            x='Percent_het',
-            y='F_MISS',
-            hue='Deviated',
+            data   =df_het,
+            x      ='Percent_het',
+            y      ='F_MISS',
+            hue    ='Deviated',
             palette={'Not Excluded': 'blue', f'{std_deviation_het}xSD Excluded': 'red'},
             markers={'Not Excluded': 'o', f'{std_deviation_het}xSD Excluded': 'o'},
-            size='Deviated',
-            sizes={'Not Excluded': 20, f'{std_deviation_het}xSD Excluded': 30}
+            size   ='Deviated',
+            sizes  ={'Not Excluded': 20, f'{std_deviation_het}xSD Excluded': 30}
         )
         plt.title("Autosomal heterozygosity and call rate")
         plt.xlabel(f"% Heterozygosity MAF {split} {maf}")
@@ -1407,7 +1405,7 @@ class SampleQC:
         output_name = self.output_name
 
         imiss_path = os.path.join(results_dir, output_name + '-ibd-missing.imiss')
-        genome_path = os.path.join(results_dir, output_name + '-ibd.genome')
+        genome_path= os.path.join(results_dir, output_name + '-ibd.genome')
 
         if not os.path.exists(imiss_path):
             raise FileNotFoundError(f"Missing file: {imiss_path}")
@@ -1423,9 +1421,9 @@ class SampleQC:
         # Process the .genome file in chunks
         for chunk in pd.read_csv(
             genome_path,
-            usecols=['FID1', 'IID1', 'FID2', 'IID2', 'PI_HAT'],
-            sep=r'\s+',
-            engine='python',
+            usecols  =['FID1', 'IID1', 'FID2', 'IID2', 'PI_HAT'],
+            sep      =r'\s+',
+            engine   ='python',
             chunksize=chunk_size,
         ):
             # Filter rows with PI_HAT > ibd_threshold
@@ -1443,14 +1441,14 @@ class SampleQC:
         imiss_related1 = pd.merge(
             df_dup[['FID1', 'IID1']],
             df_imiss[['FID', 'IID', 'F_MISS']],
-            left_on=['FID1', 'IID1'],
+            left_on =['FID1', 'IID1'],
             right_on=['FID', 'IID'],
         ).rename(columns={'F_MISS': 'F_MISS_1'})
 
         imiss_related2 = pd.merge(
             df_dup[['FID2', 'IID2']],
             df_imiss[['FID', 'IID', 'F_MISS']],
-            left_on=['FID2', 'IID2'],
+            left_on =['FID2', 'IID2'],
             right_on=['FID', 'IID'],
         ).rename(columns={'F_MISS': 'F_MISS_2'})
 
@@ -1494,8 +1492,8 @@ class SampleQC:
         """
 
         # Calculate colors based on density
-        norm = Normalize(vmin=min(logFMISS), vmax=max(logFMISS))
-        colors = colormaps['viridis']
+        norm  = Normalize(vmin=min(logFMISS), vmax=max(logFMISS))
+        colors= colormaps['viridis']
 
         fig_path = os.path.join(figs_folder, "imiss-vs-het.pdf")
 
@@ -1542,12 +1540,12 @@ class SampleQC:
         # load .het and .imiss files
         df_het = pd.read_csv(
             os.path.join(folder_path, file_name+'.het'),
-            sep=r"\s+",
+            sep   =r"\s+",
             engine='python'
         )
         df_imiss = pd.read_csv(
             os.path.join(folder_path, file_name+'.imiss'),
-            sep=r"\s+",
+            sep   =r"\s+",
             engine='python'
         )
 
