@@ -914,7 +914,7 @@ class AncestryQC:
             os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt'),
             header=None,
             index=False,
-            sep=' '
+            sep='\t'
         )
 
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
