@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 from sklearn.model_selection import ParameterGrid
 
 class UMAPplot:
@@ -425,7 +425,8 @@ class UMAPplot:
                     s=10,
                     alpha=0.6,
                     ax=ax,
-                    style="Phenotype"
+                    style="Phenotype",
+                    edgecolor='none'
                 )
                 plt.legend(
                     bbox_to_anchor=(0., 1.02, 1., .102), 
@@ -466,7 +467,8 @@ class UMAPplot:
                     alpha=0.6,
                     s=10,
                     ax=ax,
-                    style="Phenotype"
+                    style="Phenotype",
+                    edgecolor='none'
                 )
 
                 # Set tick label size
