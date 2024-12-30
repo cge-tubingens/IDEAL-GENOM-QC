@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-from cge_comrare_pipeline.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 
 class VariantQC:
 
