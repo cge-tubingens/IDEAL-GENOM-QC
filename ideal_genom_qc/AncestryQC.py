@@ -852,7 +852,8 @@ class AncestryQC:
         df_eigenvec = pd.read_csv(
             os.path.join(results_dir, output_name+'.pca.eigenvec'),
             header=None,
-            sep=' '
+            sep   =r'\s+',
+            engine='python'
         )
 
         if num_pcs>df_eigenvec.shape[1]-2:
@@ -913,8 +914,8 @@ class AncestryQC:
         df.to_csv(
             os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt'),
             header=None,
-            index=False,
-            sep='\t'
+            index =False,
+            sep   ='\t'
         )
 
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
