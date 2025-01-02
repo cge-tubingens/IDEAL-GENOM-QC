@@ -88,7 +88,8 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'merging'                  : (ancestry_qc.execute_merge_ref_study, ()),
             'pca_analysis'             : (ancestry_qc.execute_pc_decomposition, (ancestry_params['pca'], ancestry_params['maf'],)),
             'get_outliers'             : (ancestry_qc.get_ancestry_outliers, (ancestry_params['ref_threshold'], ancestry_params['stu_threshold'], 'SAS', ancestry_params['num_pca'],)),
-            'pca_plot'                 : (ancestry_qc.pca_plot, ())
+            'pca_plot'                 : (ancestry_qc.pca_plot, ()),
+            'drop_fail_samples'        : (ancestry_qc.execute_drop_ancestry_outliers, ())
         }
 
         step_description = {
@@ -101,7 +102,8 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'merging'                  : 'merge reference panel and study population',
             'pca_analysis'             : 'execute PC decomposition',
             'get_outliers'             : 'find samples with discordant ancestry',
-            'pca_plot'                 : 'generate PCA plot'
+            'pca_plot'                 : 'generate PCA plot',
+            'drop_fail_samples'        : 'drop samples with discordant ancestry'
         }
 
         for name, (func, params) in ancestry_qc_steps.items():
