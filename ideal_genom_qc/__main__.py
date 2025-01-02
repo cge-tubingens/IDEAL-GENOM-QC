@@ -61,7 +61,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in sample_qc_steps.items():
-            print(f"\033[1m{step_description[name]}.\033[0m")
+            print(f"\033[34m{step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mSample quality control done.\033[0m")
@@ -105,7 +105,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[1m{step_description[name]}.\033[0m")
+            print(f"\033[34m{step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mAncestry outliers analysis done.\033[0m")
