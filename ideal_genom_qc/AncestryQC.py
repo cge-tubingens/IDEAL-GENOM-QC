@@ -680,7 +680,8 @@ class AncestryQC:
         df_eigenvec = pd.read_csv(
             os.path.join(results_dir, output_name+'.pca.eigenvec'),
             header=None,
-            sep=' '
+            sep   =r"\s+",
+            engine='python'
         )
         df_eigenvec = df_eigenvec[df_eigenvec.columns[:5]].copy()
         df_eigenvec.columns = ['ID1', 'ID2', 'pc_1', 'pc_2', 'pc_3']
@@ -852,7 +853,7 @@ class AncestryQC:
         df_eigenvec = pd.read_csv(
             os.path.join(results_dir, output_name+'.pca.eigenvec'),
             header=None,
-            sep   =r'\s+',
+            sep   =r"\s+",
             engine='python'
         )
 
