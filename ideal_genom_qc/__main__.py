@@ -128,7 +128,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['maf'], variant_qc_params['geno'], variant_qc_params['hwe'],)),
         }
 
-        step_description = {
+        variant_step_description = {
             'Missing data rate'         : 'Compute missing data rate for males and females',
             'Different genotype'        : 'Case/control nonrandom missingness test',
             'Get fail variants'         : 'Get variants that failed quality control',
@@ -136,7 +136,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in variant_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{variant_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mVariant quality control done.\033[0m")
