@@ -15,7 +15,7 @@ from sklearn.model_selection import ParameterGrid
 
 class UMAPplot:
 
-    def __init__(self, input_path:str, input_name:str, dependables_path:str, config_dict:dict, output_path:str, compute_all:bool=True) -> None:
+    def __init__(self, input_path:str, input_name:str, dependables_path:str, output_path:str, compute_all:bool=True) -> None:
 
         """
         
@@ -51,7 +51,6 @@ class UMAPplot:
         self.input_path = input_path
         self.input_name = input_name
         self.dependables= dependables_path
-        self.config_dict= config_dict
         self.compute_all= compute_all
 
         self.files_to_keep= []
