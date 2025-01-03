@@ -48,7 +48,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'recover_SNPs_names'    : (sample_qc.execute_recover_snp_names, (True,),)
         }
 
-        step_description = {
+        sample_step_description = {
             'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
             'hh_to_missing'         : 'Solve hh warnings by setting to missing',
             'ld_pruning'            : 'Perform LD pruning',
@@ -62,7 +62,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in sample_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{sample_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mSample quality control done.\033[0m")
@@ -70,7 +70,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
     # execute step by step
     if steps_dict['ancestry']:
 
-        # instantiate PCA class 
+        # instantiate AncestryQC class 
         ancestry_qc = AncestryQC(
             input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results', 'clean_files'),
             input_name      =data_dict['output_prefix']+'-clean-samples',
@@ -93,7 +93,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'drop_fail_samples'        : (ancestry_qc.execute_drop_ancestry_outliers, ())
         }
 
-        step_description = {
+        ancestry_step_description = {
             'filter_snps'              : 'filter problematic snps',
             'LD_pruning'               : 'LD prune study_population',
             'reference_pruning'        : 'LD prune reference panel',
@@ -108,7 +108,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{ancestry_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mAncestry outliers analysis done.\033[0m")
