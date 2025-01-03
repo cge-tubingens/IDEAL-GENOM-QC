@@ -14,6 +14,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
     sample_params = params_dict['sample_qc']
     ancestry_params = params_dict['ancestry_qc']
     variant_qc_params = params_dict['variant_qc']
+    umap_params = params_dict['umap_plot']
 
     use_kingship = use_kingship.lower()
     if use_kingship == 'true':
