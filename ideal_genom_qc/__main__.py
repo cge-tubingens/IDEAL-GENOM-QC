@@ -125,7 +125,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'Missing data rate'         : (variant_qc.execute_missing_data_rate, (variant_qc_params['chr-y'],)),
             'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, ()),
             'Get fail variants'         : (variant_qc.get_fail_variants, (variant_qc_params['miss_data_rate'], variant_qc_params['diff_genotype_rate'],)),
-            'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['geno'], variant_qc_params['hwe'], variant_qc_params['maf'],)),
+            'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['maf'], variant_qc_params['geno'], variant_qc_params['hwe'],)),
         }
 
         step_description = {
