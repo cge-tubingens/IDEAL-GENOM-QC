@@ -145,21 +145,27 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
 
         # instantiate umap class
         umap_plots = UMAPplot(
-            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results'), 
-            input_name      =data_dict['output_prefix']+'.vrnt_clean', 
+            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results', 'clean_files'), 
+            input_name      =data_dict['output_prefix']+'-variantQCed', 
             dependables_path=data_dict['dependables_directory'],
-            config_dict     =params_dict,
             output_path     =data_dict['output_directory']
         )
+
         umap_steps = {
-            'ld_pruning': umap_plots.ld_pruning,
-            'comp_pca'  : umap_plots.compute_pcas,
-            'draw_plots': umap_plots.generate_plots
+            'ld_pruning': (umap_plots.ld_pruning, (umap_params['maf'], umap_params['geno'], umap_params['mind'], umap_params['hwe'], umap_params['ind_pair'],)),
+            'comp_pca'  : (umap_plots.compute_pcas, (umap_params['pca'],)),
+            'draw_plots': (umap_plots.generate_plots, (umap_params['n_neighbors'], umap_params['min_dist'], umap_params['metric'], ))
         }
 
-        for step in umap_steps.keys():
-            print(step)
-            umap_steps[step]()
+        umap_step_description = {
+            'ld_pruning': 'LD pruning',
+            'comp_pca'  : 'Compute PCAs',
+            'draw_plots': 'Generate UMAP plots'
+        }
+
+        for name, (func, params) in umap_steps.items():
+            print(f"\033[34m{umap_step_description[name]}.\033[0m")
+            func(*params)
 
         print("\033[92mUMAP plots done.\033[0m")       
 
