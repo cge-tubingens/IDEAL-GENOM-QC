@@ -168,7 +168,7 @@ class UMAPplot:
 
         return out_dict
 
-    def compute_pcas(self)->None:
+    def compute_pcas(self, pca:int=10)->None:
     
         """
         Compute Principal Component Analysis (PCA) to feed UMAP algorithm and generate plots.
@@ -188,8 +188,6 @@ class UMAPplot:
         results_dir= self.results_dir
         compute_all= self.compute_all
 
-        pca = self.config_dict['umap_pca']
-
         # Check type of pca
         if not isinstance(pca, int):
             raise TypeError("pca should be of type int.")
@@ -197,7 +195,7 @@ class UMAPplot:
         step= "compute_pca_for_umap_plots"
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDpruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
 
         if compute_all:
             # execute plink command
