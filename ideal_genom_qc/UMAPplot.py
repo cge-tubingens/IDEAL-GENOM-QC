@@ -62,7 +62,7 @@ class UMAPplot:
 
         pass
 
-    def ld_pruning(self)->dict:
+    def ld_pruning(self, maf:float=0.01, geno:float=0.1, mind:float=0.2, hwe:float=5e-8, ind_pair:list=[50, 5, 0.2])->dict:
 
         """
         Prune samples based on Linkage Disequilibrium (LD).
@@ -86,11 +86,6 @@ class UMAPplot:
         results_dir     = self.results_dir
         compute_all     = self.compute_all
 
-        maf      = self.config_dict['maf']
-        geno     = self.config_dict['geno']
-        mind     = self.config_dict['mind']
-        hwe      = self.config_dict['hwe']
-        ind_pair = self.config_dict['indep-pairwise']
 
         # Check type of maf
         if not isinstance(maf, float):
@@ -144,11 +139,11 @@ class UMAPplot:
         plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'-LDpruned')}"
 
-        self.files_to_keep.append(input_name+'.pruned.bed')
-        self.files_to_keep.append(input_name+'.pruned.bim')
-        self.files_to_keep.append(input_name+'.pruned.fam')
+        self.files_to_keep.append(input_name+'-LDpruned.bed')
+        self.files_to_keep.append(input_name+'-LDpruned.bim')
+        self.files_to_keep.append(input_name+'-LDpruned.fam')
 
         if compute_all:
             # execute PLINK commands
