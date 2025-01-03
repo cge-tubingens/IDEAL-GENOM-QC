@@ -221,16 +221,12 @@ class UMAPplot:
 
         return out_dict
     
-    def generate_plots(self)->None:
+    def generate_plots(self, n_neighbors:list=[5], min_dist:list=[0.5], metric:list=['euclidean'])->None:
 
         input_path = self.input_path
         input_name = self.input_name
         results_dir= self.results_dir
         dependables= self.dependables
-
-        n_neighbors = self.config_dict['umap_n_neighbors']
-        min_dist    = self.config_dict['umap_min_dist']
-        metric      = self.config_dict['umap_metric']
 
         step = "draw_umap_plots"
 
