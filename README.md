@@ -227,7 +227,7 @@ poetry install
 
 ### Pipeline usage options
 
-1. Inside a virtual environment
+#### Inside a virtual environment
 
 After running the `poetry install` command a virtual environment can be activated with the command `poetry shell`. Once the environment is activated the usage of the pipeline is quite simple:
 
