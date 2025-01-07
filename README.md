@@ -211,18 +211,50 @@ These cleaned binary files are ready for the next steps of the GWAS analysis.
 
 ## Installation and usage
 
-The pipeline is easy to use. Once installed in the system or in a virtual enviroment one needs to run the following command:
+The library can be installed by cloning the GitHub repository:
 
 ```
-python3 cge_comrare_pipeline --path_params <path to parameters.JSON> 
+git clone https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
+```
+
+### Setting up the environment
+
+The virtual environment can be created using either `Poetry` or `pip`. Since this is a `Poetry`-based project, we recommend using `Poetry`. Once `Poetry` is installed on your system (refer to [`Poetry` documentation](https://python-poetry.org/docs/) for installation details), navigate to the cloned repository folder and run the following command:
+
+```
+poetry install
+```
+
+### Pipeline usage options
+
+1. Inside a virtual environment
+
+After running the `poetry install` command a virtual environment can be activated with the command `poetry shell`. Once the environment is activated the usage of the pipeline is quite simple:
+
+```
+python3 ideal_genom_qc --path_params <path to parameters.JSON> 
                              --file_folders <path to paths.JSON> 
                              --steps <path to steps.JSON>
                              --use-kingship <true or false>
 ```
 
-The first three parameters are the path to the three configuration files. The fourth and fifth parameters are used to control the pipeline behavior.
+The first three parameters are the path to the three configuration files. The fourth is used to control the pipeline behavior.
 
-## Docker Container
+### Using `Poetry`
+
+One the advantages of using `Poetry` is that one does not have to activate any virtual environment to use the pipeline CLI. One just has to run the following command:
+
+```
+poetry run python3 ideal_genom_qc --path_params <path to parameters.JSON> 
+                             --file_folders <path to paths.JSON> 
+                             --steps <path to steps.JSON>
+                             --use-kingship <true or false>
+```
+### Jupyter Notebooks
+
+Another possibility is to use the Jupyter notebooks that come with the package. They can be found on the folder `notebooks`. There is a notebook for each pipeline step. The user only has to provide the necesary parameters. The notebooks are a good way to get a better understanding of the pipeline funcioning.
+
+### Docker Container
 
 With the `Dockerfile` one can create a Docker container for the pipeline. Notice that the container needs to intereact with physical files. Then, we recommend the usage of the following command:
 
