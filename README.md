@@ -117,7 +117,8 @@ The `steps.JSON` file has the following structure:
 {
     "pca"    : true,
     "sample" : true,
-    "variant": true
+    "variant": true,
+    "umap"   : true
 }
 ```
 
@@ -125,14 +126,14 @@ With the above configuration, all three steps will run seamlessly, which is the 
 
 ```
 {
-    "sample"   : true,
-    "ancestry" : true,
+    "sample"   : false,
+    "ancestry" : false,
     "variant"  : true,
     "umap"     : true
 }
 ```
 
-allows you to run only the sample and variant quality control. Note that an exception will be raised if the PCA step has not been run, as the necessary files for the sample steps would not be available.
+allows you to run only the variant QC and generate the UMAP plot(s). Note that an exception will be raised if the ancestry cehck step has not been run, as the necessary files for the variant step would not be available.
 
 ## Dependable Files
 
