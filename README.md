@@ -227,9 +227,15 @@ poetry install
 
 ### Pipeline usage options
 
-#### Inside a virtual environment
+#### 1. Inside a virtual environment
 
-After running the `poetry install` command a virtual environment can be activated with the command `poetry shell`. Once the environment is activated the usage of the pipeline is quite simple:
+After running the `poetry install` activate the virtual environment with 
+
+```
+poetry shell
+```
+
+ Once the environment is active, you can execute the pipeline with the following command:
 
 ```
 python3 ideal_genom_qc --path_params <path to parameters.JSON> 
@@ -240,9 +246,9 @@ python3 ideal_genom_qc --path_params <path to parameters.JSON>
 
 The first three parameters are the path to the three configuration files. The fourth is used to control the pipeline behavior.
 
-### Using `Poetry`
+#### 2. Using `Poetry` directly
 
-One the advantages of using `Poetry` is that one does not have to activate any virtual environment to use the pipeline CLI. One just has to run the following command:
+One of the benefits of using `Poetry` s that it eliminates the need to activate a virtual environment. Run the pipeline directly with:
 
 ```
 poetry run python3 ideal_genom_qc --path_params <path to parameters.JSON> 
@@ -250,13 +256,15 @@ poetry run python3 ideal_genom_qc --path_params <path to parameters.JSON>
                              --steps <path to steps.JSON>
                              --use-kingship <true or false>
 ```
-### Jupyter Notebooks
+#### 3. Jupyter Notebooks
 
-Another possibility is to use the Jupyter notebooks that come with the package. They can be found on the folder `notebooks`. There is a notebook for each pipeline step. The user only has to provide the necesary parameters. The notebooks are a good way to get a better understanding of the pipeline funcioning.
+The package includes Jupyter notebooks located in the notebooks folder. Each notebook corresponds to a specific step of the pipeline. Simply provide the required parameters to execute the steps interactively.
 
-### Docker Container
+Using the notebooks is a great way to gain a deeper understanding of how the pipeline operates.
 
-With the `Dockerfile` one can create a Docker container for the pipeline. Notice that the container needs to intereact with physical files. Then, we recommend the usage of the following command:
+#### 4. Docker Container
+
+A `Dockerfile` is provided to build a container for the pipeline. Since the container interacts with physical files, it is recommended to use the following command:
 
 ```
 docker run -v <path to project folder>:/data <docker_image_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> --use-kingship false
