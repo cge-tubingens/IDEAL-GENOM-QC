@@ -115,10 +115,10 @@ The `steps.JSON` file has the following structure:
 
 ```
 {
-    "pca"    : true,
-    "sample" : true,
-    "variant": true,
-    "umap"   : true
+    "ancestry": true,
+    "sample"  : true,
+    "variant" : true,
+    "umap"    : true
 }
 ```
 
