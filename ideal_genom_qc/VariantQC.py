@@ -406,7 +406,7 @@ class VariantQC:
 
         Parameters:
         -----------
-        - F_MISS (array-like): Array-like object containing the fraction of missing data for each SNP.
+        - F_MISS (pandas.Series): Array-like object containing the fraction of missing data for each SNP.
         - figs_folder (str): Path to the folder where the histogram plot will be saved.
         - output_name (str): Name of the output histogram plot file.
 
@@ -417,10 +417,10 @@ class VariantQC:
 
         values = F_MISS.copy()
 
+        plt.clf()
+
         # substitue 0 by machine epsilon
-        for k in range(len(F_MISS)):
-            if values[k] == 0:
-                values[k] = np.finfo(np.float32).eps
+        values[values == 0] = np.finfo(np.float32).eps
 
         # log10 transform imput data
         Y = np.log10(values)
@@ -428,7 +428,7 @@ class VariantQC:
         fig_path = os.path.join(figs_folder, f"{output_name}.jpeg")
 
         plt.hist(Y, bins=50, color='red')
-        plt.xlabel('Fraction of missing data')
+        plt.xlabel('Log10 of Fraction of Missing Data')
         plt.ylabel('Number of SNPs')
         plt.title('All SNPs')
 

@@ -1110,7 +1110,7 @@ class SampleQC:
 
         plt.tight_layout()
         plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_histogram.jpeg"), dpi=400)
-        plt.show()
+        plt.show(block=False)
 
         fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
 
@@ -1161,7 +1161,7 @@ class SampleQC:
 
         plt.tight_layout()
         plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_scatterplot.jpeg"), dpi=400)
-        plt.show()
+        plt.show(block=False)
 
         return fail_call_rate
     
@@ -1351,7 +1351,7 @@ class SampleQC:
         else:
             plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_histogram.jpeg"), dpi=400)
         
-        plt.show()
+        plt.show(block=False)
 
         df_het['Deviated'] = 'Not Excluded'
         df_het.loc[mask_plus, 'Deviated'] = f'{std_deviation_het}xSD Excluded'
@@ -1379,7 +1379,7 @@ class SampleQC:
             plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_greater_{maf}_scatterplot.jpeg"), dpi=400)
         else:
             plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_scatterplot.jpeg"), dpi=400)
-        plt.show()
+        plt.show(block=False)
 
         return fail_het
 

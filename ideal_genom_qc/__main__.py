@@ -14,6 +14,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
     sample_params = params_dict['sample_qc']
     ancestry_params = params_dict['ancestry_qc']
     variant_qc_params = params_dict['variant_qc']
+    umap_params = params_dict['umap_plot']
 
     use_kingship = use_kingship.lower()
     if use_kingship == 'true':
@@ -47,7 +48,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'recover_SNPs_names'    : (sample_qc.execute_recover_snp_names, (True,),)
         }
 
-        step_description = {
+        sample_step_description = {
             'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
             'hh_to_missing'         : 'Solve hh warnings by setting to missing',
             'ld_pruning'            : 'Perform LD pruning',
@@ -61,7 +62,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in sample_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{sample_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mSample quality control done.\033[0m")
@@ -69,7 +70,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
     # execute step by step
     if steps_dict['ancestry']:
 
-        # instantiate PCA class 
+        # instantiate AncestryQC class 
         ancestry_qc = AncestryQC(
             input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results', 'clean_files'),
             input_name      =data_dict['output_prefix']+'-clean-samples',
@@ -92,7 +93,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'drop_fail_samples'        : (ancestry_qc.execute_drop_ancestry_outliers, ())
         }
 
-        step_description = {
+        ancestry_step_description = {
             'filter_snps'              : 'filter problematic snps',
             'LD_pruning'               : 'LD prune study_population',
             'reference_pruning'        : 'LD prune reference panel',
@@ -107,7 +108,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{ancestry_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mAncestry outliers analysis done.\033[0m")
@@ -124,10 +125,10 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
             'Missing data rate'         : (variant_qc.execute_missing_data_rate, (variant_qc_params['chr-y'],)),
             'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, ()),
             'Get fail variants'         : (variant_qc.get_fail_variants, (variant_qc_params['miss_data_rate'], variant_qc_params['diff_genotype_rate'],)),
-            'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['geno'], variant_qc_params['hwe'], variant_qc_params['maf'],)),
+            'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['maf'], variant_qc_params['geno'], variant_qc_params['hwe'],)),
         }
 
-        step_description = {
+        variant_step_description = {
             'Missing data rate'         : 'Compute missing data rate for males and females',
             'Different genotype'        : 'Case/control nonrandom missingness test',
             'Get fail variants'         : 'Get variants that failed quality control',
@@ -135,7 +136,7 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         }
 
         for name, (func, params) in variant_qc_steps.items():
-            print(f"\033[34m{step_description[name]}.\033[0m")
+            print(f"\033[34m{variant_step_description[name]}.\033[0m")
             func(*params)
 
         print("\033[92mVariant quality control done.\033[0m")
@@ -144,21 +145,27 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
 
         # instantiate umap class
         umap_plots = UMAPplot(
-            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results'), 
-            input_name      =data_dict['output_prefix']+'.vrnt_clean', 
+            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results', 'clean_files'), 
+            input_name      =data_dict['output_prefix']+'-variantQCed', 
             dependables_path=data_dict['dependables_directory'],
-            config_dict     =params_dict,
             output_path     =data_dict['output_directory']
         )
+
         umap_steps = {
-            'ld_pruning': umap_plots.ld_pruning,
-            'comp_pca'  : umap_plots.compute_pcas,
-            'draw_plots': umap_plots.generate_plots
+            'ld_pruning': (umap_plots.ld_pruning, (umap_params['maf'], umap_params['geno'], umap_params['mind'], umap_params['hwe'], umap_params['ind_pair'],)),
+            'comp_pca'  : (umap_plots.compute_pcas, (umap_params['pca'],)),
+            'draw_plots': (umap_plots.generate_plots, (umap_params['n_neighbors'], umap_params['min_dist'], umap_params['metric'], ))
         }
 
-        for step in umap_steps.keys():
-            print(step)
-            umap_steps[step]()
+        umap_step_description = {
+            'ld_pruning': 'LD pruning',
+            'comp_pca'  : 'Compute PCAs',
+            'draw_plots': 'Generate UMAP plots'
+        }
+
+        for name, (func, params) in umap_steps.items():
+            print(f"\033[34m{umap_step_description[name]}.\033[0m")
+            func(*params)
 
         print("\033[92mUMAP plots done.\033[0m")       
 

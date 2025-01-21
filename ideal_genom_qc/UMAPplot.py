@@ -15,7 +15,7 @@ from sklearn.model_selection import ParameterGrid
 
 class UMAPplot:
 
-    def __init__(self, input_path:str, input_name:str, dependables_path:str, config_dict:dict, output_path:str, compute_all:bool=True) -> None:
+    def __init__(self, input_path:str, input_name:str, dependables_path:str, output_path:str, compute_all:bool=True) -> None:
 
         """
         
@@ -51,7 +51,6 @@ class UMAPplot:
         self.input_path = input_path
         self.input_name = input_name
         self.dependables= dependables_path
-        self.config_dict= config_dict
         self.compute_all= compute_all
 
         self.files_to_keep= []
@@ -63,7 +62,7 @@ class UMAPplot:
 
         pass
 
-    def ld_pruning(self)->dict:
+    def ld_pruning(self, maf:float=0.01, geno:float=0.1, mind:float=0.2, hwe:float=5e-8, ind_pair:list=[50, 5, 0.2])->dict:
 
         """
         Prune samples based on Linkage Disequilibrium (LD).
@@ -87,11 +86,6 @@ class UMAPplot:
         results_dir     = self.results_dir
         compute_all     = self.compute_all
 
-        maf      = self.config_dict['maf']
-        geno     = self.config_dict['geno']
-        mind     = self.config_dict['mind']
-        hwe      = self.config_dict['hwe']
-        ind_pair = self.config_dict['indep-pairwise']
 
         # Check type of maf
         if not isinstance(maf, float):
@@ -145,11 +139,11 @@ class UMAPplot:
         plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'.pruned')}"
+        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'-LDpruned')}"
 
-        self.files_to_keep.append(input_name+'.pruned.bed')
-        self.files_to_keep.append(input_name+'.pruned.bim')
-        self.files_to_keep.append(input_name+'.pruned.fam')
+        self.files_to_keep.append(input_name+'-LDpruned.bed')
+        self.files_to_keep.append(input_name+'-LDpruned.bim')
+        self.files_to_keep.append(input_name+'-LDpruned.fam')
 
         if compute_all:
             # execute PLINK commands
@@ -174,7 +168,7 @@ class UMAPplot:
 
         return out_dict
 
-    def compute_pcas(self)->None:
+    def compute_pcas(self, pca:int=10)->None:
     
         """
         Compute Principal Component Analysis (PCA) to feed UMAP algorithm and generate plots.
@@ -194,8 +188,6 @@ class UMAPplot:
         results_dir= self.results_dir
         compute_all= self.compute_all
 
-        pca = self.config_dict['umap_pca']
-
         # Check type of pca
         if not isinstance(pca, int):
             raise TypeError("pca should be of type int.")
@@ -203,7 +195,7 @@ class UMAPplot:
         step= "compute_pca_for_umap_plots"
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDpruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
 
         if compute_all:
             # execute plink command
@@ -229,16 +221,12 @@ class UMAPplot:
 
         return out_dict
     
-    def generate_plots(self)->None:
+    def generate_plots(self, n_neighbors:list=[5], min_dist:list=[0.5], metric:list=['euclidean'])->None:
 
         input_path = self.input_path
         input_name = self.input_name
         results_dir= self.results_dir
         dependables= self.dependables
-
-        n_neighbors = self.config_dict['umap_n_neighbors']
-        min_dist    = self.config_dict['umap_min_dist']
-        metric      = self.config_dict['umap_metric']
 
         step = "draw_umap_plots"
 
