@@ -226,6 +226,8 @@ The virtual environment can be created using either `Poetry` or `pip`. Since thi
 poetry install
 ```
 
+It is important to remark that currently the project has been updated to use `Poetry 2.0`.
+
 ### Pipeline usage options
 
 #### 1. Inside a virtual environment
