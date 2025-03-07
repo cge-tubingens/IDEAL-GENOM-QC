@@ -262,7 +262,7 @@ class AncestryQC:
             max_threads = 10
 
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --exclude {high_ld_regions_file} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
 
         # prune and creates a filtered binary file
         plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
