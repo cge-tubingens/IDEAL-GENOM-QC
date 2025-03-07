@@ -69,9 +69,9 @@ class Fetcher1000Genome:
 
         if self._check_if_binaries_exist():
 
-            (self.destination / "all_phase3.pgen").unlink()
-            (self.destination / "all_phase3.pgen.zst").unlink()
-            (self.destination / "all_phase3.pvar.zst").unlink()
+            (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
+            (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
+            (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
 
             return self.destination / "all_phase3"
 
