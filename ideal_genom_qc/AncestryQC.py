@@ -7,6 +7,7 @@ import subprocess
 import shutil
 import umap
 import psutil
+import logging
 
 import pandas as pd
 import numpy as np
@@ -14,6 +15,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.get_references import Fetcher1000Genome
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class AncestryQC:
     
