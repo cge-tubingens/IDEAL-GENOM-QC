@@ -14,6 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from pathlib import Path
+
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 from ideal_genom_qc.get_references import Fetcher1000Genome
 
@@ -943,3 +945,207 @@ class AncestryQC:
         )
 
         return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
+
+class ReferenceGenomicMerger():
+
+    def __init__(self, input_path: Path, input_name:str, output_path: Path, output_name:str, high_ld_regions:Path, reference_files: dict):
+
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(high_ld_regions, Path):
+            raise TypeError("high_ld_regions should be a Path object")
+        if not isinstance(reference_files, dict):
+            raise TypeError("reference_files should be a dictionary")
+        if not isinstance(input_name, str):
+            raise TypeError("input_name should be a string")
+        if not isinstance(output_name, str):
+            raise TypeError("output_name should be a string")
+        
+        if not input_path.exists():
+            raise FileNotFoundError("input_path does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not high_ld_regions.exists():
+            raise FileNotFoundError("high_ld_regions does not exist")
+
+        self.input_path = input_path
+        self.input_name = input_name
+        self.output_path= output_path
+        self.output_name= output_name
+        self.high_ld_regions = high_ld_regions
+        self.reference_files = reference_files
+
+        self.reference_AC_GT_filtered = None
+        self.study_AC_GT_filtered    = None
+        self.pruned_reference        = None
+        self.pruned_study            = None
+
+        pass
+
+    def execute_filter_prob_snps(self)->None:
+
+        """
+        Filter out problematic SNPs (Single Nucleotide Polymorphisms) from the study and reference datasets.
+
+        This method filters SNPs that are non-A-T or non-G-C from the study and reference datasets. It first filters these SNPs from the input dataset and the reference panel separately using the 'filter_non_AT_or_GC_snps' method. Then, it excludes these filtered SNPs from both datasets using PLINK commands, creating new datasets without the problematic SNPs.
+
+        Returns
+        -------
+        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+        """
+
+        logger.info("STEP: Filtering problematic SNPs from study and reference data")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+        
+        logger.info(f"STEP: Filtering problematic SNPs from the reference data: max_threads={max_threads}")
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        # find A->T and C->G SNPs in study data
+        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim")
+        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+
+        # find A->T and C->G SNPs in reference data
+        filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'])
+        logger.info("STEP: Filtering problematic SNPs from the study data: filtered reference data")
+
+        self.reference_AC_GT_filtered = self.output_path / f"{self.reference_files['bim'].stem}.no_ac_gt_snps"
+        self.study_AC_GT_filtered    = self.output_path / f"{self.input_name}.no_ac_gt_snps"
+
+        # generate cleaned study data files
+        plink_cmd1 = f"plink --bfile  {str(self.input_path / self.input_name)} --chr 1-22 --exclude {str(filtered_study)} --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
+
+        # generate cleaned reference data files
+        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --chr 1-22 --exclude {filtered_reference} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        return
+    
+    def execute_ld_pruning(self, ind_pair:list) -> None:
+
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
+        
+        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
+            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
+        
+        if not isinstance(ind_pair[2], float):
+            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
+        
+        logger.info("STEP: LD-based pruning of study and reference data")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # generates prune.in and prune.out files from study data
+        plink_cmd1 = f"plink --bfile {str(self.study_AC_GT_filtered)} --exclude {self.high_ld_regions} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
+
+        # prune study data and creates a filtered binary file
+        plink_cmd2 = f"plink --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --threads {max_threads} --make-bed --out {str((self.output_path / self.input_name).with_suffix('.pruned'))}"
+
+        # generates a pruned reference data files
+        plink_cmd3 = f"plink --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --make-bed --threads {max_threads} --out {str((self.output_path / self.reference_files['bim'].stem).with_suffix('.pruned'))}"
+
+        self.pruned_reference = (self.output_path / self.reference_files['bim'].stem).with_suffix('.pruned')
+        self.pruned_study = (self.output_path / self.input_name).with_suffix('.pruned')
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        # report
+        process_complete = True
+
+        return
+    
+    def execute_fix_chromosome_mismatch(self) -> dict:
+        """
+        Correct chromosome mismatch between study data and reference panel.
+
+        This method corrects any chromosome mismatch between the pruned study data and the pruned reference panel 
+        by updating the chromosome information in the reference panel to match that of the study data. 
+        It generates a new binary file for the corrected reference panel.
+
+        Returns
+        -------
+        dict: A dictionary containing information about the process completion status, the step performed, 
+        and the output files generated.
+        """
+
+        logger.info("STEP: Fixing chromosome mismatch between study data and reference panel")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # File paths
+        study_bim = self.pruned_study.with_suffix(".bim")
+        reference_bim = self.pruned_reference.with_suffix(".bim")
+
+        to_update_chr_file = self._find_chromosome_missmatch(study_bim, reference_bim)
+
+        self.reference_fixed_chr = self.output_path / f"{self.reference_files['bim'].stem}.updateChr"
+
+        # plink command
+        plink_cmd = f"plink --bfile {self.pruned_reference} --allow-extra-chr --update-chr {to_update_chr_file} 1 2 --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
+
+        # Execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        return
+
+    def _filter_non_AT_or_GC_snps(self, target_bim: Path) -> Path:
+
+        df = pd.read_csv(
+            target_bim, sep="\t", header=None, usecols=[1, 4, 5], names=["SNP", "A1", "A2"]
+        )
+
+        output_file = self.output_path / f"{self.input_name}.ac_get_snps"
+
+        filtered_snps = df[df[['A1', 'A2']].apply(lambda x: ''.join(sorted(x)) in {"AT", "TA", "GC", "CG"}, axis=1)]
+
+        filtered_snps = filtered_snps.drop_duplicates(subset=["SNP"], inplace=False)
+        
+        filtered_snps[["SNP"]].to_csv(output_file, index=False, header=False)
+
+        return output_file
+    
+    def _find_chromosome_missmatch(self, study_bim: Path, reference_bim: Path) -> Path:
+
+        col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
+        study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
+        reference_df = pd.read_csv(reference_bim, sep='\t', names=col_names)
+
+        # Find mismatches where rsID is the same but chromosome differs
+        mismatch_df = reference_df.merge(study_df[["chr", "rsid"]], on="rsid", suffixes=("_ref", "_study"))
+        mismatch_df = mismatch_df[mismatch_df["chr_ref"] != mismatch_df["chr_study"]]
+
+        # Exclude chromosome X and Y from updates
+        mismatch_df = mismatch_df[~mismatch_df["chr_study"].astype(str).isin(["X", "Y"])]
+
+        to_update_chr_file = self.output_path / "all_phase3.toUpdateChr"
+
+        # Save the mismatch data to a file
+        mismatch_df[["chr_study", "rsid"]].to_csv(to_update_chr_file, sep="\t", header=False, index=False)
+
+        return to_update_chr_file
