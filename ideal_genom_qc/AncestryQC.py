@@ -81,28 +81,46 @@ class AncestryQC:
             raise FileNotFoundError(".bim file not found")
         
         # check path validity of reference data
-        bed_1000g = os.path.join(dependables_path, 'all_phase3.bed')
-        fam_1000g = os.path.join(dependables_path, 'all_phase3.fam')
-        bim_1000g = os.path.join(dependables_path, 'all_phase3.bim')
-        psam_1000g= os.path.join(dependables_path, 'all_phase3.psam')
+        self.reference_files = {
+            'bed': os.path.join(dependables_path, 'all_phase3.bed'),
+            'fam': os.path.join(dependables_path, 'all_phase3.fam'),
+            'bim': os.path.join(dependables_path, 'all_phase3.bim'),
+            'psam': os.path.join(dependables_path, 'all_phase3.psam'),
+        }
+
         ld_region = os.path.join(dependables_path, 'high-LD-regions.txt')
 
-        bed_1000g_check = os.path.exists(bed_1000g)
-        fam_1000g_check = os.path.exists(fam_1000g)
-        bim_1000g_check = os.path.exists(bim_1000g)
-        psam_1000g_check= os.path.exists(psam_1000g)
+        bed_1000g_check = os.path.exists(self.reference_files['bed'])
+        fam_1000g_check = os.path.exists(self.reference_files['fam'])
+        bim_1000g_check = os.path.exists(self.reference_files['bim'])
+        psam_1000g_check= os.path.exists(self.reference_files['psam'])
         ld_region_check = os.path.exists(ld_region)
 
         if not os.path.exists(dependables_path):
             raise FileNotFoundError("dependables_path is not a valid path")
-        if not bed_1000g_check:
-            raise FileNotFoundError("all_phase3.bed file not found")
-        if not fam_1000g_check:
-            raise FileNotFoundError("all_phase3.fam file not found")
-        if not bim_1000g_check:
-            raise FileNotFoundError("all_phase3.bim file not found")
-        if not psam_1000g_check:
-            raise FileNotFoundError("all_phase3.psam file not found")
+        
+        logger.info("Checking reference data files")
+        
+        if not bed_1000g_check or not fam_1000g_check or not bim_1000g_check or not psam_1000g_check:
+
+            logger.info("Reference data files not found")
+            logger.info("Downloading reference data")
+
+            reference_fetcher = Fetcher1000Genome()
+
+            reference_fetcher.get_1000genomes()
+            logger.info(f"Reference data downloaded successfully to {reference_fetcher.destination}")
+            
+            reference_fetcher.get_1000genomes_binaries()
+            logger.info(f"Reference data binaries generated successfully")
+
+            self.reference_files = {
+                'bed': str(reference_fetcher.destination / "all_phase3.bed"),
+                'fam': str(reference_fetcher.destination / "all_phase3.fam"),
+                'bim': str(reference_fetcher.destination / "all_phase3.bim"),
+                'psam': str(reference_fetcher.destination / "all_phase3.psam")
+            }
+
         if not ld_region_check:
             raise FileNotFoundError("high LD regions file not found")
 
