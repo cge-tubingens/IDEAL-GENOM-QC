@@ -5,6 +5,9 @@ from pathlib import Path
 
 from ideal_genom_qc.Helpers import shell_do
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 class Fetcher1000Genome:
 
     def __init__(self, destination: Path = Path(__file__).resolve().parent.parent / "data" / "1000genomes"):
@@ -30,11 +33,15 @@ class Fetcher1000Genome:
 
         if self._check_if_binaries_exist():
 
+            logger.info("1000 Genomes binaries already exist. Skipping download.")
+
             self.pvar_file = self.destination / "all_phase3.pvar.zst"
             self.psam_file = self.destination / "all_phase3.psam"
             self.pgen_decompressed = self.destination / "all_phase3.pgen"
 
             return self.pgen_decompressed
+        
+        logger.info("Downloading 1000 Genomes data...")
         
         self._download_file(url_pgen, self.destination / "all_phase3.pgen.zst")
         self.pvar_file = self._download_file(url_pvar, self.destination / "all_phase3.pvar.zst")
@@ -42,6 +49,8 @@ class Fetcher1000Genome:
 
         pgen_file = self.destination / "all_phase3.pgen.zst"
         pgen_decompressed = self.destination / "all_phase3.pgen"
+
+        logger.info("Decompressing pgen file from 1000 Genomes data...")
 
         # plink2 command
         plink2_cmd = f"plink2 --zst-decompress {str(pgen_file)} {str(pgen_decompressed)}"
@@ -69,11 +78,15 @@ class Fetcher1000Genome:
 
         if self._check_if_binaries_exist():
 
+            logger.info("1000 Genomes binaries already exist. Skipping conversion into bfiles...")
+
             (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
             (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
             (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
 
             return self.destination / "all_phase3"
+        
+        logger.info("Converting 1000 Genomes data into bfiles...")
 
         # plink2 command
         plink2_cmd = f"plink2 --pfile {str(self.destination / "all_phase3")} vzs --max-alleles 2 --make-bed --out {str(self.destination / "all_phase3")}"
