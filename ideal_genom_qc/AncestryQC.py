@@ -734,6 +734,7 @@ class AncestryQC:
         self.reference_files = reference_files
         self.high_ld_regions = high_ld_regions
         self.recompute_merge = recompute_merge
+        self.built = built
 
         if not reference_files:
 
