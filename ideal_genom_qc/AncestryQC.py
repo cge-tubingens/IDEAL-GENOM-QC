@@ -1,6 +1,4 @@
 import os
-import subprocess
-import shutil
 import psutil
 import logging
 
@@ -808,7 +806,6 @@ class AncestryQC:
             output_name= self.output_name
         )
 
-        print('pca value', pca)
         logger.info(f"STEP: Running PCA analysis: `ref_population` = {ref_population}")
         logger.info(f"STEP: Running PCA analysis: `pca` = {pca}")
         logger.info(f"STEP: Running PCA analysis: `maf` = {maf}")
