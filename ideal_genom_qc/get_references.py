@@ -17,6 +17,10 @@ class Fetcher1000Genome:
         self.pgen_file = None
         self.pvar_file = None
         self.psam_file = None
+
+        self.bed_file = None
+        self.bim_file = None
+        self.fam_file = None
         
         pass
 
@@ -83,6 +87,11 @@ class Fetcher1000Genome:
             (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
             (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
             (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+
+            self.bed_file = (self.destination / "all_phase3.bed")
+            self.bim_file = (self.destination / "all_phase3.bim")
+            self.fam_file = (self.destination / "all_phase3.fam")
+            self.psam_file= (self.destination / "all_phase3.psam")
 
             return self.destination / "all_phase3"
         
