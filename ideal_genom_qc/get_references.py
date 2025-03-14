@@ -231,5 +231,3 @@ class FetcherLDRegions:
                 for line in data:
                     file.write(f"{line[0]}\t{line[1]}\t{line[2]}\t{line[3]}\n")
             return out_dir / f'high-LD-regions_GRCH{self.built}.txt'
-        
-
