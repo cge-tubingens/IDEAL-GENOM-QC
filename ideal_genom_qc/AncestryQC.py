@@ -738,9 +738,9 @@ class AncestryQC:
 
         if not reference_files:
 
-            logger.info("No reference files provided. Fetching 1000 Genomes reference data")
+            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for built {self.built}")
 
-            fetcher = Fetcher1000Genome()
+            fetcher = Fetcher1000Genome(built=self.built)
             fetcher.get_1000genomes()
             fetcher.get_1000genomes_binaries()
 
@@ -836,4 +836,3 @@ class AncestryQC:
         goa.draw_pca_plot(plot_dir=self.plots_dir)
 
         return
-
