@@ -1,6 +1,8 @@
 import requests
 import logging
 
+import pandas as pd
+
 from pathlib import Path
 
 from ideal_genom_qc.Helpers import shell_do
