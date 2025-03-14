@@ -12,9 +12,13 @@ logger = logging.getLogger(__name__)
 
 class Fetcher1000Genome:
 
-    def __init__(self, destination: Path = Path(__file__).resolve().parent.parent / "data" / "1000genomes"):
+    def __init__(self, destination: Path = Path(), built: str = '38'):
 
+        if not destination:
+            destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
+        
         self.destination = destination
+        self.built = built
 
         self.pgen_file = None
         self.pvar_file = None
@@ -30,12 +34,21 @@ class Fetcher1000Genome:
 
         self.destination.mkdir(parents=True, exist_ok=True)
 
-        if url_pgen is None:
-            url_pgen = r"https://www.dropbox.com/s/j72j6uciq5zuzii/all_hg38.pgen.zst?dl=1"
-        if url_pvar is None:
-            url_pvar = r"https://www.dropbox.com/scl/fi/fn0bcm5oseyuawxfvkcpb/all_hg38_rs.pvar.zst?rlkey=przncwb78rhz4g4ukovocdxaz&dl=1"
-        if url_psam is None:
-            url_psam = r"https://www.dropbox.com/scl/fi/u5udzzaibgyvxzfnjcvjc/hg38_corrected.psam?rlkey=oecjnk4vmbhc8b1p202l0ih4x&dl=1"
+        if self.built == '38':
+            if url_pgen is None:
+                url_pgen = r"https://www.dropbox.com/s/j72j6uciq5zuzii/all_hg38.pgen.zst?dl=1"
+            if url_pvar is None:
+                url_pvar = r"https://www.dropbox.com/scl/fi/fn0bcm5oseyuawxfvkcpb/all_hg38_rs.pvar.zst?rlkey=przncwb78rhz4g4ukovocdxaz&dl=1"
+            if url_psam is None:
+                url_psam = r"https://www.dropbox.com/scl/fi/u5udzzaibgyvxzfnjcvjc/hg38_corrected.psam?rlkey=oecjnk4vmbhc8b1p202l0ih4x&dl=1"
+        
+        elif self.built == '37':
+            if url_pgen is None:
+                url_pgen = r"https://www.dropbox.com/s/y6ytfoybz48dc0u/all_phase3.pgen.zst?dl=1"
+            if url_pvar is None:
+                url_pvar = r"https://www.dropbox.com/s/odlexvo8fummcvt/all_phase3.pvar.zst?dl=1"
+            if url_psam is None:
+                url_psam = r"https://www.dropbox.com/scl/fi/haqvrumpuzfutklstazwk/phase3_corrected.psam?rlkey=0yyifzj2fb863ddbmsv4jkeq6&dl=1"
 
         if self._check_if_binaries_exist():
 
