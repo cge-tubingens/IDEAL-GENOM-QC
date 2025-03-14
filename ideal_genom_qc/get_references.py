@@ -100,8 +100,8 @@ class Fetcher1000Genome:
         logger.info("Converting 1000 Genomes data into bfiles...")
 
         # plink2 command
-        plink2_cmd = f"plink2 --pfile {str(self.destination / "all_phase3")} vzs --max-alleles 2 --make-bed --out {str(self.destination / "all_phase3")}"
-
+        plink2_cmd = f"plink2 --pfile {str(self.destination / 'all_phase3')} vzs --chr 1-22, X, Y, MT --max-alleles 2 --make-bed --out {str(self.destination / 'all_phase3')}"
+        
         # execute plink2 command
         shell_do(plink2_cmd)
 
