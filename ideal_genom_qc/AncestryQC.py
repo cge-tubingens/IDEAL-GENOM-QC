@@ -699,7 +699,7 @@ class GenomicOutlierAnalyzer:
 
 class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict = dict(), recompute_merge: bool = True) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38') -> None:
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -713,6 +713,12 @@ class AncestryQC:
             raise TypeError("input_name should be a string")
         if not isinstance(output_name, str):
             raise TypeError("output_name should be a string")
+        if not isinstance(recompute_merge, bool):
+            raise TypeError("recompute_merge should be a boolean")
+        if not isinstance(built, str):
+            raise TypeError("built should be a string")
+        if built not in ['37', '38']:
+            raise ValueError("built should be either '37' or '38'")
         
         if not input_path.exists():
             raise FileNotFoundError("input_path does not exist")
