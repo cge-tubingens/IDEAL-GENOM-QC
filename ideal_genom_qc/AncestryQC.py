@@ -1,11 +1,6 @@
-"""
-Module to perform principal component analysis to identify ethnicity outliers.
-"""
-
 import os
 import subprocess
 import shutil
-import umap
 import psutil
 import logging
 
@@ -22,160 +17,51 @@ from ideal_genom_qc.get_references import Fetcher1000Genome
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class AncestryQC:
-    
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str) -> None:
+class ReferenceGenomicMerger():
 
-        """
-        Initialize the PCA (Principal Component Analysis) object.
+    def __init__(self, input_path: Path, input_name:str, output_path: Path, output_name:str, high_ld_regions:Path, reference_files: dict):
 
-        This method initializes the PCA object by checking the paths and the existence of necessary files. It ensures that the input and output paths, as well as the path to dependables, are set upon initialization. Additionally, it verifies the existence of required input files (.bed, .fam, .bim) and reference data from the dependables folder. If any of the necessary files or paths are missing, it raises appropriate errors.
-
-        Parameters:
-        -----------
-        - input_path (str): Path to the folder containing the input data files.
-        - input_name (str): Name of the input data files (without extension).
-        - output_path (str): Path to the folder where the output will be saved.
-        - output_name (str): Name for the output files.
-        - config_dict (str): Dictionary containing configuration settings.
-        - dependables_path (str): Path to the folder containing reference data.
-
-        Raises:
-        -------
-        - ValueError: If input_path, output_path, or dependables_path are not set upon initialization.
-        - FileNotFoundError: If any of the required files or paths are missing.
-
-        Attributes:
-        -----------
-        - input_path (str): Path to the folder containing the input data files.
-        - output_path (str): Path to the folder where the output will be saved.
-        - input_name (str): Name of the input data files (without extension).
-        - output_name (str): Name for the output files.
-        - dependables (str): Path to the folder containing reference data.
-        - config_dict (str): Dictionary containing configuration settings.
-        - dependables_to_keep (list): List of reference data files to keep.
-        - results_to_keep (list): List of result files to keep.
-        - results_dir (str): Path to the folder where PCA results will be saved.
-        - fails_dir (str): Path to the folder where failed samples will be saved.
-        - plots_dir (str): Path to the folder where plots will be saved.
-        """
-
-        # check if paths are set
-        if input_path is None or output_path is None or dependables_path is None:
-            raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
-
-        # Check path validity of input data
-        bed_path = os.path.join(input_path, input_name + '.bed')
-        fam_path = os.path.join(input_path, input_name + '.fam')
-        bim_path = os.path.join(input_path, input_name + '.bim')
-
-        bed_check = os.path.exists(bed_path)
-        fam_check = os.path.exists(fam_path)
-        bim_check = os.path.exists(bim_path)
-
-        if not os.path.exists(input_path) or not os.path.exists(output_path):
-            raise FileNotFoundError("input_path or output_path is not a valid path")
-        if not bed_check:
-            raise FileNotFoundError(".bed file not found")
-        if not fam_check:
-            raise FileNotFoundError(".fam file not found")
-        if not bim_check:
-            raise FileNotFoundError(".bim file not found")
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(high_ld_regions, Path):
+            raise TypeError("high_ld_regions should be a Path object")
+        if not isinstance(reference_files, dict):
+            raise TypeError("reference_files should be a dictionary")
+        if not isinstance(input_name, str):
+            raise TypeError("input_name should be a string")
+        if not isinstance(output_name, str):
+            raise TypeError("output_name should be a string")
         
-        # check path validity of reference data
-        self.reference_files = {
-            'bed': os.path.join(dependables_path, 'all_phase3.bed'),
-            'fam': os.path.join(dependables_path, 'all_phase3.fam'),
-            'bim': os.path.join(dependables_path, 'all_phase3.bim'),
-            'psam': os.path.join(dependables_path, 'all_phase3.psam'),
-        }
-
-        ld_region = os.path.join(dependables_path, 'high-LD-regions.txt')
-
-        bed_1000g_check = os.path.exists(self.reference_files['bed'])
-        fam_1000g_check = os.path.exists(self.reference_files['fam'])
-        bim_1000g_check = os.path.exists(self.reference_files['bim'])
-        psam_1000g_check= os.path.exists(self.reference_files['psam'])
-        ld_region_check = os.path.exists(ld_region)
-
-        if not os.path.exists(dependables_path):
-            raise FileNotFoundError("dependables_path is not a valid path")
-        
-        logger.info("Checking reference data files")
-        
-        if not bed_1000g_check or not fam_1000g_check or not bim_1000g_check or not psam_1000g_check:
-
-            logger.info("Reference data files not found")
-            logger.info("Downloading reference data")
-
-            reference_fetcher = Fetcher1000Genome()
-
-            reference_fetcher.get_1000genomes()
-            logger.info(f"Reference data downloaded successfully to {reference_fetcher.destination}")
-            
-            reference_fetcher.get_1000genomes_binaries()
-            logger.info(f"Reference data binaries generated successfully")
-
-            self.reference_files = {
-                'bed': str(reference_fetcher.destination / "all_phase3.bed"),
-                'fam': str(reference_fetcher.destination / "all_phase3.fam"),
-                'bim': str(reference_fetcher.destination / "all_phase3.bim"),
-                'psam': str(reference_fetcher.destination / "all_phase3.psam")
-            }
-
-        if not ld_region_check:
-            raise FileNotFoundError("high LD regions file not found")
+        if not input_path.exists():
+            raise FileNotFoundError("input_path does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not high_ld_regions.exists():
+            raise FileNotFoundError("high_ld_regions does not exist")
 
         self.input_path = input_path
-        self.output_path= output_path
         self.input_name = input_name
+        self.output_path= output_path
         self.output_name= output_name
-        self.dependables= dependables_path
+        self.high_ld_regions = high_ld_regions
+        self.reference_files = reference_files
 
-        self.dependables_to_keep = ['all_phase3.bed', 'all_phase3.fam','all_phase3.bim', 'all_phase3.psam', 'high-LD-regions.txt', 'geographic_info.txt']
+        self.reference_AC_GT_filtered= None
+        self.study_AC_GT_filtered    = None
+        self.pruned_reference        = None
+        self.pruned_study            = None
+        self.reference_fixed_chr     = None
+        self.reference_fixed_pos     = None
+        self.reference_flipped       = None
+        self.reference_cleaned       = None
 
-        self.results_to_keep = ['fail_samples']
+        pass
 
-        # create results folder
-        self.results_dir = os.path.join(output_path, 'ancestry_results')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+    def execute_rename_snpid(self) -> None:
 
-        # create fails folder
-        self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
-        if not os.path.exists(self.fails_dir):
-            os.mkdir(self.fails_dir)
-
-        # create clean files folder
-        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
-        if not os.path.exists(self.clean_dir):
-            os.mkdir(self.clean_dir)
-        
-        # create figures folder
-        self.plots_dir = os.path.join(self.results_dir, 'ancestryQC_plots')
-        if not os.path.exists(self.plots_dir):
-            os.mkdir(self.plots_dir)
-
-    def execute_filter_prob_snps(self)->dict:
-
-        """
-        Filter out problematic SNPs (Single Nucleotide Polymorphisms) from the study and reference datasets.
-
-        This method filters SNPs that are non-A-T or non-G-C from the study and reference datasets. It first filters these SNPs from the input dataset and the reference panel separately using the 'filter_non_AT_or_GC_snps' method. Then, it excludes these filtered SNPs from both datasets using PLINK commands, creating new datasets without the problematic SNPs.
-
-        Returns
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-        results_dir= self.results_dir
-        dependables= self.dependables
-
-        reference_panel = 'all_phase3'
-
-        step = "fiter non A-T or G-C snps"
+        logger.info(f"STEP: Renaming SNPs in the study data to the format chr_pos_a1_a2")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
@@ -187,60 +73,69 @@ class AncestryQC:
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
+        df_bim = pd.read_csv(self.input_path / (self.input_name+ '.bim'), sep="\t", header=None, dtype={0: str})
+        df_bim.columns = ['chrom', 'snp', 'cm', 'pos', 'a1', 'a2']
+
+        df_link = pd.DataFrame(columns=['old_id', 'new_id'])
+        
+        df_link['old_id'] = df_bim['snp']
+        df_link['new_id'] = df_bim['chrom'].astype(str) + "_" + df_bim['pos'].astype(str) + "_" + df_bim['a1'].str[0] + "_" + df_bim['a2'].str[0]
+
+        df_link.to_csv(self.input_path / "update_names.txt", sep="\t", header=False, index=False)
+        logger.info(f"STEP: Renaming SNPs in the study data: created file {str(self.input_path / 'update_names.txt')}")
+
+        # PLINK2 command
+        plink2_cmd = f"plink2 --bfile {str(self.input_path / self.input_name)} --update-name {str(self.input_path / "update_names.txt")} --make-bed --out {str(self.output_path / (self.input_name+ '-renamed'))} --memory {memory} --threads {max_threads}"
+
+        # Execute PLINK2 command
+        shell_do(plink2_cmd, log=True)
+
+        return
+
+    def execute_filter_prob_snps(self)->None:
+
+        logger.info("STEP: Filtering A->T and C->G SNPs from study and reference data.")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+        
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # find A->T and C->G SNPs in study data
-        self.filter_non_AT_or_GC_snps(input_dir=input_path, input_name=input_name, results_dir=results_dir)
+        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name+'-renamed'}.bim", output_filename=self.input_name)
+        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
 
         # find A->T and C->G SNPs in reference data
-        self.filter_non_AT_or_GC_snps(input_dir=dependables, input_name=reference_panel, results_dir=dependables)
+        filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'], output_filename=self.reference_files['bim'].stem)
+        logger.info("STEP: Filtering problematic SNPs from the study data: filtered reference data")
 
-        # generate cleaned study data files
-        plink_cmd1 = f"plink --bfile  {os.path.join(input_path, input_name)} --chr 1-22 --exclude {os.path.join(results_dir, input_name+'.ac_get_snps')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.no_ac_gt_snps')}"
+        self.reference_AC_GT_filtered= self.output_path / f"{self.reference_files['bim'].stem}-no_ac_gt_snps"
+        self.study_AC_GT_filtered    = self.output_path / f"{self.input_name}-no_ac_gt_snps"
 
-        # generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {os.path.join(dependables, reference_panel)} --chr 1-22 --exclude {os.path.join(dependables, reference_panel+'.ac_get_snps')} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {os.path.join(dependables, reference_panel+'.no_ac_gt_snps')}"
+        with open(filtered_study, 'r') as f:
+            logger.info(f"STEP: Filtering problematic SNPs from the study data: {len(f.readlines())} SNPs filtered")
+        with open(filtered_reference, 'r') as f:
+            logger.info(f"STEP: Filtering problematic SNPs from the reference data: {len(f.readlines())} SNPs filtered")
+
+        # PLINK command: generate cleaned study data files
+        plink_cmd1 = f"plink --bfile  {str(self.output_path / (self.input_name+'-renamed'))} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
+
+        # PLINK command: generate cleaned reference data files
+        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --chr 1-22 --exclude {str(filtered_reference)} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'reference_out': dependables,
-            'study_data': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_ld_pruning(self, ind_pair:list)->dict:
-
-        """
-        Prune samples based on Linkage Disequilibrium (LD).
-
-        This method performs LD-based sample pruning using PLINK commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
-
-        Raises:
-        -------
-        - TypeError: If maf, geno, mind, or hwe is not of type float.
-        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
-        - FileNotFoundError: If the file with high LD regions is not found.
-
-        Returns:
-        --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name      = self.input_name
-        dependables_path= self.dependables
-        results_dir     = self.results_dir
+        return
+    
+    def execute_ld_pruning(self, ind_pair:list) -> None:
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
@@ -251,459 +146,389 @@ class AncestryQC:
         if not isinstance(ind_pair[2], float):
             raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
         
-        # check existence of high LD regions file
-        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
-        if not os.path.exists(high_ld_regions_file):
-            raise FileNotFoundError("File with high LD region was not found")
-
-        step = "ld_prune"
+        logger.info("STEP: LD-based pruning of study and reference data")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --exclude {high_ld_regions_file} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+        # PLINK command: generates prune.in and prune.out files from study data
+        plink_cmd1 = f"plink --bfile {str(self.study_AC_GT_filtered)} --exclude range {self.high_ld_regions} --keep-allele-order --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
 
-        # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.no_ac_gt_snps')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --threads {max_threads} --make-bed --out {os.path.join(results_dir, input_name+'.pruned')}"
+        # PLINK command: prune study data and creates a filtered binary file
+        plink_cmd2 = f"plink --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --threads {max_threads} --make-bed --out {str((self.output_path / (self.input_name+'-pruned')))}"
+
+        # PLINK command: generates a pruned reference data files
+        plink_cmd3 = f"plink --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --make-bed --threads {max_threads} --out {str((self.output_path / (self.reference_files['bim'].stem+'-pruned')))}"
+
+        self.pruned_reference = self.output_path / (self.reference_files['bim'].stem+'-pruned')
+        self.pruned_study = self.output_path / self.output_path / (self.input_name+'-pruned')
 
         # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def execute_ld_prune_ref_panel(self)->dict:
+    def execute_fix_chromosome_mismatch(self) -> dict:
 
-        """
-        Prune the reference panel based on the pruned SNPs of the study data.
-
-        This method prunes the reference panel dataset based on the SNPs pruned from the study data during LD-based pruning. It generates a new binary file for the pruned reference panel.
-
-        Returns
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name = self.input_name
-        dependables= self.dependables
-        results_dir= self.results_dir
-
-        step = "prune reference panel"
+        logger.info("STEP: Fixing chromosome mismatch between study data and reference panel")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        # File paths
+        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
+        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
 
-        # generates a pruned reference data files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.no_ac_gt_snps')} --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(dependables, 'all_phase3.pruned')} --memory {memory}"
+        to_update_chr_file = self._find_chromosome_mismatch(study_bim, reference_bim)
 
-        # executes PLINK command
+        self.reference_fixed_chr = self.output_path / f"{self.reference_files['bim'].stem}-updateChr"
+
+        with open(to_update_chr_file, 'r') as f:
+            logger.info(f"STEP: Fixing chromosome mismatch between study data and reference panel: {len(f.readlines())} SNPs to update")
+
+        # PLINK command
+        plink_cmd = f"plink --bfile {self.pruned_reference} --update-chr {to_update_chr_file} 1 2 --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
+
+        # Execute PLINK command
         shell_do(plink_cmd, log=True)
-        
-        # report
-        process_complete = True
 
-        outfiles_dict = {
-            'plink_out': dependables
-        }
+        return
+    
+    def execute_fix_possition_mismatch(self) -> None:
 
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_fix_chromosome_missmatch(self)->dict:
-
-        """
-        Correct chromosome mismatch between study data and reference panel.
-
-        This method corrects any chromosome mismatch between the pruned study data and the pruned reference panel by updating the chromosome information in the reference panel to match that of the study data. It generates a new binary file for the corrected reference panel.
-
-        Returns
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name = self.input_name
-        dependables= self.dependables
-        results_dir= self.results_dir
-
-        step = "chromosome missmatch"
+        logger.info("STEP: Fixing position mismatch between study data and reference panel")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # check that the variant IDs of the reference data have the same chr. ID as the study data
-        awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$2]=$1; next}} ($2 in a && a[$2] != $1) {{print a[$2],$2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} | sed -n '/^[XY]/!p' > {os.path.join(dependables, 'all_phase3.toUpdateChr')}"
+        # File paths
+        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
+        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
 
-        result = subprocess.run(awk_cmd, shell=True, capture_output=True, text=True)
+        to_update_pos_file = self._find_position_mismatch(study_bim, reference_bim)
 
-        logs = [result.stderr, result.stdout]
+        self.reference_fixed_pos = self.output_path / f"{self.reference_files['bim'].stem}-updatePos"
 
-        # generates cleaned reference data files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.pruned')} --allow-extra-chr --update-chr {os.path.join(dependables, 'all_phase3.toUpdateChr')} 1 2 --threads {max_threads} --make-bed --out {os.path.join(dependables, 'all_phase3.updateChr')}"
+        with open(to_update_pos_file, 'r') as f:
+            logger.info(f"STEP: Fixing position mismatch between study data and reference panel: {len(f.readlines())} SNPs to update")
+
+        # PLINK command
+        plink_cmd = f"plink --bfile {self.reference_fixed_chr} --update-map {to_update_pos_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_pos}"
+
+        # Execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        return
+    
+    def execute_fix_allele_flip(self) -> None:
+
+        logger.info("STEP: Allele flipping between study data and reference panel")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # File paths
+        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
+        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
+
+        to_flip_file = self.output_path / f"{self.reference_files['bim'].stem}.toFlip"
+        self._find_allele_flip(study_bim, reference_bim, to_flip_file)
+
+        self.reference_flipped = self.output_path / f"{self.reference_files['bim'].stem}-flipped"
+
+        with open(to_flip_file, 'r') as f:
+            logger.info(f"STEP: Allele flipping between study data and reference panel: {len(f.readlines())} SNPs to flip")
+
+        # plink command
+        plink_cmd = f"plink --bfile {self.reference_fixed_pos} --flip {to_flip_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_flipped}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': dependables
-        }
+    def execute_remove_mismatches(self) -> None:
 
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict,
-            'awk_logs': logs
-        }
-
-        return out_dict
-
-    def execute_fix_position_missmatch_allele_flip(self)->dict:
-
-        """
-        Function to handle position mismatch and allele flips.
-
-        Returns
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name  = self.input_name
-        dependables = self.dependables
-        results_dir = self.results_dir
-
-        step = "possition missmatch and allele flips"
-
-        # position missmatch
-        awk_cmd1 = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$2]=$4; next}} ($2 in a && a[$2] != $4)  {{print a[$2],$2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} > {os.path.join(dependables, 'all_phase3.toUpdatePos')}"
-
-        # possible allele flips
-        awk_cmd2 = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$1$2$4]=$5$6; next}} ($1$2$4 in a && a[$1$2$4] != $5$6 && a[$1$2$4] != $6$5)  {{print $2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.pruned.bim')} > {os.path.join(dependables, 'all_phase3.toFlip')}"
-
-        # executes awk commands
-        awks = [awk_cmd1, awk_cmd2]
-        logs = []
-        for awk in awks:
-            result = subprocess.run(awk, shell=True, capture_output=True, text=True)
-            logs.append([result.stderr, result.stdout])
-
-        # update positions and flip alleles
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.updateChr')} --update-map {os.path.join(dependables, 'all_phase3.toUpdatePos')} 1 2 --flip {os.path.join(dependables, 'all_phase3.toFlip')} --make-bed --out {os.path.join(dependables, 'all_phase3.flipped')}"
-
-        # executes PLINK command
-        shell_do(plink_cmd, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': dependables,
-            'other_files': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict,
-            'awk_logs': logs
-        }
-
-        return out_dict
-
-    def execute_remove_missmatch(self)->dict:
-
-        """
-        Function to remove mismatched alleles after allele flipping.
-
-        Returns:
-        --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name  = self.input_name
-        dependables = self.dependables
-        results_dir = self.results_dir
-
-        step = "remove missmatch"
-
-        # identify alleles that do not match after allele flipping
-        awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} FNR==NR {{a[$1$2$4]=$5$6; next}} ($1$2$4 in a && a[$1$2$4] != $5$6 && a[$1$2$4] != $6$5) {{print $2}}' {os.path.join(results_dir, input_name+'.pruned.bim')} {os.path.join(dependables, 'all_phase3.flipped.bim')} > {os.path.join(dependables, 'all_phase3.missmatch')}"
-
-        # executes awk command
-        result = subprocess.run(awk_cmd, shell=True, capture_output=True, text=True)
-        log = [result.stderr, result.stdout]
-
-        # generates cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(dependables, 'all_phase3.flipped')} --exclude {os.path.join(dependables, 'all_phase3.missmatch')} --make-bed --out {os.path.join(dependables, 'all_phase3.clean')}"
-
-        # executes PLINK command
-        shell_do(plink_cmd, log=True)
-
-        self.dependables_to_keep.append('all_phase3.clean.bed')
-        self.dependables_to_keep.append('all_phase3.clean.bim')
-        self.dependables_to_keep.append('all_phase3.clean.fam')
-
-        delete_temp_files(self.dependables_to_keep, dependables)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': dependables,
-            'other_files': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict,
-            'awk_logs': log
-        }
-
-        return out_dict
-    
-    def execute_merge_ref_study(self)->dict:
-
-        """
-        Function to merge reference panel with study data.
-
-        Returns:
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_name       = self.input_name
-        dependables = self.dependables
-        results_dir = self.results_dir
-
-        step = "merge reference panel with study data"
+        logger.info("STEP: Removing mismatched SNPs from reference data")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        # File paths
+        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
+        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
 
-        # merge refenrence and study data
-        plink_cmd = f"plink --bfile {os.path.join(results_dir, input_name+'.pruned')} --bmerge {os.path.join(dependables, 'all_phase3.clean.bed')} {os.path.join(dependables, 'all_phase3.clean.bim')} {os.path.join(dependables, 'all_phase3.clean.fam')} --make-bed --out {os.path.join(results_dir, input_name+'.merged')} --memory {memory} --threads {max_threads}"
+        mismatches_file = self.output_path / f"{self.reference_files['bim'].stem}.toRemove"
+        self._find_allele_flip(study_bim, reference_bim, mismatches_file)
 
-        # executes PLINK command
+        self.reference_cleaned = self.output_path / f"{self.reference_files['bim'].stem}-cleaned"
+
+        with open(mismatches_file, 'r') as f:
+            logger.info(f"STEP: Removing mismatched SNPs from reference data: {len(f.readlines())} SNPs to remove")
+
+        # plink command
+        plink_cmd = f"plink --bfile {self.reference_flipped} --exclude {mismatches_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_cleaned}"
+
+        # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': dependables,
-            'other_files': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def execute_pc_decomposition(self, pca:int, maf:float)->dict:
+    def execute_merge_data(self) -> None:
 
-        """
-        Run Principal Component Analysis (PCA) on the study data and perform ancestry inference to filter samples based on population outliers.
+        logger.info("STEP: Merging study and reference data")
 
-        This function executes PCA analysis on the study data merged with the reference panel. It then performs ancestry inference to identify population outliers using predefined population tags and a specified threshold. Samples identified as population outliers are removed from the study data.
-
-        Returns:
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-
-        Raises:
-        - TypeError: If the PCA parameter is not of type int.
-        """
-
-        input_name = self.input_name
-        output_name= self.output_name
-        results_dir= self.results_dir
-
-        step = "pca_decomposition"
-
-        # check `pca` type
-        if not isinstance(pca, int):
-            raise TypeError("pca should be an integer value")
-        if pca < 1:
-            raise ValueError("pca should be a positive integer")
-        
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        # plink command
+        plink_cmd = f"plink --bfile {self.pruned_study} --bmerge {str(self.reference_cleaned.with_suffix('.bed'))} {str(self.reference_cleaned.with_suffix('.bim'))} {str(self.reference_cleaned.with_suffix('.fam'))} --keep-allele-order --threads {max_threads} --make-bed --out {self.output_path / (self.output_name+'-merged')}"
 
-        # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.merged')} --keep-allele-order --maf {maf} --out {os.path.join(results_dir, output_name+'.pca')} --pca {pca} --memory {memory} --threads {max_threads}"
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
 
-        # executes PLINK command
-        shell_do(plink_cmd1, log=True)
+        return
 
-        # report
-        process_complete = True
+    def _filter_non_AT_or_GC_snps(self, target_bim: Path, output_filename: str) -> Path:
 
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-    
-    def get_ancestry_outliers(self, ref_threshold:float, stu_threshold:float, reference_pop:str, num_pcs:int=2)->dict:
-
-        dependables= self.dependables
-        input_path = self.input_path
-        input_name = self.input_name
-        results_dir= self.results_dir
-        fails_dir  = self.fails_dir
-        output_name= self.output_name
-
-        step = "get ancestry outliers"
-
-        # add population tags to pca output
-        df = self.population_tags(
-            psam_path     =os.path.join(dependables, 'all_phase3.psam'),
-            study_fam_path=os.path.join(input_path, input_name+'.fam')
+        df = pd.read_csv(
+            target_bim, sep="\t", header=None, usecols=[1, 4, 5], names=["SNP", "A1", "A2"]
         )
-        df['ID1'] = df['ID1'].astype(str)
+
+        output_file = self.output_path / f"{output_filename}.ac_get_snps"
+
+        filtered_snps = df[df[['A1', 'A2']].apply(lambda x: ''.join(sorted(x)) in {"AT", "TA", "GC", "CG"}, axis=1)]
+        
+        filtered_snps[["SNP"]].to_csv(output_file, index=False, header=False)
+
+        return output_file
+    
+    def _find_chromosome_mismatch(self, study_bim: Path, reference_bim: Path) -> Path:
+
+        col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
+        study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
+        reference_df = pd.read_csv(reference_bim, sep='\t', names=col_names)
+
+        # Find mismatches where rsID is the same but chromosome differs
+        mismatch_df = reference_df.merge(study_df[["chr", "rsid"]], on="rsid", suffixes=("_ref", "_study"))
+        chromosome_mismatch_df = mismatch_df[mismatch_df["chr_ref"] != mismatch_df["chr_study"]]
+
+        # Exclude chromosomes X and Y from updates
+        mismatch_df = mismatch_df[~mismatch_df["chr_study"].astype(str).isin(["X", "Y"])]
+
+        to_update_chr_file = self.output_path / "all_phase3.toUpdateChr"
+
+        # Save the mismatch data to a file
+        chromosome_mismatch_df[["chr_study", "rsid"]].to_csv(to_update_chr_file, sep="\t", header=False, index=False)
+
+        return to_update_chr_file
+    
+    def _find_position_mismatch(self, study_bim: Path, reference_bim: Path) -> Path:
+
+        col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
+        study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
+        reference_df = pd.read_csv(reference_bim, sep='\t', names=col_names)
+
+        # Create a dictionary from file1 with column 2 as key and column 4 as value
+        a = dict(zip(study_df['rsid'], study_df['pos_bp']))
+
+        # Filter rows in reference_df where column 2 exists in 'a' and the values isn column 4 differ
+        filtered = reference_df[reference_df['rsid'].map(a).notna() & (reference_df['pos_bp'] != reference_df['rsid'].map(a))]
+
+        # Print the result to a file
+        to_update_pos_file = self.output_path / f"{self.reference_files['bim'].stem}.toUpdatePos"
+        filtered[['rsid', 'pos_bp']].to_csv(to_update_pos_file, sep="\t", header=False, index=False)
+
+        return to_update_pos_file
+    
+    def _find_allele_flip(self, study_bim: Path, reference_bim: Path, output_filename: Path) -> None:
+
+        col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
+        study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
+        reference_df = pd.read_csv(reference_bim, sep='\t', names=col_names)
+
+        # Create a dictionary with the composite key from file1
+        a = {f"{row['chr']}{row['rsid']}{row['pos_bp']}": f"{row['allele1']}{row['allele2']}" for _, row in study_df.iterrows()}
+
+        # Filtering the rows in file2 based on the conditions
+        filtered = reference_df[
+            reference_df.apply(
+                lambda row: (
+                    f"{row['chr']}{row['rsid']}{row['pos_bp']}" in a and 
+                    a[f"{row['chr']}{row['rsid']}{row['pos_bp']}"] not in {f"{row['allele1']}{row['allele2']}", f"{row['allele2']}{row['allele1']}"}
+                ), axis=1
+            )
+        ]
+
+        # Save the second column of filtered rows to a file
+        filtered['rsid'].to_csv(output_filename, sep="\t", header=False, index=False)
+
+        return
+    
+class GenomicOutlierAnalyzer:
+
+    def __init__(self, input_path: Path, input_name: str, merged_file: Path, reference_tags: Path, output_path: Path, output_name: str) -> None:
+
+        self.merged_file = merged_file
+        self.reference_tags = reference_tags
+        self.output_path= output_path
+        self.output_name= output_name
+        self.input_path = input_path
+        self.input_name = input_name
+
+        self.einvectors = None
+        self.eigenvalues = None
+        self.ancestry_fails = None
+        self.population_tags = None
+
+        pass
+
+    def execute_pca(self, pca: int = 10, maf: float = 0.01) -> None:
+
+        if not isinstance(pca, int):
+            raise TypeError("pca should be an integer")
+        if pca <= 0:
+            raise ValueError("pca should be a positive integer")
+        if not isinstance(maf, float):
+            raise TypeError("maf should be a float")
+        if maf < 0 or maf > 0.5:
+            raise ValueError("maf should be a float between 0 and 0.5")
+
+        logger.info("STEP: Performing principal component decomposition")
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        # PLINK command: generate PCA for reference data
+        plink_cmd = f"plink --bfile {str(self.merged_file)} --keep-allele-order --maf {maf} --out {str(self.output_path / (self.output_name+'-pca'))} --pca {pca} --memory {memory} --threads {max_threads}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        self.einvectors = self.output_path / (self.output_name+'-pca.eigenvec')
+        self.eigenvalues = self.output_path / (self.output_name+'-pca.eigenval')
+
+        return
+    
+    def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path()) -> None:
+
+        if not isinstance(ref_threshold, float):
+            raise TypeError("ref_threshold should be a float")
+        if not isinstance(stu_threshold, float):
+            raise TypeError("stu_threshold should be a float")
+        if not isinstance(reference_pop, str):
+            raise TypeError("reference_pop should be a string")
+        if not isinstance(num_pcs, int):
+            raise TypeError("num_pcs should be an integer")
+        if num_pcs <= 0:
+            raise ValueError("num_pcs should be a positive integer")
+        if not isinstance(fails_dir, Path):
+            raise TypeError("fails_dir should be a Path object")
+        
+        if not fails_dir.exists():
+            logger.info("STEP: Identifying ancestry outliers: `fails_dir` does not exist.")
+            logger.info(f"STEP: Identifying ancestry outliers: ancestry outliers will be saved in {self.output_path}")
+            fails_dir = self.output_path
+        
+        logger.info("STEP: Identifying ancestry outliers")
+
+        df_tags = pd.read_csv(self.reference_tags, sep="\t", usecols=['#IID', 'SuperPop'])
+        df_tags['ID'] = '0'
+        df_tags = df_tags[['ID', '#IID', 'SuperPop']]
+        df_tags = df_tags.rename(columns={'ID': 'ID1', '#IID': 'ID2', 'SuperPop': 'SuperPop'})
+
+        df = pd.read_csv(self.einvectors, sep=r"\s+",engine='python', header=None)
+        logger.info("STEP: Identifying ancestry outliers: read eigenvec file")
+
+        df = df[[0, 1]]
+        df = df.rename(columns = {0: 'ID1', 1:'ID2'})
+
+        df = pd.merge(df, df_tags, on=['ID1', 'ID2'], how='left')
+        df['SuperPop'] = df['SuperPop'].fillna('StPop', inplace=False)
+
+        df.to_csv((self.output_path / (self.output_name + 'pop_tags.csv')), sep='\t', index=False)
+
+        self.population_tags = self.output_path / (self.output_name + 'pop_tags.csv')
 
         # filter samples who are ethnicity outliers
-        ancestry_fails = self.pca_fail(
-            df_tags      =df, 
-            results_dir  =results_dir,
-            output_folder=fails_dir,
-            output_name  =output_name, 
-            ref_threshold=ref_threshold,
-            stu_threshold=stu_threshold,
-            reference_pop=reference_pop,
-            num_pcs      =num_pcs
+        ancestry_fails = self._find_pca_fails(
+            output_path  = fails_dir,
+            df_tags      = df,
+            ref_threshold= ref_threshold,
+            stu_threshold= stu_threshold,
+            reference_pop= reference_pop,
+            num_pcs      = num_pcs
         )
 
-        # report
-        process_complete = True
+        self.ancestry_fails = ancestry_fails
 
-        outfiles_dict = {
-            'fail_samples': fails_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def execute_drop_ancestry_outliers(self)->dict:
+    def execute_drop_ancestry_outliers(self, output_dir: Path = Path()) -> None:
 
-        input_path = self.input_path
-        input_name = self.input_name
-        output_name= self.output_name
-        fails_dir  = self.fails_dir
-        clean_dir  = self.clean_dir
+        logger.info("STEP: Dropping ancestry outliers from the study data")
 
-        step = "drop ancestry outliers"
+        if not isinstance(output_dir, Path):
+            raise TypeError("output_dir should be a Path object")
+        
+        if not output_dir.exists():
+            logger.info("STEP: Dropping ancestry outliers from the study data: `output_dir` does not exist.")
+            logger.info(f"STEP: Dropping ancestry outliers from the study data: ancestry outliers will be saved in {self.output_path}")
+            output_dir = self.output_path
+
+        with open(self.ancestry_fails, 'r') as f:
+            logger.info(f"STEP: Dropping ancestry outliers from the study data: {len(f.readlines())} samples identified as ancestry outliers")
 
         # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --allow-no-sex --remove {os.path.join(fails_dir, output_name+'.fail-ancestry-qc.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-ancestry-clean')}"
+        plink_cmd2 = f"plink --bfile {str(self.input_path / self.input_name)} --allow-no-sex --remove {str(self.ancestry_fails)} --make-bed --out {str(output_dir / (self.output_name+'-ancestry-cleaned'))}"
 
         # execute PLINK command
         shell_do(plink_cmd2, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': clean_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def pca_plot(self)->dict:
+    def draw_pca_plot(self, plot_dir: Path = Path(), plot_name: str = 'pca_plot.jpeg') -> None:
 
-        """
-        Generate Principal Component Analysis (PCA) plots for the study data.
+        logger.info("STEP: Generating PCA plots")
 
-        This function generates PCA plots based on the results of PCA analysis previously     performed on the study data merged with the reference panel. Two types of plots are     generated: a 2D scatter plot showing the first two principal components and a 3D scatter plot showing the first three principal components. The plots are colored according to the population supergroup (SuperPop) obtained from the population tags.
-
-        Returns:
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-        output_name= self.output_name
-        dependables= self.dependables
-        results_dir= self.results_dir
-
-        step = "generate pca plots"
+        if not isinstance(plot_dir, Path):
+            raise TypeError("plot_dir should be a Path object")
+        if not isinstance(plot_name, str):
+            raise TypeError("plot_name should be a string")
+        
+        if not plot_dir.exists():
+            logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
+            logger.info(f'STEP: Generating PCA plots: pca plots will be saved in {self.output_path}')
+            plot_dir = self.output_path
 
         # add population tags to pca output
-        df = self.population_tags(
-            psam_path= os.path.join(dependables, 'all_phase3.psam'),
-            study_fam_path=os.path.join(input_path, input_name+'.fam')
-        )
-        df['ID1'] = df['ID1'].astype(str)
+        df_tags = pd.read_csv(self.population_tags, sep='\t')
+        df_tags['ID1'] = df_tags['ID1'].astype(str)
 
         # load .eigenvec file and keep the first three principal components
         df_eigenvec = pd.read_csv(
-            os.path.join(results_dir, output_name+'.pca.eigenvec'),
+            self.einvectors,
             header=None,
             sep   =r"\s+",
             engine='python'
@@ -713,13 +538,13 @@ class AncestryQC:
         df_eigenvec['ID1'] = df_eigenvec['ID1'].astype(str)
 
         # merge to get data with tagged populations
-        df = pd.merge(df_eigenvec, df, on=['ID1', 'ID2'])
+        df = pd.merge(df_eigenvec, df_tags, on=['ID1', 'ID2'])
 
         # generates a 2D scatter plot
         fig, ax = plt.subplots(figsize=(10,10))
         scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
         scatter_fig = scatter_plot.get_figure()
-        scatter_fig.savefig(os.path.join(self.plots_dir, 'pca.jpeg'), dpi=400)
+        scatter_fig.savefig(plot_dir / f'2D-{plot_name}', dpi=400)
 
         # generates a 3D scatter plot
         fig2= plt.figure()
@@ -733,70 +558,12 @@ class AncestryQC:
                 label=s
             )
         ax.legend()
-        plt.savefig(os.path.join(self.plots_dir, 'pca_3d.jpeg'), dpi=400)
+        plt.savefig(plot_dir / f'3D-{plot_name}', dpi=400)
         plt.close()
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plots_out': self.plots_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    @staticmethod
-    def filter_non_AT_or_GC_snps(input_dir:str, input_name:str, results_dir:str)->list:
-
-        """
-        Filters out single nucleotide polymorphisms (SNPs) that do not belong to the categories AT, TA, GC, or CG.
-
-        This method filters SNPs from the input file based on their nucleotide sequences. It selects SNPs with sequences GC, CG, AT, or TA and writes their IDs to a file for further processing.
-
-        Parameters:
-        -----------
-        - input_dir (str): The directory containing the input files.
-        - input_name (str): The name of the input file.
-        - results_dir (str): The directory where the results will be stored.
-
-        Returns:
-        - list: A list containing stdout and stderr outputs from the execution of the AWK command.
-        """
-
-        bim_target = os.path.join(input_dir, input_name+'.bim')
-        ac_gt_snps = os.path.join(results_dir, input_name+'.ac_get_snps')
-
-        awk_cmd = f"awk 'BEGIN {{OFS=\"\t\"}} ($5$6 == \"GC\" || $5$6 == \"CG\" || $5$6 == \"AT\" || $5$6 == \"TA\") {{print $2}}' {bim_target} > {ac_gt_snps}"
-
-        result = subprocess.run(awk_cmd, shell=True, capture_output=True, text=True)
-
-        logs = [result.stderr, result.stdout]
-
-        return logs
+        return
     
-    @staticmethod
-    def population_tags(psam_path:str, study_fam_path:str)->pd.DataFrame:
-
-        """
-        Creates a DataFrame containing population tags by merging information from two input files.
-
-        This method reads population information from a .psam file and individual IDs from a .fam file. It creates a DataFrame containing individual IDs and their corresponding population tags.
-
-        Parameters:
-        -----------
-        - psam_path (str): The path to the .psam file containing population information.
-        - study_fam_path (str): The path to the study .fam file containing individual IDs.
-
-        Returns:
-        --------
-        - pd.DataFrame: A DataFrame containing population tags with individual IDs.
-        """
+    def _set_population_tags(self, psam_path: Path, study_fam_path: Path) -> pd.DataFrame:
 
         # Read population information from the .psam file
         df_psam = pd.read_csv(
@@ -807,7 +574,7 @@ class AncestryQC:
 
         # Set an ID column and rename columns for consistency
         df_psam['ID'] = 0
-        df_psam = df_psam[['ID', '#IID', 'SuperPop']].copy()
+        df_psam = df_psam[['ID', '#IID', 'SuperPop']]
         df_psam.columns = ['ID1', 'ID2', 'SuperPop']
 
         # read individual IDs from the study .fam file
@@ -825,29 +592,8 @@ class AncestryQC:
 
         # concatenate the two DataFrames to merge the information
         return pd.concat([df_fam, df_psam], axis=0)
-
-    @staticmethod
-    def pca_fail(df_tags:pd.DataFrame, results_dir:str, output_folder:str, output_name:str, ref_threshold:int, stu_threshold:int, reference_pop:str, num_pcs:str=2)->str:
-
-        """
-        Identifies samples failing ancestry quality control based on principal component analysis (PCA).
-
-        This method identifies samples failing ancestry quality control based on PCA results.
-        It compares the PCA coordinates of study samples with reference population samples.
-        Samples with PCA coordinates outside a certain threshold from the reference mean are considered outliers.
-
-        Parameters:
-        -----------
-        - df_tags (pd.DataFrame): DataFrame containing population tags and PCA information.
-        - results_dir (str): Directory path containing PCA results.
-        - output_folder (str): Directory path to save output files.
-        - output_name (str): Prefix for the output file names.
-        - threshold (int): Threshold value for identifying outliers.
-
-        Returns:
-        --------
-        - str: Path to the file containing the list of samples failing ancestry quality control.
-        """
+    
+    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: int, stu_threshold: int, reference_pop: str, num_pcs: str = 2) -> str:
 
         if not isinstance(ref_threshold, (float, int)):
             raise TypeError("ref_threshold should be an integer or float value")
@@ -863,9 +609,8 @@ class AncestryQC:
             raise TypeError("num_pcs should be an integer value")
         if num_pcs<1:
             raise ValueError("num_pcs should be a positive integer")
-        
 
-        # filters South Asian subjects
+        # filters reference subjects
         mask1 = (df_tags['SuperPop']==reference_pop)
         # filters subjects from study data
         mask2 = (df_tags['SuperPop']=='StPop')
@@ -876,7 +621,7 @@ class AncestryQC:
 
         # read .eigenvec file
         df_eigenvec = pd.read_csv(
-            os.path.join(results_dir, output_name+'.pca.eigenvec'),
+            self.einvectors,
             header=None,
             sep   =r"\s+",
             engine='python'
@@ -936,19 +681,23 @@ class AncestryQC:
 
         df = pd.merge(df_1, df_2, on=['ID1', 'ID2'])
 
+        ancestry_fails = output_path / (self.output_name + '_fail-ancestry-qc.txt')
+
+        logger.info(f"STEP: Identifying ancestry outliers: {df.shape[0]} samples identified as ancestry outliers")
+
         # save samples considered as ethnicity outliers
         df.to_csv(
-            os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt'),
+            ancestry_fails,
             header=None,
             index =False,
             sep   ='\t'
         )
 
-        return os.path.join(output_folder, output_name+'.fail-ancestry-qc.txt')
+        return ancestry_fails
 
-class ReferenceGenomicMerger():
+class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name:str, output_path: Path, output_name:str, high_ld_regions:Path, reference_files: dict):
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict = dict(), recompute_merge: bool = True) -> None:
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -958,7 +707,7 @@ class ReferenceGenomicMerger():
             raise TypeError("high_ld_regions should be a Path object")
         if not isinstance(reference_files, dict):
             raise TypeError("reference_files should be a dictionary")
-        if not isinstance(input_name, str):
+        if not isinstance(input_name, str): 
             raise TypeError("input_name should be a string")
         if not isinstance(output_name, str):
             raise TypeError("output_name should be a string")
@@ -969,183 +718,114 @@ class ReferenceGenomicMerger():
             raise FileNotFoundError("output_path does not exist")
         if not high_ld_regions.exists():
             raise FileNotFoundError("high_ld_regions does not exist")
-
+        
         self.input_path = input_path
         self.input_name = input_name
         self.output_path= output_path
         self.output_name= output_name
-        self.high_ld_regions = high_ld_regions
         self.reference_files = reference_files
+        self.high_ld_regions = high_ld_regions
+        self.recompute_merge = recompute_merge
 
-        self.reference_AC_GT_filtered = None
-        self.study_AC_GT_filtered    = None
-        self.pruned_reference        = None
-        self.pruned_study            = None
+        if not reference_files:
+
+            logger.info("No reference files provided. Fetching 1000 Genomes reference data")
+
+            fetcher = Fetcher1000Genome()
+            fetcher.get_1000genomes()
+            fetcher.get_1000genomes_binaries()
+
+            self.reference_files = {
+                'bim': fetcher.bim_file,
+                'bed': fetcher.bed_file,
+                'fam': fetcher.fam_file,
+                'psam': fetcher.psam_file
+            }
+
+        self.results_dir = self.output_path / 'ancestry_qc_results' 
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+
+        self.merging_dir = self.results_dir / 'merging'
+        self.merging_dir.mkdir(parents=True, exist_ok=True)
+
+        self.plots_dir = self.results_dir / 'plots'
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
+
+        self.fail_samples_dir = self.results_dir / 'fail_samples'
+        self.fail_samples_dir.mkdir(parents=True, exist_ok=True)
+
+        self.clean_files = self.results_dir / 'clean_files'
+        self.clean_files.mkdir(parents=True, exist_ok=True)
 
         pass
 
-    def execute_filter_prob_snps(self)->None:
-
-        """
-        Filter out problematic SNPs (Single Nucleotide Polymorphisms) from the study and reference datasets.
-
-        This method filters SNPs that are non-A-T or non-G-C from the study and reference datasets. It first filters these SNPs from the input dataset and the reference panel separately using the 'filter_non_AT_or_GC_snps' method. Then, it excludes these filtered SNPs from both datasets using PLINK commands, creating new datasets without the problematic SNPs.
-
-        Returns
-        -------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        logger.info("STEP: Filtering problematic SNPs from study and reference data")
-
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
-        else:
-            max_threads = 10
-        
-        logger.info(f"STEP: Filtering problematic SNPs from the reference data: max_threads={max_threads}")
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
-        # find A->T and C->G SNPs in study data
-        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim")
-        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
-
-        # find A->T and C->G SNPs in reference data
-        filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'])
-        logger.info("STEP: Filtering problematic SNPs from the study data: filtered reference data")
-
-        self.reference_AC_GT_filtered = self.output_path / f"{self.reference_files['bim'].stem}.no_ac_gt_snps"
-        self.study_AC_GT_filtered    = self.output_path / f"{self.input_name}.no_ac_gt_snps"
-
-        # generate cleaned study data files
-        plink_cmd1 = f"plink --bfile  {str(self.input_path / self.input_name)} --chr 1-22 --exclude {str(filtered_study)} --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
-
-        # generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --chr 1-22 --exclude {filtered_reference} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
-
-        # report
-        process_complete = True
-
-        return
-    
-    def execute_ld_pruning(self, ind_pair:list) -> None:
+    def merge_reference_study(self, ind_pair: list = [50, 5, 0.2]) -> None:
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
         
-        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
-            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
-        
-        if not isinstance(ind_pair[2], float):
-            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
-        
-        logger.info("STEP: LD-based pruning of study and reference data")
+        if not self.recompute_merge:
+            logger.info("STEP: Merging study and reference data: recompute_merge is set to False. Skipping merging step")
+            logger.info(f"STEP: Merging study and reference data: merged data is expected to be in {self.merging_dir}")
+            return
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
-        else:
-            max_threads = 10
-
-        # generates prune.in and prune.out files from study data
-        plink_cmd1 = f"plink --bfile {str(self.study_AC_GT_filtered)} --exclude {self.high_ld_regions} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
-
-        # prune study data and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --threads {max_threads} --make-bed --out {str((self.output_path / self.input_name).with_suffix('.pruned'))}"
-
-        # generates a pruned reference data files
-        plink_cmd3 = f"plink --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --make-bed --threads {max_threads} --out {str((self.output_path / self.reference_files['bim'].stem).with_suffix('.pruned'))}"
-
-        self.pruned_reference = (self.output_path / self.reference_files['bim'].stem).with_suffix('.pruned')
-        self.pruned_study = (self.output_path / self.input_name).with_suffix('.pruned')
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
-
-        # report
-        process_complete = True
-
-        return
-    
-    def execute_fix_chromosome_mismatch(self) -> dict:
-        """
-        Correct chromosome mismatch between study data and reference panel.
-
-        This method corrects any chromosome mismatch between the pruned study data and the pruned reference panel 
-        by updating the chromosome information in the reference panel to match that of the study data. 
-        It generates a new binary file for the corrected reference panel.
-
-        Returns
-        -------
-        dict: A dictionary containing information about the process completion status, the step performed, 
-        and the output files generated.
-        """
-
-        logger.info("STEP: Fixing chromosome mismatch between study data and reference panel")
-
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
-        else:
-            max_threads = 10
-
-        # File paths
-        study_bim = self.pruned_study.with_suffix(".bim")
-        reference_bim = self.pruned_reference.with_suffix(".bim")
-
-        to_update_chr_file = self._find_chromosome_missmatch(study_bim, reference_bim)
-
-        self.reference_fixed_chr = self.output_path / f"{self.reference_files['bim'].stem}.updateChr"
-
-        # plink command
-        plink_cmd = f"plink --bfile {self.pruned_reference} --allow-extra-chr --update-chr {to_update_chr_file} 1 2 --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
-
-        # Execute PLINK command
-        shell_do(plink_cmd, log=True)
-
-        return
-
-    def _filter_non_AT_or_GC_snps(self, target_bim: Path) -> Path:
-
-        df = pd.read_csv(
-            target_bim, sep="\t", header=None, usecols=[1, 4, 5], names=["SNP", "A1", "A2"]
+        rgm = ReferenceGenomicMerger(
+            input_path= self.input_path, 
+            input_name= self.input_name,
+            output_path= self.merging_dir, 
+            output_name= self.output_name,
+            high_ld_regions =self.high_ld_regions, 
+            reference_files = self.reference_files
         )
 
-        output_file = self.output_path / f"{self.input_name}.ac_get_snps"
+        rgm.execute_rename_snpid()
+        rgm.execute_filter_prob_snps()
+        rgm.execute_ld_pruning(ind_pair=ind_pair)
+        rgm.execute_fix_chromosome_mismatch()
+        rgm.execute_fix_possition_mismatch()
+        rgm.execute_fix_allele_flip()
+        rgm.execute_remove_mismatches()
+        rgm.execute_merge_data()
 
-        filtered_snps = df[df[['A1', 'A2']].apply(lambda x: ''.join(sorted(x)) in {"AT", "TA", "GC", "CG"}, axis=1)]
-
-        filtered_snps = filtered_snps.drop_duplicates(subset=["SNP"], inplace=False)
-        
-        filtered_snps[["SNP"]].to_csv(output_file, index=False, header=False)
-
-        return output_file
+        return
     
-    def _find_chromosome_missmatch(self, study_bim: Path, reference_bim: Path) -> Path:
+    def _clean_merging_dir(self) -> None:
 
-        col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
-        study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
-        reference_df = pd.read_csv(reference_bim, sep='\t', names=col_names)
+        for file in self.merging_dir.iterdir():
+            if file.is_file() and '-merged' not in file.name:
+                file.unlink()
 
-        # Find mismatches where rsID is the same but chromosome differs
-        mismatch_df = reference_df.merge(study_df[["chr", "rsid"]], on="rsid", suffixes=("_ref", "_study"))
-        mismatch_df = mismatch_df[mismatch_df["chr_ref"] != mismatch_df["chr_study"]]
+        return
+    
+    def run_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4) -> None:
 
-        # Exclude chromosome X and Y from updates
-        mismatch_df = mismatch_df[~mismatch_df["chr_study"].astype(str).isin(["X", "Y"])]
+        goa = GenomicOutlierAnalyzer(
+            input_path= self.input_path, 
+            input_name= self.input_name,
+            merged_file= self.merging_dir / (self.output_name + '-merged'),
+            reference_tags= self.reference_files['psam'],
+            output_path= self.results_dir, 
+            output_name= self.output_name
+        )
 
-        to_update_chr_file = self.output_path / "all_phase3.toUpdateChr"
+        print('pca value', pca)
+        logger.info(f"STEP: Running PCA analysis: `ref_population` = {ref_population}")
+        logger.info(f"STEP: Running PCA analysis: `pca` = {pca}")
+        logger.info(f"STEP: Running PCA analysis: `maf` = {maf}")
+        logger.info(f"STEP: Running PCA analysis: `num_pca` = {num_pca}")
+        logger.info(f"STEP: Running PCA analysis: `ref_threshold` = {ref_threshold}")
+        logger.info(f"STEP: Running PCA analysis: `stu_threshold` = {stu_threshold}")
 
-        # Save the mismatch data to a file
-        mismatch_df[["chr_study", "rsid"]].to_csv(to_update_chr_file, sep="\t", header=False, index=False)
+        goa.execute_pca(pca=pca, maf=maf)
+        goa.find_ancestry_outliers(
+            ref_threshold=ref_threshold, 
+            stu_threshold=stu_threshold, 
+            reference_pop=ref_population, 
+            num_pcs      =num_pca, 
+            fails_dir    =self.fail_samples_dir
+        )
+        goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
+        goa.draw_pca_plot(plot_dir=self.plots_dir)
 
-        return to_update_chr_file
+        return
+
