@@ -1,6 +1,7 @@
 import os
 import json
-import pandas as pd
+
+from pathlib import Path
 
 from ideal_genom_qc.Helpers import arg_parser
 
@@ -9,7 +10,7 @@ from ideal_genom_qc.VariantQC import VariantQC
 from ideal_genom_qc.AncestryQC import AncestryQC
 from ideal_genom_qc.UMAPplot import UMAPplot
 
-def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:str)->None:
+def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingship: str, recompute_merge: str)->None:
 
     sample_params     = params_dict['sample_qc']
     ancestry_params   = params_dict['ancestry_qc']
@@ -21,6 +22,12 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
         use_kingship = True
     else:
         use_kingship = False
+
+    recompute_merge = recompute_merge.lower()
+    if recompute_merge == 'true':
+        recompute_merge = True
+    else:
+        recompute_merge = False
 
     print('use kingship', type(use_kingship))
 
@@ -70,46 +77,40 @@ def qc_pipeline(params_dict:dict, data_dict:dict, steps_dict:dict, use_kingship:
     # execute step by step
     if steps_dict['ancestry']:
 
-        # instantiate AncestryQC class 
+        # instantiate AncestryQC class
         ancestry_qc = AncestryQC(
-            input_path      =os.path.join(data_dict['output_directory'], 'sample_qc_results', 'clean_files'),
-            input_name      =data_dict['output_prefix']+'-clean-samples',
-            output_path     =data_dict['output_directory'],
-            output_name     =data_dict['output_prefix'],
-            dependables_path=data_dict['dependables_directory']
+            input_path = Path(data_dict['output_directory']) / 'sample_qc_results' / 'clean_files', 
+            input_name = data_dict['output_prefix']+'-clean-samples', 
+            output_path= Path(data_dict['output_directory']), 
+            output_name= data_dict['output_prefix'], 
+            high_ld_regions= Path(data_dict['dependables_directory']) / 'high-LD-regions.txt',
+            recompute_merge=recompute_merge
         )
 
         ancestry_qc_steps = {
-            'filter_snps'              : (ancestry_qc.execute_filter_prob_snps, ()),
-            'LD_pruning'               : (ancestry_qc.execute_ld_pruning, (ancestry_params['ind_pair'],)),
-            'reference_pruning'        : (ancestry_qc.execute_ld_prune_ref_panel, ()),
-            'chr_missmatch'            : (ancestry_qc.execute_fix_chromosome_missmatch,()),
-            'pos_missmatch_allele_flip': (ancestry_qc.execute_fix_position_missmatch_allele_flip, ()),
-            'remove_missmatch'         : (ancestry_qc.execute_remove_missmatch, ()),
-            'merging'                  : (ancestry_qc.execute_merge_ref_study, ()),
-            'pca_analysis'             : (ancestry_qc.execute_pc_decomposition, (ancestry_params['pca'], ancestry_params['maf'],)),
-            'get_outliers'             : (ancestry_qc.get_ancestry_outliers, (ancestry_params['ref_threshold'], ancestry_params['stu_threshold'], 'SAS', ancestry_params['num_pca'],)),
-            'pca_plot'                 : (ancestry_qc.pca_plot, ()),
-            'drop_fail_samples'        : (ancestry_qc.execute_drop_ancestry_outliers, ())
+            'merge_study_reference'    : (ancestry_qc.merge_reference_study, {"ind_pair":ancestry_params['indep']}),
+            'delete_intermediate_files': (ancestry_qc._clean_merging_dir, {}),
+            'pca_analysis'             : (ancestry_qc.run_pca, 
+                {
+                    "ref_population": ancestry_params['reference_pop'],
+                    "pca":ancestry_params['pca'],
+                    "maf":ancestry_params['maf'],
+                    "num_pca":ancestry_params['num_pcs'],
+                    "ref_threshold":ancestry_params['ref_threshold'],
+                    "stu_threshold":ancestry_params['stu_threshold'],
+                }
+            ),
         }
 
-        ancestry_step_description = {
-            'filter_snps'              : 'filter problematic snps',
-            'LD_pruning'               : 'LD prune study_population',
-            'reference_pruning'        : 'LD prune reference panel',
-            'chr_missmatch'            : 'fix any chromosome missmatch',
-            'pos_missmatch_allele_flip': 'fix any issue with position missmatch and allele flip',
-            'remove_missmatch'         : 'remove missmatchesd SNPs',
-            'merging'                  : 'merge reference panel and study population',
-            'pca_analysis'             : 'execute PC decomposition',
-            'get_outliers'             : 'find samples with discordant ancestry',
-            'pca_plot'                 : 'generate PCA plot',
-            'drop_fail_samples'        : 'drop samples with discordant ancestry'
+        step_description = {
+            'merge_study_reference'    : "Merge reference genome with study genome",
+            'delete_intermediate_files': "Delete intermediate files generated during merging",
+            'pca_analysis'             : "Run a PCA analysis to perfom ancestry QC"
         }
 
         for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[34m{ancestry_step_description[name]}.\033[0m")
-            func(*params)
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            func(**params)
 
         print("\033[92mAncestry outliers analysis done.\033[0m")
 
@@ -180,6 +181,8 @@ def execute_main()->str:
     data_path   = args_dict['file_folders']
     steps_path  = args_dict['steps']
     use_kingship= args_dict['use_kingship'].lower()
+    recompute_merge = args_dict['recompute_merge'].lower()
+    built      = args_dict['built']
 
     # check path to config files
     if not os.path.exists(data_path):
@@ -190,6 +193,9 @@ def execute_main()->str:
     
     if not os.path.exists(steps_path):
         raise FileNotFoundError("Configuration file with pipeline steps cannot be found.")
+    
+    if built not in ['37', '38']:
+        raise ValueError("Built of the human genome must be 37 or 38.")
 
     # open config file
     with open(data_path, 'r') as file:
@@ -205,7 +211,8 @@ def execute_main()->str:
         params_dict =params_dict,
         data_dict   =data_dict,
         steps_dict  =steps_dict,
-        use_kingship=use_kingship
+        use_kingship=use_kingship,
+        recompute_merge=recompute_merge
     )
 
     return "Pipeline is completed"
