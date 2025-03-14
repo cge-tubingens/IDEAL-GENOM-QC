@@ -105,9 +105,31 @@ class Fetcher1000Genome:
         # execute plink2 command
         shell_do(plink2_cmd)
 
-        (self.destination / "all_phase3.pgen").unlink()
-        (self.destination / "all_phase3.pgen.zst").unlink()
-        (self.destination / "all_phase3.pvar.zst").unlink()
+        self._rename_snps1()
+
+        logger.info("1000 Genomes binaries created renamed.")
+
+        (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
+        (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
+        (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+
+        logger.info("Downloaded 1000 Genomes data deleted.")
+
+        (self.destination / "all_phase3.bim").unlink(missing_ok=True)
+        (self.destination / "all_phase3.bed").unlink(missing_ok=True)
+        (self.destination / "all_phase3.fam").unlink(missing_ok=True)
+
+        bim = (self.destination / "all_phase3_renamed.bim").with_name('all_phase3.bim')
+        bed = (self.destination / "all_phase3_renamed.bed").with_name('all_phase3.bed')
+        fam = (self.destination / "all_phase3_renamed.fam").with_name('all_phase3.fam')
+
+        (self.destination / "all_phase3_renamed.bim").rename(bim)
+        (self.destination / "all_phase3_renamed.bed").rename(bed)
+        (self.destination / "all_phase3_renamed.fam").rename(fam)
+
+        self.bed_file = bed
+        self.bim_file = bim
+        self.fam_file = fam
 
         return self.destination / "all_phase3"
     
