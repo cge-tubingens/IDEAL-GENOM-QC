@@ -170,3 +170,66 @@ class Fetcher1000Genome:
         shell_do(plink2_cmd)
 
         return
+    
+class FetcherLDRegions:
+
+    def __init__(self, destination: Path = Path(), built: str = '38'):
+
+        if not destination:
+            destination = Path(__file__).resolve().parent.parent / "data" / "ld_regions_files"
+
+        self.destination = destination
+        self.built = built
+
+        self.ld_regions = None
+        
+        pass
+
+    def get_ld_regions(self)-> Path:
+
+        self.destination.mkdir(parents=True, exist_ok=True)
+
+        if self.built == '37':
+            url_ld_regions = r"https://raw.githubusercontent.com/genepi-freiburg/gwas/refs/heads/master/single-pca/high-LD-regions.txt"
+        
+            ld = requests.get(url_ld_regions)
+
+            out_dir = self.destination
+
+            if ld.status_code == 200:
+                with open((out_dir / f"high-LD-regions_GRCh{self.built}.txt"), "wb") as f:
+                    f.write(ld.content)
+                logger.info(f"LD regions file for built {self.built} downloaded successfully to {out_dir}")
+                return out_dir / f"high-LD-regions_GRCh{self.built}.txt"
+            else:
+                logger.info(f"Failed to download .bim file: {ld.status_code}")
+
+                return Path()
+
+        elif self.built == '38':
+            # extracted from
+            # https://github.com/neurogenetics/GWAS-pipeline
+            data = [
+                (1, 47534328, 51534328, "r1"),
+                (2, 133742429, 137242430, "r2"),
+                (2, 182135273, 189135274, "r3"),
+                (3, 47458510, 49962567, "r4"),
+                (3, 83450849, 86950850, "r5"),
+                (5, 98664296, 101164296, "r6"),
+                (5, 129664307, 132664308, "r7"),
+                (5, 136164311, 139164311, "r8"),
+                (6, 24999772, 35032223, "r9"),
+                (6, 139678863, 142178863, "r10"),
+                (8, 7142478, 13142491, "r11"),
+                (8, 110987771, 113987771, "r12"),
+                (11, 87789108, 90766832, "r13"),
+                (12, 109062195, 111562196, "r14"),
+                (20, 33412194, 35912078, "r15")
+            ]
+
+            with open(out_dir / f'high-LD-regions_GRCH{self.built}.txt', 'w') as file:
+                for line in data:
+                    file.write(f"{line[0]}\t{line[1]}\t{line[2]}\t{line[3]}\n")
+            return out_dir / f'high-LD-regions_GRCH{self.built}.txt'
+        
+
