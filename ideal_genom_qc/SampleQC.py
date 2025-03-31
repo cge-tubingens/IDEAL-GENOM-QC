@@ -189,7 +189,7 @@ class SampleQC:
         if not isinstance(ind_pair[2], float):
             raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
 
-        step = "ld_prune"
+        logger.info("STEP: LD pruning")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
