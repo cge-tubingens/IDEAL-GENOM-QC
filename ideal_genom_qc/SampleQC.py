@@ -238,35 +238,22 @@ class SampleQC:
         if mind <= 0.02 and mind >= 0.1:
             warnings.warn(f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1.", UserWarning)
 
-        step = "outlying_missing_genotype"
+        logger.info(f"STEP: Missing genotype check. `mind` set to {mind}")
 
-        # run mssingness across file genome-wide
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --missing --out {os.path.join(results_dir, output_name+'-missing')}"
+        # PLINK command: run mssingness across file genome-wide 
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --out {self.results_dir / (self.input_name+'-missing')}"
 
-        # produce a log file with samples excluded at CR 80% and generate plots
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --mind {mind} --make-bed --out {os.path.join(results_dir, output_name+'-mind')}"
+        # PLINK command: produce a log file with samples excluded at CR 80% and generate plots
+        plink_cmd2 = f"plink --bfile {self.pruned_file} --mind {mind} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-mind')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.call_rate_miss = os.path.join(results_dir, output_name+'-missing.imiss')
+        self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.imiss')
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
     def execute_sex_check(self, sex_check:list=[])->dict:
 
