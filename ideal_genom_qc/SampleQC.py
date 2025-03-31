@@ -291,37 +291,7 @@ class SampleQC:
 
         return
 
-    def execute_heterozygosity_rate(self, maf:float)->dict:
-        
-        """
-        Executes the heterozygosity rate calculation using PLINK commands.
-        
-        This method performs a series of PLINK commands to calculate the heterozygosity rate
-        for a given minor allele frequency (MAF) threshold. It extracts autosomal SNPs, filters
-        SNPs based on the MAF threshold, computes missingness, and converts files for heterozygosity computation.
-
-        Finally, computes heterozygosity for each individual and writes the results to a summary file.
-        
-        Parameters:
-        -----------
-            maf (float): The minor allele frequency threshold. Must be a float between 0 and 0.5.
-        
-        Returns:
-        --------
-            dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-
-        Raises:
-        -------
-            TypeError: If the provided MAF is not a float.
-            ValueError: If the provided MAF is not between 0 and 0.5.
-        """
-
-        input_name = self.input_name
-        output_name= self.output_name
-        results_dir= self.results_dir
+    def execute_heterozygosity_rate(self, maf: float = 0.01)->dict:
 
         if not isinstance(maf, float):
             raise TypeError("maf should be a float")
