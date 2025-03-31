@@ -356,13 +356,43 @@ class ReferenceGenomicMerger():
         return
     
     def execute_fix_allele_flip(self) -> None:
+        """
+        Executes the allele flipping process between study data and reference panel.
+
+        This method performs the following steps:
+        1. Identifies SNPs requiring allele flipping between study and reference data
+        2. Creates a list of SNPs to flip
+        3. Generates a new reference panel with flipped alleles using PLINK
+
+        The method uses multi-threading capabilities based on available CPU cores,
+        reserving 2 cores for system processes when possible.
+
+        Returns:
+        --------
+            None
+
+        Side Effects:
+        -------------
+            - Creates a .toFlip file containing SNPs requiring allele flipping
+            - Generates new PLINK binary files (.bed, .bim, .fam) with flipped alleles
+            - Logs the number of SNPs requiring flipping
+            - Updates self.reference_flipped with the path to new flipped reference files
+
+        Dependencies:
+        ------------
+            - PLINK must be installed and accessible in system PATH
+            - Requires valid PLINK binary files for both study and reference data
+            - Requires write permissions in output directory
+        """
 
         logger.info("STEP: Allele flipping between study data and reference panel")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # File paths
         study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
@@ -385,13 +415,36 @@ class ReferenceGenomicMerger():
         return
 
     def execute_remove_mismatches(self) -> None:
+        """
+        Removes mismatched SNPs from the reference data based on allele comparisons between study and reference datasets.
+
+        This method performs the following steps:
+        1. Determines optimal thread count for processing
+        2. Identifies allele mismatches between study and reference BIM files
+        3. Creates a list of SNPs to remove
+        4. Generates a cleaned reference dataset excluding mismatched SNPs
+
+        The method utilizes PLINK to perform the actual SNP removal while maintaining allele order.
+
+        Returns:
+        --------
+            None
+
+        Side Effects:
+        -------------
+            - Creates a file listing SNPs to be removed at {output_path}/{reference_bim_stem}.toRemove
+            - Generates cleaned reference files at {output_path}/{reference_bim_stem}-cleaned.bed/bim/fam
+            - Logs the number of SNPs being removed
+        """
 
         logger.info("STEP: Removing mismatched SNPs from reference data")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # File paths
         study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
@@ -414,13 +467,36 @@ class ReferenceGenomicMerger():
         return
     
     def execute_merge_data(self) -> None:
+        """
+        Merge study and reference data using PLINK.
+
+        This method merges the pruned study data with the cleaned reference data using PLINK's
+        --bmerge functionality. It automatically determines the optimal number of threads to use
+        based on available CPU cores.
+
+        The method:
+        1. Calculates optimal thread count (CPU count - 2 or half of available cores)
+        2. Constructs PLINK command for merging datasets
+        3. Executes the merge operation via shell command
+
+        Returns:
+        --------
+            None
+
+        Side effects:
+        -------------
+            - Creates merged PLINK binary files (.bed, .bim, .fam) in the output directory
+            - Logs the merge operation
+        """
 
         logger.info("STEP: Merging study and reference data")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # plink command
         plink_cmd = f"plink --bfile {self.pruned_study} --bmerge {str(self.reference_cleaned.with_suffix('.bed'))} {str(self.reference_cleaned.with_suffix('.bim'))} {str(self.reference_cleaned.with_suffix('.fam'))} --keep-allele-order --threads {max_threads} --make-bed --out {self.output_path / (self.output_name+'-merged')}"
@@ -431,6 +507,30 @@ class ReferenceGenomicMerger():
         return
 
     def _filter_non_AT_or_GC_snps(self, target_bim: Path, output_filename: str) -> Path:
+        """
+        Filter SNPs that are not A/T or G/C variants from a PLINK BIM file.
+        This method reads a BIM file and identifies SNPs that are either A/T or G/C variants.
+        These variants are known as strand-ambiguous SNPs because their complementary alleles 
+        are the same as their original alleles, making it impossible to determine the correct 
+        strand without additional information.
+        
+        Parameters
+        ----------
+        target_bim : Path
+            Path to the input BIM file containing SNP information
+        output_filename : str
+            Base name for the output file (without extension)
+        
+        Returns
+        -------
+        Path
+            Path to the output file containing filtered SNP IDs with .ac_get_snps extension
+        
+        Notes
+        -----
+        The input BIM file should be tab-delimited with standard PLINK BIM format.
+        Only columns containing SNP ID (column 2) and alleles (columns 5 and 6) are used.
+        """
 
         df = pd.read_csv(
             target_bim, sep="\t", header=None, usecols=[1, 4, 5], names=["SNP", "A1", "A2"]
@@ -445,6 +545,26 @@ class ReferenceGenomicMerger():
         return output_file
     
     def _find_chromosome_mismatch(self, study_bim: Path, reference_bim: Path) -> Path:
+        """
+        Find chromosome mismatches between study and reference BIM files.
+
+        This function identifies SNPs where the chromosome assignment differs between
+        the study dataset and the reference panel, despite having the same rsID.
+        Sex chromosomes (X, Y) are excluded from the update list.
+
+        Parameters
+        ----------
+        study_bim : Path
+            Path to the study BIM file to check for mismatches
+        reference_bim : Path
+            Path to the reference BIM file to compare against
+
+        Returns
+        -------
+        Path
+            Path to output file containing SNPs that need chromosome updates.
+            File format is tab-separated with columns: chromosome, rsID
+        """
 
         col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
         study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
@@ -465,6 +585,31 @@ class ReferenceGenomicMerger():
         return to_update_chr_file
     
     def _find_position_mismatch(self, study_bim: Path, reference_bim: Path) -> Path:
+        """F
+        ind SNPs with mismatched positions between study and reference datasets.
+
+        This method compares the base pair positions of SNPs between a study dataset and a 
+        reference dataset to identify SNPs that have different positions despite having the 
+        same rsID.
+
+        Parameters
+        ----------
+        study_bim : Path
+            Path to the PLINK .bim file of the study dataset.
+        reference_bim : Path
+            Path to the PLINK .bim file of the reference dataset.
+
+        Returns
+        -------
+        Path
+            Path to the output file containing SNPs that need position updates.
+            The output file contains two columns (rsID and new position) without headers.
+
+        Notes
+        -----
+        The output file format is compatible with PLINK's --update-map command for updating
+        SNP positions in the study dataset.
+        """
 
         col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
         study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
@@ -483,6 +628,34 @@ class ReferenceGenomicMerger():
         return to_update_pos_file
     
     def _find_allele_flip(self, study_bim: Path, reference_bim: Path, output_filename: Path) -> None:
+        """Find SNPs with allele flips between study and reference datasets.
+
+        This method identifies Single Nucleotide Polymorphisms (SNPs) where the alleles are
+        flipped between the study and reference datasets. A flip occurs when the allele
+        pairs don't match in either order.
+
+        Parameters
+        ----------
+        study_bim : Path
+            Path to the study .bim file containing SNP information
+        reference_bim : Path
+            Path to the reference .bim file containing SNP information
+        output_filename : Path
+            Path where the list of flipped SNPs will be saved
+
+        Returns
+        -------
+        None
+            Writes rsids of flipped SNPs to the specified output file
+
+        Notes
+        -----
+        The .bim files should be tab-separated with columns:
+        chromosome, rsid, genetic_distance, base_pair_position, allele1, allele2
+
+        The output file will contain one rsid per line for SNPs where alleles don't match
+        between study and reference in either order (A1/A2 or A2/A1).
+        """
 
         col_names = ["chr", "rsid", "pos_cm", "pos_bp", "allele1", "allele2"]
         study_df = pd.read_csv(study_bim, sep='\t', names=col_names)
