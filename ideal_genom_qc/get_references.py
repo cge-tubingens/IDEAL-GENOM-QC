@@ -124,6 +124,12 @@ class Fetcher1000Genome:
 
         logger.info("Downloaded 1000 Genomes data deleted.")
 
+        # PLINK2 command
+        plink2_cmd = f"plink2 --bfile {self.destination / 'all_phase3'} --set-all-var-ids @:#:$r:$a --make-bed --out {self.destination / f'1kG_phase3_GRCh{self.built}'}"
+
+        shell_do(plink2_cmd, log=True)
+
+        (self.destination / "all_phase3.bed").unlink(missing_ok=True)
         (self.destination / "all_phase3.bim").unlink(missing_ok=True)
         (self.destination / "all_phase3.bed").unlink(missing_ok=True)
         (self.destination / "all_phase3.fam").unlink(missing_ok=True)
