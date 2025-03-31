@@ -255,91 +255,41 @@ class SampleQC:
 
         return
     
-    def execute_sex_check(self, sex_check:list=[])->dict:
+    def execute_sex_check(self, sex_check: list = [0.2, 0.8]) -> None:
 
-        """
-        Executes a sex check using PLINK commands on genetic data.
-
-        Parameters:
-        -----------
-        sex_check (list): A list containing two float elements that represent the sex check thresholds. 
-                  The list should either be empty or contain exactly two float elements that sum to 1. 
-                  If None or an empty list is provided, the samples will not be excluded and the estimates 
+        if not isinstance(sex_check, list):
+            raise TypeError("sex_check should be a list")
+        if len(sex_check) != 2:
+            raise ValueError("sex_check must have two elements")
+        if not all(isinstance(i, float) for i in sex_check):
+            raise TypeError("All elements in sex_check must be floats")
+        if 1 != sum(sex_check):
+            raise ValueError("The sum of sex_check elements must be equal to 1")
         
-        Returns:
-        --------
-        dict: A dictionary containing the following keys:
-              - 'pass': A boolean indicating if the process completed successfully.
-              - 'step': A string describing the step performed.
-              - 'output': A dictionary with the key 'plink_out' pointing to the results directory.
-        
-        Raises:
-        -------
-        TypeError: If sex_check is not a list or if its elements are not floats.
-        ValueError: If sex_check does not have exactly two elements or if the elements do not sum to 1.
-        """
-
-        input_name = self.input_name
-        output_name= self.output_name
-        result_path= self.results_dir
-        results_dir= self.results_dir
-
-        # check type sex_check
-        if sex_check is not None:
-            if not isinstance(sex_check, list):
-                TypeError('sex_check should be a list or None')
-            if len(sex_check)>2:
-                ValueError('sex_check should have a maximum of two elements')
-            if len(sex_check)==1:
-                ValueError('sex_check should have two elements or an empty list')
-        
-            if len(sex_check)>0:
-                if not isinstance(sex_check[0], float) or not isinstance(sex_check[1], float):
-                    TypeError('elements of sex_check should be floats')
-                if sum(sex_check)!=1:
-                    ValueError('elements of sex_check should sum to 1')
-        
-        step = "discordant sex information"
+        logger.info(f"STEP: Check discordant sex information.")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
         else:
             max_threads = 10
 
-        # run sex checking
-        if sex_check is None or sex_check==[]:
-            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex --out {os.path.join(result_path, output_name+'-sexcheck')}"
-        else:
-            plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {os.path.join(result_path, output_name+'-sexcheck')}"
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
 
         # extract xchr SNPs
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --chr 23 --make-bed --out {os.path.join(result_path, output_name+'-xchr')}"
+        plink_cmd2 = f"plink --bfile {self.pruned_file} --chr 23 --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
 
         # run missingness on xchr SNPs
-        plink_cmd3 = f"plink --bfile {os.path.join(result_path, output_name+'-xchr')} --missing --out {os.path.join(result_path, output_name+'-xchr-missing')}"
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-xchr')} --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.sexcheck_miss = os.path.join(result_path, output_name+'-sexcheck.sexcheck')
-        self.xchr_miss = os.path.join(result_path, output_name+'-xchr-missing.imiss')
+        self.sexcheck_miss = (self.results_dir / (self.output_name+'-sexcheck')).with_suffix('.sexcheck')
+        self.xchr_miss = (self.results_dir / (self.output_name+'-xchr-missing')).with_suffix('.imiss')
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
 
     def execute_heterozygosity_rate(self, maf:float)->dict:
         
