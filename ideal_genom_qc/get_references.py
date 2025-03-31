@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Fetcher1000Genome:
 
-    def __init__(self, destination: Path = Path(), built: str = '38'):
+    def __init__(self, destination: Path = None, built: str = '38'):
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
@@ -72,7 +72,7 @@ class Fetcher1000Genome:
         logger.info("Decompressing pgen file from 1000 Genomes data...")
 
         # plink2 command
-        plink2_cmd = f"plink2 --zst-decompress {str(pgen_file)} {str(pgen_decompressed)}"
+        plink2_cmd = f"plink2 --zst-decompress {pgen_file} {pgen_decompressed}"
 
         # execute plink2 command
         shell_do(plink2_cmd)
@@ -103,17 +103,17 @@ class Fetcher1000Genome:
             (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
             (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
 
-            self.bed_file = (self.destination / "all_phase3.bed")
-            self.bim_file = (self.destination / "all_phase3.bim")
-            self.fam_file = (self.destination / "all_phase3.fam")
-            self.psam_file= (self.destination / "all_phase3.psam")
+            self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed')
+            self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim')
+            self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam')
+            self.psam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam')
 
             return self.destination / "all_phase3"
         
         logger.info("Converting 1000 Genomes data into bfiles...")
 
         # plink2 command
-        plink2_cmd = f"plink2 --pfile {str(self.destination / 'all_phase3')} vzs --chr 1-22, X, Y, MT --max-alleles 2 --make-bed --out {str(self.destination / 'all_phase3')}"
+        plink2_cmd = f"plink2 --pfile {self.destination / 'all_phase3'} vzs --chr 1-22,X,Y,MT --snps-only --max-alleles 2 --make-bed --out {self.destination / 'all_phase3'}"
         
         # execute plink2 command
         shell_do(plink2_cmd)
