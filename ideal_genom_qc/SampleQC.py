@@ -756,6 +756,37 @@ class SampleQC:
         return
 
     def _compute_heterozigozity(self, ped_file: Path, map_file: Path = None) -> None:
+        """
+        Computes heterozygosity statistics from a PED file and writes results to a summary file.
+        This method analyzes a PED file to calculate homozygosity and heterozygosity rates
+        for each individual. The results are written to a summary file in the same directory
+        as the input PED file.
+        
+        Parameters
+        ----------
+        ped_file : Path
+            Path to the input PED file containing genotype data
+        map_file : Path, optional
+            Path to the MAP file (not used in current implementation)
+        
+        Returns
+        -------
+        None
+            Results are written to a summary file named "Summary-{ped_filename}"
+        The output summary file contains the following columns:
+        - ID: Individual identifier
+        - total: Total number of valid genotypes
+        - num_hom: Number of homozygous genotypes
+        - num_het: Number of heterozygous genotypes  
+        - Percent_hom: Percentage of homozygous genotypes
+        - Percent_het: Percentage of heterozygous genotypes
+        
+        sNotes
+        -----
+        - Missing alleles (coded as '0' or 'N') are excluded from calculations
+        - The method assumes PED file format with genotype data starting from column 7
+        - Handles FileNotFound and IOError exceptions with appropriate error messages
+        """
         
         # Define output file name
         summary_file= f"Summary-{ped_file.name}"
@@ -806,27 +837,66 @@ class SampleQC:
         except FileNotFoundError:
             print(f"Error: File {ped_file} not found.")
         except IOError as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
 
-    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float)->pd.DataFrame:
+    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
+        """
+        Get samples that failed quality control checks and generate a summary DataFrame.
+        This method performs multiple QC checks on samples:
+        1. Call rate check
+        2. Sex check
+        3. Heterozygosity rate check (for MAF > and < threshold)
+        4. Duplicates/Relatedness check (using either KING or IBD)
         
-        """
-        Identifies and reports samples that fail various quality control checks.
-
-        Parameters:
-        -----------
+        Parameters
+        ----------
         call_rate_thres : float
-            The threshold for the call rate check. Samples with call rates above this threshold will be flagged.
-        std_deviation_het : float
-            The standard deviation threshold for the heterozygosity rate check. Samples with heterozygosity rates threshold*std away from the mean will be flagged.
+            Threshold for call rate filtering
+        std_deviation_het : float 
+            Number of standard deviations to use for heterozygosity filtering
         maf_het : float
-            The minor allele frequency threshold for the heterozygosity rate check. Used to split the heterozygosity rate check into two parts: MAF > threshold and MAF < threshold.
-
-        Returns:
-        --------
-        pandas.DataFrame
-            The function saves the results of the failed samples to a file and returns a summary DataFrame of the failure counts.
+            Minor allele frequency threshold for heterozygosity check
+        ibd_threshold : float
+            Threshold for IBD filtering (only used if use_king=False)
+        
+        Returns
+        -------
+        pd.DataFrame
+            Summary DataFrame containing:
+            - Counts of samples failing each QC check
+            - Number of duplicated sample IDs
+            - Total failures
+        
+        Raises
+        ------
+        FileNotFoundError
+            If any required input files are missing
+        TypeError
+            If unexpected column types are found in summary DataFrame
+        
+        Notes
+        -----
+        The method saves a detailed fail_samples.txt file with all failed samples and their failure reasons.
+        Samples failing multiple checks are only counted once in the final summary.
         """
+        # Check if required files exist
+        required_files = [
+            self.call_rate_miss,
+            self.results_dir / (self.output_name + '-sexcheck.sexcheck'),
+            self.results_dir / (self.output_name + '-xchr-missing.imiss'),
+            self.results_dir / ('Summary-' + self.output_name + '-chr1-22-mafgreater-recode.ped'),
+            self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing.imiss'),
+            self.results_dir / ('Summary-' + self.output_name + '-chr1-22-mafless-recode.ped'),
+            self.results_dir / (self.output_name + '-chr1-22-mafless-missing.imiss')
+        ]
+
+        if not self.use_king:
+            required_files.append(self.results_dir / (self.output_name + '-ibd-missing.imiss'))
+            required_files.append(self.results_dir / (self.output_name + '-ibd.genome'))
+
+        for file in required_files:
+            if not file.exists():
+                raise FileNotFoundError(f"Required file not found: {file}")
 
         # ==========================================================================================================
         #                                             CALL RATE CHECK
@@ -908,7 +978,9 @@ class SampleQC:
         else:
 
             fail_duplicates = self.report_ibd_analysis(ibd_threshold)
-
+        totals = summary.select_dtypes(include="number").sum()
+        if 'count' in totals.index:
+            totals['count'] -= num_dup
             logger.info('Duplicates and relatedness check done with IBD')
 
         # ==========================================================================================================
@@ -927,10 +999,16 @@ class SampleQC:
         df.to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
 
         totals = summary.select_dtypes(include="number").sum() - num_dup
-
+        dups_row = pd.DataFrame({summary.columns[0]: ['Duplicated Sample IDs'], summary.columns[1]: [-num_dup]})
         # Create the total row
         dups_row = pd.DataFrame({'Failure':['Duplicated Sample IDs'], 'count':[-num_dup]})
-        total_row= pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
+        # Validate column types in the summary DataFrame
+        for col in summary.columns:
+            if not (pd.api.types.is_numeric_dtype(summary[col]) or summary[col].dtype == 'object'):
+                raise TypeError(f"Unexpected column type in summary DataFrame: {col} has type {summary[col].dtype}")
+
+        # Construct the total_row DataFrame
+        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
 
         # Append the total row to the DataFrame
         summary = pd.concat([summary, dups_row, total_row], ignore_index=True)
@@ -938,6 +1016,27 @@ class SampleQC:
         return summary
     
     def execute_drop_samples(self) -> None:
+        """
+        Execute the removal of samples that failed quality control checks using PLINK.
+        This method performs the following steps:
+        1. Determines the appropriate binary file name based on previous processing steps
+        2. Reads the fail_samples.txt file containing samples to be removed
+        3. Executes PLINK command to create new binary files excluding failed samples
+        
+        Raises:
+        -------
+            FileNotFoundError: If the fail_samples.txt file is not found in the fails directory
+
+        Returns:
+        --------
+            None
+
+        Notes:
+        ------
+            - The output files will be created with suffix '-clean-samples'
+            - The method preserves allele order during the operation
+            - Input files must be in PLINK binary format (.bed, .bim, .fam)
+        """
         
         logger.info("STEP: Drop samples that failed quality control checks")
 
@@ -951,7 +1050,11 @@ class SampleQC:
         logger.info(f"Binary file name: {binary_name}")
 
         # drop samples
-        plink_cmd = f"plink --bfile {self.input_path / binary_name} --remove {self.fails_dir / 'fail_samples.txt'} --keep-allele-order --make-bed --out {self.clean_dir / (self.output_name+'-clean-samples')}"
+        fail_samples_file = self.fails_dir / 'fail_samples.txt'
+        if not fail_samples_file.exists():
+            raise FileNotFoundError(f"Required file {fail_samples_file} not found. Ensure the fail_samples.txt file is generated before executing this step.")
+
+        plink_cmd = f"plink --bfile {self.input_path / binary_name} --remove {fail_samples_file} --keep-allele-order --make-bed --out {self.clean_dir / (self.output_name+'-clean-samples')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -959,29 +1062,45 @@ class SampleQC:
         return
   
     def report_call_rate(self, directory: Path, filename: str, threshold: float, plots_dir: Path = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02') -> pd.DataFrame:
-        
         """
-        Generates a report on sample call rates, including histograms and scatter plots, and identifies samples that fail the call rate threshold.
-
-        Parameters:
-        -----------
-        directory (str): 
-            The directory where the input file is located.
-        filename (str): 
-            The name of the input file containing sample call rate data.
-        threshold (float): 
-            The threshold for the proportion of missing SNPs (F_MISS) above which samples are considered to have failed the call rate.
-        plots_dir (str): 
-            The directory where the output plots will be saved.
-        y_axis_cap (int, optional): 
-            The maximum value for the y-axis in the capped histogram. Default is 10.
+        Generate sample call rate analysis plots and identify samples failing the call rate threshold.
+        This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
+        samples that fail the specified call rate threshold. It generates two sets of plots:
+        1. Histograms showing the distribution of missing SNPs (F_MISS)
+        2. Scatterplots showing different views of the call rate data
         
-        Returns:
-        --------
-        pandas.DataFrame: 
-            A DataFrame containing the samples that fail the call rate threshold, with columns 'FID', 'IID', and 'Failure'.
+        Parameters
+        ----------
+        directory : Path
+            Directory containing the input file
+        filename : str
+            Name of the PLINK format missing rate file
+        threshold : float
+            Call rate threshold for sample filtering (in terms of F_MISS)
+        plots_dir : Path, optional
+            Directory where plots will be saved. If None, uses default plots directory
+        y_axis_cap : int, optional
+            Maximum value for y-axis in capped histogram plots. Default is 10
+        color : str, optional
+            Color for the main plot elements. Default is '#1B9E77'
+        line_color : str, optional
+            Color for threshold lines in plots. Default is '#D95F02'
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing samples that failed the call rate threshold with columns:
+            - FID: Family ID
+            - IID: Individual ID
+            - Failure: Always set to 'Call rate'
+        
+        Notes
+        -----
+        The method generates two JPEG files:
+        - call_rate_{threshold}_histogram.jpeg: Contains histogram plots
+        - call_rate_{threshold}_scatterplot.jpeg: Contains scatter plots
         """
-
+        
         if not plots_dir:
             plots_dir = self.plots_dir
 
@@ -1072,6 +1191,40 @@ class SampleQC:
         return fail_call_rate
     
     def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Path = None) -> pd.DataFrame:
+        """
+        Creates a sex check report and visualization based on PLINK's sex check results.
+        This function reads sex check data and X chromosome missingness data, merges them,
+        and generates a scatter plot to visualize potential sex discrepancies. It also identifies
+        samples that fail sex check quality control.
+        
+        Parameters
+        ----------
+        directory : Path
+            Path to the directory containing input files
+        sex_check_filename : str
+            Filename of PLINK's sex check results (typically .sexcheck file)
+        xchr_imiss_filename : str
+            Filename of X chromosome missingness data
+        plots_dir : Path, optional
+            Directory where the plot should be saved. If None, uses default plots directory
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing samples that failed sex check QC with columns:
+            - FID: Family ID
+            - IID: Individual ID
+            - Failure: Type of failure (always 'Sex check')
+        
+        Notes
+        -----
+        The function creates a scatter plot with:
+        - Blue hollow circles for samples with Male PEDSEX
+        - Green hollow circles for samples with Female PEDSEX
+        - Red filled circles for problematic samples
+        - Dotted red vertical lines at F=0.2 and F=0.8
+        The plot is saved as 'sex_check.jpeg' in the specified plots directory.
+        """
         
         if not plots_dir:
             plots_dir = self.plots_dir
@@ -1152,6 +1305,45 @@ class SampleQC:
         return fail_sexcheck
     
     def report_heterozygosity_rate(self, directory: str, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: str, y_axis_cap: float = 80) -> pd.DataFrame:
+        """
+        Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
+        This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
+        and generates visualization plots to aid in quality control analysis.
+        
+        Parameters
+        ----------
+        directory : str
+            Path to the directory containing input files
+        summary_ped_filename : str
+            Filename of the summary PED file containing heterozygosity information
+        autosomal_filename : str
+            Filename of the autosomal file containing call rate information
+        std_deviation_het : float
+            Number of standard deviations to use as threshold for identifying deviant samples
+        maf : float
+            Minor allele frequency threshold used in the analysis
+        split : str
+            Direction of MAF comparison ('>' or '<')
+        plots_dir : str
+            Directory where plot files will be saved
+        y_axis_cap : float, optional
+            Maximum value for y-axis in capped histogram plot (default: 80)
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing samples that failed heterozygosity rate check with columns:
+            - FID: Family ID
+            - IID: Individual ID
+            - Failure: Description of failure type
+        
+        Notes
+        -----
+        The function generates two types of plots:
+        1. Histograms of heterozygosity rates (both uncapped and capped)
+        2. Scatter plot of heterozygosity rate vs missing SNP proportion
+        Files are saved as JPEG images in the specified plots directory.
+        """
         
         # load samples that failed heterozygosity rate check with MAF > threshold
         maf_file = directory / summary_ped_filename
@@ -1246,6 +1438,44 @@ class SampleQC:
         return fail_het
 
     def report_ibd_analysis(self, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> pd.DataFrame:
+        """
+        Analyze IBD (Identity By Descent) to identify duplicated or related samples.
+        This method processes IBD analysis results to identify sample pairs with IBD scores
+        above a specified threshold, indicating potential duplicates or related individuals.
+        For identified pairs, it uses missingness data to determine which sample should be
+        removed (keeping the sample with lower missingness rate).
+        
+        Parameters
+        ----------
+        ibd_threshold : float, default=0.185
+            The PI_HAT threshold above which samples are considered related.
+            Typical values: >0.98 for duplicates, >0.5 for first-degree relatives.
+        chunk_size : int, default=100000
+            Number of rows to process at a time when reading the genome file.
+        
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing samples to be removed, with columns:
+            - FID: Family ID
+            - IID: Individual ID
+            - Failure: Reason for removal ('Duplicates and relatedness (IBD)')
+            Returns empty DataFrame if no related pairs are found or if KING is used.
+        
+        Raises
+        ------
+        TypeError
+            If ibd_threshold is not a float.
+        FileNotFoundError
+            If required input files (*.imiss or *.genome) are not found.
+        
+        Notes
+        -----
+        The method requires two input files:
+        - {output_name}-ibd-missing.imiss: Contains sample missingness information
+        - {output_name}-ibd.genome: Contains pairwise IBD estimates
+        For each related pair, the sample with higher missingness rate is marked for removal.
+        """
         
         if not isinstance(ibd_threshold, float):
             raise TypeError("ibd_threshold should be a float")
@@ -1324,6 +1554,15 @@ class SampleQC:
         return to_remove
     
     def clean_input_folder(self) -> None:
+        """Removes specific files from the input folder.
+
+        This method cleans the input folder by removing files that contain 'missing' or
+        'renamed' in their names, excluding log files. The cleaning process helps maintain
+        organization by removing temporary or processed files.
+
+        Returns:
+            None
+        """
 
         logger.info("STEP: Clean input folder")
 
@@ -1337,6 +1576,16 @@ class SampleQC:
         return
     
     def clean_result_folder(self) -> None:
+        """
+        Clean the results folder by removing specific file types.
+
+        This method removes all .bed, .bim, and .fam files from the results directory,
+        while preserving log files. The cleaning process helps maintain a tidy workspace
+        by removing intermediate or temporary files from previous runs.
+
+        Returns:
+            None
+        """
 
         logger.info("STEP: Clean results folder")
 
@@ -1350,4 +1599,3 @@ class SampleQC:
                 file.unlink()
 
         return
-
