@@ -404,6 +404,41 @@ class SampleQC:
         return
     
     def execute_sex_check(self, sex_check: list = [0.2, 0.8]) -> None:
+        """
+        Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
+        This method performs sex check analysis by:
+        1. Running PLINK's --check-sex command on pruned data
+        2. Extracting X chromosome SNPs
+        3. Calculating missingness rates for X chromosome SNPs
+        
+        Parameters
+        ----------
+        sex_check : list of float, default=[0.2, 0.8]
+            List containing two float values that define the F-statistic boundaries for sex determination.
+            The values must sum to 1.0. First value is the lower bound, second is the upper bound.
+            Samples with F-statistics below the first value are called female, above the second value are called male.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If sex_check is not a list or if its elements are not floats
+        ValueError
+            If sex_check doesn't contain exactly 2 elements or if they don't sum to 1
+        
+        Notes
+        -----
+        The method creates the following output files:
+        - {output_name}-sexcheck.sexcheck : Contains sex check results
+        - {output_name}-xchr.bed/bim/fam : X chromosome SNP data
+        - {output_name}-xchr-missing.imiss : X chromosome missingness data
+        The number of threads used is automatically determined based on available CPU cores,
+        using max(available cores - 2, 1) or falling back to half of logical cores if CPU count
+        cannot be determined.
+        """
 
         if not isinstance(sex_check, list):
             raise TypeError("sex_check should be a list")
@@ -411,15 +446,17 @@ class SampleQC:
             raise ValueError("sex_check must have two elements")
         if not all(isinstance(i, float) for i in sex_check):
             raise TypeError("All elements in sex_check must be floats")
-        if 1 != sum(sex_check):
+        if sum(sex_check) != 1:
             raise ValueError("The sum of sex_check elements must be equal to 1")
         
         logger.info(f"STEP: Check discordant sex information.")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         plink_cmd1 = f"plink --bfile {self.pruned_file} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
 
@@ -434,8 +471,8 @@ class SampleQC:
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.sexcheck_miss = (self.results_dir / (self.output_name+'-sexcheck')).with_suffix('.sexcheck')
-        self.xchr_miss = (self.results_dir / (self.output_name+'-xchr-missing')).with_suffix('.imiss')
+        self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
+        self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.imiss')
 
         return
 
