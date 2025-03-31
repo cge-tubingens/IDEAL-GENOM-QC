@@ -152,21 +152,6 @@ class Fetcher1000Genome:
 
         return check_bed and check_bim and check_fam and check_psam
     
-    def _rename_snps1(self) -> None:
-
-        df_bim = pd.read_csv(self.destination / "all_phase3.bim", sep="\t", header=None, dtype={0: str})
-        df_bim.columns = ['chrom', 'snp', 'cm', 'pos', 'a1', 'a2']
-
-        df_bim['snp'] = df_bim['chrom'].astype(str) + "_" + df_bim['pos'].astype(str) + "_" + df_bim['a1'].str[0] + "_" + df_bim['a2'].str[0]
-
-        df_bim.to_csv(self.destination / "all_phase3.bim", sep="\t", header=False, index=False)
-
-        plink2_cmd = f"plink2 --bfile {str(self.destination / 'all_phase3')} --make-bed --out {str(self.destination / 'all_phase3_renamed')}"
-
-        shell_do(plink2_cmd)
-
-        return
-    
 class FetcherLDRegions:
 
     def __init__(self, destination: Path = Path(), built: str = '38'):
