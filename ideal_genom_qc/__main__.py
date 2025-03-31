@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 
 from pathlib import Path
 
@@ -10,18 +11,20 @@ from ideal_genom_qc.VariantQC import VariantQC
 from ideal_genom_qc.AncestryQC import AncestryQC
 from ideal_genom_qc.UMAPplot import UMAPplot
 
-def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingship: str, recompute_merge: str)->None:
+from ideal_genom_qc.get_references import FetcherLDRegions
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_merge: str, built: str) -> None:
 
     sample_params     = params_dict['sample_qc']
     ancestry_params   = params_dict['ancestry_qc']
     variant_qc_params = params_dict['variant_qc']
     umap_params       = params_dict['umap_plot']
 
-    use_kingship = use_kingship.lower()
-    if use_kingship == 'true':
-        use_kingship = True
-    else:
-        use_kingship = False
+    input_path = Path(data_dict['input_directory'])
+    output_path = Path(data_dict['output_directory'])
 
     recompute_merge = recompute_merge.lower()
     if recompute_merge == 'true':
@@ -29,33 +32,43 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingsh
     else:
         recompute_merge = False
 
-    print('use kingship', type(use_kingship))
+    high_ld_file = Path(data_dict['high_ld_file'])
+
+    if not high_ld_file.exists() or not high_ld_file.is_file():
+        logger.info("LD regions file not found.")
+        logger.info("Downloading LD regions file.")
+
+        fetcher = FetcherLDRegions(built=built)
+        high_ld_file = fetcher.get_ld_regions()
+
+        logger.info(f"LD regions file downloaded to {high_ld_file}.")
+
 
     if steps_dict['sample']:
         # instantiate SampleQC class
         sample_qc = SampleQC(
-            input_path      =data_dict['input_directory'],
+            input_path      =input_path,
             input_name      =data_dict['input_prefix'],
-            output_path     =data_dict['output_directory'],
+            output_path     =output_path,
             output_name     =data_dict['output_prefix'],
-            dependables_path=data_dict['dependables_directory'],
+            high_ld_file    =high_ld_file
         )
 
-        # pipeline steps
         sample_qc_steps = {
-            'rename SNPs'           : (sample_qc.execute_rename_snps, (True,)),
-            'hh_to_missing'         : (sample_qc.execute_haploid_to_missing, ()),
-            'ld_pruning'            : (sample_qc.execute_ld_pruning, (sample_params['ind_pair'],)),
-            'miss_genotype'         : (sample_qc.execute_miss_genotype, (sample_params['mind'],)),
-            'sex_check'             : (sample_qc.execute_sex_check, (sample_params['sex_check'],)),
-            'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, (sample_params['maf'],)),
-            'duplicates_relatedness': (sample_qc.execute_duplicate_relatedness, (sample_params['kingship'], use_kingship,)),
-            'get_fail_samples'      : (sample_qc.get_fail_samples, (sample_params['mind'], sample_params['het_deviation'], sample_params['maf'], sample_params['ibd_threshold'],)),
-            'drop_fail_samples'     : (sample_qc.execute_drop_samples, ()),
-            'recover_SNPs_names'    : (sample_qc.execute_recover_snp_names, (True,),)
+            'rename SNPs'           : (sample_qc.execute_rename_snpid, {"rename": sample_params['rename_snp']}),
+            'hh_to_missing'         : (sample_qc.execute_haploid_to_missing, {"hh_to_missing": sample_params['hh_to_missing']}),
+            'ld_pruning'            : (sample_qc.execute_ld_pruning, {"ind_pair": sample_params['ind_pair']}),
+            'miss_genotype'         : (sample_qc.execute_miss_genotype, { "mind": sample_params['mind']}),
+            'sex_check'             : (sample_qc.execute_sex_check, {"sex_check": sample_params['sex_check']}),
+            'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, {"maf": sample_params['maf']}),
+            'duplicates_relatedness': (sample_qc.execute_duplicate_relatedness, {"kingship": sample_params['kingship'], "use_king": sample_params['use_kingship']}),
+            'get_fail_samples'      : (sample_qc.get_fail_samples, {"call_rate_thres": sample_params['mind'], "std_deviation_het": sample_params['het_deviation'], "maf_het": sample_params['maf'], "ibd_threshold": sample_params['ibd_threshold']}),
+            'drop_fail_samples'     : (sample_qc.execute_drop_samples, {}),
+            'clean_input_files'     : (sample_qc.clean_input_folder, {}),
+            'clean_results_files'   : (sample_qc.clean_result_folder, {}),
         }
 
-        sample_step_description = {
+        step_description = {
             'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
             'hh_to_missing'         : 'Solve hh warnings by setting to missing',
             'ld_pruning'            : 'Perform LD pruning',
@@ -65,12 +78,13 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingsh
             'duplicates_relatedness': 'Get samples with high relatedness rate or duplicates',
             'get_fail_samples'      : 'Get samples that failed quality control',
             'drop_fail_samples'     : 'Drop samples that failed quality control',
-            'recover_SNPs_names'    : 'Recover SNPs names'
+            'clean_input_files'     : 'Clean input folder',
+            'clean_results_files'   : 'Clean results folder',
         }
 
         for name, (func, params) in sample_qc_steps.items():
-            print(f"\033[34m{sample_step_description[name]}.\033[0m")
-            func(*params)
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            func(**params)
 
         print("\033[92mSample quality control done.\033[0m")
 
@@ -79,16 +93,16 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingsh
 
         # instantiate AncestryQC class
         ancestry_qc = AncestryQC(
-            input_path = Path(data_dict['output_directory']) / 'sample_qc_results' / 'clean_files', 
+            input_path = output_path / 'sample_qc_results' / 'clean_files', 
             input_name = data_dict['output_prefix']+'-clean-samples', 
-            output_path= Path(data_dict['output_directory']), 
+            output_path= output_path, 
             output_name= data_dict['output_prefix'], 
-            high_ld_regions= Path(data_dict['dependables_directory']) / 'high-LD-regions.txt',
+            high_ld_file= high_ld_file,
             recompute_merge=recompute_merge
         )
 
         ancestry_qc_steps = {
-            'merge_study_reference'    : (ancestry_qc.merge_reference_study, {"ind_pair":ancestry_params['indep']}),
+            'merge_study_reference'    : (ancestry_qc.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
             'delete_intermediate_files': (ancestry_qc._clean_merging_dir, {}),
             'pca_analysis'             : (ancestry_qc.run_pca, 
                 {
@@ -116,29 +130,31 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, use_kingsh
 
     if steps_dict['variant']:
         variant_qc = VariantQC(
-            input_path      =os.path.join(data_dict['output_directory'], 'ancestry_results', 'clean_files'),
-            input_name      =data_dict['output_prefix']+'-ancestry-clean',
-            output_path     =data_dict['output_directory'],
+            input_path      =output_path / 'ancestry_qc_results' / 'clean_files',
+            input_name      =data_dict['output_prefix']+'-ancestry-cleaned',
+            output_path     =output_path,
             output_name     =data_dict['output_prefix']
         )
 
         variant_qc_steps = {
-            'Missing data rate'         : (variant_qc.execute_missing_data_rate, (variant_qc_params['chr-y'],)),
-            'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, ()),
-            'Get fail variants'         : (variant_qc.get_fail_variants, (variant_qc_params['miss_data_rate'], variant_qc_params['diff_genotype_rate'],)),
-            'Drop fail variants'        : (variant_qc.execute_drop_variants, (variant_qc_params['maf'], variant_qc_params['geno'], variant_qc_params['hwe'],)),
+            'Missing data rate'         : (variant_qc.execute_missing_data_rate, {'chr_y': variant_qc_params['chr-y']}),
+            'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, {}),
+            'Hardy-Weinberg equilibrium': (variant_qc.execute_hwe_test, {}),
+            'Get fail variants'         : (variant_qc.get_fail_variants, {'marker_call_rate_thres': variant_qc_params['miss_data_rate'], 'case_controls_thres': variant_qc_params['diff_genotype_rate'], 'hwe_threshold':variant_qc_params['hwe']}),
+            'Drop fail variants'        : (variant_qc.execute_drop_variants, {'maf': variant_qc_params['maf'], 'geno': variant_qc_params['geno'], 'hwe': variant_qc_params['hwe']}),
         }
 
         variant_step_description = {
             'Missing data rate'         : 'Compute missing data rate for males and females',
             'Different genotype'        : 'Case/control nonrandom missingness test',
+            'Hardy-Weinberg equilibrium': 'Hardy-Weinberg equilibrium test',
             'Get fail variants'         : 'Get variants that failed quality control',
             'Drop fail variants'        : 'Drop variants that failed quality control'
         }
 
         for name, (func, params) in variant_qc_steps.items():
             print(f"\033[34m{variant_step_description[name]}.\033[0m")
-            func(*params)
+            func(**params)
 
         print("\033[92mVariant quality control done.\033[0m")
 
@@ -180,7 +196,6 @@ def execute_main()->str:
     params_path = args_dict['path_params']
     data_path   = args_dict['file_folders']
     steps_path  = args_dict['steps']
-    use_kingship= args_dict['use_kingship'].lower()
     recompute_merge = args_dict['recompute_merge'].lower()
     built      = args_dict['built']
 
@@ -211,8 +226,8 @@ def execute_main()->str:
         params_dict =params_dict,
         data_dict   =data_dict,
         steps_dict  =steps_dict,
-        use_kingship=use_kingship,
-        recompute_merge=recompute_merge
+        recompute_merge=recompute_merge,
+        built    =built
     )
 
     return "Pipeline is completed"
