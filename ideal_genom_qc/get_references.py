@@ -182,6 +182,8 @@ class FetcherLDRegions:
                 with open((out_dir / f"high-LD-regions_GRCh{self.built}.txt"), "wb") as f:
                     f.write(ld.content)
                 logger.info(f"LD regions file for built {self.built} downloaded successfully to {out_dir}")
+
+                self.ld_regions = out_dir / f"high-LD-regions_GRCh{self.built}.txt"
                 return out_dir / f"high-LD-regions_GRCh{self.built}.txt"
             else:
                 logger.info(f"Failed to download .bim file: {ld.status_code}")
@@ -212,4 +214,5 @@ class FetcherLDRegions:
             with open(out_dir / f'high-LD-regions_GRCH{self.built}.txt', 'w') as file:
                 for line in data:
                     file.write(f"{line[0]}\t{line[1]}\t{line[2]}\t{line[3]}\n")
+            self.ld_regions = out_dir / f"high-LD-regions_GRCH{self.built}.txt"
             return out_dir / f'high-LD-regions_GRCH{self.built}.txt'
