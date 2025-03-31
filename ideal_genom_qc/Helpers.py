@@ -24,16 +24,16 @@ def shell_do(command, print_cmd=False, log=False, return_log=False, err=False):
     if err:
         return res.stderr.decode('utf-8')
     
-def arg_parser()->dict:
+def arg_parser() -> dict:
 
     # define parser
     parser = argparse.ArgumentParser(description='Adresses to configuration files')
 
     # parameters of quality control
-    parser.add_argument('--path_params', type=str, nargs='?', default=None, const=None, help='Full path to the JSON file containing genotype quality control parameters.')
+    parser.add_argument('--path-params', type=str, nargs='?', default=None, const=None, required=True, help='Full path to the JSON file containing genotype quality control parameters.')
 
     # path to data and names of files
-    parser.add_argument('--file_folders', type=str, nargs='?', default=None, const=None, help='Full path to the JSON file containing folder names and locations for genotype quality control data.')
+    parser.add_argument('--file-folders', type=str, nargs='?', default=None, const=None, required=True, help='Full path to the JSON file containing folder names and locations for genotype quality control data.')
 
     # path to steps of the pipeline to be executed
     parser.add_argument('--steps', type=str, nargs='?', default=None, const=None, help='Full path to the JSON file containing the pipeline steps to be executed.')
@@ -46,7 +46,7 @@ def arg_parser()->dict:
 
     return args
 
-def delete_temp_files(files_to_keep:list, path_to_folder:str)->None:
+def delete_temp_files(files_to_keep: list, path_to_folder: str) -> None:
 
     """
     Function to delete temporary files that were created during the pipeline execution. Moreover, it creates a directory called 'log_files' to save al `.log` files originated from the pipeline execution.
