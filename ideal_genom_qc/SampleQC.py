@@ -130,6 +130,32 @@ class SampleQC:
         self.plots_dir.mkdir(parents=True, exist_ok=True)
 
     def execute_rename_snpid(self, rename: bool = True) -> None:
+        
+        """
+        Executes the SNP ID renaming process using PLINK2.
+        This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
+        The renaming is performed using PLINK2's --set-all-var-ids parameter.
+        
+        Parameter:
+        ----------
+        rename (bool, optional): Flag to control whether SNP renaming should be performed. 
+            Defaults to True.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            TypeError: If rename parameter is not a boolean.
+
+        Notes:
+        ------
+            - The renamed files will be saved with '-renamed' suffix
+            - Thread count is optimized based on available CPU cores
+            - The new SNP ID format will be: chromosome:position:allele1:allele2
+            - Sets self.renamed_snps to True if renaming is performed
+        """
 
         if not isinstance(rename, bool):
             raise TypeError("rename must be a boolean")
@@ -158,7 +184,7 @@ class SampleQC:
     def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
 
         if not isinstance(hh_to_missing, bool):
-            raise TypeError("renamed should be a boolean")
+            raise TypeError("hh_to_missing should be a boolean")
         
         if not hh_to_missing:
             logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
@@ -169,12 +195,11 @@ class SampleQC:
         
         logger.info("STEP: Convert haploid genotypes to missing values")
 
-        if self.renamed_snps:
-            # PLINK command: convert haploid genotypes to missing
-            plink_cmd = f"plink --bfile {self.input_path / (self.input_name+'-renamed')} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
-        else:
-            # PLINK command: convert haploid genotypes to missing
-            plink_cmd = f"plink --bfile {self.input_path / self.input_name} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
+        # Dynamically set the input file name based on whether SNPs are renamed
+        input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
+
+        # PLINK command: convert haploid genotypes to missing
+        plink_cmd = f"plink --bfile {self.input_path / input_file} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
