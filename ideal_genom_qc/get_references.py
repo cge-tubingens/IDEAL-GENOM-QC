@@ -154,7 +154,7 @@ class Fetcher1000Genome:
     
 class FetcherLDRegions:
 
-    def __init__(self, destination: Path = Path(), built: str = '38'):
+    def __init__(self, destination: Path = None, built: str = '38'):
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / "ld_regions_files"
