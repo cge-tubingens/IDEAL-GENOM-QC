@@ -118,10 +118,6 @@ class Fetcher1000Genome:
         # execute plink2 command
         shell_do(plink2_cmd)
 
-        self._rename_snps1()
-
-        logger.info("1000 Genomes binaries created renamed.")
-
         (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
         (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
         (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
