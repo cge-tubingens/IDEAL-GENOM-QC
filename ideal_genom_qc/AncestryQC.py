@@ -17,7 +17,48 @@ logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger():
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38', rename_snps: bool=False) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
+        """
+        Initialize AncestryQC class.
+        This class performs ancestry quality control on genetic data by comparing study samples against reference populations.
+        
+        Parameters:
+        -----------
+        input_path: Path 
+            Path to directory containing input files
+        input_name: str 
+            Name of input file without extension
+        output_path: Path 
+            Path to directory for output files
+        output_name: str 
+            Name for output files without extension
+        high_ld_regions: Path 
+            Path to file containing high LD regions to exclude
+        reference_files: dict 
+            Dictionary containing paths to reference population files
+        built: str (optional) 
+            Genome build version ('37' or '38'). Defaults to '38'
+        
+        Raises:
+        -------
+        TypeError: 
+            If input arguments are not of correct type
+        ValueError: 
+            If genome build version is not '37' or '38'
+        FileNotFoundError: 
+            If required input files/directories do not exist
+        
+        Attributes:
+        -----------
+            reference_AC_GT_filtered: Filtered reference allele counts and genotypes
+            study_AC_GT_filtered: Filtered study allele counts and genotypes
+            pruned_reference: LD-pruned reference data
+            pruned_study: LD-pruned study data
+            reference_fixed_chr: Reference data with fixed chromosomes
+            reference_fixed_pos: Reference data with fixed positions
+            reference_flipped: Reference data with flipped alleles
+            reference_cleaned: Final cleaned reference data
+        """
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -49,7 +90,6 @@ class ReferenceGenomicMerger():
         self.output_name= output_name
         self.high_ld_regions = high_ld_regions
         self.reference_files = reference_files
-        self.renamed_snps    = rename_snps
 
         self.reference_AC_GT_filtered= None
         self.study_AC_GT_filtered    = None
@@ -62,44 +102,31 @@ class ReferenceGenomicMerger():
 
         pass
 
-    def execute_rename_snpid(self) -> None:
-        
-        if not self.renamed_snps:
-            logger.info(f"STEP: Rename SNPs. `rename_snps` set to {self.renamed_snps}. Skipping renaming of SNPs in the study data")
-            return
-        else:
-            logger.info(f"STEP: Rename SNPs. `rename` set to {self.renamed_snps}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
-
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
-        else:
-            max_threads = 10
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
-        df_bim = pd.read_csv(self.input_path / (self.input_name+ '.bim'), sep="\t", header=None, dtype={0: str})
-        df_bim.columns = ['chrom', 'snp', 'cm', 'pos', 'a1', 'a2']
-
-        df_link = pd.DataFrame(columns=['old_id', 'new_id'])
-        
-        df_link['old_id'] = df_bim['snp']
-        df_link['new_id'] = df_bim['chrom'].astype(str) + "_" + df_bim['pos'].astype(str) + "_" + df_bim['a1'].str[0] + "_" + df_bim['a2'].str[0]
-
-        df_link.to_csv(self.input_path / "update_names.txt", sep="\t", header=False, index=False)
-        logger.info(f"STEP: Renaming SNPs in the study data: created file {self.input_path / 'update_names.txt'}")
-
-        # PLINK2 command
-        plink2_cmd = f"plink2 --bfile {str(self.input_path / self.input_name)} --update-name {str(self.input_path / "update_names.txt")} --make-bed --out {str(self.input_path / (self.input_name+ '-renamed'))} --memory {memory} --threads {max_threads}"
-
-        # Execute PLINK2 command
-        shell_do(plink2_cmd, log=True)
-
-        return
-
     def execute_filter_prob_snps(self)->None:
+        """
+        Executes the filtering of problematic SNPs (A->T and C->G) from both study and reference data.
+        This method performs the following operations:
+        1. Identifies and filters A->T and C->G SNPs from study data
+        2. Identifies and filters A->T and C->G SNPs from reference data
+        3. Creates new PLINK binary files excluding the identified problematic SNPs
+        4. Uses maximum available CPU threads (total cores - 2) and 2/3 of available memory
+        The method handles both renamed and original SNP scenarios, determined by self.renamed_snps.
+        
+        Returns:
+        --------
+            None
+
+        Side Effects:
+        ------------
+            - Creates filtered SNP list files in the output directory
+            - Creates new PLINK binary files (.bed, .bim, .fam) in the output directory
+            - Sets self.reference_AC_GT_filtered and self.study_AC_GT_filtered paths
+            - Logs progress and statistics of filtering operations
+        Requires:
+        ---------
+            - Valid PLINK binary files for both study and reference data
+            - Proper initialization of input_path, output_path, and reference_files
+        """
 
         logger.info("STEP: Filtering A->T and C->G SNPs from study and reference data.")
 
@@ -113,16 +140,10 @@ class ReferenceGenomicMerger():
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
-        if self.renamed_snps:
 
-            # find A->T and C->G SNPs in study data
-            filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name+'-renamed'}.bim", output_filename=self.input_name)
-            logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
-
-        else:
-            # find A->T and C->G SNPs in study data
-            filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim", output_filename=self.input_name)
-            logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+        # find A->T and C->G SNPs in study data
+        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim", output_filename=self.input_name)
+        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
 
 
         # find A->T and C->G SNPs in reference data
@@ -156,6 +177,38 @@ class ReferenceGenomicMerger():
         return
     
     def execute_ld_pruning(self, ind_pair:list) -> None:
+        """
+        Execute linkage disequilibrium (LD) pruning on study and reference data.
+        This method performs LD-based pruning using PLINK to remove highly correlated SNPs from both study and reference datasets.
+        The pruning is done using a sliding window approach where SNPs are removed based on their pairwise correlation (r²).
+        Parameters:
+        -----------
+        ind_pair (list): A list containing three elements:
+            - ind_pair[0] (int): Window size in SNPs
+            - ind_pair[1] (int): Number of SNPs to shift the window at each step
+            - ind_pair[2] (float): r² threshold for pruning
+
+        Raises:
+        -------
+        TypeError: 
+            If ind_pair is not a list
+        TypeError: 
+            If first two elements of ind_pair are not integers
+        TypeError: 
+            If third element of ind_pair is not a float
+        
+        Notes:
+        ------
+            - Uses PLINK's --indep-pairwise command for pruning
+            - Excludes high LD regions specified in self.high_ld_regions
+            - Creates pruned datasets for both study and reference data
+            - Updates self.pruned_reference and self.pruned_study with paths to pruned files
+            - Uses all available CPU threads except 2 for processing
+        
+        Returns:
+        -------
+            None
+        """
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
@@ -192,14 +245,37 @@ class ReferenceGenomicMerger():
 
         return
     
-    def execute_fix_chromosome_mismatch(self) -> dict:
+    def execute_fix_chromosome_mismatch(self) -> None:
+        """
+        Fix chromosome mismatch between study data and reference panel.
+
+        This method executes PLINK commands to correct any chromosome mismatches between the study data
+        and reference panel datasets. It identifies mismatches using internal methods and updates
+        the chromosome assignments in the reference panel to match the study data.
+
+        The method performs the following steps:
+        1. Identifies chromosome mismatches between study and reference BIM files
+        2. Creates an update file for chromosome reassignment
+        3. Executes PLINK command to update chromosome assignments in reference panel
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        - Creates new PLINK binary files with updated chromosome assignments
+        - The updated files are saved with '-updateChr' suffix
+        """
 
         logger.info("STEP: Fixing chromosome mismatch between study data and reference panel")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # File paths
         study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
@@ -221,13 +297,44 @@ class ReferenceGenomicMerger():
         return
     
     def execute_fix_possition_mismatch(self) -> None:
+        """
+        Fixes position mismatches between study data and reference panel.
+
+        This method executes PLINK commands to update the positions of SNPs in the reference panel
+        to match those in the study data. It processes previously identified position mismatches
+        and creates new binary PLINK files with corrected positions.
+
+        The method:
+        1. Determines optimal thread count for processing
+        2. Identifies position mismatches between study and reference BIM files
+        3. Updates reference panel positions using PLINK
+        4. Creates new binary files with corrected positions
+
+        Returns:
+        -------
+            None
+
+        Side Effects:
+        ------------
+            - Creates new PLINK binary files (.bed, .bim, .fam) with updated positions
+            - Logs the number of SNPs being updated
+            - Modifies self.reference_fixed_pos with path to updated files
+
+        Dependencies:
+        -------------
+            - Requires PLINK to be installed and accessible
+            - Expects pruned study and reference files to exist
+            - Requires previous chromosome fixing step to be completed
+        """
 
         logger.info("STEP: Fixing position mismatch between study data and reference panel")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # File paths
         study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
