@@ -235,6 +235,44 @@ class SampleQC:
         return
     
     def execute_ld_pruning(self, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
+        This method performs LD pruning in three steps:
+        1. Excludes complex/high LD regions
+        2. Identifies SNPs for pruning using indep-pairwise test
+        3. Creates final pruned dataset
+
+        Parameters
+        ----------
+        ind_pair : list, optional
+            List of three elements for LD pruning parameters:
+            - Window size (int): Number of SNPs to analyze in each window
+            - Step size (int): Number of SNPs to shift window at each step
+            - r² threshold (float): Correlation coefficient threshold for pruning
+            Default is [50, 5, 0.2]
+        
+        Raises
+        ------
+        TypeError
+            If ind_pair is not a list
+            If first two elements of ind_pair are not integers
+            If third element of ind_pair is not float
+        ValueError
+            If ind_pair does not contain exactly three elements
+            If window size or step size is not positive
+            If r² threshold is not between 0 and 1
+        FileNotFoundError
+            If required pruning input file is not found
+        
+        Notes
+        -----
+        - Uses available CPU cores (leaving 2 cores free) and 2/3 of available memory
+        - Creates intermediate and final files with suffixes:
+          * '-LDregionExcluded'
+          * '-LDregionExcluded-prunning'
+          * '-LDpruned'
+        - Updates self.pruned_file with path to final pruned dataset
+        """
         
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
@@ -295,6 +333,40 @@ class SampleQC:
         return
     
     def execute_miss_genotype(self, mind: float = 0.2)->dict:
+        """
+        Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+        This method performs two main operations:
+        1. Generates missingness statistics for all samples
+        2. Filters samples based on the specified missingness threshold (mind)
+        
+        Parameters
+        ----------
+        mind : float, optional
+            The missingness threshold for sample filtering (default is 0.2).
+            Samples with missingness rates above this threshold will be removed.
+            Recommended range is between 0.02 and 0.1.
+        
+        Returns
+        -------
+        dict
+            Dictionary containing missingness analysis results
+        
+        Raises
+        ------
+        TypeError
+            If mind parameter is not a float
+        ValueError
+            If mind parameter is not between 0 and 1
+        FileNotFoundError
+            If the output .imiss file is not generated
+            If mind value is outside recommended range (0.02-0.1)
+        
+        Notes
+        -----
+        This function creates two files:
+        - {input_name}-missing.imiss: Contains missingness statistics for all samples
+        - {output_name}-mind.bed: New binary file with filtered samples
+        """
 
         if not isinstance(mind, float):
             raise TypeError("mind should be a float")
@@ -304,8 +376,13 @@ class SampleQC:
             raise ValueError("mind should be between 0 and 1")
         
         # Check if mind is around typical values
-        if mind <= 0.02 and mind >= 0.1:
-            warnings.warn(f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1.", UserWarning)
+        if mind < 0.02 or mind > 0.1:
+            warnings.warn(
+                f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1. "
+                f"Values below 0.02 may exclude too few samples with high missingness, potentially affecting data quality, "
+                f"while values above 0.1 may exclude too many samples, reducing the dataset size significantly.",
+                UserWarning
+            )
 
         logger.info(f"STEP: Missing genotype check. `mind` set to {mind}")
 
@@ -321,6 +398,8 @@ class SampleQC:
             shell_do(cmd, log=True)
 
         self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.imiss')
+        if not self.call_rate_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.call_rate_miss}")
 
         return
     
