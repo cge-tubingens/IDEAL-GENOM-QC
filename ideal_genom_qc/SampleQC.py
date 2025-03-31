@@ -637,6 +637,39 @@ class SampleQC:
         return
 
     def execute_kingship(self, kingship: float = 0.354) -> None:
+        """
+        Execute kinship analysis to identify and handle sample relatedness.
+        This method performs kinship analysis using PLINK2 to identify duplicate samples and related individuals. 
+        It first computes a kinship coefficient matrix for all samples and then prunes samples based on the 
+        specified kingship threshold.
+        
+        Parameters
+        ----------
+        kingship : float, optional
+            The kinship coefficient threshold used to identify related samples. Must be between 0 and 1.
+            Samples with kinship coefficients above this threshold will be marked for removal.
+            Default is 0.354 (equivalent to first-degree relatives).
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If kingship parameter is not a float.
+        ValueError
+            If kingship parameter is not between 0 and 1.
+        FileNotFoundError
+            If the expected output file from PLINK2 is not created.
+        
+        Notes
+        -----
+        - Uses PLINK2 to compute kinship coefficients and perform sample pruning
+        - Automatically determines optimal thread count and memory usage based on system resources
+        - Creates output files with kinship coefficient matrix and list of samples to be removed
+        - Updates self.kinship_miss with path to file containing samples to be removed
+        """
 
         if not isinstance(kingship, float):
             raise TypeError("kingship should be a float")
@@ -645,10 +678,12 @@ class SampleQC:
         
         logger.info(f"STEP: Duplicates and relatedness check with Kingship. `kingship` set to {kingship}")
         
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # Get the virtual memory details
         memory_info = psutil.virtual_memory()
@@ -658,7 +693,7 @@ class SampleQC:
         # Compute kinship-coefficient matrix for all samples
         plink2_cmd1 = f"plink2 --bfile {self.pruned_file} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
-        # Prune for Monozygotic Twins OR Duplicates  os.path.join(results_dir, output_name+'-kinship-pruned-duplicates')
+        # Prune for Monozygotic Twins OR Duplicates
         plink2_cmd2 = f"plink2 --bfile {self.pruned_file} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kingship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
@@ -667,6 +702,10 @@ class SampleQC:
             shell_do(cmd, log=True)
 
         self.kinship_miss = (self.results_dir / (self.output_name+'-kinship-pruned-duplicates')).with_suffix('.king.cutoff.out.id')
+
+        # Check if the file exists
+        if not self.kinship_miss.exists():
+            raise FileNotFoundError(f"Expected file {self.kinship_miss} was not created. Ensure the PLINK2 command executed successfully.")
 
         return
     
