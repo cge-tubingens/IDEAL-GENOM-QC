@@ -183,8 +183,36 @@ class SampleQC:
     
     def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
 
+        """
+        Convert haploid genotypes to missing values in PLINK binary files.
+        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
+        missing values in the genotype data. This is often useful for quality control 
+        of genetic data, particularly for variants on sex chromosomes.
+        
+        Parameters
+        ----------
+        hh_to_missing : bool, default=True
+            If True, converts haploid genotypes to missing values.
+            If False, skips the conversion step.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If hh_to_missing is not a boolean value.
+        
+        Notes
+        -----
+        The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
+        new files with suffix '-hh-missing'. The input files are determined based on whether
+        SNPs have been previously renamed (checks self.renamed_snps).
+        """
+
         if not isinstance(hh_to_missing, bool):
-            raise TypeError("hh_to_missing should be a boolean")
+            raise TypeError("hh_to_missing must be a boolean")
         
         if not hh_to_missing:
             logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
