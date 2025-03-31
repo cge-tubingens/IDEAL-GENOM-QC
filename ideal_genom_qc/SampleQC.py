@@ -709,7 +709,40 @@ class SampleQC:
 
         return
     
-    def execute_duplicate_relatedness(self, kingship: float = 0.354, use_king: bool = True)->dict:
+    def execute_duplicate_relatedness(self, kingship: float = 0.354, use_king: bool = True) -> None:
+        """
+        Execute duplicate and relatedness analysis on the genotype data.
+        This method performs either IBD (Identity by Descent) or KING kinship coefficient
+        analysis to identify duplicate samples and related individuals in the dataset.
+        
+        Parameters
+        ----------
+        kingship : float, optional
+            The KING kinship coefficient threshold for identifying related samples.
+            Default is 0.354, which corresponds to duplicates/MZ twins.
+        use_king : bool, optional
+            If True, uses KING algorithm for relatedness analysis.
+            If False, uses traditional IBD analysis.
+            Default is True.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If kingship is not a float or use_king is not a boolean.
+        
+        Notes
+        -----
+        The method will store the analysis type (KING or IBD) in the use_king attribute.
+        """
+
+        if not isinstance(use_king, bool):
+            raise TypeError("use_king must be a boolean")
+        if not isinstance(kingship, float):
+            raise TypeError("kingship must be a float")
 
         logger.info("STEP: Duplicates and relatedness check")
         
