@@ -144,11 +144,10 @@ class Fetcher1000Genome:
     
     def _check_if_binaries_exist(self) -> bool:
 
-        check_bed = (self.destination / "all_phase3.bed").exists()
-        check_bim = (self.destination / "all_phase3.bim").exists()
-        check_fam = (self.destination / "all_phase3.fam").exists()
-        check_psam = (self.destination / "all_phase3.psam").exists()
-
+        check_bed = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed').exists()
+        check_bim = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim').exists()
+        check_fam = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam').exists()
+        check_psam = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam').exists()
 
         return check_bed and check_bim and check_fam and check_psam
     
