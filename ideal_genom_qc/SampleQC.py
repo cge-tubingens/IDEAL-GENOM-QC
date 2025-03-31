@@ -128,183 +128,57 @@ class SampleQC:
         self.plots_dir = self.results_dir / 'plots'
         self.plots_dir.mkdir(parents=True, exist_ok=True)
 
-    def execute_rename_snps(self, rename:bool=True)->dict:
+    def execute_rename_snpid(self, rename: bool = True) -> None:
+
+        if not isinstance(rename, bool):
+            raise TypeError("rename should be a boolean")
         
-        """
-        Rename the SNPs in the .bim files following the standard format chr:pos:ref:alt in order to avoid very large SNP names that can cause issues in downstream analyses.
-
-        Parameters:
-        -----------
-            rename (bool): Flag to determine whether to rename SNPs or not. Default is True.
-
-        Returns:
-        --------
-            dict: A dictionary containing the status of the process, the step name, and the output file directory.
-        """
-
         if not rename:
-            pass
-
-        input_path = self.input_path
-        input_name = self.input_name
-
-        step="snp_renaming"
-
-        df_bim = pd.read_csv(
-            os.path.join(input_path, input_name + '.bim'),
-            sep=r'\s+',
-            engine='python',
-            header=None,
-        )
-
-        df_linkage = pd.concat(
-            [df_bim[1] ,df_bim[0].astype(str) + ':' + df_bim[3].astype(str)+ ':' + df_bim[4].astype(str) + ':' + df_bim[5].astype(str)],
-            axis=1,
-        )
-        df_linkage.columns = ['old', 'new']
-
-        df_bim[1] = df_linkage['new'].copy()
-
-        df_bim.to_csv(
-            os.path.join(input_path, input_name + '.bim'),
-            sep   ='\t',
-            header=False,
-            index =False,
-        )
-
-        df_linkage.to_csv(
-            os.path.join(input_path, input_name + '.linkage'),
-            sep   ='\t',
-            header=False,
-            index =False,
-        )
-
-        # PLINK command
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --make-bed --out {os.path.join(input_path, input_name+'-renamed')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
-
-        df_bim = pd.read_csv(
-            os.path.join(input_path, input_name + '.bim'),
-            sep   =r'\s+',
-            engine='python',
-            header=None,
-        )
-        df_bim[1] = df_linkage['old'].copy()
-
-        df_bim.to_csv(
-            os.path.join(input_path, input_name + '.bim'),
-            sep   ='\t',
-            header=False,
-            index =False,
-        )
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': input_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-    
-    def execute_haploid_to_missing(self, renamed:bool=True)->dict:
-
-        """
-        Executes the conversion of haploid genotypes to missing values using PLINK.
-
-        This method constructs and runs a PLINK command to convert haploid genotypes
-        to missing values in a given dataset. The resulting files are saved with a 
-        suffix '-hh-missing' in the same directory as the input files.
-
-        Returns:
-        --------
-            dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-
-        step = "haploid_to_missing"
-
-        if renamed:
-            # convert haploid genotypes to missing
-            plink_cmd = f"plink --bfile {os.path.join(input_path, input_name+'-renamed')} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
+            return
         else:
-            # convert haploid genotypes to missing
-            plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --set-hh-missing --make-bed --out {os.path.join(input_path, input_name+'-hh-missing')}"
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
+            self.renamed_snps = True
+
+        if os.cpu_count() is not None:
+            max_threads = os.cpu_count()-2
+        else:
+            max_threads = 10
+
+        plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.input_path / (self.input_name+ '-renamed')}"
+
+        # Execute PLINK2 command
+        shell_do(plink2_cmd, log=True)
+
+        return
+    
+    def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
+
+        if not isinstance(hh_to_missing, bool):
+            raise TypeError("renamed should be a boolean")
+        
+        if not hh_to_missing:
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
+            return
+        else:
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
+            self.hh_to_missing = True
+        
+        logger.info("STEP: Convert haploid genotypes to missing values")
+
+        if self.renamed_snps:
+            # PLINK command: convert haploid genotypes to missing
+            plink_cmd = f"plink --bfile {self.input_path / (self.input_name+'-renamed')} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
+        else:
+            # PLINK command: convert haploid genotypes to missing
+            plink_cmd = f"plink --bfile {self.input_path / self.input_name} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': input_path
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def execute_ld_pruning(self, ind_pair:list)->dict:
-        
-        """
-        Executes LD pruning using PLINK.
-
-        This method performs linkage disequilibrium (LD) pruning on genetic data using PLINK.
-        It excludes high LD regions, performs an LD prune indep-pairwise test, and extracts
-        pruned SNPs.
-
-        This method runs three PLINK commands:
-        1. Exclude complex regions according to LD.
-        2. Run independent pairwise tests and generates prune.in and prune.out files.
-        3. Extract pruned SNPs and generate a new dataset.
-
-        Parameters:
-        -----------
-        ind_pair (list): A list containing three integers representing the window size,
-                        step size, and r^2 threshold for the indep-pairwise test.
-        
-        Returns:
-        --------
-        dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-        
-        Raises:
-        -------
-            FileNotFoundError: If the file with high LD regions is not found.
-            TypeError: If ind_pair is not a list.
-            TypeError: If the first two elements in ind_pair values are not integers.
-            TypeError: If the third element in ind_pair is not a float.
-        """
-
-        input_path      = self.input_path
-        input_name      = self.input_name
-        dependables_path= self.dependables
-        results_dir     = self.results_dir
-        
-        # check existence of high LD regions file
-        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
-        if not os.path.exists(high_ld_regions_file):
-            raise FileNotFoundError(f"File with high LD region was not found: {high_ld_regions_file}")
+    def execute_ld_pruning(self, ind_pair: list = [50, 5, 0.2]) -> None:
         
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
