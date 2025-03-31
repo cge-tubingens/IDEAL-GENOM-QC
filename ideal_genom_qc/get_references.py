@@ -16,6 +16,8 @@ class Fetcher1000Genome:
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
+
+        logger.info(f"Destination folder: {destination}")
         
         self.destination = destination
         self.built = built
