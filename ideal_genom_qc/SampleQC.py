@@ -209,32 +209,21 @@ class SampleQC:
             ld_input = self.input_name
 
         # exclude complex regions
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name+'-hh-missing')} --exclude {high_ld_regions_file} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded')}"
+        plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
 
         # LD prune indep-pairwise test
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning')}"
+        plink_cmd2 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')} --memory {memory} --threads {max_threads}"
 
-        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDregionExcluded')} --extract {os.path.join(results_dir, input_name+'-LDregionExcluded-prunning.prune.in')} --make-bed --out {os.path.join(results_dir, input_name+'.LDpruned')} --memory {memory} --threads {max_threads}"
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+
+        self.pruned_file = self.results_dir / (self.input_name + '-LDpruned')
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
     def execute_miss_genotype(self, mind:float)->dict:
         
