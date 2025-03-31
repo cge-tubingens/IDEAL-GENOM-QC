@@ -5,6 +5,7 @@ Module to perform sample quality control
 import os
 import psutil
 import warnings
+import logging
 
 import pandas as pd
 import numpy as np
@@ -355,69 +356,30 @@ class SampleQC:
         else:
             max_threads = 10
 
-        # PLINK commands
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --genome --out {os.path.join(results_dir, output_name+'-ibd')} --threads {max_threads}"
+        # PLINK command
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
 
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --allow-no-sex --missing --out {os.path.join(results_dir, output_name+'-ibd-missing')}"
+        # PLINKI command
+        plink_cmd2 = f"plink --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.ibd_miss = os.path.join(results_dir, output_name+'-ibd-missing.imiss')
-        self.genome = os.path.join(results_dir, output_name+'-ibd.genome')
+        self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
+        self.genome = self.results_dir / (self.output_name+'-ibd.genome')
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_kingship(self, kingship:float)->dict:
-        
-        """
-        Executes the duplicates and relatedness analysis using PLINK2.
-
-        This function computes the kinship-coefficient matrix for all samples and prunes for monozygotic twins or duplicates
-        based on the provided kinship threshold. It uses PLINK2 commands to perform these operations and logs the execution.
-
-        Parameters:
-        -----------
-            kingship (float): The kinship threshold value. Must be a float between 0 and 1.
-        
-        Returns:
-        --------
-            dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-
-        Raises:
-        -------
-            TypeError: If the kingship parameter is not a float.
-            ValueError: If the kingship parameter is not between 0 and 1.
-        """
-
-        input_name = self.input_name
-        output_name= self.output_name
-        results_dir= self.results_dir
+    def execute_kingship(self, kingship: float = 0.354) -> None:
 
         if not isinstance(kingship, float):
             raise TypeError("kingship should be a float")
         if kingship < 0 or kingship >1:
             raise ValueError("kingship should be between 0 and 1")
         
-        step = "duplicates_and_relatedness"
+        logger.info(f"STEP: Duplicates and relatedness check with Kingship. `kingship` set to {kingship}")
         
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
@@ -430,36 +392,23 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
         
         # Compute kinship-coefficient matrix for all samples
-        plink2_cmd1 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --make-king triangle bin --out {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
+        plink2_cmd1 = f"plink2 --bfile {self.pruned_file} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
-        # Prune for Monozygotic Twins OR Duplicates
-        plink2_cmd2 = f"plink2 --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --king-cutoff {os.path.join(results_dir, output_name+'-kinship-coefficient-matrix')} {kingship} --out {os.path.join(results_dir, output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
+        # Prune for Monozygotic Twins OR Duplicates  os.path.join(results_dir, output_name+'-kinship-pruned-duplicates')
+        plink2_cmd2 = f"plink2 --bfile {self.pruned_file} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kingship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
         cmds = [plink2_cmd1, plink2_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.kinship_miss = os.path.join(results_dir, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
+        self.kinship_miss = (self.results_dir / (self.output_name+'-kinship-pruned-duplicates')).with_suffix('.king.cutoff.out.id')
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def execute_duplicate_relatedness(self, kingship:float=0.354, use_king:bool=True)->dict:
+    def execute_duplicate_relatedness(self, kingship: float = 0.354, use_king: bool = True)->dict:
 
-        step = "duplicates_and_relatedness"
+        logger.info("STEP: Duplicates and relatedness check")
         
         if use_king:
             self.execute_kingship(kingship)
@@ -468,127 +417,13 @@ class SampleQC:
 
         self.use_king = use_king
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': self.results_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_recover_snp_names(self, rename:bool=True)->dict:
-        
-        """
-        Executes the recovery of SNP names by renaming them based on a linkage file and 
-        updating the corresponding .bim file. Optionally, it can skip the renaming process.
-
-        Parameters:
-        -----------
-            rename (bool): Flag to determine whether to rename SNPs or not. Default is True.
-
-        Returns:
-        --------
-            dict: A dictionary containing the status of the process, the step name, and the output file directory.
-
-        Raises:
-        -------
-            FileNotFoundError: If the file linking old names and new names is not found.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-        output_name= self.output_name
-
-        step = "recover_snp_names"
-
-        if not rename:
-            pass
-
-        if not os.path.isfile(os.path.join(input_path, input_name + '.linkage')):
-            raise FileNotFoundError("Linkage file not found.")
-
-        df_bim_cleaned = pd.read_csv(
-            os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
-            sep   =r'\s+',
-            engine='python',
-            header=None,
-        )
-
-        df_linkage = pd.read_csv(
-            os.path.join(input_path, input_name + '.linkage'),
-            sep   =r'\s+',
-            engine='python',
-            header=None,
-        )
-
-        df_bim_cleaned[1] = df_linkage[0].copy()
-        df_bim_cleaned.to_csv(
-            os.path.join(self.clean_dir, output_name+'-clean-samples.bim'),
-            sep   ='\t',
-            header=False,
-            index =False,
-        )
-
-        # PLINK command
-        plink_cmd = f"plink --bfile {os.path.join(self.clean_dir, output_name+'-clean-samples')} --make-bed --out {os.path.join(self.clean_dir, output_name+'-clean-samples')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': self.clean_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    @staticmethod
-    def compute_heterozigozity(ped_file: str, map_file: str=None)->None:
-        
-        """
-        Computes heterozygosity statistics for individuals in a PED file and writes the results to a summary file.
-
-        The function reads genotype data from the specified PED file, calculates the total number of genotypes,
-        the number of homozygous genotypes, the number of heterozygous genotypes, and their respective percentages
-        for each individual. The results are written to a summary file in the same directory as the PED file.
-        The summary file contains the following columns:
-            - ID: Individual ID
-            - total: Total number of genotypes
-            - num_hom: Number of homozygous genotypes
-            - num_het: Number of heterozygous genotypes
-            - Percent_hom: Percentage of homozygous genotypes
-            - Percent_het: Percentage of heterozygous genotypes
-
-        Parameters:
-        -----------
-            ped_file (str): Path to the PED file containing genotype data.
-            map_file (str, optional): Path to the MAP file. This parameter is currently not used. Defaults to None.
-
-        Returns:
-        --------
-            None
-
-        If the PED file is not found or an I/O error occurs, an error message is printed.
-        """
+    def _compute_heterozigozity(self, ped_file: Path, map_file: Path = None) -> None:
         
         # Define output file name
-        summary_file= f"Summary-{os.path.basename(ped_file)}"
-        output_path = os.path.join(os.path.dirname(ped_file), summary_file)
+        summary_file= f"Summary-{ped_file.name}"
+        output_path = ped_file.parent / summary_file
 
         try:
             with open(ped_file, 'r') as ped, open(output_path, 'w') as output:
@@ -637,7 +472,7 @@ class SampleQC:
         except IOError as e:
             print(f"Error: {e}")
 
-    def get_fail_samples(self, call_rate_thres:float, std_deviation_het:float, maf_het:float, ibd_threshold:float)->pd.DataFrame:
+    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float)->pd.DataFrame:
         
         """
         Identifies and reports samples that fail various quality control checks.
@@ -657,65 +492,61 @@ class SampleQC:
             The function saves the results of the failed samples to a file and returns a summary DataFrame of the failure counts.
         """
 
-        result_path = self.results_dir
-        output_name = self.output_name
-        plots_dir   = self.plots_dir
-
         # ==========================================================================================================
         #                                             CALL RATE CHECK
         # ==========================================================================================================
 
         # load samples who failed call rate check
         fail_call_rate = self.report_call_rate(
-            directory    =result_path, 
-            filename     =output_name+'-missing.imiss', 
+            directory    =self.results_dir, 
+            filename     =self.call_rate_miss,
             threshold    =call_rate_thres, 
-            plots_dir    =plots_dir, 
+            plots_dir    =self.plots_dir,
             y_axis_cap   =10
         )
 
-        print('Call rate check done')
+        logger.info('Call rate check done')
 
         # ==========================================================================================================
         #                                             SEX CHECK
         # ==========================================================================================================
 
         fail_sexcheck = self.report_sex_check(
-            directory          =result_path, 
-            sex_check_filename =output_name+'-sexcheck.sexcheck', 
-            xchr_imiss_filename=output_name+'-xchr-missing.imiss',
-            plots_dir          =plots_dir
+            directory          =self.results_dir, 
+            sex_check_filename =self.output_name+'-sexcheck.sexcheck', 
+            xchr_imiss_filename=self.output_name+'-xchr-missing.imiss',
+            plots_dir          =self.plots_dir
         )
 
-        print('Sex check done')
+        logger.info('Sex check done')
 
         # ==========================================================================================================
         #                                       HETETROZYGOSITY RATE CHECK
         # ==========================================================================================================
 
         fail_het_greater = self.report_heterozygosity_rate(
-            directory           = result_path, 
-            summary_ped_filename= 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped', 
-            autosomal_filename  = output_name+'-chr1-22-mafgreater-missing.imiss', 
+            directory           = self.results_dir, 
+            summary_ped_filename= 'Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped', 
+            autosomal_filename  = self.output_name+'-chr1-22-mafgreater-missing.imiss', 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '>',
-            plots_dir           = plots_dir
+            plots_dir           = self.plots_dir
         )
 
-        print('Heterozygosity rate check done for MAF > threshold')
+        logger.info(f'Heterozygosity rate check done for MAF > {maf_het}')
 
         fail_het_less = self.report_heterozygosity_rate(
-            directory           = result_path, 
-            summary_ped_filename= 'Summary-'+output_name+'-chr1-22-mafless-recode.ped', 
-            autosomal_filename  = output_name+'-chr1-22-mafless-missing.imiss', 
+            directory           = self.results_dir, 
+            summary_ped_filename= 'Summary-'+self.output_name+'-chr1-22-mafless-recode.ped', 
+            autosomal_filename  = self.output_name+'-chr1-22-mafless-missing.imiss', 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '<',
-            plots_dir           = plots_dir
+            plots_dir           = self.plots_dir
         )
 
-        print('Heterozygosity rate check done for MAF < threshold')
+        logger.info(f'Heterozygosity rate check done for MAF < {maf_het}')
 
         # ==========================================================================================================
         #                                       DUPLICATES-RELATEDNESS CHECK
@@ -724,7 +555,7 @@ class SampleQC:
         if self.use_king:
 
             # load samples that failed duplicates and relatedness check
-            duplicates_file = os.path.join(result_path, output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
+            duplicates_file = self.results_dir / (self.output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
             df_duplicates = pd.read_csv(
                 duplicates_file,
                 sep   =r'\s+',
@@ -736,13 +567,13 @@ class SampleQC:
             fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
             fail_duplicates['Failure'] = 'Duplicates and relatedness (Kingship)'
 
-            print('Duplicates and relatedness check done with kingship')
+            logger.info('Duplicates and relatedness check done with kingship')
 
         else:
 
             fail_duplicates = self.report_ibd_analysis(ibd_threshold)
 
-            print('Duplicates and relatedness check done with IBD')
+            logger.info('Duplicates and relatedness check done with IBD')
 
         # ==========================================================================================================
         #                                       MERGE ALL FAILURES
@@ -757,7 +588,7 @@ class SampleQC:
 
         df = df.drop_duplicates(subset=['FID', 'IID'])
 
-        df.to_csv(os.path.join(self.fails_dir, 'fail_samples.txt'), index=False, sep='\t')
+        df.to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
 
         totals = summary.select_dtypes(include="number").sum() - num_dup
 
@@ -770,52 +601,28 @@ class SampleQC:
         
         return summary
     
-    def execute_drop_samples(self)->dict:
+    def execute_drop_samples(self) -> None:
         
-        """
-        Executes the process of dropping samples using PLINK.
+        logger.info("STEP: Drop samples that failed quality control checks")
 
-        This method constructs and runs a PLINK command to remove samples listed in a specified file.
-        The resulting files are saved to the specified output directory with a modified name.
+        if self.hh_to_missing:
+            binary_name = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            binary_name = self.input_name+'-renamed'
+        else:
+            binary_name = self.input_name
 
-        Returns:
-        --------
-        dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-        clean_dir  = self.clean_dir
-        output_name= self.output_name
-        fails_dir  = self.fails_dir
-
-        step = "drop_samples"
+        logger.info(f"Binary file name: {binary_name}")
 
         # drop samples
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name+'-hh-missing')} --remove {os.path.join(fails_dir, 'fail_samples.txt')} --make-bed --out {os.path.join(clean_dir, output_name+'-clean-samples')}"
+        plink_cmd = f"plink --bfile {self.input_path / binary_name} --remove {self.fails_dir / 'fail_samples.txt'} --keep-allele-order --make-bed --out {self.clean_dir / (self.output_name+'-clean-samples')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': clean_dir
-        }
-
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
   
-    def report_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str, y_axis_cap:int=10)->pd.DataFrame:
+    def report_call_rate(self, directory: Path, filename: str, threshold: float, plots_dir: Path = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02') -> pd.DataFrame:
         
         """
         Generates a report on sample call rates, including histograms and scatter plots, and identifies samples that fail the call rate threshold.
@@ -839,9 +646,12 @@ class SampleQC:
             A DataFrame containing the samples that fail the call rate threshold, with columns 'FID', 'IID', and 'Failure'.
         """
 
+        if not plots_dir:
+            plots_dir = self.plots_dir
+
         # load samples that failed sex check
         df_call_rate = pd.read_csv(
-            os.path.join(directory, filename),
+            directory / filename,
             sep=r'\s+',
             engine='python'
         )
@@ -854,31 +664,31 @@ class SampleQC:
         fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 
         # First subplot: Full histogram
-        axes1[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color='blue', alpha=0.7, ax=axes1[0])
+        axes1[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[0])
         axes1[0].set_title("Sample Call Rate Distribution")
         axes1[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
         axes1[0].set_ylabel("Frequency")
 
         # Second subplot: Histogram with capped y-axis
-        axes1[1] = sns.histplot(df_call_rate['F_MISS'], bins=30, color='blue', alpha=0.7, ax=axes1[1])
+        axes1[1] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[1])
         axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
         axes1[1].set_title("Sample Call Rate Distribution (Capped)")
         axes1[1].set_xlabel("Proportion of missing SNPs (F_MISS)")
 
         plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_histogram.jpeg"), dpi=400)
+        plt.savefig(plots_dir / f"call_rate_{threshold}_histogram.jpeg", dpi=400)
         plt.show(block=False)
 
         fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
 
         # First subplot: capped y-axis
-        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color='blue', alpha=0.7, ax=axes2[0])
+        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color=color, alpha=0.7, ax=axes2[0])
         axes2[0].set_ylim(0, y_axis_cap)  # Cap y-axis
         axes2[0].set_title("Sample Call Rate Distribution (Capped)")
         axes2[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
 
         # Add a vertical line at the threshold
-        axes2[0].axvline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+        axes2[0].axvline(threshold, linewidth=2, color=line_color, linestyle='dashed')
 
         # Second subplot: Number of samples vs F_MISS
         df_call_rate_sorted = pd.DataFrame({
@@ -890,8 +700,9 @@ class SampleQC:
             data  =df_call_rate_sorted,
             x     ='Index',
             y     ='F_MISS',
-            marker='o',  
-            color ='blue',
+            marker='o',
+            edgecolor='none',
+            color =color,
             ax    =axes2[1]
         ) 
         axes2[1].set_title("Sample Call Rate")
@@ -899,7 +710,7 @@ class SampleQC:
         axes2[1].set_ylabel("F_MISS")
 
         # Add a vertical line at the threshold
-        axes2[1].axhline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+        axes2[1].axhline(threshold, linewidth=2, color=line_color, linestyle='dashed')
 
         # third subplot: Number of samples vs F_MISS
         axes2[2] = sns.scatterplot(
@@ -907,51 +718,36 @@ class SampleQC:
             y      =np.random.normal(size=len(df_call_rate['F_MISS'])),
             markers='o',
             s      =20,
+            color =color,
         )
         axes2[2].set_title("Sample Call Rate")
         axes2[2].set_xlabel("Proportion of missing SNPs (F_MISS)")
         axes2[2].set_ylabel(f"Samples")
+        axes2[2].set_yticks([])
     
 
         # Add a vertical line at the threshold
-        axes2[2].axvline(threshold, linewidth=2, color='firebrick', linestyle='dashed')
+        axes2[2].axvline(threshold, linewidth=2, color=line_color, linestyle='dashed')
 
         plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, f"call_rate_{threshold}_scatterplot.jpeg"), dpi=400)
+        plt.savefig(plots_dir / f"call_rate_{threshold}_scatterplot.jpeg", dpi=400)
         plt.show(block=False)
 
         return fail_call_rate
     
-    def report_sex_check(self, directory:str, sex_check_filename:str, xchr_imiss_filename:str, plots_dir:str)->pd.DataFrame:
+    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Path = None) -> pd.DataFrame:
         
-        """
-        Generates a report for sex check and creates a scatter plot visualizing the results.
-        
-        Parameters:
-        -----------
-        directory (str): 
-            The directory where the input files are located.
-        sex_check_filename (str): 
-            The filename of the sex check data.
-        xchr_imiss_filename (str): 
-            The filename of the X chromosome missingness data.
-        plots_dir (str): 
-            The directory where the plot will be saved.
-        
-        Returns:
-        --------
-        pandas.DataFrame: 
-            A DataFrame containing the FID and IID of samples that failed the sex check.
-        """
+        if not plots_dir:
+            plots_dir = self.plots_dir
 
         df_sexcheck = pd.read_csv(
-            os.path.join(directory, sex_check_filename),
+            directory / sex_check_filename,
             sep   =r'\s+',
             engine='python'
         )
 
         df_xchr_imiss = pd.read_csv(
-            os.path.join(directory, xchr_imiss_filename),
+            directory / xchr_imiss_filename,
             sep   =r'\s+',
             engine='python'
         )
@@ -1015,42 +811,14 @@ class SampleQC:
         plt.legend(title='', loc='best')
         
         plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, 'sex_check.jpeg'), dpi=400)
+        plt.savefig(plots_dir / 'sex_check.jpeg', dpi=400)
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory:str, summary_ped_filename:str, autosomal_filename:str, std_deviation_het:float, maf:float, split:str, plots_dir:str, y_axis_cap:float=80)->pd.DataFrame:
+    def report_heterozygosity_rate(self, directory: str, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: str, y_axis_cap: float = 80) -> pd.DataFrame:
         
-        """
-        Generates a report on heterozygosity rate and plots histograms and scatter plots for visualization.
-
-        Parameters:
-        -----------
-        directory (str): 
-            The directory where the input files are located.
-        summary_ped_filename (str): 
-            The filename of the summary PED file containing heterozygosity rates.
-        autosomal_filename (str): 
-            The filename of the autosomal file containing call rates.
-        std_deviation_het (float): 
-            The standard deviation threshold for heterozygosity rate exclusion.
-        maf (float): 
-            Minor Allele Frequency threshold.
-        split (str): 
-            A string identifier for the split (e.g., 'train', 'test').
-        plots_dir (str): 
-            The directory where the plots will be saved.
-        y_axis_cap (float, optional): 
-            The cap for the y-axis in the histogram plot. Default is 80.
-        
-        Returns:
-        --------
-        pandas.DataFrame: 
-            A DataFrame containing samples that failed the heterozygosity rate check.
-        """
-
         # load samples that failed heterozygosity rate check with MAF > threshold
-        maf_file = os.path.join(directory, summary_ped_filename)
+        maf_file = directory / summary_ped_filename
         df_maf = pd.read_csv(
             maf_file,
             sep   =r'\s+',
@@ -1058,7 +826,7 @@ class SampleQC:
         )
 
         # autosomal call rate per individual
-        autosomal_file = os.path.join(directory, autosomal_filename)
+        autosomal_file = directory / autosomal_filename
         df_autosomal = pd.read_csv(
             autosomal_file,
             sep   =r'\s+',
@@ -1103,10 +871,11 @@ class SampleQC:
         axes1[1].set_ylabel("Frequency")
 
         plt.tight_layout()
+        
         if split == '>':
-            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_greater_{maf}_histogram.jpeg"), dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_histogram.jpeg", dpi=400)
         else:
-            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_histogram.jpeg"), dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_histogram.jpeg", dpi=400)
         
         plt.show(block=False)
 
@@ -1133,24 +902,15 @@ class SampleQC:
 
         plt.tight_layout()
         if split == '>':
-            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_greater_{maf}_scatterplot.jpeg"), dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_scatterplot.jpeg", dpi=400)
         else:
-            plt.savefig(os.path.join(plots_dir, f"heterozygosity_rate_less_{maf}_scatterplot.jpeg"), dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_scatterplot.jpeg", dpi=400)
         plt.show(block=False)
 
         return fail_het
 
     def report_ibd_analysis(self, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> pd.DataFrame:
-        """
-        Identify individuals with high IBD (identity-by-descent) relatedness and report samples to remove.
-
-        Parameters:
-            ibd_threshold (float): Threshold for IBD (PI_HAT) above which samples are considered related.
-            chunk_size (int): Number of rows to process at a time from the .genome file.
-
-        Returns:
-            pd.DataFrame: A dataframe containing FID, IID, and the reason for removal.
-        """
+        
         if not isinstance(ibd_threshold, float):
             raise TypeError("ibd_threshold should be a float")
 
@@ -1158,15 +918,13 @@ class SampleQC:
             return pd.DataFrame()
 
         # File paths
-        results_dir = self.results_dir
-        output_name = self.output_name
 
-        imiss_path = os.path.join(results_dir, output_name + '-ibd-missing.imiss')
-        genome_path= os.path.join(results_dir, output_name + '-ibd.genome')
+        imiss_path = self.results_dir / (self.output_name + '-ibd-missing.imiss')
+        genome_path= self.results_dir / (self.output_name + '-ibd.genome')
 
-        if not os.path.exists(imiss_path):
+        if not imiss_path.exists():
             raise FileNotFoundError(f"Missing file: {imiss_path}")
-        if not os.path.exists(genome_path):
+        if not genome_path.exists():
             raise FileNotFoundError(f"Missing file: {genome_path}")
 
         # Load .imiss file
@@ -1228,107 +986,32 @@ class SampleQC:
         to_remove['Failure'] = 'Duplicates and relatedness (IBD)'
 
         return to_remove
-
-    @staticmethod
-    def plot_imiss_het(logFMISS:pd.Series, meanHET:pd.Series, figs_folder:str)->None:
-
-        """
-        Plot missing genotypes proportion vs. heterozygosity rate.
-
-        This static method plots the proportion of missing genotypes vs. heterozygosity rate for individuals. It visualizes the relationship between missing data and heterozygosity rate.
-
-        Parameters:
-        -----------
-        - logFMISS (pd.Series): Pandas Series containing the logarithm of the proportion of missing genotypes for individuals.
-        - meanHET (pd.Series): Pandas Series containing the mean heterozygosity rate for individuals.
-        - figs_folder (str): Path to the folder where the plot will be saved.
-
-        Returns:
-        --------
-        - None
-        """
-
-        # Calculate colors based on density
-        norm  = Normalize(vmin=min(logFMISS), vmax=max(logFMISS))
-        colors= colormaps['viridis']
-
-        fig_path = os.path.join(figs_folder, "imiss-vs-het.pdf")
-
-        meanHet_low= np.mean(meanHET) - 2*np.std(meanHET)
-        meanHet_up = np.mean(meanHET) + 2*np.std(meanHET)
-
-        # Plotting
-        plt.figure(figsize=(8, 6))
-        plt.scatter(logFMISS, meanHET, cmap=colors, s=50, marker='o', norm=norm)
-        plt.xlim(-3, 0)
-        plt.ylim(0, 0.5)
-        plt.xlabel("Proportion of missing genotypes")
-        plt.ylabel("Heterozygosity rate")
-        plt.yticks(np.arange(0, 0.51, 0.05))
-        plt.xticks([-3, -2, -1, 0], [0.001, 0.01, 0.1, 1])
-        plt.axhline(meanHet_low, color='red', linestyle='--')
-        plt.axhline(meanHet_up, color='red', linestyle='--')
-        plt.axvline(-1.522879, color='red', linestyle='--')
-        plt.grid(True)
-        plt.savefig(fig_path)
-        plt.close()
-
-        return None
-
-    @staticmethod
-    def fail_imiss_het(folder_path:str, file_name:str, output_file:str)->tuple:
-
-        """
-        Identify samples failing imiss-het quality control.
-
-        This static method reads the .het and .imiss files generated by PLINK from the specified folder path and file name. It computes the mean heterozygosity rate and the logarithm of the proportion of missing genotypes for each sample. Then, it filters samples based on specific criteria (proportion of missing genotypes or mean heterozygosity rate). It saves the samples that failed imiss-het quality control to the specified output file.
-
-        Parameters:
-        -----------
-        - folder_path (str): Path to the folder containing the .het and .imiss files.
-        - file_name (str): Name of the PLINK file (without extension).
-        - output_file (str): Path to save the samples that failed imiss-het quality control.
-
-        Returns:
-        --------
-        - Tuple[pd.Series, pd.Series]: A tuple containing the logarithm of the proportion of missing genotypes (logF_MISS) and the mean heterozygosity rate (meanHet) for all samples.
-        """
-
-        # load .het and .imiss files
-        df_het = pd.read_csv(
-            os.path.join(folder_path, file_name+'.het'),
-            sep   =r"\s+",
-            engine='python'
-        )
-        df_imiss = pd.read_csv(
-            os.path.join(folder_path, file_name+'.imiss'),
-            sep   =r"\s+",
-            engine='python'
-        )
-
-        # compute Het mean
-        df_het['meanHet'] = (df_het['N(NM)']-df_het['O(HOM)'])/df_het['N(NM)']
-
-        df_imiss['logF_MISS'] = np.log10(df_imiss['F_MISS'])
     
-        # compute the lower 2 standard deviation bound
-        meanHet_lower = df_het['meanHet'].mean() - 2*df_het['meanHet'].std()
+    def clean_input_folder(self) -> None:
 
-        # compute the upper 2 standard deviation bound
-        meanHet_upper = df_het['meanHet'].mean() + 2*df_het['meanHet'].std()
+        logger.info("STEP: Clean input folder")
 
-        # filter samples
-        mask = ((df_imiss['F_MISS']>=0.04) | (df_het['meanHet'] < meanHet_lower) | (df_het['meanHet'] > meanHet_upper))
+        # remove all files from input folder
+        for file in self.input_path.glob('*'):
+            if file.is_file() and file.suffix != '.log' and 'missing' in file.name:
+                file.unlink()
+            elif file.is_file() and file.suffix != '.log' and 'renamed' in file.name:
+                file.unlink()
 
-        df = df_imiss[mask].reset_index(drop=True)
-        df = df.iloc[:,0:2].copy()
+        return
+    
+    def clean_result_folder(self) -> None:
 
-        # save samples that failed imiss-het QC
-        df.to_csv(
-            path_or_buf =output_file, 
-            sep         ='\t', 
-            index       =False, 
-            header      =False
-        )
+        logger.info("STEP: Clean results folder")
 
-        return df_imiss['logF_MISS'], df_het['meanHet']
+        # remove all files from output folder
+        for file in self.results_dir.glob('*'):
+            if file.is_file() and file.suffix != '.log' and '.bed' in file.name:
+                file.unlink()
+            elif file.is_file() and file.suffix != '.log' and '.bim' in file.name:
+                file.unlink()
+            elif file.is_file() and file.suffix != '.log' and '.fam' in file.name:
+                file.unlink()
+
+        return
+
