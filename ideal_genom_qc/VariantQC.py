@@ -4,68 +4,36 @@ Python module to perform variant quality control
 
 import os
 import psutil
+import logging
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+from pathlib import Path
+
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class VariantQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str) -> None:
 
-        """
-        Initialize the VariantQC object.
 
-        Parameters:
-        -----------
-        - input_path (str): Path to input data.
-        - input_name (str): Name of the input files.
-        - output_path (str): Path to store output data.
-        - output_name (str): Name of the output files.
-        - config_dict (str): Configuration dictionary.
-        - dependables_path (str): Path to dependent files.
-
-        Raises:
-        -------
-        - ValueError: If values for input_path, output_path, and dependables_path are not provided upon initialization.
-
-        Attributes:
-        -----------
-        - input_path (str): Path to the folder containing the input data files.
-        - output_path (str): Path to the folder where the output will be saved.
-        - input_name (str): Name of the input data files (without extension).
-        - output_name (str): Name for the output files.
-        - dependables (str): Path to the folder containing reference data.
-        - config_dict (str): Dictionary containing configuration settings.
-        - dependables_to_keep (list): List of reference data files to keep.
-        - results_to_keep (list): List of result files to keep.
-        - results_dir (str): Path to the folder where PCA results will be saved.
-        - fails_dir (str): Path to the folder where failed samples will be saved.
-        - plots_dir (str): Path to the folder where plots will be saved.
-        """
-
-        # check if paths are set
-        if input_path is None or output_path is None:
-            raise ValueError("values for input_path and output_path must be set upon initialization.")
-
-        # Check path validity of input data
-        bed_path = os.path.join(input_path, input_name + '.bed')
-        fam_path = os.path.join(input_path, input_name + '.fam')
-        bim_path = os.path.join(input_path, input_name + '.bim')
-
-        bed_check = os.path.exists(bed_path)
-        fam_check = os.path.exists(fam_path)
-        bim_check = os.path.exists(bim_path)
-
-        if not os.path.exists(input_path) or not os.path.exists(output_path):
+        if not isinstance(input_path, Path) or not isinstance(output_path, Path):
+            raise TypeError("input_path and output_path should be of type Path")
+        if not isinstance(input_name, str) or not isinstance(output_name, str):
+            raise TypeError("input_name and output_name should be of type str")
+        
+        if not input_path.exists() or not output_path.exists():
             raise FileNotFoundError("input_path or output_path is not a valid path")
-        if not bed_check:
+        if not (input_path / f"{input_name}.bed").exists():
             raise FileNotFoundError(".bed file not found")
-        if not fam_check:
+        if not (input_path / f"{input_name}.fam").exists():
             raise FileNotFoundError(".fam file not found")
-        if not bim_check:
+        if not (input_path / f"{input_name}.bim").exists():
             raise FileNotFoundError(".bim file not found")
         
         self.input_path = input_path
@@ -73,29 +41,25 @@ class VariantQC:
         self.input_name = input_name
         self.output_name= output_name
 
-        self.files_to_keep = ['fail_samples']
+        self.hwe_results = None
 
-        # create results folder if not existent
-        self.results_dir = os.path.join(output_path, 'variant_qc_results')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+        # create results folder
+        self.results_dir = self.output_path / 'variant_qc_results'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
 
-        # create fails folder if not existent
-        self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
-        if not os.path.exists(self.fails_dir):
-            os.mkdir(self.fails_dir)
+        # create fails folder
+        self.fails_dir = self.results_dir / 'fail_samples'
+        self.fails_dir.mkdir(parents=True, exist_ok=True)
 
-        # create clean files folder if not existent
-        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
-        if not os.path.exists(self.clean_dir):
-            os.mkdir(self.clean_dir)
+        # create clean files folder
+        self.clean_dir = self.results_dir / 'clean_files'
+        self.clean_dir.mkdir(parents=True, exist_ok=True)
         
-        # create figures folder if not existent
-        self.plots_dir = os.path.join(self.results_dir, 'variantQC_plots')
-        if not os.path.exists(self.plots_dir):
-            os.mkdir(self.plots_dir)
+        # create figures folder
+        self.plots_dir = self.results_dir / 'plots'
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
 
-    def execute_missing_data_rate(self, chr_y:int=24)->dict:
+    def execute_missing_data_rate(self, chr_y: int = 24) -> None:
 
         """
         Identify markers with an excessive missing rate.
@@ -112,11 +76,6 @@ class VariantQC:
         ValueError: If 'chr_y' in config_dict is not between 0 and 26 (inclusive).
         """
 
-        input_path = self.input_path
-        input_name = self.input_name
-        result_path= self.results_dir
-        output_name= self.output_name
-
         # check type for chr_y
         if not isinstance(chr_y, int):
             raise TypeError("chr_y should be of type integer.")
@@ -124,7 +83,7 @@ class VariantQC:
         if chr_y < 0 or chr_y > 26:
             raise ValueError("chr_y should be between 1 and 26")
 
-        step = 'high_rate_missing_data'
+        logger.info("Identifying markers with excessive missing rate...")
 
         # Get the virtual memory details
         memory_info = psutil.virtual_memory()
@@ -132,35 +91,22 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # generates  .lmiss and .imiss files for male subjects
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --missing --filter-males --chr {chr_y} --out {os.path.join(result_path, output_name+'-missing-males-only')} --memory {memory}"
+        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --missing --filter-males --chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-males-only')} --memory {memory}"
 
         # generates .lmiss and. imiss files for female subjects
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --missing --not-chr {chr_y} --out {os.path.join(result_path, output_name+'-missing-not-y')} --memory {memory}"
+        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --missing --not-chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-not-y')} --memory {memory}"
 
-        self.males_missing_data = os.path.join(result_path, output_name+'-missing-males-only.lmiss')
-        self.females_missing_data = os.path.join(result_path, output_name+'-missing-not-y.lmiss')
+        self.males_missing_data = self.results_dir / (self.output_name+'-missing-males-only.lmiss')
+        self.females_missing_data = self.results_dir / (self.output_name+'-missing-not-y.lmiss')
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_different_genotype_call_rate(self)->dict:
+    def execute_different_genotype_call_rate(self) -> None:
 
         """
         Identify markers with different genotype call rates between cases and controls.
@@ -172,12 +118,7 @@ class VariantQC:
         dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
         """
 
-        input_path = self.input_path
-        input_name = self.input_name
-        result_path= self.results_dir
-        output_name= self.output_name
-
-        step = 'different_genotype_case_control'
+        logger.info("Identifying markers with different genotype call rates between cases and controls...")
 
         # Get the virtual memory details
         memory_info = psutil.virtual_memory()
@@ -185,29 +126,34 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # generates .missing file
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --test-missing --out {os.path.join(result_path, output_name+'-case-control-missing')} --memory {memory}"
+        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --test-missing --out {self.results_dir / (self.output_name+'-case-control-missing')} --memory {memory}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        self.case_control_missing = os.path.join(result_path, output_name+'-case-control-missing.missing')
+        self.case_control_missing = self.results_dir / (self.output_name+'-case-control-missing.missing')
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def get_fail_variants(self, marker_call_rate_thres:float=0.2, case_controls_thres:float=1e-5)->pd.DataFrame:
+    def execute_hwe_test(self) -> None:
+
+        logger.info('Computing Hardy-Weinberg Equilibrium test...')
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        # PLINK command to compute HWE test
+        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --hardy --out {self.results_dir / (self.output_name+'-hwe')} --memory {memory}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+        self.hwe_results = self.output_name+'-hwe.hwe'
+
+        return
+    
+    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8) -> pd.DataFrame:
         
         """
         Identifies and reports variants that fail quality control checks based on missing data and genotype call rate.
@@ -222,20 +168,15 @@ class VariantQC:
         pd.DataFrame: A DataFrame summarizing the counts of different failure types, including duplicated SNPs and total counts.
         """
 
-        result_path= self.results_dir
-        fails_dir  = self.fails_dir
-        plots_dir  = self.plots_dir
-
         # ==========================================================================================================
         #                                             MARKERS WITH MISSING DATA 
         # ==========================================================================================================
 
         fail_missing_data = self.report_missing_data(
-            directory      =result_path, 
+            directory      =self.results_dir, 
             filename_male  =self.males_missing_data, 
-            filename_female=self.females_missing_data, \
+            filename_female=self.females_missing_data,
             threshold      =marker_call_rate_thres, 
-            plots_dir      =plots_dir
         )
 
         # ==========================================================================================================
@@ -243,13 +184,22 @@ class VariantQC:
         # ==========================================================================================================
 
         fail_genotype = self.report_different_genotype_call_rate(
-            directory=result_path, 
+            directory=self.results_dir, 
             filename =self.case_control_missing, 
             threshold=case_controls_thres, 
-            plots_dir=plots_dir
         )
 
-        fails = pd.concat([fail_missing_data, fail_genotype], axis=0, ignore_index=True)
+        # ==========================================================================================================
+        #                                             MARKERS FAILING HWE TEST
+        # ==========================================================================================================
+
+        fail_hwe = self.report_hwe(
+            directory=self.results_dir,
+            filename=self.hwe_results,
+            hwe_threshold=hwe_threshold
+        )
+
+        fails = pd.concat([fail_missing_data, fail_genotype, fail_hwe], axis=0, ignore_index=True)
 
         summary = fails['Failure'].value_counts().reset_index()
         num_dup = fails.duplicated(subset=['SNP']).sum()
@@ -262,53 +212,23 @@ class VariantQC:
 
         fails = fails.drop(columns=['Failure'], inplace=False)
 
-        fails.to_csv(os.path.join(fails_dir, 'fail_markers.txt'), sep='\t', header=False, index=False)
+        fails.to_csv(self.fails_dir / 'fail_markers.txt', sep='\t', header=False, index=False)
 
         return pd.concat([summary, dups_row, total_row], ignore_index=True)
 
-    def execute_drop_variants(self, maf:float=5e-8, geno:float=0.1, hwe:float=5e-8)->dict:
+    def execute_drop_variants(self, maf: float = 5e-8, geno: float = 0.1, hwe: float = 5e-8) -> None:
 
-        """
-        Remove markers failing quality control.
-
-        This function removes markers failing quality control based on specified thresholds for minor allele frequency (MAF), genotype call rate (geno), missing genotype rate (mind), and Hardy-Weinberg equilibrium (hwe).
-    
-        Returns:
-        --------
-        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_path = self.input_path
-        input_name = self.input_name
-        result_path= self.results_dir
-        output_name= self.output_name
-        fails_dir  = self.fails_dir
-        clean_dir = self.clean_dir
-
-        step = "remove_markers"
+        logger.info("Removing markers failing quality control...")
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {os.path.join(input_path, input_name)} --exclude {os.path.join(fails_dir, 'fail_markers.txt')} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {os.path.join(clean_dir, output_name+'-variantQCed')}"
+        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --exclude {self.fails_dir / 'fail_markers.txt'} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {self.clean_dir / (self.output_name+'-variantQCed')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': result_path
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def report_missing_data(self, directory:str, filename_male:str, filename_female:str, threshold:float, plots_dir:str, y_axis_cap:int=10):
+    def report_missing_data(self, directory: str, filename_male: str, filename_female: str, threshold: float, y_axis_cap: int = 10) -> pd.DataFrame:
    
         """
         Reports SNPs with missing data rates above a specified threshold for male and female subjects.
@@ -354,15 +274,15 @@ class VariantQC:
         fail_females = fail_females[['SNP']].copy()
         fail_females['Failure'] = 'Missing data rate on females'
 
-        self.make_histogram(df_males['F_MISS'], self.plots_dir, 'missing_data_male')
-        self.make_histogram(df_females['F_MISS'], self.plots_dir, 'missing_data_female')
+        self._make_histogram(df_males['F_MISS'], 'missing_data_male', threshold, 'Ratio of missing data', 'Missing data for males')
+        self._make_histogram(df_females['F_MISS'], 'missing_data_female', threshold, 'Ratio of missing data', 'Missing data for females')
 
         # concatenate female and male subjects who failed QC
         fails = pd.concat([fail_females, fail_males], axis=0)
 
         return fails
 
-    def report_different_genotype_call_rate(self, directory:str, filename:str, threshold:float, plots_dir:str):
+    def report_different_genotype_call_rate(self, directory: str, filename: str, threshold: float) -> pd.DataFrame:
         """
         Reports markers with different genotype call rates based on a given threshold.
         This function reads a .missing file, filters markers with a different genotype call rate
@@ -396,8 +316,33 @@ class VariantQC:
 
         return fail_diffmiss
     
-    @staticmethod
-    def make_histogram(F_MISS:pd.Series, figs_folder:str, output_name:str)->None:
+    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8) -> pd.DataFrame:
+
+        df_hwe = pd.read_csv(
+            directory / filename,
+            sep=r"\s+",
+            engine='python'
+        )
+
+        fail_hwe = df_hwe[df_hwe['P']<hwe_threshold].reset_index(drop=True)
+        fail_hwe = fail_hwe[['SNP']].copy()
+        fail_hwe['Failure'] = 'HWE'
+
+        df_all = df_hwe[df_hwe['TEST']=='ALL'].reset_index(drop=True)
+        df_all['P'] = df_all['P'].replace(0, np.finfo(float).tiny)
+
+        self._make_histogram(
+            values=-np.log10(df_all['P']), 
+            output_name='hwe-histogram', 
+            threshold=-np.log10(hwe_threshold), 
+            x_label='-log10(P) of HWE test', 
+            title='HWE test',
+            y_lim_cap=10000
+        )
+
+        return fail_hwe
+    
+    def _make_histogram(self, values:pd.Series, output_name:str, threshold: float, x_label: str, title: str, y_lim_cap: float=None)->None:
 
         """
         Generate a histogram plot of missing data fraction.
@@ -415,27 +360,21 @@ class VariantQC:
         None
         """
 
-        values = F_MISS.copy()
-
         plt.clf()
 
-        # substitue 0 by machine epsilon
-        values[values == 0] = np.finfo(np.float32).eps
+        fig_path = self.plots_dir / f"{output_name}.pdf"
 
-        # log10 transform imput data
-        Y = np.log10(values)
-
-        fig_path = os.path.join(figs_folder, f"{output_name}.jpeg")
-
-        plt.hist(Y, bins=50, color='red')
-        plt.xlabel('Log10 of Fraction of Missing Data')
+        plt.hist(values, bins=50, color='#1B9E77')
+        plt.xlabel(x_label)
         plt.ylabel('Number of SNPs')
-        plt.title('All SNPs')
+        plt.ylim(0, y_lim_cap if y_lim_cap else None)
+        plt.title(title)
 
         # Draw the vertical line indicating the cut off threshold
-        plt.axvline(x=np.log10(0.2), linestyle='--', color='black')
+        plt.axvline(x=threshold, linestyle='--', color='red')
 
         plt.savefig(fig_path, dpi=400)
+        plt.show()
         plt.close()
 
         return None
