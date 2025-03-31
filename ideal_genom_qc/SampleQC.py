@@ -132,7 +132,7 @@ class SampleQC:
     def execute_rename_snpid(self, rename: bool = True) -> None:
 
         if not isinstance(rename, bool):
-            raise TypeError("rename should be a boolean")
+            raise TypeError("rename must be a boolean")
         
         if not rename:
             logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
@@ -141,10 +141,12 @@ class SampleQC:
             logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
             self.renamed_snps = True
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.input_path / (self.input_name+ '-renamed')}"
 
