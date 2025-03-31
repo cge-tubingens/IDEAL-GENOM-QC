@@ -131,22 +131,16 @@ class Fetcher1000Genome:
 
         (self.destination / "all_phase3.bed").unlink(missing_ok=True)
         (self.destination / "all_phase3.bim").unlink(missing_ok=True)
-        (self.destination / "all_phase3.bed").unlink(missing_ok=True)
         (self.destination / "all_phase3.fam").unlink(missing_ok=True)
 
-        bim = (self.destination / "all_phase3_renamed.bim").with_name('all_phase3.bim')
-        bed = (self.destination / "all_phase3_renamed.bed").with_name('all_phase3.bed')
-        fam = (self.destination / "all_phase3_renamed.fam").with_name('all_phase3.fam')
+        self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed')
+        self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim')
+        self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam')
 
-        (self.destination / "all_phase3_renamed.bim").rename(bim)
-        (self.destination / "all_phase3_renamed.bed").rename(bed)
-        (self.destination / "all_phase3_renamed.fam").rename(fam)
+        psam_renamed = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam')
+        self.psam_file= (self.destination / "all_phase3.psam").rename(psam_renamed)
 
-        self.bed_file = bed
-        self.bim_file = bim
-        self.fam_file = fam
-
-        return self.destination / "all_phase3"
+        return self.destination / f'1kG_phase3_GRCh{self.built}'
     
     def _check_if_binaries_exist(self) -> bool:
 
