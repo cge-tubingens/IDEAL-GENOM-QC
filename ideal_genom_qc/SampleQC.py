@@ -201,6 +201,13 @@ class SampleQC:
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
+        if self.hh_to_missing:
+            ld_input = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            ld_input = self.input_name+'-renamed'
+        else:
+            ld_input = self.input_name
+
         # exclude complex regions
         plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name+'-hh-missing')} --exclude {high_ld_regions_file} --make-bed --out {os.path.join(results_dir, input_name+'-LDregionExcluded')}"
 
