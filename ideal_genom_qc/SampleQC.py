@@ -476,19 +476,58 @@ class SampleQC:
 
         return
 
-    def execute_heterozygosity_rate(self, maf: float = 0.01)->dict:
+    def execute_heterozygosity_rate(self, maf: float = 0.01) -> None:
+        """
+        Executes heterozygosity rate analysis on genetic data using PLINK.
+
+        This method performs a series of PLINK commands to analyze heterozygosity rates in genetic data,
+        separating SNPs based on minor allele frequency (MAF) threshold and computing heterozygosity
+        for both groups.
+
+        Parameters
+        ----------
+        maf : float, optional
+            Minor allele frequency threshold used to split SNPs into two groups.
+            Must be between 0 and 0.5. Default is 0.01.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If maf is not a float
+        ValueError
+            If maf is not between 0 and 0.5
+        FileNotFoundError
+            If any of the expected output files are not created
+
+        Notes
+        -----
+        The method:
+        1. Extracts autosomal SNPs
+        2. Splits SNPs based on MAF threshold
+        3. Computes missingness
+        4. Converts to PED/MAP format
+        5. Computes heterozygosity for both MAF groups
+
+        The computation uses optimized threading based on available CPU cores and memory.
+        """
 
         if not isinstance(maf, float):
             raise TypeError("maf should be a float")
-        if maf < 0 or maf >0.5:
+        if maf <= 0 or maf >= 0.5:
             raise ValueError("maf should be between 0 and 0.5")
 
         logger.info(f"STEP: Heterozygosity rate check. `maf` set to {maf}")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # Get the virtual memory details
         memory_info = psutil.virtual_memory()
@@ -525,25 +564,62 @@ class SampleQC:
         )
 
         self.summary_greater = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped')
+        if not self.summary_greater.exists():
+            raise FileNotFoundError(f"Missing file: {self.summary_greater}")
         self.summary_less    = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafless-recode.ped')
+        if not self.summary_less.exists():
+            raise FileNotFoundError(f"Missing file: {self.summary_less}")
         self.maf_greater_miss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.imiss')
+        if not self.maf_greater_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_greater_miss}")
         self.maf_less_miss   = self.results_dir / (self.output_name+'-chr1-22-mafless-missing.imiss')
+        if not self.maf_less_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_less_miss}")
 
         return
 
     def execute_ibd(self) -> None:
+        """
+        Execute Identity by Descent (IBD) analysis using PLINK.
+
+        This method performs duplicate and relatedness checks using IBD analysis. It runs two PLINK commands:
+        1. Generates genome-wide IBD estimates
+        2. Calculates missing genotype rates
+
+        The method uses optimal thread count based on available CPU cores and validates input/output files.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            FileNotFoundError: If required input pruned file is missing or if expected output files are not generated
+
+        Required instance attributes:
+            pruned_file: Path to pruned PLINK binary file
+            results_dir: Directory path for output files
+            output_name: Base name for output files
+            ibd_miss: Path to missing genotype rate file (set by method)
+            genome: Path to IBD estimates file (set by method)
+        """
 
         logger.info("STEP: Duplicates and relatedness check with IBD")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        if not self.pruned_file or not self.pruned_file.exists():
+            raise FileNotFoundError(f"Missing file: {self.pruned_file}")
 
         # PLINK command
         plink_cmd1 = f"plink --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
 
-        # PLINKI command
+        # PLINK command
         plink_cmd2 = f"plink --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
 
         # execute PLINK commands
@@ -552,7 +628,11 @@ class SampleQC:
             shell_do(cmd, log=True)
 
         self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
+        if not self.ibd_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.ibd_miss}")
         self.genome = self.results_dir / (self.output_name+'-ibd.genome')
+        if not self.genome.exists():
+            raise FileNotFoundError(f"Missing file: {self.genome}")
 
         return
 
