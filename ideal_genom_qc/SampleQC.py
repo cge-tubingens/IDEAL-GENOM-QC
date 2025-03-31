@@ -298,7 +298,7 @@ class SampleQC:
         if maf < 0 or maf >0.5:
             raise ValueError("maf should be between 0 and 0.5")
 
-        step = "heterozygosity_rate"
+        logger.info(f"STEP: Heterozygosity rate check. `maf` set to {maf}")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
@@ -311,61 +311,44 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
 
         # extract autosomal SNPS
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'.LDpruned')} --autosome --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22')}"
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --autosome --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
 
         # extract SNPs with minor allele frequency greater than threshold
-        plink_cmd2 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22')} --maf {maf} --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')}"
+        plink_cmd2 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
 
         # extract SNPs with minor allele frequency less than threshold
-        plink_cmd3 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22')} --exclude {os.path.join(results_dir, output_name+'-chr1-22-mafgreater.bim')} --make-bed --out {os.path.join(results_dir, output_name+'-chr1-22-mafless')}"
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22')} --exclude {(self.results_dir / (self.output_name+'-chr1-22-mafgreater')).with_suffix('.bim')} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafless')}"
 
         # get missingness to plot against het
-        plink_cmd4 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')} --missing --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing')}"
-        plink_cmd5 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafless')} --missing --out {os.path.join(results_dir, output_name+'-chr1-22-mafless-missing')}"
+        plink_cmd4 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing')}"
+        plink_cmd5 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafless-missing')}"
 
         # convert both to ped/map files for heterozigosity computation
-        plink_cmd6 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafgreater')} --recode --out {os.path.join(results_dir, output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
-        plink_cmd7 = f"plink --bfile {os.path.join(results_dir, output_name+'-chr1-22-mafless')} --recode --out {os.path.join(results_dir, output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
+        plink_cmd6 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
+        plink_cmd7 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
         for cmd in cmds:
             shell_do(cmd, log=True)
 
-        self.compute_heterozigozity(
-            ped_file=os.path.join(results_dir, output_name+'-chr1-22-mafgreater-recode.ped')
+        self._compute_heterozigozity(
+            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')).with_suffix('.ped')
         )
-        self.compute_heterozigozity(
-            ped_file=os.path.join(results_dir, output_name+'-chr1-22-mafless-recode.ped')
+        self._compute_heterozigozity(
+            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafless-recode')).with_suffix('.ped')
         )
 
-        self.summary_greater = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafgreater-recode.ped')
-        self.summary_less    = os.path.join(results_dir, 'Summary-'+output_name+'-chr1-22-mafless-recode.ped')
-        self.maf_greater_miss= os.path.join(results_dir, output_name+'-chr1-22-mafgreater-missing.imiss')
-        self.maf_less_miss   = os.path.join(results_dir, output_name+'-chr1-22-mafless-missing.imiss')
+        self.summary_greater = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped')
+        self.summary_less    = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafless-recode.ped')
+        self.maf_greater_miss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.imiss')
+        self.maf_less_miss   = self.results_dir / (self.output_name+'-chr1-22-mafless-missing.imiss')
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
+    def execute_ibd(self) -> None:
 
-        out_dict = {
-            'pass'  : process_complete,
-            'step'  : step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def execute_ibd(self)->dict:
-
-        input_name = self.input_name
-        output_name= self.output_name
-        results_dir= self.results_dir
-
-        step = "identity_by_descent"
+        logger.info("STEP: Duplicates and relatedness check with IBD")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
