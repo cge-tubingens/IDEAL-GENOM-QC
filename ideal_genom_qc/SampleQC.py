@@ -13,7 +13,13 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import seaborn as sns
 
-from ideal_genom_qc.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.Helpers import shell_do
+from ideal_genom_qc.get_references import FetcherLDRegions
+
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class SampleQC:
 
