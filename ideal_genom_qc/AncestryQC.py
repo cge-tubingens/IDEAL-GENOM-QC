@@ -10,14 +10,14 @@ import seaborn as sns
 from pathlib import Path
 
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
-from ideal_genom_qc.get_references import Fetcher1000Genome
+from ideal_genom_qc.get_references import Fetcher1000Genome, FetcherLDRegions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger():
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38', rename_snps: bool=False) -> None:
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -49,6 +49,7 @@ class ReferenceGenomicMerger():
         self.output_name= output_name
         self.high_ld_regions = high_ld_regions
         self.reference_files = reference_files
+        self.renamed_snps    = rename_snps
 
         self.reference_AC_GT_filtered= None
         self.study_AC_GT_filtered    = None
@@ -62,8 +63,12 @@ class ReferenceGenomicMerger():
         pass
 
     def execute_rename_snpid(self) -> None:
-
-        logger.info(f"STEP: Renaming SNPs in the study data to the format chr_pos_a1_a2")
+        
+        if not self.renamed_snps:
+            logger.info(f"STEP: Rename SNPs. `rename_snps` set to {self.renamed_snps}. Skipping renaming of SNPs in the study data")
+            return
+        else:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {self.renamed_snps}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
 
         if os.cpu_count() is not None:
             max_threads = os.cpu_count()-2
@@ -84,10 +89,10 @@ class ReferenceGenomicMerger():
         df_link['new_id'] = df_bim['chrom'].astype(str) + "_" + df_bim['pos'].astype(str) + "_" + df_bim['a1'].str[0] + "_" + df_bim['a2'].str[0]
 
         df_link.to_csv(self.input_path / "update_names.txt", sep="\t", header=False, index=False)
-        logger.info(f"STEP: Renaming SNPs in the study data: created file {str(self.input_path / 'update_names.txt')}")
+        logger.info(f"STEP: Renaming SNPs in the study data: created file {self.input_path / 'update_names.txt'}")
 
         # PLINK2 command
-        plink2_cmd = f"plink2 --bfile {str(self.input_path / self.input_name)} --update-name {str(self.input_path / "update_names.txt")} --make-bed --out {str(self.output_path / (self.input_name+ '-renamed'))} --memory {memory} --threads {max_threads}"
+        plink2_cmd = f"plink2 --bfile {str(self.input_path / self.input_name)} --update-name {str(self.input_path / "update_names.txt")} --make-bed --out {str(self.input_path / (self.input_name+ '-renamed'))} --memory {memory} --threads {max_threads}"
 
         # Execute PLINK2 command
         shell_do(plink2_cmd, log=True)
@@ -108,9 +113,17 @@ class ReferenceGenomicMerger():
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
-        # find A->T and C->G SNPs in study data
-        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name+'-renamed'}.bim", output_filename=self.input_name)
-        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+        if self.renamed_snps:
+
+            # find A->T and C->G SNPs in study data
+            filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name+'-renamed'}.bim", output_filename=self.input_name)
+            logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+
+        else:
+            # find A->T and C->G SNPs in study data
+            filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim", output_filename=self.input_name)
+            logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+
 
         # find A->T and C->G SNPs in reference data
         filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'], output_filename=self.reference_files['bim'].stem)
@@ -124,11 +137,16 @@ class ReferenceGenomicMerger():
         with open(filtered_reference, 'r') as f:
             logger.info(f"STEP: Filtering problematic SNPs from the reference data: {len(f.readlines())} SNPs filtered")
 
-        # PLINK command: generate cleaned study data files
-        plink_cmd1 = f"plink --bfile  {str(self.output_path / (self.input_name+'-renamed'))} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
+        if self.renamed_snps:
+        
+            # PLINK command: generate cleaned study data files
+            plink_cmd1 = f"plink --bfile  {str(self.output_path / (self.input_name+'-renamed'))} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
+        else:
+            # PLINK command: generate cleaned study data files
+            plink_cmd1 = f"plink --bfile  {str(self.input_path / self.input_name)} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
 
         # PLINK command: generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --chr 1-22 --exclude {str(filtered_reference)} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
+        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --biallelic-only strict --chr 1-22 --exclude {str(filtered_reference)} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -435,9 +453,9 @@ class GenomicOutlierAnalyzer:
     
     def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path()) -> None:
 
-        if not isinstance(ref_threshold, float):
+        if not isinstance(ref_threshold, (float, int)):
             raise TypeError("ref_threshold should be a float")
-        if not isinstance(stu_threshold, float):
+        if not isinstance(stu_threshold, (float, int)):
             raise TypeError("stu_threshold should be a float")
         if not isinstance(reference_pop, str):
             raise TypeError("reference_pop should be a string")
@@ -699,13 +717,13 @@ class GenomicOutlierAnalyzer:
 
 class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38', rename_snps: bool = False) -> None:
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
         if not isinstance(output_path, Path):
             raise TypeError("output_path should be a Path object")
-        if not isinstance(high_ld_regions, Path):
+        if not isinstance(high_ld_file, Path):
             raise TypeError("high_ld_regions should be a Path object")
         if not isinstance(reference_files, dict):
             raise TypeError("reference_files should be a dictionary")
@@ -719,22 +737,32 @@ class AncestryQC:
             raise TypeError("built should be a string")
         if built not in ['37', '38']:
             raise ValueError("built should be either '37' or '38'")
+        if not isinstance(rename_snps, bool):
+            raise TypeError("rename_snps should be a boolean")
         
         if not input_path.exists():
             raise FileNotFoundError("input_path does not exist")
         if not output_path.exists():
             raise FileNotFoundError("output_path does not exist")
-        if not high_ld_regions.exists():
-            raise FileNotFoundError("high_ld_regions does not exist")
+        if not high_ld_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions()
+            ld_fetcher.get_ld_regions()
+
+            high_ld_file = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
         
         self.input_path = input_path
         self.input_name = input_name
         self.output_path= output_path
         self.output_name= output_name
         self.reference_files = reference_files
-        self.high_ld_regions = high_ld_regions
+        self.high_ld_regions = high_ld_file
         self.recompute_merge = recompute_merge
         self.built = built
+        self.rename_snps = rename_snps
 
         if not reference_files:
 
@@ -779,15 +807,16 @@ class AncestryQC:
             return
 
         rgm = ReferenceGenomicMerger(
-            input_path= self.input_path, 
+            input_path= self.input_path,
             input_name= self.input_name,
             output_path= self.merging_dir, 
             output_name= self.output_name,
             high_ld_regions =self.high_ld_regions, 
-            reference_files = self.reference_files
+            reference_files = self.reference_files,
+            rename_snps=self.rename_snps
         )
 
-        rgm.execute_rename_snpid()
+        #rgm.execute_rename_snpid()
         rgm.execute_filter_prob_snps()
         rgm.execute_ld_pruning(ind_pair=ind_pair)
         rgm.execute_fix_chromosome_mismatch()
