@@ -17,89 +17,110 @@ from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 
 class SampleQC:
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, dependables_path:str)->None:
-
-        """
-        Initialize the SampleQC object.
-
-        Parameters:
-        -----------
-        - input_path (str): Path to the input data.
-        - input_name (str): Name of the input data files (without extension).
-        - output_path (str): Path to the folder where the output will be saved.
-        - output_name (str): Name of the output data.
-        - config_dict (str): Dictionary containing configuration settings.
-        - dependables_path (str): Path to dependent files.
-
-        Raises:
-        ------
-        - ValueError: If values for input_path, output_path, and dependables_path are not provided upon initialization.
-
-        Attributes:
-        -----------
-        - input_path (str): Path to the folder containing the input data files.
-        - output_path (str): Path to the folder where the output will be saved.
-        - input_name (str): Name of the input data files (without extension).
-        - output_name (str): Name for the output files.
-        - dependables (str): Path to the folder containing reference data.
-        - config_dict (str): Dictionary containing configuration settings.
-        - dependables_to_keep (list): List of reference data files to keep.
-        - results_to_keep (list): List of result files to keep.
-        - results_dir (str): Path to the folder where PCA results will be saved.
-        - fails_dir (str): Path to the folder where failed samples will be saved.
-        - plots_dir (str): Path to the folder where plots will be saved.
-        """
-
-        # check if paths are set
-        if input_path is None or output_path is None or dependables_path is None:
-            raise ValueError("values for input_path, output_path and dependables_path must be set upon initialization.")
-
-        # Check path validity of input data
-        bed_path = os.path.join(input_path, input_name + '.bed')
-        fam_path = os.path.join(input_path, input_name + '.fam')
-        bim_path = os.path.join(input_path, input_name + '.bim')
-
-        bed_check = os.path.exists(bed_path)
-        fam_check = os.path.exists(fam_path)
-        bim_check = os.path.exists(bim_path)
-
-        if not os.path.exists(input_path) or not os.path.exists(output_path):
-            raise FileNotFoundError("input_path or output_path is not a valid path")
-        if not bed_check:
-            raise FileNotFoundError(".bed file not found")
-        if not fam_check:
-            raise FileNotFoundError(".fam file not found")
-        if not bim_check:
-            raise FileNotFoundError(".bim file not found")
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38') -> None:
         
+        """
+        Initialize SampleQC class for quality control of genetic data.
+        This class handles quality control procedures for genetic data files in PLINK format
+        (bed, bim, fam). It sets up the directory structure and validates input files.
+        
+        Parameters
+        ----------
+        input_path : Path
+            Directory path containing the input PLINK files
+        input_name : str
+            Base name of the input PLINK files (without extension)
+        output_path : Path
+            Directory path where output files will be saved
+        output_name : str
+            Base name for output files (without extension)
+        high_ld_file : Path
+            Path to file containing high LD regions. If not found, will be fetched from package
+        built : str, optional
+            Genome build version, either '37' or '38' (default='38')
+        
+        Raises
+        ------
+        TypeError
+            If input types are incorrect
+        ValueError
+            If genome build version is not '37' or '38'
+        FileNotFoundError
+            If input paths or required PLINK files are not found
+        
+        Attributes
+        ----------
+        renamed_snps : bool
+            Flag indicating if SNPs should be renamed
+        hh_to_missing : bool
+            Flag indicating if heterozygous haploid genotypes should be set to missing
+        pruned_file : None
+            Placeholder for pruned file path
+        results_dir : Path
+            Directory for all QC results
+        fails_dir : Path
+            Directory for failed samples
+        clean_dir : Path
+            Directory for clean files
+        plots_dir : Path
+            Directory for QC plots
+        """
 
-        self.input_path  = input_path
-        self.output_path = output_path
+        if not isinstance(input_path, Path) or not isinstance(output_path, Path):
+            raise TypeError("input_path and output_path should be of type Path")
+        if not isinstance(input_name, str) or not isinstance(output_name, str):
+            raise TypeError("input_name and output_name should be of type str")
+        if not isinstance(high_ld_file, Path):
+            raise TypeError("high_ld_file should be of type Path")
+        
+        if not isinstance(built, str):
+            raise TypeError("built should be of type str")
+        if built not in ['37', '38']:
+            raise ValueError("built should be either 37 or 38")
+        
+        if not input_path.exists() or not output_path.exists():
+            raise FileNotFoundError("input_path or output_path is not a valid path")
+        if not (input_path / f"{input_name}.bed").exists():
+            raise FileNotFoundError(".bed file not found")
+        if not (input_path / f"{input_name}.fam").exists():
+            raise FileNotFoundError(".fam file not found")
+        if not (input_path / f"{input_name}.bim").exists():
+            raise FileNotFoundError(".bim file not found")
+        if not high_ld_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions()
+            ld_fetcher.get_ld_regions()
+
+            high_ld_file = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
+        
+        self.input_path  = Path(input_path)
+        self.output_path = Path(output_path)
         self.input_name  = input_name
         self.output_name = output_name
-        self.dependables = dependables_path
+        self.high_ld_file = high_ld_file
 
-        self.files_to_keep = ['fail_samples']
+        self.renamed_snps = False
+        self.hh_to_missing= False
+        self.pruned_file = None
 
         # create results folder
-        self.results_dir = os.path.join(output_path, 'sample_qc_results')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+        self.results_dir = self.output_path / 'sample_qc_results'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
 
         # create fails folder
-        self.fails_dir = os.path.join(self.results_dir, 'fail_samples')
-        if not os.path.exists(self.fails_dir):
-            os.mkdir(self.fails_dir)
+        self.fails_dir = self.results_dir / 'fail_samples'
+        self.fails_dir.mkdir(parents=True, exist_ok=True)
 
         # create clean files folder
-        self.clean_dir = os.path.join(self.results_dir, 'clean_files')
-        if not os.path.exists(self.clean_dir):
-            os.mkdir(self.clean_dir)
+        self.clean_dir = self.results_dir / 'clean_files'
+        self.clean_dir.mkdir(parents=True, exist_ok=True)
         
         # create figures folder
-        self.plots_dir = os.path.join(self.results_dir, 'sampleQC_plots')
-        if not os.path.exists(self.plots_dir):
-            os.mkdir(self.plots_dir)
+        self.plots_dir = self.results_dir / 'plots'
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
 
     def execute_rename_snps(self, rename:bool=True)->dict:
         
