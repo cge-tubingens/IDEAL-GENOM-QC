@@ -170,12 +170,13 @@ class FetcherLDRegions:
 
         self.destination.mkdir(parents=True, exist_ok=True)
 
+        out_dir = self.destination
+
         if self.built == '37':
             url_ld_regions = r"https://raw.githubusercontent.com/genepi-freiburg/gwas/refs/heads/master/single-pca/high-LD-regions.txt"
         
             ld = requests.get(url_ld_regions)
 
-            out_dir = self.destination
 
             if ld.status_code == 200:
                 with open((out_dir / f"high-LD-regions_GRCh{self.built}.txt"), "wb") as f:
