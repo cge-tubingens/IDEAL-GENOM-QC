@@ -225,36 +225,7 @@ class SampleQC:
 
         return
     
-    def execute_miss_genotype(self, mind:float)->dict:
-        
-        """
-        Executes PLINK commands to assess missing genotypes and filter samples based on a given missingness threshold.
-
-        This method runs two PLINK commands:
-        1. Computes missingness statistics genome-wide.
-        2. Filters samples based on the specified missingness threshold (mind) and generates a new dataset.
-        
-        Parameters:
-        -----------
-        mind (float): The missingness threshold for filtering samples.
-        
-        Returns:
-        --------
-            dict: A dictionary containing the following keys:
-                - 'pass' (bool): Indicates if the process completed successfully.
-                - 'step' (str): The name of the step executed.
-                - 'output' (dict): A dictionary with the key 'plink_out' pointing to the results directory.
-
-        Raises:
-        -------
-            TypeError: If mind is not a float.
-            ValueError: If mind is not between 0 and 1.
-            UserWarning: If mind is outside the recommended range
-        """
-
-        input_name  = self.input_name
-        output_name = self.output_name
-        results_dir = self.results_dir
+    def execute_miss_genotype(self, mind: float = 0.2)->dict:
 
         if not isinstance(mind, float):
             raise TypeError("mind should be a float")
