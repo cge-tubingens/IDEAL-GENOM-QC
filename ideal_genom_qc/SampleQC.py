@@ -238,19 +238,27 @@ class SampleQC:
         
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
+        if len(ind_pair) != 3:
+            raise ValueError("ind_pair must have exactly three elements")
         
         if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
-            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
+            raise TypeError("The first two elements in ind_pair values should be integers (window size and step size)")
+        if ind_pair[0] <= 0 or ind_pair[1] <= 0:
+            raise ValueError("Window size and step size must be positive integers")
         
         if not isinstance(ind_pair[2], float):
             raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
+        if not (0 < ind_pair[2] <= 1):
+            raise ValueError("The r^2 threshold must be a float between 0 and 1")
 
         logger.info("STEP: LD pruning")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # Get the virtual memory details
         memory_info = psutil.virtual_memory()
@@ -266,7 +274,11 @@ class SampleQC:
 
         # exclude complex regions
         plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
+        if not prune_in_file.exists():
+            raise FileNotFoundError(f"Required file {prune_in_file} not found. Ensure the LD pruning step completed successfully.")
 
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
         # LD prune indep-pairwise test
         plink_cmd2 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')} --memory {memory} --threads {max_threads}"
 
@@ -277,6 +289,7 @@ class SampleQC:
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
+            logger.info(f"Executing PLINK command: {cmd}")
             shell_do(cmd, log=True)
 
         return
