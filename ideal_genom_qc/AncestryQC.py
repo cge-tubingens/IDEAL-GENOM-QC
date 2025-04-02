@@ -682,6 +682,35 @@ class ReferenceGenomicMerger():
 class GenomicOutlierAnalyzer:
 
     def __init__(self, input_path: Path, input_name: str, merged_file: Path, reference_tags: Path, output_path: Path, output_name: str) -> None:
+        """
+        Initialize GenomicOutlierAnalyzer object with input and output parameters.
+
+        Parameters
+        ----------
+        input_path : Path
+            Path to input directory containing files to process
+        input_name : str
+            Name of input file 
+        merged_file : Path
+            Path to merged genotype file
+        reference_tags : Path
+            Path to file containing reference population tags
+        output_path : Path
+            Path to output directory
+        output_name : str
+            Name for output files
+
+        Attributes
+        ----------
+        einvectors : numpy.ndarray, None
+            Principal component eigenvectors, initialized as None
+        eigenvalues : numpy.ndarray, None
+            Principal component eigenvalues, initialized as None
+        ancestry_fails : list, None
+            List of samples failing ancestry QC, initialized as None
+        population_tags : pandas.DataFrame, None
+            DataFrame containing population reference tags, initialized as None
+        """
 
         self.merged_file = merged_file
         self.reference_tags = reference_tags
@@ -698,6 +727,41 @@ class GenomicOutlierAnalyzer:
         pass
 
     def execute_pca(self, pca: int = 10, maf: float = 0.01) -> None:
+        """
+        Perform Principal Component Analysis (PCA) on the genetic data using PLINK.
+
+        This method executes PCA on the merged genetic data file, calculating the specified
+        number of principal components. It automatically determines the optimal number of
+        threads and memory allocation based on system resources.
+
+        Parameters
+        ----------
+        pca : int, default=10
+            Number of principal components to calculate.
+            Must be a positive integer.
+        maf : float, default=0.01
+            Minor allele frequency threshold for filtering variants.
+            Must be between 0 and 0.5.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If pca is not an integer or maf is not a float
+        ValueError
+            If pca is not positive or maf is not between 0 and 0.5
+
+        Notes
+        -----
+        The method creates two output files:
+        - {output_name}-pca.eigenvec: Contains the eigenvectors (PC loadings)
+        - {output_name}-pca.eigenval: Contains the eigenvalues
+
+        The results are stored in self.einvectors and self.eigenvalues attributes.
+        """
 
         if not isinstance(pca, int):
             raise TypeError("pca should be an integer")
@@ -732,6 +796,45 @@ class GenomicOutlierAnalyzer:
         return
     
     def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path()) -> None:
+        """
+        Identifies ancestry outliers in the dataset based on PCA analysis.
+        This method analyzes population structure using principal component analysis (PCA) and identifies
+        samples that are potential ancestry outliers based on their distance from reference populations.
+        
+        Parameters
+        ----------
+        ref_threshold : float
+            Distance threshold for reference population samples
+        stu_threshold : float
+            Distance threshold for study population samples
+        reference_pop : str
+            Name of the reference population to compare against
+        num_pcs : int, optional
+            Number of principal components to use in the analysis (default is 2)
+        fails_dir : Path, optional
+            Directory path to save failed samples information (default is empty Path)
+        
+        Returns
+        -------
+        None
+            Results are stored in the ancestry_fails attribute
+        Raises
+        ------
+        TypeError
+            If parameters are not of the expected type
+        ValueError
+            If num_pcs is not a positive integer
+        
+        Notes
+        -----
+        The method requires:
+        - A reference tags file with population information
+        - An eigenvectors file from PCA analysis
+        - Both files should be previously set in the class instance
+        The results are saved in:
+        - population_tags: CSV file with population assignments
+        - ancestry_fails: List of samples identified as ancestry outliers
+        """
 
         if not isinstance(ref_threshold, (float, int)):
             raise TypeError("ref_threshold should be a float")
