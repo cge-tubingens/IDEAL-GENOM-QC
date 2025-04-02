@@ -374,7 +374,7 @@ class VariantQC:
         plt.axvline(x=threshold, linestyle='--', color='red')
 
         plt.savefig(fig_path, dpi=400)
-        plt.show()
+        plt.show(block=False)
         plt.close()
 
         return None
