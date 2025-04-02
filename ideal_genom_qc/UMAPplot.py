@@ -5,86 +5,82 @@ Module to draw plots based on UMAP dimension reduction
 import os
 import umap
 import warnings
+import logging
+import psutil
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from pathlib import Path
+
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
+from ideal_genom_qc.get_references import FetcherLDRegions
 from sklearn.model_selection import ParameterGrid
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 class UMAPplot:
 
-    def __init__(self, input_path:str, input_name:str, dependables_path:str, output_path:str, compute_all:bool=True) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38', recompute_pca: bool = True) -> None:
 
-        """
-        
-        """
 
-        # check if paths are set
-        if input_path is None or dependables_path is None or output_path is None:
-            raise ValueError("values for sampleQC_path, pcaQC_path, dependables_path and output_path must be set upon initialization.")
 
-        # Check path validity of clean data
-        bed_path = os.path.join(input_path, input_name + '.bed')
-        fam_path = os.path.join(input_path, input_name + '.fam')
-        bim_path = os.path.join(input_path, input_name + '.bim')
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(high_ld_file, Path):
+            raise TypeError("high_ld_regions should be a Path object")
+        if not isinstance(input_name, str): 
+            raise TypeError("input_name should be a string")
+        if not isinstance(output_name, str):
+            raise TypeError("output_name should be a string")
+        if not isinstance(recompute_pca, bool):
+            raise TypeError("recompute_merge should be a boolean")
+        if not isinstance(built, str):
+            raise TypeError("built should be a string")
+        if built not in ['37', '38']:
+            raise ValueError("built should be either '37' or '38'")        
+        if not input_path.exists():
+            raise FileNotFoundError("input_path does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not high_ld_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions()
+            ld_fetcher.get_ld_regions()
 
-        bed_check = os.path.exists(bed_path)
-        fam_check = os.path.exists(fam_path)
-        bim_check = os.path.exists(bim_path)
-
-        if not bed_check:
-            raise FileNotFoundError(".bed file not found")
-        if not fam_check:
-            raise FileNotFoundError(".fam file not found")
-        if not bim_check:
-            raise FileNotFoundError(".bim file not found")
-        
-        # Check path validity of dependables
-        if not os.path.exists(dependables_path):
-            raise FileNotFoundError("dependables_path is not a valid path")
-        # Check path validity of output_path
-        if not os.path.exists(output_path):
-            raise FileNotFoundError("output_path is not a valid path")
+            high_ld_file = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
 
         self.input_path = input_path
         self.input_name = input_name
-        self.dependables= dependables_path
-        self.compute_all= compute_all
+        self.output_path= output_path
+        self.output_name= output_name
+        self.high_ld_regions = high_ld_file
+        self.recompute_pca = recompute_pca
+        self.built = built
 
         self.files_to_keep= []
 
-        # create results folder
-        self.results_dir = os.path.join(output_path, 'umap_plots')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+        self.results_dir = self.output_path / 'umap_results' 
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+
+        self.plots_dir = self.results_dir / 'plots'
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
 
         pass
 
-    def ld_pruning(self, maf:float=0.01, geno:float=0.1, mind:float=0.2, hwe:float=5e-8, ind_pair:list=[50, 5, 0.2])->dict:
+    def ld_pruning(self, maf: float = 0.001, geno: float = 0.1, mind: float = 0.2, hwe: float = 5e-8, ind_pair: list = [50, 5, 0.2]) -> None:
 
-        """
-        Prune samples based on Linkage Disequilibrium (LD).
-
-        This method performs LD-based sample pruning using PLINK1.9 commands. It filters samples based on Minor Allele Frequency (maf), genotype missingness (geno), individual missingness (mind), and Hardy-Weinberg Equilibrium (hwe). Additionally, it excludes SNPs located in high LD regions specified in the dependables path. The resulting pruned dataset is saved as a new binary file.
-
-        Raises:
-        -------
-        - TypeError: If maf, geno, mind, or hwe is not of type float.
-        - ValueError: If maf, geno, mind, or hwe is not within the specified range.
-        - FileNotFoundError: If the file with high LD regions is not found.
-
-        Returns:
-        --------
-        - dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-        """
-
-        input_path      = self.input_path
-        input_name      = self.input_name
-        dependables_path= self.dependables
-        results_dir     = self.results_dir
-        compute_all     = self.compute_all
+        if not self.recompute_pca:
+            logger.info(f"`recompuite_pca` is set to {self.recompute_pca}. LD pruning will be skipped.")
+            logger.info("LD pruning already performed. Skipping this step.")
+            return
 
 
         # Check type of maf
@@ -104,12 +100,12 @@ class UMAPplot:
             raise TypeError("hwe should be of type float.")
         
         # Check if maf is in range
-        if maf < 0.0 or maf > 0.5:
+        if maf <= 0.0 or maf >= 0.5:
             raise ValueError("maf should be between 0 and 0.5")
         
         # Check if geno is in range
-        if geno < 0.05 or geno > 0.1:
-            raise ValueError("geno should be between 0.05 and 0.1")
+        if geno <= 0 or geno >= 1:
+            raise ValueError("geno should be between 0 and 1")
         
         # Check if mind is in range
         if mind < 0 or mind > 1:
@@ -122,53 +118,31 @@ class UMAPplot:
         # Check if hwe is in range
         if hwe < 0 or hwe > 1:
             raise ValueError("hwe should be between 0 and 1")
-        
-        # check existence of high LD regions file
-        high_ld_regions_file = os.path.join(dependables_path, 'high-LD-regions.txt')
-        if not os.path.exists(high_ld_regions_file):
-            raise FileNotFoundError(f"File with high LD region was not found: {high_ld_regions_file}")
 
-        step = "ld_prune"
+        logger.info("Executing LD pruning with the following parameters:")
+        logger.info(f"LD pruning parameters: maf={maf}, geno={geno}, mind={mind}, hwe={hwe}, ind_pair={ind_pair}")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
         else:
-            max_threads = 10
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {os.path.join(input_path, input_name)} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {high_ld_regions_file} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {os.path.join(results_dir, input_name)}"
+        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {self.high_ld_regions} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {self.results_dir / self.input_name}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {os.path.join(input_path, input_name)} --keep-allele-order --extract {os.path.join(results_dir, input_name+'.prune.in')} --make-bed --threads {max_threads} --out {os.path.join(results_dir, input_name+'-LDpruned')}"
+        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --keep-allele-order --extract {self.results_dir / (self.input_name+'.prune.in')} --make-bed --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDpruned')}"
 
-        self.files_to_keep.append(input_name+'-LDpruned.bed')
-        self.files_to_keep.append(input_name+'-LDpruned.bim')
-        self.files_to_keep.append(input_name+'-LDpruned.fam')
+        # execute plink command
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
 
-        if compute_all:
-            # execute PLINK commands
-            cmds = [plink_cmd1, plink_cmd2]
-            for cmd in cmds:
-                shell_do(cmd, log=True)
-        else:
-            print(f"\033[1m LD prunning already performed.\033[0m")
+        return
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def compute_pcas(self, pca:int=10)->None:
+    def compute_pcas(self, pca: int = 10) -> None:
     
         """
         Compute Principal Component Analysis (PCA) to feed UMAP algorithm and generate plots.
@@ -184,51 +158,83 @@ class UMAPplot:
             dict: A dictionary containing the status of the process, the step name, and the output directory for the plots.
         """
 
-        input_name = self.input_name
-        results_dir= self.results_dir
-        compute_all= self.compute_all
+        if not self.recompute_pca:
+            logger.info(f"`recompuite_pca` is set to {self.recompute_pca}. PCA will be skipped.")
+            logger.info("PCA already performed. Skipping this step.")
+            return
 
         # Check type of pca
         if not isinstance(pca, int):
             raise TypeError("pca should be of type int.")
+        if pca <= 0:
+            raise ValueError("pca should be a positive integer.")
+        if pca <= 3:
+            warnings.warn(f"The 'pca' value {pca} is low. Consider increasing it for better results.", UserWarning)
 
-        step= "compute_pca_for_umap_plots"
+        logger.info("Executing PCA with the following parameters:")
+        logger.info(f"PCA parameters: pca={pca}")
 
         # runs pca analysis
-        plink_cmd1 = f"plink --bfile {os.path.join(results_dir, input_name+'-LDpruned')} --keep-allele-order --maf 0.01 --out {os.path.join(results_dir, input_name)} --pca {pca}"
+        plink_cmd1 = f"plink --bfile {self.results_dir / (self.input_name+'-LDpruned')} --keep-allele-order --out {self.results_dir / self.input_name} --pca {pca}"
 
-        if compute_all:
-            # execute plink command
-            cmd = plink_cmd1
-            shell_do(cmd, log=True)
-        else:
-            print(f"\033[1m Principal components already computed.\033[0m")
+        shell_do(plink_cmd1, log=True)
 
-        self.files_to_keep.append(input_name+'.eigenvec')
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plots_out': self.results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def generate_plots(self, n_neighbors:list=[5], min_dist:list=[0.5], metric:list=['euclidean'])->None:
+    def generate_plots(self, color_hue_file: Path = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: int = None) -> None:
 
-        input_path = self.input_path
-        input_name = self.input_name
-        results_dir= self.results_dir
-        dependables= self.dependables
 
-        step = "draw_umap_plots"
+        # Check type of n_neighbors
+        if not isinstance(n_neighbors, list):
+            raise TypeError("n_neighbors should be of type list.")
+        if not all(isinstance(i, int) for i in n_neighbors):
+            raise TypeError("n_neighbors should be a list of integers.")
+        if not all(i > 0 for i in n_neighbors):
+            raise ValueError("n_neighbors should be a list of positive integers.")
+        if len(n_neighbors) == 0:
+            raise ValueError("n_neighbors should not be an empty list.")
+        
+        # Check type of min_dist
+        if not isinstance(min_dist, list):
+            raise TypeError("min_dist should be of type list.")
+        if not all(isinstance(i, float) for i in min_dist):
+            raise TypeError("min_dist should be a list of floats.")
+        if not all(i >= 0 for i in min_dist):
+            raise ValueError("min_dist should be a list of non-negative floats.")
+        if len(min_dist) == 0:
+            raise ValueError("min_dist should not be an empty list.")
+        
+        # Check type of metric
+        if not isinstance(metric, list):
+            raise TypeError("metric should be of type list.")
+        if not all(isinstance(i, str) for i in metric):
+            raise TypeError("metric should be a list of strings.")
+        if len(metric) == 0:
+            raise ValueError("metric should not be an empty list.")
+        
+        # Check type of random_state
+        if random_state is not None:
+            if not isinstance(random_state, int):
+                raise TypeError("random_state should be of type int.")
+            if random_state < 0:
+                raise ValueError("random_state should be a non-negative integer.")
+            
+        # Check if color_hue_file is a file
+        if color_hue_file is not None:
+            if not isinstance(color_hue_file, Path):
+                raise TypeError("color_hue_file should be a Path object.")
+            if not color_hue_file.is_file():
+                raise FileNotFoundError(f"color_hue_file not found at {color_hue_file}")
+        
+        # Check if case_control_markers is a boolean
+        if not isinstance(case_control_markers, bool):
+            raise TypeError("case_control_markers should be of type bool.")
+
+        logger.info("Generating UMAP plots with the following parameters:")
+        logger.info(f"UMAP parameters: n_neighbors={n_neighbors}, min_dist={min_dist}, metric={metric}")
+        logger.info(f"Random state: {random_state}")
+        logger.info(f"Color hue file: {color_hue_file}")
+        logger.info(f"Case control markers: {case_control_markers}")
 
         # generate a parameter grid
         params_dict = {
@@ -238,10 +244,56 @@ class UMAPplot:
         }
         param_grid = ParameterGrid(params_dict)
 
-        count=1
+        if color_hue_file is not None:
+            # load color hue file
+            df_color_hue = pd.read_csv(
+                color_hue_file,
+                sep=r'\s+',
+                engine='python'
+            )
+            logger.info(f"Color hue file loaded from {color_hue_file}")
+            logger.info(f"Column {df_color_hue.columns[2]} will be used for color hue")
+            df_color_hue.columns = ["ID1", "ID2", df_color_hue.columns[2]]
+            logger.info(f"Color hue file has {df_color_hue.shape[0]} rows and {df_color_hue.shape[1]} columns")
+            hue_col = df_color_hue.columns[2]
+        else:
+            hue_col = None
 
-        # path to geographic information
-        geo_info_path = os.path.join(dependables, 'geographic_info.txt')
+        if case_control_markers:
+            # load case control markers
+            df_fam = pd.read_csv(
+                self.input_path / (self.input_name+'.fam'),
+                sep=r'\s+',
+                engine='python'
+            )
+            logger.info(f"Case-control labels loaded from {self.input_path / (self.input_name+'.fam')}")
+            
+            df_fam.columns = ["ID1", "ID2", "F_ID", "M_ID", "Sex", "Phenotype"]
+            recode = {1:'Control', 2:'Patient'}
+            df_fam["Phenotype"] = df_fam["Phenotype"].map(recode)
+            df_fam = df_fam[['ID1', 'ID2', 'Phenotype']].copy()
+            logger.info(f"Case-control markers file has {df_fam.shape[0]} rows and {df_fam.shape[1]} columns")
+
+        if color_hue_file is not None and case_control_markers:
+            # merge color hue file with case control markers
+            df_metadata = df_color_hue.merge(
+                df_fam,
+                on=['ID1', 'ID2'],
+                how='inner'
+            )
+            logger.info(f"Color hue file merged with case control markers file")
+            logger.info(f"Merged file has {df_metadata.shape[0]} rows and {df_metadata.shape[1]} columns")
+        elif color_hue_file is not None:
+            df_metadata = df_color_hue.copy()
+            logger.info(f"Color hue file used as metadata")
+        elif case_control_markers:
+            df_metadata = df_fam.copy()
+            logger.info(f"Case control markers file used as metadata")
+        else:
+            df_metadata = None
+            logger.info(f"No metadata file provided")
+
+        count=1
 
         # create a dataframe to store parameters
         df_params = pd.DataFrame(
@@ -251,14 +303,14 @@ class UMAPplot:
         for params in param_grid:
 
             # generate umap plot for data that passed QC
-            warnings = self.umap_plots(
-                path_to_data=os.path.join(results_dir, input_name+'.eigenvec'),
-                output_file =os.path.join(results_dir, f"umap_2d_{count}.jpeg"),
-                geo_path    =geo_info_path,
-                fam_path    =os.path.join(input_path, input_name+".fam"),
+            warnings = self._umap_plots(
+                plot_name   =f"umap_2d_{count}.jpeg",
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric'],
+                random_state=random_state,
+                df_metadata =df_metadata,
+                hue_col     =hue_col,
             )
 
             self.files_to_keep.append(f"umap_2d_{count}.jpeg")
@@ -272,33 +324,16 @@ class UMAPplot:
 
         # save parameters to a csv file
         df_params.to_csv(
-            os.path.join(results_dir, 'plots_parameters.csv'),
+            os.path.join(self.results_dir, 'plots_parameters.csv'),
             index=True,
             sep='\t'
         )
 
         self.files_to_keep.append('plots_parameters.csv')
 
-        # delete temporary files
-        delete_temp_files(self.files_to_keep, results_dir)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plots_out': self.results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    @staticmethod
-    def umap_plots(path_to_data:str, output_file:str, geo_path:str, fam_path:str, n_neighbors:int, min_dist:float, metric:str):
+    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None):
         
         """
         Generates UMAP plots from PCA eigenvector data and saves the plot to a .jpeg file.
@@ -332,24 +367,15 @@ class UMAPplot:
         If geographic information is provided, it will be included in the plot. The plot is saved to the specified output file in a .jpeg file.
         """
 
-        import warnings
 
         # load .eigenvec file
         df_eigenvec = pd.read_csv(
-            path_to_data,
+            self.results_dir / (self.input_name+'.eigenvec'),
             header=None,
             sep=' '
         )
-
-        # load .fam file
-        df_fam = pd.read_csv(
-            fam_path,
-            header=None,
-            sep=' '
-        )
-        df_fam.columns = ["ID1", "ID2", "F_ID", "M_ID", "Sex", "Phenotype"]
-        recode = {1:'control', 2:'case'}
-        df_fam["Phenotype"] = df_fam["Phenotype"].map(recode)
+        logger.info(f"Eigenvector file loaded from {self.results_dir / (self.input_name+'.eigenvec')}")
+        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
 
         # rename columns
         num_pc = df_eigenvec.shape[1]-2
@@ -359,11 +385,25 @@ class UMAPplot:
         df_ids = df_eigenvec[['ID1', 'ID2']].copy()
         df_vals= df_eigenvec[new_cols].to_numpy()
 
-        df_ids = df_ids.merge(
-            df_fam[["ID1", "ID2", "Phenotype"]], on=['ID1', 'ID2']
-        )
+        if df_metadata is not None:
+            # merge metadata with eigenvector data
+            df_ids = df_ids.merge(
+                df_metadata,
+                on=['ID1', 'ID2'],
+                how='inner'
+            )
+            logger.info(f"Metadata file merged with eigenvector file")
+            logger.info(f"Merged file has {df_ids.shape[0]} rows and {df_ids.shape[1]} columns")
 
-        del df_eigenvec, df_fam
+            if 'Phenotype' in df_ids.columns:
+                style_col = 'Phenotype'
+            else:
+                style_col = None
+            
+            if style_col and hue_col is None:
+                hue_col, style_col = style_col, None
+
+        del df_eigenvec
 
         # instantiate umap class
         D2_redux = umap.UMAP(
@@ -371,7 +411,7 @@ class UMAPplot:
             n_neighbors =n_neighbors,
             min_dist    =min_dist,
             metric      =metric,
-            random_state=42
+            random_state=random_state
         )
 
         with warnings.catch_warnings(record=True) as w:
@@ -381,42 +421,28 @@ class UMAPplot:
             # generates umap projection
             umap_2D_proj = D2_redux.fit_transform(df_vals)
 
+            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
+
             del df_vals
 
-            if os.path.isfile(geo_path):
+            # generates and saves a 2D scatter plot
+            # size given in inches
+            sns.set_context(font_scale=0.9)
+            fig, ax = plt.subplots(figsize=(5,5))
 
-                # load file with geographic info
-                df_geo = pd.read_csv(
-                    geo_path,
-                    sep=' ',
-                    index_col=False 
-                )
-
-                # prepares data for plotting
-                df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
-                df_2D = pd.merge(
-                    df_2D,
-                    df_geo,
-                    left_on='ID2',
-                    right_on=df_geo.columns[0]
-                ).drop(columns=[df_geo.columns[0]])
-
-                # generates and saves a 2D scatter plot
-                # size given in inches
-                sns.set_context(font_scale=0.9)
-                fig, ax = plt.subplots(figsize=(5,5))
-                scatter_plot= sns.scatterplot(
-                    data=df_2D, 
-                    x='umap1', 
-                    y='umap2', 
-                    hue=df_geo.columns[1],
-                    marker='.',
-                    s=10,
-                    alpha=0.6,
-                    ax=ax,
-                    style="Phenotype",
-                    edgecolor='none'
-                )
+            scatter_plot= sns.scatterplot(
+                data=df_2D, 
+                x='umap1', 
+                y='umap2', 
+                hue=hue_col,
+                marker='.',
+                s=5,
+                alpha=0.6,
+                ax=ax,
+                style=style_col,
+                edgecolor='none'
+            )
+            if df_metadata is not None:
                 plt.legend(
                     bbox_to_anchor=(0., 1.02, 1., .102), 
                     loc='lower left',
@@ -427,55 +453,22 @@ class UMAPplot:
                     markerscale=2
                 )
                 
-                # Set tick label size
-                ax.tick_params(axis='both', labelsize=7)
+            # Set tick label size
+            ax.tick_params(axis='both', labelsize=7)
 
-                # Set axis label and size
-                ax.set_xlabel('UMAP1', fontsize=7)
-                ax.set_ylabel('UMAP2', fontsize=7)
+            # Set axis label and size
+            ax.set_xlabel('UMAP1', fontsize=7)
+            ax.set_ylabel('UMAP2', fontsize=7)
 
-                plt.tight_layout()
+            plt.tight_layout()
 
-                scatter_fig = scatter_plot.get_figure()
-                scatter_fig.savefig(output_file, dpi=600)
-                plt.close()
-            else:
-                # prepares data for plotting
-                df_2D = pd.concat(
-                    [df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1
-                )
+            scatter_fig = scatter_plot.get_figure()
+            scatter_fig.savefig(self.plots_dir / plot_name, dpi=400)
+            plt.close()
 
-                # generates and saves a 2D scatter plot
-                # size given in inches
-                fig, ax = plt.subplots(figsize=(5,5))
-                scatter_plot= sns.scatterplot(
-                    data=df_2D, 
-                    x='umap1',
-                    y='umap2',
-                    marker='.',
-                    alpha=0.6,
-                    s=10,
-                    ax=ax,
-                    style="Phenotype",
-                    edgecolor='none'
-                )
-
-                # Set tick label size
-                ax.tick_params(axis='both', labelsize=7)
-
-                # Set axis label and size
-                ax.set_xlabel('UMAP1', fontsize=7)
-                ax.set_ylabel('UMAP2', fontsize=7)
-
-                scatter_fig = scatter_plot.get_figure()
-                plt.tight_layout()
-                scatter_fig.savefig(output_file, dpi=600)
-                plt.close()
 
             if isinstance(w, list):
                 warning = [warn.message.args[0] for warn in w]
                 return warning
             else:
                 return None
-
-
