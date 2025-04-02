@@ -889,6 +889,32 @@ class GenomicOutlierAnalyzer:
         return
     
     def execute_drop_ancestry_outliers(self, output_dir: Path = Path()) -> None:
+        """
+        Drop ancestry outliers from the study data by removing samples identified as ancestry outliers
+        using PLINK command line tool.
+        This method reads a file containing samples identified as ancestry outliers and creates new
+        binary PLINK files excluding these samples.
+
+        Parameters
+        ----------
+        output_dir : Path, optional
+            Directory where the cleaned files will be saved. If not provided or doesn't exist,
+            files will be saved in self.output_path.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If output_dir is not a Path object.
+        
+        Notes
+        -----
+        The method creates new PLINK binary files (.bed, .bim, .fam) with the suffix '-ancestry-cleaned'
+        excluding the samples listed in self.ancestry_fails file.
+        """
 
         logger.info("STEP: Dropping ancestry outliers from the study data")
 
@@ -912,6 +938,40 @@ class GenomicOutlierAnalyzer:
         return
     
     def draw_pca_plot(self, plot_dir: Path = Path(), plot_name: str = 'pca_plot.jpeg') -> None:
+        """
+        Generate 2D and 3D PCA plots from eigenvector data and population tags.
+        This method creates two PCA visualization plots:
+        - A 2D scatter plot showing PC1 vs PC2 colored by super-population
+        - A 3D scatter plot showing PC1 vs PC2 vs PC3 colored by super-population
+        
+        Parameters
+        ----------
+        plot_dir : Path, optional
+            Directory path where plots will be saved. Defaults to current directory.
+            If directory doesn't exist, plots will be saved in self.output_path
+        plot_name : str, optional
+            Base name for the plot files. Defaults to 'pca_plot.jpeg'.
+            Final filenames will be prefixed with '2D-' and '3D-'
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If plot_dir is not a Path object
+            If plot_name is not a string
+        
+        Notes
+        -----
+        Requires the following class attributes to be set:
+        - self.population_tags : Path to population tags file (tab-separated)
+        - self.einvectors : Path to eigenvectors file (space-separated)
+        - self.output_path : Path to output directory (used if plot_dir doesn't exist)
+        The population tags file should contain columns 'ID1', 'ID2', and 'SuperPop'
+        The eigenvectors file should contain the principal components data
+        """
 
         logger.info("STEP: Generating PCA plots")
 
@@ -967,6 +1027,32 @@ class GenomicOutlierAnalyzer:
         return
     
     def _set_population_tags(self, psam_path: Path, study_fam_path: Path) -> pd.DataFrame:
+        """
+        Sets population tags for genetic data by combining information from a PSAM file and a study FAM file.
+
+        This method processes population information from reference data (PSAM file) and study data (FAM file), 
+        combining them into a single DataFrame with consistent column naming and structure.
+
+        Parameters
+        ----------
+        psam_path : Path
+            Path to the PSAM file containing reference population information.
+        study_fam_path : Path
+            Path to the FAM file containing study individual IDs.
+
+        Returns
+        -------
+        pd.DataFrame
+            Combined DataFrame containing:
+                - ID1: Family or group identifier (0 for reference data)
+                - ID2: Individual identifier
+                - SuperPop: Population tag ('StPop' for study individuals, actual population for reference data)
+
+        Notes
+        -----
+        The PSAM file should contain at least '#IID' and 'SuperPop' columns.
+        The FAM file should be space-separated with no header.
+        """
 
         # Read population information from the .psam file
         df_psam = pd.read_csv(
@@ -997,6 +1083,48 @@ class GenomicOutlierAnalyzer:
         return pd.concat([df_fam, df_psam], axis=0)
     
     def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: int, stu_threshold: int, reference_pop: str, num_pcs: str = 2) -> str:
+        """
+        Identifies ancestry outliers based on PCA results using two thresholds:
+        one for reference population and another for study population.
+
+        Parameters
+        ----------
+        output_path : Path
+            Path where the output file will be saved
+        df_tags : pd.DataFrame
+            DataFrame containing subject IDs and population tags
+        ref_threshold : int
+            Number of standard deviations from reference population mean to consider a subject as outlier
+        stu_threshold : int
+            Number of standard deviations from study population mean to consider a subject as outlier
+        reference_pop : str
+            Reference population name as it appears in df_tags
+        num_pcs : int, optional
+            Number of principal components to use in the analysis (default is 2)
+
+        Returns
+        -------
+        str
+            Path to the output file containing the IDs of subjects identified as ancestry outliers
+
+        Raises
+        ------
+        TypeError
+            If ref_threshold, stu_threshold are not numeric
+            If reference_pop is not a string
+            If num_pcs is not an integer
+        ValueError
+            If ref_threshold, stu_threshold are not positive
+            If num_pcs is less than 1
+            If num_pcs is greater than available PCs in eigenvec file
+
+        Notes
+        -----
+        The method identifies outliers that deviate significantly from both:
+        1. The reference population mean (by ref_threshold standard deviations)
+        2. The study population mean (by stu_threshold standard deviations)
+        Only subjects that are outliers in both criteria are included in the final output.
+        """
 
         if not isinstance(ref_threshold, (float, int)):
             raise TypeError("ref_threshold should be an integer or float value")
@@ -1101,6 +1229,48 @@ class GenomicOutlierAnalyzer:
 class AncestryQC:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38', rename_snps: bool = False) -> None:
+        """
+        Initialize AncestryQC class.
+        This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
+        and running principal component analysis.
+
+        Parameters:
+        -----------
+        input_path: Path 
+            Path to directory containing input files
+        input_name: str 
+            Base name of input files (without extension) 
+        output_path: Path 
+            Path to directory where output files will be saved
+        output_name: str 
+            Base name for output files
+        high_ld_file: Path 
+            Path to file containing high LD regions to exclude
+        reference_files: dict (optional) 
+            Dictionary with paths to reference files. Must contain 'bim', 'bed', 'fam' and 'psam' keys. 
+            If not provided, will download 1000 Genomes reference files. Defaults to empty dict.
+        recompute_merge: bool (optional): 
+            Whether to recompute merge with reference even if merged files exist. Defaults to True.
+        built: str (optional) 
+            Genome build version, either '37' or '38'. Defaults to '38'.
+        rename_snps: bool (optional): 
+            Whether to rename SNPs to avoid duplicates during merge. Defaults to False.
+        
+        Raises:
+        -------
+            TypeError: If input arguments are not of expected types
+            ValueError: If built is not '37' or '38'
+            FileNotFoundError: If input_path or output_path do not exist
+        
+        Note:
+        -----
+            Creates the following directory structure under output_path:
+            - ancestry_qc_results/
+                - merging/
+                - plots/ 
+                - fail_samples/
+                - clean_files/
+        """
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -1180,6 +1350,36 @@ class AncestryQC:
         pass
 
     def merge_reference_study(self, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Merge reference and study data by applying quality control filters and merging steps.
+        This method performs a series of quality control steps to merge study data with reference data:
+        1. Filters problematic SNPs
+        2. Performs LD pruning
+        3. Fixes chromosome mismatches
+        4. Fixes position mismatches  
+        5. Fixes allele flips
+        6. Removes remaining mismatches
+        7. Merges the datasets
+        
+        Parameters
+        ----------
+        ind_pair : list, default [50, 5, 0.2]
+            Parameters for LD pruning: [window size, step size, r2 threshold]
+        
+        Returns
+        -------
+        None
+        
+        Notes
+        -----
+        If recompute_merge is False, the method will skip the merging process and expect
+        merged data to already exist in the merging directory.
+        
+        Raises
+        ------
+        TypeError
+            If ind_pair is not a list
+        """
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
@@ -1211,14 +1411,61 @@ class AncestryQC:
         return
     
     def _clean_merging_dir(self) -> None:
+        """
+        Cleans up the merging directory by removing unnecessary files.
+        This method removes all files in the merging directory except:
+        - Files containing '-merged' in their name
+        - Log files with '.log' extension
+        The cleanup helps manage disk space and removes intermediate files that are no longer needed
+        after the merging process is complete.
+        
+        Returns:
+        -------
+            None
+        """
+        
 
         for file in self.merging_dir.iterdir():
-            if file.is_file() and '-merged' not in file.name:
+            if file.is_file() and '-merged' not in file.name and file.suffix != '.log':
                 file.unlink()
 
         return
     
     def run_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4) -> None:
+        """
+        Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.
+
+        This method executes a complete PCA workflow including:
+        1. Running the PCA analysis
+        2. Identifying ancestry outliers
+        3. Removing identified outliers
+        4. Generating PCA plots
+
+        Parameters
+        ----------
+        ref_population : str
+            Reference population identifier for ancestry comparison
+        pca : int, optional
+            Number of principal components to calculate (default=10)
+        maf : float, optional
+            Minor allele frequency threshold for filtering (default=0.01)
+        num_pca : int, optional
+            Number of principal components to use in outlier detection (default=10)
+        ref_threshold : float, optional
+            Threshold for reference population outlier detection (default=4)
+        stu_threshold : float, optional
+            Threshold for study population outlier detection (default=4)
+
+        Returns
+        -------
+        None
+            Results are saved to specified output directories
+
+        Notes
+        -----
+        The method uses the GenomicOutlierAnalyzer class to perform the analysis and 
+        saves results in the directories specified during class initialization.
+        """
 
         goa = GenomicOutlierAnalyzer(
             input_path= self.input_path, 
