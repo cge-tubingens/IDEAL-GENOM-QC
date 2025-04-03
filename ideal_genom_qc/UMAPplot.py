@@ -245,17 +245,21 @@ class UMAPplot:
         param_grid = ParameterGrid(params_dict)
 
         if color_hue_file is not None:
+
+            if color_hue_file.is_file():
             # load color hue file
-            df_color_hue = pd.read_csv(
-                color_hue_file,
-                sep=r'\s+',
-                engine='python'
-            )
-            logger.info(f"Color hue file loaded from {color_hue_file}")
-            logger.info(f"Column {df_color_hue.columns[2]} will be used for color hue")
-            df_color_hue.columns = ["ID1", "ID2", df_color_hue.columns[2]]
-            logger.info(f"Color hue file has {df_color_hue.shape[0]} rows and {df_color_hue.shape[1]} columns")
-            hue_col = df_color_hue.columns[2]
+                df_color_hue = pd.read_csv(
+                    color_hue_file,
+                    sep=r'\s+',
+                    engine='python'
+                )
+                logger.info(f"Color hue file loaded from {color_hue_file}")
+                logger.info(f"Column {df_color_hue.columns[2]} will be used for color hue")
+                df_color_hue.columns = ["ID1", "ID2", df_color_hue.columns[2]]
+                logger.info(f"Color hue file has {df_color_hue.shape[0]} rows and {df_color_hue.shape[1]} columns")
+                hue_col = df_color_hue.columns[2]
+            else:
+                raise FileNotFoundError(f"color_hue_file not found at {color_hue_file}")
         else:
             hue_col = None
 
