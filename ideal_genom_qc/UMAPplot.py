@@ -430,7 +430,7 @@ class UMAPplot:
 
         return
     
-    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None):
+    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None, **umap_kwargs) -> list:
         
         """
         Generates UMAP plots from PCA eigenvector data and saves the plot to a .jpeg file.
@@ -508,7 +508,8 @@ class UMAPplot:
             n_neighbors =n_neighbors,
             min_dist    =min_dist,
             metric      =metric,
-            random_state=random_state
+            random_state=random_state,
+            **umap_kwargs
         )
 
         with warnings.catch_warnings(record=True) as w:
