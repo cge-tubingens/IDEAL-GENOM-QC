@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Set the working directory in the container
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone the specific repository
-RUN git clone https://github.com/cge-tubingens/cge-comrare-pipeline .
+RUN git clone https://github.com/cge-tubingens/IDEAL-GENOM-QC .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -27,7 +27,8 @@ COPY . .
 RUN wget -O /tmp/plink19.zip https://s3.amazonaws.com/plink1-assets/plink_linux_x86_64_20231211.zip \
     && unzip /tmp/plink19.zip -d /usr/local/bin/ \
     && wget -O /tmp/plink2.zip https://s3.amazonaws.com/plink2-assets/alpha5/plink2_linux_avx2_20240105.zip \
-    && unzip /tmp/plink2.zip -d /usr/local/bin/
+    && unzip /tmp/plink2.zip -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/plink*
 
 # Set the entrypoint to run the Python CLI tool
-ENTRYPOINT ["python", "-m", "cge_comrare_pipeline"]
+ENTRYPOINT ["python", "-m", "ideal_genom_qc"]
