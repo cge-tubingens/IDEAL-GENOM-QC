@@ -24,8 +24,42 @@ logger = logging.getLogger(__name__)
 class UMAPplot:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38', recompute_pca: bool = True) -> None:
+        """
+        Initialize UMAPplot object for population structure analysis.
+        This class handles the creation of UMAP plots for genetic data, managing input/output paths
+        and configuration for the analysis.
 
+        Parameters
+        ----------
+        input_path : Path
+            Path to the directory containing input files
+        input_name : str
+            Name of the input file
+        output_path : Path
+            Path to the directory where results will be saved
+        output_name : str
+            Name for the output files
+        high_ld_file : Path
+            Path to the file containing high LD regions
+        built : str, optional
+            Genome build version, either '37' or '38' (default is '38')
+        recompute_pca : bool, optional
+            Whether to recompute PCA analysis (default is True)
 
+        Raises
+        ------
+        TypeError
+            If input types are incorrect for any parameter
+        ValueError
+            If built is not '37' or '38'
+        FileNotFoundError
+            If input_path or output_path do not exist
+        
+        Notes
+        -----
+        If high_ld_file is not found, it will be automatically fetched from the package.
+        Creates 'umap_results' and 'plots' directories in the output path.
+        """
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -76,6 +110,49 @@ class UMAPplot:
         pass
 
     def ld_pruning(self, maf: float = 0.001, geno: float = 0.1, mind: float = 0.2, hwe: float = 5e-8, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Perform Linkage Disequilibrium (LD) pruning on genetic data using PLINK.
+        This method filters SNPs based on specified thresholds for various quality control metrics
+        and performs LD-based pruning to remove highly correlated variants.
+        
+        Parameters
+        ----------
+        maf : float, default=0.001
+            Minor allele frequency threshold. Variants with MAF below this value are removed.
+            Must be between 0 and 0.5.
+        geno : float, default=0.1
+            Maximum per-SNP missing rate. Variants with missing rate above this are removed.
+            Must be between 0 and 1.
+        mind : float, default=0.2
+            Maximum per-individual missing rate. Samples with missing rate above this are removed.
+            Must be between 0 and 1. Recommended range is 0.02 to 0.1.
+        hwe : float, default=5e-8
+            Hardy-Weinberg equilibrium exact test p-value threshold.
+            Variants with p-value below this are removed. Must be between 0 and 1.
+        ind_pair : list, default=[50, 5, 0.2]
+            Parameters for pairwise LD pruning: [window size, step size, r² threshold].
+        
+        Returns
+        -------
+        None
+            Creates pruned PLINK binary files in the results directory.
+        
+        Notes
+        -----
+        - Skips processing if recompute_pca is False
+        - Uses multithreading with optimal thread count based on system CPU
+        - Generates intermediate files: .prune.in and .prune.out
+        - Creates final LD-pruned dataset with '-LDpruned' suffix
+        
+        Raises
+        ------
+        TypeError
+            If input parameters are not of type float
+        ValueError
+            If input parameters are outside their valid ranges
+        UserWarning
+            If mind parameter is outside recommended range
+        """
 
         if not self.recompute_pca:
             logger.info(f"`recompuite_pca` is set to {self.recompute_pca}. LD pruning will be skipped.")
@@ -145,17 +222,36 @@ class UMAPplot:
     def compute_pcas(self, pca: int = 10) -> None:
     
         """
-        Compute Principal Component Analysis (PCA) to feed UMAP algorithm and generate plots.
+        Computes Principal Component Analysis (PCA) using PLINK.
 
-        This method performs PCA analysis using PLINK1.9 on the input dataset specified by `input_name` and stores the results in the `results_dir`. The number of principal components to compute is defined in the configuration dictionary under the key 'umap_pca'. If `compute_all` is set to True, the PCA analysis is executed; otherwise, it assumes the principal components have already been computed.
+        This method performs PCA on the LD-pruned dataset using PLINK's --pca command.
+        The analysis generates eigenvectors and eigenvalues that can be used for
+        population structure analysis and visualization.
 
-        Raises:
+        Parameters
+        ----------
+        pca : int, default=10
+            Number of principal components to compute. Should be a positive integer.
+            Values below 3 will trigger a warning as they may be insufficient for 
+            meaningful analysis.
+
+        Returns
         -------
-            TypeError: If the 'umap_pca' value in the configuration dictionary is not an integer.
+        None
+            Results are written to disk in the results directory with the input_name prefix.
 
-        Returns:
-        --------
-            dict: A dictionary containing the status of the process, the step name, and the output directory for the plots.
+        Raises
+        ------
+        TypeError
+            If pca parameter is not an integer.
+        ValueError
+            If pca parameter is not positive.
+
+        Notes
+        -----
+        - If recompute_pca is False, the method will skip PCA computation
+        - Uses PLINK's --pca command on the LD-pruned dataset
+        - Output files are saved in the results directory specified during initialization
         """
 
         if not self.recompute_pca:
