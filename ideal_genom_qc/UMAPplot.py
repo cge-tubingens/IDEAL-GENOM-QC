@@ -275,7 +275,56 @@ class UMAPplot:
 
         return
     
-    def generate_plots(self, color_hue_file: Path = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: int = None) -> None:
+    def generate_plots(self, color_hue_file: Path = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: int = None, umap_kwargs: dict = dict()) -> None:
+        """
+        Generate UMAP plots with different parameter combinations.
+        This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various 
+        combinations of parameters. It can incorporate color coding based on metadata and case-control markers.
+        
+        Parameters
+        ----------
+        color_hue_file : Path, optional
+            Path to a tab-separated file containing color hue information. The file should have at least 3 columns,
+            where the first two are ID1 and ID2, and the third column contains the values for color coding.
+            Default is None.
+        case_control_markers : bool, optional
+            Whether to include case-control markers in the plots. If True, reads from the .fam file.
+            Default is True. If color_hue_file is not provided, the difference between case and control will be used as hue.
+        n_neighbors : list of int, optional
+            List of values for the n_neighbors parameter in UMAP. Each value must be positive.
+            Default is [5].
+        min_dist : list of float, optional
+            List of values for the min_dist parameter in UMAP. Each value must be non-negative.
+            Default is [0.5].
+        metric : list of str, optional
+            List of distance metrics to use in UMAP.
+            Default is ['euclidean'].
+        random_state : int, optional
+            Random seed for reproducibility. Must be non-negative.
+            Default is None.
+        umap_kwargs : dict, optional
+            Additional keyword arguments to pass to the UMAP constructor.
+            Default is an empty dictionary.
+        
+        Returns
+        -------
+        None
+            Saves UMAP plots as JPEG files and parameters as a CSV file in the results directory.
+        
+        Raises
+        ------
+        TypeError
+            If input parameters are not of the correct type.
+        ValueError
+            If input parameters have invalid values.
+        FileNotFoundError
+            If color_hue_file is specified but not found.
+        
+        Notes
+        -----
+        The method creates a grid of all possible parameter combinations and generates a UMAP plot for each.
+        Parameters for each plot are saved in 'plots_parameters.csv'.
+        """
 
 
         # Check type of n_neighbors
@@ -408,6 +457,7 @@ class UMAPplot:
                 random_state=random_state,
                 df_metadata =df_metadata,
                 hue_col     =hue_col,
+                umap_kwargs=umap_kwargs
             )
 
             self.files_to_keep.append(f"umap_2d_{count}.jpeg")
@@ -430,40 +480,45 @@ class UMAPplot:
 
         return
     
-    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None, **umap_kwargs) -> list:
-        
+    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None, umap_kwargs: dict = dict()) -> list:
         """
-        Generates UMAP plots from PCA eigenvector data and saves the plot to a .jpeg file.
-
-        Parameters:
-        -----------
-        path_to_data : str
-            Path to the .eigenvec file containing PCA eigenvector data.
-        output_file : str
-            Path to the output file where the UMAP plot will be saved.
-        geo_path : str
-            Path to the file containing geographic information. If the file does not exist, the plot will be generated without geographic information acting as hue.
-        fam_path : str
-            Path to the .fam (PLINK1.9 file format) file containing family information.
+        Generate and save UMAP (Uniform Manifold Approximation and Projection) plots from PCA data.
+        This method reads eigenvector data from a file, performs UMAP dimensionality reduction,
+        and creates a 2D scatter plot with optional metadata coloring/styling.
+        
+        Parameters
+        ----------
+        plot_name : str
+            Name of the output plot file
         n_neighbors : int
-            The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation.
+            Number of neighbors to consider for manifold approximation
         min_dist : float
-            The effective minimum distance between embedded points used for manifold approximation.
+            Minimum distance between points in the low dimensional representation
         metric : str
-            The metric to use for distance computation during manifold approximation.
+            Distance metric to use for UMAP calculation
+        random_state : int, optional
+            Random seed for reproducibility
+        df_metadata : pd.DataFrame, optional
+            DataFrame containing metadata to merge with the eigenvector data
+        hue_col : str, optional
+            Column name in metadata to use for point coloring
+            Additional keyword arguments to pass to UMAP
+        umap_kwargs : dict, optional
+            Additional keyword arguments to pass to UMAP constructor
 
-        Returns:
-        --------
+        Returns
+        -------
         list or None
-            A list of warning messages if any warnings were raised during the UMAP projection, otherwise None.
+            List of warning messages if any were generated during execution, None otherwise
         
-        Notes:
-        ------
-        The function reads PCA eigenvector data (from .eigenvec file) and family information (from .fam file), performs UMAP dimensionality reduction, and generates a 2D scatter plot. To ensure reproducibility of the plot, the random state is set to 42.
-
-        If geographic information is provided, it will be included in the plot. The plot is saved to the specified output file in a .jpeg file.
+        Notes
+        -----
+        The method expects an eigenvector file in the results directory with the naming pattern
+        {input_name}.eigenvec. The plot will be saved in the plots directory with the provided
+        plot_name.
+        If metadata is provided and contains a 'Phenotype' column, it will be used for styling
+        points unless hue_col is specified.
         """
-
 
         # load .eigenvec file
         df_eigenvec = pd.read_csv(
@@ -537,7 +592,7 @@ class UMAPplot:
                 s=5,
                 alpha=0.6,
                 ax=ax,
-                style=style_col,
+                style=style_col if style_col is not None else None,
                 edgecolor='black'
             )
             if df_metadata is not None:
@@ -565,8 +620,5 @@ class UMAPplot:
             plt.close()
 
 
-            if isinstance(w, list):
-                warning = [warn.message.args[0] for warn in w]
-                return warning
-            else:
-                return None
+            warning = [warn.message.args[0] for warn in w]
+            return warning
