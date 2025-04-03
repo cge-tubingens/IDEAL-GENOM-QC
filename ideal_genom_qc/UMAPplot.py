@@ -159,7 +159,6 @@ class UMAPplot:
             logger.info("LD pruning already performed. Skipping this step.")
             return
 
-
         # Check type of maf
         if not isinstance(maf, float):
              raise TypeError("maf should be of type float.")
@@ -220,7 +219,6 @@ class UMAPplot:
         return
 
     def compute_pcas(self, pca: int = 10) -> None:
-    
         """
         Computes Principal Component Analysis (PCA) using PLINK.
 
@@ -346,8 +344,7 @@ class UMAPplot:
             # load color hue file
                 df_color_hue = pd.read_csv(
                     color_hue_file,
-                    sep=r'\s+',
-                    engine='python'
+                    sep='\t',
                 )
                 logger.info(f"Color hue file loaded from {color_hue_file}")
                 logger.info(f"Column {df_color_hue.columns[2]} will be used for color hue")
@@ -540,7 +537,7 @@ class UMAPplot:
                 alpha=0.6,
                 ax=ax,
                 style=style_col,
-                edgecolor='none'
+                edgecolor='black'
             )
             if df_metadata is not None:
                 plt.legend(
@@ -563,7 +560,7 @@ class UMAPplot:
             plt.tight_layout()
 
             scatter_fig = scatter_plot.get_figure()
-            scatter_fig.savefig(self.plots_dir / plot_name, dpi=400)
+            scatter_fig.savefig(self.plots_dir / plot_name, dpi=500)
             plt.close()
 
 
