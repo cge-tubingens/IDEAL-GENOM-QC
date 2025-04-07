@@ -36,3 +36,6 @@ python = ">=3.11,<3.13"
 [build-system]
 requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"
+
+[project.scripts]
+ideal_genom_qc = "ideal_genom_qc.__main__:main"

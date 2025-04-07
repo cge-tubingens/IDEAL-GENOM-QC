@@ -227,7 +227,8 @@ poetry shell
 python3 ideal_genom_qc --path_params <path to parameters.JSON> 
                              --file_folders <path to paths.JSON> 
                              --steps <path to steps.JSON>
-                             --use-kingship <true or false>
+                             --recompute-merge true
+                             --built 38
 ```
 
 The first three parameters are the path to the three configuration files. The fourth is used to control the pipeline behavior.
@@ -240,7 +241,8 @@ One of the benefits of using `Poetry` s that it eliminates the need to activate 
 poetry run python3 ideal_genom_qc --path_params <path to parameters.JSON> 
                              --file_folders <path to paths.JSON> 
                              --steps <path to steps.JSON>
-                             --use-kingship <true or false>
+                             --recompute-merge true
+                             --built 38
 ```
 #### 3. Jupyter Notebooks
 
