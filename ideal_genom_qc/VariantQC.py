@@ -20,7 +20,50 @@ logger = logging.getLogger(__name__)
 class VariantQC:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str) -> None:
-
+        """
+        Initialize the VariantQC class.
+        This class handles quality control for genetic variants data stored in PLINK binary format
+        (.bed, .bim, .fam files).
+        
+        Parameters:
+        -----------
+        input_path: Path 
+            Directory path containing input PLINK files
+        input_name: str 
+            Base name of input PLINK files (without extension)
+        output_path: Path 
+            Directory path where output files will be saved
+        output_name: str 
+            Base name for output files
+        
+        Raises:
+        -------
+        TypeError: 
+            If input_path/output_path are not Path objects or if input_name/output_name are not strings
+        FileNotFoundError: 
+            If input_path/output_path don't exist or required PLINK files are not found
+        
+        Attributes:
+        -----------
+        input_path: Path 
+            Path to input directory
+        output_path: Path 
+            Path to output directory  
+        input_name: str 
+            Base name of input files
+        output_name: str 
+            Base name for output files
+        hwe_results: 
+            Storage for Hardy-Weinberg equilibrium test results
+        results_dir: Path 
+            Directory for all QC results
+        fails_dir: Path 
+            Directory for failed samples
+        clean_dir: Path 
+            Directory for cleaned files
+        plots_dir: Path 
+            Directory for QC plots
+        """
 
         if not isinstance(input_path, Path) or not isinstance(output_path, Path):
             raise TypeError("input_path and output_path should be of type Path")
@@ -60,20 +103,35 @@ class VariantQC:
         self.plots_dir.mkdir(parents=True, exist_ok=True)
 
     def execute_missing_data_rate(self, chr_y: int = 24) -> None:
-
         """
-        Identify markers with an excessive missing rate.
-
-        This function performs marker missing data analysis on input data using PLINK. It filters markers based on their missing rate.
-
-        Returns:
-        --------
-        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
-
-        Raises:
+        Executes missing data rate analysis using PLINK for male and female subjects separately.
+        This method performs two PLINK operations:
+        1. Generates .lmiss and .imiss files for male subjects on chromosome Y
+        2. Generates .lmiss and .imiss files for all subjects excluding chromosome Y
+        
+        Parameters
+        ----------
+        chr_y : int, default=24
+            Chromosome Y number in the dataset. Must be between 0 and 26.
+        
+        Returns
         -------
-        TypeError: If 'chr_y' in config_dict is not an integer.
-        ValueError: If 'chr_y' in config_dict is not between 0 and 26 (inclusive).
+        None
+        
+        Raises
+        ------
+        TypeError
+            If chr_y is not an integer
+        ValueError
+            If chr_y is not between 0 and 26
+        
+        Notes
+        -----
+        The method uses 2/3 of available system memory for PLINK operations.
+        Output files are generated in the results directory with the following naming pattern:
+        - {output_name}-missing-males-only.lmiss/.imiss : For male subjects
+        - {output_name}-missing-not-y.lmiss/.imiss : For non-Y chromosome data
+        The results are stored in self.males_missing_data and self.females_missing_data as Path objects.
         """
 
         # check type for chr_y
@@ -107,16 +165,27 @@ class VariantQC:
         return
 
     def execute_different_genotype_call_rate(self) -> None:
-
         """
-        Identify markers with different genotype call rates between cases and controls.
+        Execute test for different genotype call rates between cases and controls using PLINK.
 
-        This function performs a test for different genotype call rates between cases and controls using PLINK.
-    
+        This method performs the following operations:
+        1. Calculates available memory for PLINK execution
+        2. Runs PLINK's --test-missing command to identify markers with significantly different
+            missing rates between cases and controls
+        3. Generates a .missing file with the results
+
+        The method uses approximately 2/3 of available system memory for PLINK execution.
+
         Returns:
         --------
-        dict: A dictionary containing information about the process completion status, the step performed, and the output files generated.
+             None
+
+        Side effects:
+        -------------
+            - Creates a .missing file in the results directory
+            - Sets self.case_control_missing path attribute
         """
+
 
         logger.info("Identifying markers with different genotype call rates between cases and controls...")
 
@@ -136,6 +205,26 @@ class VariantQC:
         return
     
     def execute_hwe_test(self) -> None:
+        """
+        Execute Hardy-Weinberg Equilibrium (HWE) test using PLINK.
+
+        This method performs the following steps:
+        1. Calculates available memory and allocates 2/3 for the test
+        2. Runs PLINK command to compute HWE test on the input binary PLINK files
+        3. Saves results to a .hwe output file
+
+        The HWE test is used to assess whether genotype frequencies in a population remain constant 
+        across generations under specific conditions.
+
+        Returns:
+        --------
+            None
+
+        Side effects:
+        -------------
+            - Creates a .hwe output file in the results directory
+            - Sets self.hwe_results to the name of the output file
+        """
 
         logger.info('Computing Hardy-Weinberg Equilibrium test...')
 
@@ -154,19 +243,36 @@ class VariantQC:
         return
     
     def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8) -> pd.DataFrame:
-        
         """
-        Identifies and reports variants that fail quality control checks based on missing data and genotype call rate.
-
-        Parameters:
+        Identify and consolidate failing variants based on multiple quality control criteria.
+        This method combines the results of three QC checks:
+        1. Variants with high missing data rates
+        2. Variants with significantly different genotype call rates between cases and controls
+        3. Variants failing Hardy-Weinberg equilibrium test
+        
+        Parameters
         ----------
-        marker_call_rate_thres (float): Threshold for marker call rate to identify markers with missing data. Default is 0.2.
-        case_controls_thres (float): Threshold for genotype call rate to identify markers with different genotype call rates between cases and controls. Default is 1e-5.
+        marker_call_rate_thres : float, optional
+            Threshold for failing variants based on missing data rate (default: 0.2)
+        case_controls_thres : float, optional
+            P-value threshold for differential missingness between cases and controls (default: 1e-5)
+        hwe_threshold : float, optional
+            P-value threshold for Hardy-Weinberg equilibrium test (default: 5e-8)
         
-        Returns:
-        --------
-        pd.DataFrame: A DataFrame summarizing the counts of different failure types, including duplicated SNPs and total counts.
+        Returns
+        -------
+        pd.DataFrame
+            A summary DataFrame containing:
+            - Counts of variants failing each QC criterion
+            - Number of variants failing multiple criteria (duplicates)
+            - Total number of unique failing variants
+        
+        Notes
+        -----
+        - Results are also written to a tab-separated file 'fail_markers.txt'
+        - Variants failing multiple criteria are only counted once in the final output file
         """
+        
 
         # ==========================================================================================================
         #                                             MARKERS WITH MISSING DATA 
@@ -217,6 +323,30 @@ class VariantQC:
         return pd.concat([summary, dups_row, total_row], ignore_index=True)
 
     def execute_drop_variants(self, maf: float = 5e-8, geno: float = 0.1, hwe: float = 5e-8) -> None:
+        """
+        Execute variant filtering based on quality control parameters using PLINK.
+
+        This method removes variants that fail quality control criteria including minor allele frequency (MAF),
+        genotype missingness rate, and Hardy-Weinberg equilibrium (HWE) test.
+
+        Parameters
+        ----------
+        maf : float, optional
+            Minor allele frequency threshold. Variants with MAF below this value are removed.
+            Default is 5e-8.
+        geno : float, optional
+            Maximum per-variant missing genotype rate. Variants with missing rate above this 
+            value are removed. Default is 0.1 (10%).
+        hwe : float, optional 
+            Hardy-Weinberg equilibrium test p-value threshold. Variants with HWE p-value below
+            this are removed. Default is 5e-8.
+
+        Returns
+        -------
+        None
+            Creates quality controlled PLINK binary files (.bed, .bim, .fam) in the clean directory
+            with suffix '-variantQCed'.
+        """
 
         logger.info("Removing markers failing quality control...")
 
@@ -229,26 +359,37 @@ class VariantQC:
         return
 
     def report_missing_data(self, directory: str, filename_male: str, filename_female: str, threshold: float, y_axis_cap: int = 10) -> pd.DataFrame:
+        """
+        Analyze and report missing data rates for male and female subjects.
+        This method processes missing data information from separate files for male and female subjects,
+        creates visualizations of missing data distributions, and identifies SNPs that fail the missing
+        data threshold for each sex group.
+        
+        Parameters
+        ----------
+        directory : str
+            Path to the directory containing the input files
+        filename_male : str
+            Name of the file containing missing data information for male subjects (.lmiss format)
+        filename_female : str
+            Name of the file containing missing data information for female subjects (.lmiss format)
+        threshold : float
+            Maximum allowed missing data rate (between 0 and 1)
+        y_axis_cap : int, optional
+            Upper limit for y-axis in histogram plots (default is 10)
+        
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing SNPs that fail the missing data threshold for either sex,
+            with columns ['SNP', 'Failure'] where 'Failure' indicates the failing category
+        
+        Notes
+        -----
+        The method generates two histogram plots saved as 'missing_data_male' and 
+        'missing_data_female' showing the distribution of missing data rates for each sex.
+        """
    
-        """
-        Reports SNPs with missing data rates above a specified threshold for male and female subjects.
-        This function reads .lmiss files for male and female subjects, filters SNPs with missing data rates
-        above the given threshold, and generates histograms for the missing data rates. It then concatenates
-        the filtered SNPs for both male and female subjects and returns them.
-
-        Parameters:
-        -----------
-        directory (str): The directory where the .lmiss files are located.
-        filename_male (str): The filename of the .lmiss file for male subjects.
-        filename_female (str): The filename of the .lmiss file for female subjects.
-        threshold (float): The threshold for the missing data rate. SNPs with missing data rates above this threshold will be reported.
-        plots_dir (str): The directory where the histograms will be saved.
-        y_axis_cap (int, optional): The maximum value for the y-axis in the histograms. Default is 10.
-
-        Returns:
-        --------
-        pd.DataFrame: A DataFrame containing the SNPs that failed the missing data rate threshold for both male and female subjects.
-        """
 
         # load .lmiss file for male subjects
         df_males = pd.read_csv(
@@ -293,7 +434,6 @@ class VariantQC:
             directory (str): The directory where the .missing file is located.
             filename (str): The name of the .missing file.
             threshold (float): The threshold for filtering markers based on the P-value.
-            plots_dir (str): The directory where plots will be saved (not used in this function).
         
         Returns:
         --------
@@ -317,6 +457,33 @@ class VariantQC:
         return fail_diffmiss
     
     def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8) -> pd.DataFrame:
+        """
+        Generate Hardy-Weinberg Equilibrium (HWE) test report and visualization.
+
+        This method reads HWE test results from a file, identifies variants that fail HWE,
+        creates a histogram of -log10(P) values, and returns failed variants.
+
+        Parameters
+        ----------
+        directory : Path
+            Directory path where the HWE test results file is located
+        filename : str
+            Name of the file containing HWE test results
+        hwe_threshold : float, optional
+            P-value threshold for HWE test failure (default: 5e-8)
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing variants that failed HWE test with columns:
+            - SNP: variant identifier
+            - Failure: reason for failure (always 'HWE')
+
+        Notes
+        -----
+        The method creates a histogram plot saved as 'hwe-histogram' showing the
+        distribution of -log10(P) values from HWE tests.
+        """
 
         df_hwe = pd.read_csv(
             directory / filename,
@@ -343,21 +510,35 @@ class VariantQC:
         return fail_hwe
     
     def _make_histogram(self, values:pd.Series, output_name:str, threshold: float, x_label: str, title: str, y_lim_cap: float=None)->None:
-
         """
-        Generate a histogram plot of missing data fraction.
-
-        This static method generates a histogram plot of the missing data fraction (F_MISS) for Single Nucleotide Polymorphisms (SNPs).
-
-        Parameters:
-        -----------
-        - F_MISS (pandas.Series): Array-like object containing the fraction of missing data for each SNP.
-        - figs_folder (str): Path to the folder where the histogram plot will be saved.
-        - output_name (str): Name of the output histogram plot file.
-
-        Returns:
-        --------
+        Creates a histogram plot with a vertical threshold line and saves it to a PDF file.
+        
+        Parameters
+        ----------
+        values : pd.Series
+            The data values to plot in the histogram.
+        values: pd.Series
+            Series containing the numeric values to plot.
+        output_name : str
+            Name of the output file (without extension).
+        threshold : float
+            Value where to draw the vertical threshold line.
+        x_label : str
+            Label for the x-axis.
+        title : str
+            Title of the plot.
+        y_lim_cap : float, optional
+            Upper limit for y-axis. If None, automatically determined. Defaults to None.
+        
+        Returns
+        -------
         None
+            This function saves the plot to a file and displays it but does not return any value.
+        
+        Notes
+        -----
+        The plot is saved as a PDF file in the plots_dir directory defined in the class instance.
+        The histogram uses 50 bins and a predefined color (#1B9E77).
         """
 
         plt.clf()

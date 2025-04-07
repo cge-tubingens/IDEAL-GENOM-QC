@@ -13,6 +13,36 @@ logger = logging.getLogger(__name__)
 class Fetcher1000Genome:
 
     def __init__(self, destination: Path = None, built: str = '38'):
+        """
+        Initialize a reference data handler.
+        This class manages reference data files from 1000 Genomes Project.
+        
+        Paramters:
+        ----------
+        destination: Path (optional) 
+            Path where reference files will be stored. If not provided, defaults to '../data/1000genomes_built_{built}'.
+        built: str (optional): 
+            Human genome build version. Defaults to '38'.
+        
+        Attributes:
+        -----------
+        destination: Path 
+            Directory path where reference files are stored
+        built: str 
+            Human genome build version being used
+        pgen_file: Path 
+            Path to PGEN format file
+        pvar_file: Path 
+            Path to PVAR format file 
+        psam_file: Path 
+            Path to PSAM format file
+        bed_file: Path 
+            Path to BED format file
+        bim_file: Path 
+            Path to BIM format file 
+        fam_file: Path 
+            Path to FAM format file
+        """
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
@@ -33,6 +63,30 @@ class Fetcher1000Genome:
         pass
 
     def get_1000genomes(self, url_pgen: str = None, url_pvar: str = None, url_psam: str = None)-> Path:
+        """
+        Download and decompress 1000 Genomes reference data.
+        This method downloads the PLINK2 binary files (.pgen, .pvar, .psam) for the 1000 Genomes 
+        reference dataset, corresponding to the specified genome build (37 or 38). If the files 
+        already exist in the destination directory, the download is skipped.
+        
+        Parameters:
+        -----------
+        url_pgen (str, optional): Custom URL for downloading the .pgen file. 
+            If None, uses default URL based on genome build.
+        url_pvar (str, optional): Custom URL for downloading the .pvar file.
+            If None, uses default URL based on genome build.
+        url_psam (str, optional): Custom URL for downloading the .psam file.
+            If None, uses default URL based on genome build.
+        
+        Returns:
+        --------
+            Path: Path object pointing to the decompressed .pgen file location.
+        
+        Note:
+        -----
+            The method requires plink2 to be installed and accessible in the system path
+            for decompressing the .pgen file.
+        """
 
         self.destination.mkdir(parents=True, exist_ok=True)
 
@@ -84,6 +138,25 @@ class Fetcher1000Genome:
         return pgen_decompressed
 
     def _download_file(self, url: str, destination: Path) -> Path:
+        """
+        Downloads a file from a given URL and saves it to the specified destination.
+
+        Parameters:
+        -----------
+        url: str 
+            The URL of the file to download.
+        destination: Path 
+            The path where the downloaded file will be saved.
+
+        Returns:
+        --------
+        Path: 
+            The path to the downloaded file if successful, None if download fails.
+
+        Raises:
+        -------
+            None: Exceptions are caught and logged internally.
+        """
         try:
             response = requests.get(url, stream=True)
             response.raise_for_status()
@@ -96,6 +169,21 @@ class Fetcher1000Genome:
             return None
 
     def get_1000genomes_binaries(self) -> Path:
+        """
+        Convert downloaded 1000 Genomes data into PLINK binary files (.bed, .bim, .fam).
+        This method processes the downloaded 1000 Genomes data files and converts them into PLINK binary format.
+        If the binary files already exist, it skips the conversion process. The method handles file cleanup
+        and proper renaming of output files.
+        The conversion is done in two steps:
+        1. Convert pfile to binary format including only SNPs from chromosomes 1-22,X,Y,MT
+        2. Update variant IDs and create final binary files
+        
+        Returns
+        -------
+        Path
+            Path object pointing to the generated binary files (without extension)
+            The actual files created will be .bed, .bim, .fam and .psam with the same prefix
+        """
 
         if self._check_if_binaries_exist():
 
@@ -145,6 +233,16 @@ class Fetcher1000Genome:
         return self.destination / f'1kG_phase3_GRCh{self.built}'
     
     def _check_if_binaries_exist(self) -> bool:
+        """
+        Checks if all required binary files exist in the destination directory.
+
+        This method verifies the existence of .bed, .bim, .fam, and .psam files
+        for the 1000 Genomes Phase 3 reference panel in the specified genome build.
+
+        Returns:
+        --------
+            bool: True if all required files exist, False otherwise.
+        """
 
         check_bed = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed').exists()
         check_bim = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim').exists()
@@ -156,6 +254,28 @@ class Fetcher1000Genome:
 class FetcherLDRegions:
 
     def __init__(self, destination: Path = None, built: str = '38'):
+        """
+        Initialize LDRegions object.
+        This initializer sets up the destination path for LD regions files and the genome build version.
+        If no destination is provided, it defaults to a 'data/ld_regions_files' directory relative to
+        the parent directory of the current file.
+        
+        Parameters
+        ----------
+        destination : Path, optional
+            Path where LD region files will be stored. If None, uses default path.
+        built : str, optional
+            Genome build version, defaults to '38'.
+        
+        Attributes
+        ----------
+        destination : Path
+            Directory path where LD region files are stored
+        built : str
+            Genome build version being used
+        ld_regions : None
+            Placeholder for LD regions data, initially set to None
+        """
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / "ld_regions_files"
@@ -168,6 +288,28 @@ class FetcherLDRegions:
         pass
 
     def get_ld_regions(self)-> Path:
+        """
+        Downloads or creates high LD regions file based on genome build version.
+        This method handles the retrieval of high Linkage Disequilibrium (LD) regions for
+        different genome builds (37 or 38). For build 37, it downloads the regions from a
+        GitHub repository. For build 38, it creates the file from predefined coordinates.
+        
+        Returns:
+        --------
+        Path: Path to the created/downloaded LD regions file. Returns empty Path if
+              download fails for build 37.
+        
+        Raises:
+        -------
+            None explicitly, but may raise standard I/O related exceptions.
+        
+        Notes:
+        -----
+            - For build 37: Downloads from genepi-freiburg/gwas repository
+            - For build 38: Creates file from hardcoded coordinates from GWAS-pipeline
+            - Files are named as 'high-LD-regions_GRCh{build}.txt'
+            - Creates destination directory if it doesn't exist
+        """
 
         self.destination.mkdir(parents=True, exist_ok=True)
 
