@@ -15,15 +15,15 @@ projectFolder
     |
     |---outputData
     |
-    |---dependables
-    |
     |---configFiles
+    |
+    |---dependables
 ```
 1. The `inputData` folder should contain the binary files with the genotype data to be analyzed in `PLINK` format (`.bed`, `.bim`, `.fam` files).
 
 2. The `outputData` folder will contain the resultant files of the quality control pipeline. Below, the pipeline output will be detailed.
 
-3. The `dependables` folder is designed to contain necessary files for the pipeline.
+3. The `dependables` folder is designed to contain complemenatry files for the quality control pipeline. This folder is optional.
 
 4. The `configFiles` folder is essential for the correct functioning of the pipeline. It should contain three configuration files: `parameters.JSON`, `paths.JSON` and `steps.JSON`.
 
@@ -38,60 +38,53 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
 ```
 {
     "sample_qc": {
-        "ind_pair": [
-            50,
-            5,
-            0.2
-        ],
-        "mind": 0.2,
-        "sex_check": [
-            0.2,
-            0.8
-        ],
+        "rename_snp"   : true,
+        "hh_to_missing": true,
+        "use_kingship" : true,
+        "ind_pair"     : [50, 5, 0.2],
+        "mind"         : 0.2,
+        "sex_check"    : [0.2, 0.8],
+        "maf"          : 0.01,
         "het_deviation": 3,
-        "maf": 0.01,
-        "kingship": 0.354,
+        "kingship"     : 0.354,
         "ibd_threshold": 0.185
     },
     "ancestry_qc": {
-        "maf": 0.01,
-        "ind_pair": [
-            50,
-            5,
-            0.2
-        ],
-        "pca": 10,
+        "ind_pair"     : [50, 5, 0.2],
+        "pca"          : 10,
+        "maf"          : 0.01,
         "ref_threshold": 4,
         "stu_threshold": 4,
-        "num_pca": 10
+        "reference_pop": "SAS",
+        "num_pcs"      : 10,
     },
     "variant_qc": {
-        "chr-y": 24,
-        "miss_data_rate": 0.2,
-        "diff_genotype_rate": 1e-5,
-        "geno": 0.1,
-        "hwe": 5e-8,
-        "maf": 5e-8
+        'chr_y': 24,
+        'miss_data_rate': 0.2,
+        'diff_genotype_rate': 1e-5,
+        'geno': 0.1,
+        'maf': 5e-8,
+        'hwe': 5e-8,
     },
     "umap_plot": {
-    	"maf": 0.01,
-    	"geno": 0.1,
-    	"mind": 0.2,
-    	"hwe": 5e-8,
-    	"ind_pair": [
-            50,
-            5,
-            0.2
-        ],
-        "pca": 10,
-        "n_neighbors": [5],
-        "min_dist": [0.5],
-        "metric": ["euclidean"]
+        'umap_maf': 0.01,
+        'umap_mind': 0.2,
+        'umap_geno': 0.1,
+        'umap_hwe': 5e-8,
+        'umap_ind_pair': [50, 5, 0.2],
+        'umap_pca': 10,
+        'n_neighbors': [5, 10, 15],
+        'metric': ['euclidean', 'chebyshev'],
+        'min_dist': [0.01, 0.1, 0.2],
+        'random_state': None,
+        'case_control_marker': True,
+        'color_hue_file': Path('path/to/color_hue_file.txt'), # if needed
+        'umap_kwargs': {}
     }
 }
 ```
 
-If you wish to change at least one of the default values, please provide the full information in the configuration file.
+The values that come with each parameter are the default values used in our research group. If the user wishes to change at least one of them, please provide the full information in the configuration file.
 
 ### Paths to Project Folders
 
@@ -103,11 +96,11 @@ The `paths.JSON` file contains the addresses to the project folder as well as th
     "input_prefix"         : "<prefix of the input data>",
     "output_directory"     : "<path to folder where the output data will go>",
     "output_prefix"        : "<prefix for the output data>",
-    "dependables_directory": "<path to folder with dependables files>"
+    "high_ld_file"         : "<path to file with high LD regions>"
 }
 ```
 
-If the CLI is run locally you should provide the full path to the directories.
+If the CLI is run locally the user should provide the full path to file and directories. If no high LD file is provided or if the path is wrong, the library will use the one it has by default.
 
 ### Pipeline Steps
 
@@ -137,29 +130,19 @@ allows you to run only the variant QC and generate the UMAP plot(s). Note that a
 
 ## Dependable Files
 
-This folder should contain additional files to run the quality control pipeline. The structure inside the directory should be as follows:
+This folder should contain additional files to run the quality control pipeline. For example, the user might use this directory to store the high LD regions files in case it wants to use a different one from the library's default. Moreover, if the user wants to explore the population structure with respect to some category, the corresponding file should be located in this folder.
 
 ```
 dependables
     |
-    |---all_phase3.bed
+    |---high-LD_regions.txt
     |
-    |---all_phase3.bim
-    |
-    |---all_phase3.fam
-    |
-    |---all_phase3.psam
-    |
-    |---high-LD-regions.txt
-    |
-    |---geographic_info.txt
+    |---population_categories.txt
 ```
 
-Notice that the files `all_phase3.bed`, `all_phase3.bim`, `all_phase3.fam` and `all_phase3.psam` correspond to the 1000 Genomes phase 3. In addition, the file `high-LD-regions.txt` corresponds to the build 38, in order to be consistent with 1000 Genomes phase 3 build.
+Regarding the `population_structure.txt`, we expect a file with three colums, the first two are the ones for the `IID` and `FID` from **PLINK** `.fam` file, and the third one with the category that wants to be explored.
 
-The file `geographic_info.txt` is optional. It should contain two columns: the first one for individual ids, and the second one with geographical (or another categorical information that allows to split the study population) information. With this file it can be built a plot to see the genes distribution by categories. If the file is not present the plot will not be generated. The separator between the two columns must be a blank space or tab.
-
-In a future realease is intended to add this step in the pipeline.
+The other external files needed to perform the QC pipeline are the reference genome files. The library has the facility of fetch and process the reference genome automatically.
 
 ## Output Data
 
