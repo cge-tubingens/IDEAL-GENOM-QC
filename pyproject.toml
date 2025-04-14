@@ -32,6 +32,9 @@ Issues = "https://github.com/cge-tubingens/cge-comrare-pipeline/issues"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0"
+sphinx-rtd-theme = "^2.0"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
