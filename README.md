@@ -1,6 +1,8 @@
 # Genotype Quality Control Pipeline
 
 [![Documentation Status](https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest)](https://ideal-genom-qc.readthedocs.io/en/latest/)
+[![PyPI version](https://img.shields.io/pypi/v/ideal-genom-qc.svg)](https://pypi.org/project/ideal-genom-qc/)
+
 
 This Python package is designed to execute a genotype quality control pipeline, encapsulating several years of research at CGE Tübingen.
 
