@@ -2,6 +2,8 @@
 
 This Python package is designed to execute a genotype quality control pipeline, encapsulating several years of research at CGE Tübingen.
 
+[![Documentation Status](https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest)](https://ideal-genom-qc.readthedocs.io/en/latest/)
+
 ## Basic requirements
 
 The quality control pipeline is built on `PLINK 1.9` as the main tool. The `ideal_genom_qc` serves as a wrapper for the various QC pipeline steps. To run the pipeline, `PLINK 1.9` must be installed on the system.
@@ -259,4 +261,6 @@ docker run -v <path to project folder>:/data <docker_image_name>:<tag> --path_pa
 ```
 
 It is important to remark that the path to the files in `paths.JSON` must be relative to their location inside `data` folder in the Docker container.
+
+
 
