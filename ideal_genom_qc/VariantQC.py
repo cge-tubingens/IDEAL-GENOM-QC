@@ -242,7 +242,7 @@ class VariantQC:
 
         return
     
-    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8) -> pd.DataFrame:
+    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8, male_female_y_cap: int = None, hwe_y_cap: int = None) -> pd.DataFrame:
         """
         Identify and consolidate failing variants based on multiple quality control criteria.
         This method combines the results of three QC checks:
@@ -282,7 +282,8 @@ class VariantQC:
             directory      =self.results_dir, 
             filename_male  =self.males_missing_data, 
             filename_female=self.females_missing_data,
-            threshold      =marker_call_rate_thres, 
+            threshold      =marker_call_rate_thres,
+            y_axis_cap     =male_female_y_cap
         )
 
         # ==========================================================================================================
@@ -302,7 +303,8 @@ class VariantQC:
         fail_hwe = self.report_hwe(
             directory=self.results_dir,
             filename=self.hwe_results,
-            hwe_threshold=hwe_threshold
+            hwe_threshold=hwe_threshold,
+            y_lim_cap=hwe_y_cap
         )
 
         fails = pd.concat([fail_missing_data, fail_genotype, fail_hwe], axis=0, ignore_index=True)
@@ -358,7 +360,7 @@ class VariantQC:
 
         return
 
-    def report_missing_data(self, directory: str, filename_male: str, filename_female: str, threshold: float, y_axis_cap: int = 10) -> pd.DataFrame:
+    def report_missing_data(self, directory: str, filename_male: str, filename_female: str, threshold: float, y_axis_cap: int = None) -> pd.DataFrame:
         """
         Analyze and report missing data rates for male and female subjects.
         This method processes missing data information from separate files for male and female subjects,
@@ -415,8 +417,8 @@ class VariantQC:
         fail_females = fail_females[['SNP']].copy()
         fail_females['Failure'] = 'Missing data rate on females'
 
-        self._make_histogram(df_males['F_MISS'], 'missing_data_male', threshold, 'Ratio of missing data', 'Missing data for males')
-        self._make_histogram(df_females['F_MISS'], 'missing_data_female', threshold, 'Ratio of missing data', 'Missing data for females')
+        self._make_histogram(df_males['F_MISS'], 'missing_data_male', threshold, 'Ratio of missing data', 'Missing data for males', y_lim_cap=y_axis_cap)
+        self._make_histogram(df_females['F_MISS'], 'missing_data_female', threshold, 'Ratio of missing data', 'Missing data for females', y_lim_cap=y_axis_cap)
 
         # concatenate female and male subjects who failed QC
         fails = pd.concat([fail_females, fail_males], axis=0)
@@ -456,7 +458,7 @@ class VariantQC:
 
         return fail_diffmiss
     
-    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8) -> pd.DataFrame:
+    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8, y_lim_cap: int = None) -> pd.DataFrame:
         """
         Generate Hardy-Weinberg Equilibrium (HWE) test report and visualization.
 
@@ -504,7 +506,7 @@ class VariantQC:
             threshold=-np.log10(hwe_threshold), 
             x_label='-log10(P) of HWE test', 
             title='HWE test',
-            y_lim_cap=10000
+            y_lim_cap=y_lim_cap
         )
 
         return fail_hwe
