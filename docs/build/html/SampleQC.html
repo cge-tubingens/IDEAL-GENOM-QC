@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ideal_genom_qc.SampleQC &mdash; ideal-genome-qc 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ideal_genom_qc.AncestryQC" href="AncestryQC.html" />
+    <link rel="prev" title="ideal-genome-qc documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ideal-genome-qc
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ideal_genom_qc.SampleQC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC"><code class="docutils literal notranslate"><span class="pre">SampleQC</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.clean_input_folder"><code class="docutils literal notranslate"><span class="pre">SampleQC.clean_input_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.clean_result_folder"><code class="docutils literal notranslate"><span class="pre">SampleQC.clean_result_folder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_drop_samples"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_drop_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_duplicate_relatedness"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_duplicate_relatedness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_haploid_to_missing"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_haploid_to_missing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_heterozygosity_rate"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_heterozygosity_rate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_ibd"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_ibd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_kingship"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_kingship()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_ld_pruning"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_ld_pruning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_miss_genotype"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_miss_genotype()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_rename_snpid"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_rename_snpid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.execute_sex_check"><code class="docutils literal notranslate"><span class="pre">SampleQC.execute_sex_check()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.get_fail_samples"><code class="docutils literal notranslate"><span class="pre">SampleQC.get_fail_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.report_call_rate"><code class="docutils literal notranslate"><span class="pre">SampleQC.report_call_rate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.report_heterozygosity_rate"><code class="docutils literal notranslate"><span class="pre">SampleQC.report_heterozygosity_rate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.report_ibd_analysis"><code class="docutils literal notranslate"><span class="pre">SampleQC.report_ibd_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.SampleQC.SampleQC.report_sex_check"><code class="docutils literal notranslate"><span class="pre">SampleQC.report_sex_check()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">ideal_genom_qc.AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UMAPplot.html">ideal_genom_qc.UMAPplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">ideal_genom_qc.VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">ideal_genom_qc.get_references</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ideal-genome-qc</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ideal_genom_qc.SampleQC</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/SampleQC.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ideal_genom_qc.SampleQC">
+<span id="ideal-genom-qc-sampleqc"></span><h1>ideal_genom_qc.SampleQC<a class="headerlink" href="#module-ideal_genom_qc.SampleQC" title="Link to this heading"></a></h1>
+<p>Module to perform sample quality control</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.SampleQC.</span></span><span class="sig-name descname"><span class="pre">SampleQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.clean_input_folder">
+<span class="sig-name descname"><span class="pre">clean_input_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.clean_input_folder" title="Link to this definition"></a></dt>
+<dd><p>Removes specific files from the input folder.</p>
+<p>This method cleans the input folder by removing files that contain ‘missing’ or
+‘renamed’ in their names, excluding log files. The cleaning process helps maintain
+organization by removing temporary or processed files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.clean_result_folder">
+<span class="sig-name descname"><span class="pre">clean_result_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.clean_result_folder" title="Link to this definition"></a></dt>
+<dd><p>Clean the results folder by removing specific file types.</p>
+<p>This method removes all .bed, .bim, and .fam files from the results directory,
+while preserving log files. The cleaning process helps maintain a tidy workspace
+by removing intermediate or temporary files from previous runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_drop_samples">
+<span class="sig-name descname"><span class="pre">execute_drop_samples</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_drop_samples" title="Link to this definition"></a></dt>
+<dd><p>Execute the removal of samples that failed quality control checks using PLINK.
+This method performs the following steps:
+1. Determines the appropriate binary file name based on previous processing steps
+2. Reads the fail_samples.txt file containing samples to be removed
+3. Executes PLINK command to create new binary files excluding failed samples</p>
+<section id="raises">
+<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>FileNotFoundError: If the fail_samples.txt file is not found in the fails directory</p>
+</div></blockquote>
+</section>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>None</p>
+</div></blockquote>
+</section>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>The output files will be created with suffix ‘-clean-samples’</p></li>
+<li><p>The method preserves allele order during the operation</p></li>
+<li><p>Input files must be in PLINK binary format (.bed, .bim, .fam)</p></li>
+</ul>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_duplicate_relatedness">
+<span class="sig-name descname"><span class="pre">execute_duplicate_relatedness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kingship</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.354</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_king</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_duplicate_relatedness" title="Link to this definition"></a></dt>
+<dd><p>Execute duplicate and relatedness analysis on the genotype data.
+This method performs either IBD (Identity by Descent) or KING kinship coefficient
+analysis to identify duplicate samples and related individuals in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kingship</strong> (<em>float</em><em>, </em><em>optional</em>) – The KING kinship coefficient threshold for identifying related samples.
+Default is 0.354, which corresponds to duplicates/MZ twins.</p></li>
+<li><p><strong>use_king</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, uses KING algorithm for relatedness analysis.
+If False, uses traditional IBD analysis.
+Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If kingship is not a float or use_king is not a boolean.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method will store the analysis type (KING or IBD) in the use_king attribute.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_haploid_to_missing">
+<span class="sig-name descname"><span class="pre">execute_haploid_to_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hh_to_missing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_haploid_to_missing" title="Link to this definition"></a></dt>
+<dd><p>Convert haploid genotypes to missing values in PLINK binary files.
+This method uses PLINK’s –set-hh-missing flag to convert haploid genotypes to
+missing values in the genotype data. This is often useful for quality control
+of genetic data, particularly for variants on sex chromosomes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hh_to_missing</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, converts haploid genotypes to missing values.
+If False, skips the conversion step.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If hh_to_missing is not a boolean value.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
+new files with suffix ‘-hh-missing’. The input files are determined based on whether
+SNPs have been previously renamed (checks self.renamed_snps).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_heterozygosity_rate">
+<span class="sig-name descname"><span class="pre">execute_heterozygosity_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_heterozygosity_rate" title="Link to this definition"></a></dt>
+<dd><p>Executes heterozygosity rate analysis on genetic data using PLINK.</p>
+<p>This method performs a series of PLINK commands to analyze heterozygosity rates in genetic data,
+separating SNPs based on minor allele frequency (MAF) threshold and computing heterozygosity
+for both groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>maf</strong> (<em>float</em><em>, </em><em>optional</em>) – Minor allele frequency threshold used to split SNPs into two groups.
+Must be between 0 and 0.5. Default is 0.01.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If maf is not a float</p></li>
+<li><p><strong>ValueError</strong> – If maf is not between 0 and 0.5</p></li>
+<li><p><strong>FileNotFoundError</strong> – If any of the expected output files are not created</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method:
+1. Extracts autosomal SNPs
+2. Splits SNPs based on MAF threshold
+3. Computes missingness
+4. Converts to PED/MAP format
+5. Computes heterozygosity for both MAF groups</p>
+<p>The computation uses optimized threading based on available CPU cores and memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_ibd">
+<span class="sig-name descname"><span class="pre">execute_ibd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_ibd" title="Link to this definition"></a></dt>
+<dd><p>Execute Identity by Descent (IBD) analysis using PLINK.</p>
+<p>This method performs duplicate and relatedness checks using IBD analysis. It runs two PLINK commands:
+1. Generates genome-wide IBD estimates
+2. Calculates missing genotype rates</p>
+<p>The method uses optimal thread count based on available CPU cores and validates input/output files.</p>
+<section id="id1">
+<h2>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>None</p>
+</div></blockquote>
+</section>
+<section id="id2">
+<h2>Raises:<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>FileNotFoundError: If required input pruned file is missing or if expected output files are not generated</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Required instance attributes:</dt><dd><p>pruned_file: Path to pruned PLINK binary file
+results_dir: Directory path for output files
+output_name: Base name for output files
+ibd_miss: Path to missing genotype rate file (set by method)
+genome: Path to IBD estimates file (set by method)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_kingship">
+<span class="sig-name descname"><span class="pre">execute_kingship</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kingship</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.354</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_kingship" title="Link to this definition"></a></dt>
+<dd><p>Execute kinship analysis to identify and handle sample relatedness.
+This method performs kinship analysis using PLINK2 to identify duplicate samples and related individuals.
+It first computes a kinship coefficient matrix for all samples and then prunes samples based on the
+specified kingship threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kingship</strong> (<em>float</em><em>, </em><em>optional</em>) – The kinship coefficient threshold used to identify related samples. Must be between 0 and 1.
+Samples with kinship coefficients above this threshold will be marked for removal.
+Default is 0.354 (equivalent to first-degree relatives).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If kingship parameter is not a float.</p></li>
+<li><p><strong>ValueError</strong> – If kingship parameter is not between 0 and 1.</p></li>
+<li><p><strong>FileNotFoundError</strong> – If the expected output file from PLINK2 is not created.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Uses PLINK2 to compute kinship coefficients and perform sample pruning</p></li>
+<li><p>Automatically determines optimal thread count and memory usage based on system resources</p></li>
+<li><p>Creates output files with kinship coefficient matrix and list of samples to be removed</p></li>
+<li><p>Updates self.kinship_miss with path to file containing samples to be removed</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_ld_pruning">
+<span class="sig-name descname"><span class="pre">execute_ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_ld_pruning" title="Link to this definition"></a></dt>
+<dd><p>Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
+This method performs LD pruning in three steps:
+1. Excludes complex/high LD regions
+2. Identifies SNPs for pruning using indep-pairwise test
+3. Creates final pruned dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind_pair</strong> (<em>list</em><em>, </em><em>optional</em>) – List of three elements for LD pruning parameters:
+- Window size (int): Number of SNPs to analyze in each window
+- Step size (int): Number of SNPs to shift window at each step
+- r² threshold (float): Correlation coefficient threshold for pruning
+Default is [50, 5, 0.2]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If ind_pair is not a list
+    If first two elements of ind_pair are not integers
+    If third element of ind_pair is not float</p></li>
+<li><p><strong>ValueError</strong> – If ind_pair does not contain exactly three elements
+    If window size or step size is not positive
+    If r² threshold is not between 0 and 1</p></li>
+<li><p><strong>FileNotFoundError</strong> – If required pruning input file is not found</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Uses available CPU cores (leaving 2 cores free) and 2/3 of available memory</p></li>
+<li><p>Creates intermediate and final files with suffixes:
+* ‘-LDregionExcluded’
+* ‘-LDregionExcluded-prunning’
+* ‘-LDpruned’</p></li>
+<li><p>Updates self.pruned_file with path to final pruned dataset</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_miss_genotype">
+<span class="sig-name descname"><span class="pre">execute_miss_genotype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_miss_genotype" title="Link to this definition"></a></dt>
+<dd><p>Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+This method performs two main operations:
+1. Generates missingness statistics for all samples
+2. Filters samples based on the specified missingness threshold (mind)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mind</strong> (<em>float</em><em>, </em><em>optional</em>) – The missingness threshold for sample filtering (default is 0.2).
+Samples with missingness rates above this threshold will be removed.
+Recommended range is between 0.02 and 0.1.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing missingness analysis results</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If mind parameter is not a float</p></li>
+<li><p><strong>ValueError</strong> – If mind parameter is not between 0 and 1</p></li>
+<li><p><strong>FileNotFoundError</strong> – If the output .imiss file is not generated
+    If mind value is outside recommended range (0.02-0.1)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function creates two files:
+- {input_name}-missing.imiss: Contains missingness statistics for all samples
+- {output_name}-mind.bed: New binary file with filtered samples</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_rename_snpid">
+<span class="sig-name descname"><span class="pre">execute_rename_snpid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_rename_snpid" title="Link to this definition"></a></dt>
+<dd><p>Executes the SNP ID renaming process using PLINK2.
+This method renames SNP IDs in the PLINK binary files to a standardized format of ‘chr:pos:a1:a2’.
+The renaming is performed using PLINK2’s –set-all-var-ids parameter.</p>
+<section id="parameter">
+<h2>Parameter:<a class="headerlink" href="#parameter" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>rename (bool, optional): Flag to control whether SNP renaming should be performed.</dt><dd><p>Defaults to True.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h2>Returns:<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>None</p>
+</div></blockquote>
+</section>
+<section id="id4">
+<h2>Raises:<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>TypeError: If rename parameter is not a boolean.</p>
+</div></blockquote>
+</section>
+<section id="id5">
+<h2>Notes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>The renamed files will be saved with ‘-renamed’ suffix</p></li>
+<li><p>Thread count is optimized based on available CPU cores</p></li>
+<li><p>The new SNP ID format will be: chromosome:position:allele1:allele2</p></li>
+<li><p>Sets self.renamed_snps to True if renaming is performed</p></li>
+</ul>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.execute_sex_check">
+<span class="sig-name descname"><span class="pre">execute_sex_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sex_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.2,</span> <span class="pre">0.8]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.execute_sex_check" title="Link to this definition"></a></dt>
+<dd><p>Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
+This method performs sex check analysis by:
+1. Running PLINK’s –check-sex command on pruned data
+2. Extracting X chromosome SNPs
+3. Calculating missingness rates for X chromosome SNPs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sex_check</strong> (<em>list</em><em> of </em><em>float</em><em>, </em><em>default=</em><em>[</em><em>0.2</em><em>, </em><em>0.8</em><em>]</em>) – List containing two float values that define the F-statistic boundaries for sex determination.
+The values must sum to 1.0. First value is the lower bound, second is the upper bound.
+Samples with F-statistics below the first value are called female, above the second value are called male.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If sex_check is not a list or if its elements are not floats</p></li>
+<li><p><strong>ValueError</strong> – If sex_check doesn’t contain exactly 2 elements or if they don’t sum to 1</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method creates the following output files:
+- {output_name}-sexcheck.sexcheck : Contains sex check results
+- {output_name}-xchr.bed/bim/fam : X chromosome SNP data
+- {output_name}-xchr-missing.imiss : X chromosome missingness data
+The number of threads used is automatically determined based on available CPU cores,
+using max(available cores - 2, 1) or falling back to half of logical cores if CPU count
+cannot be determined.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.get_fail_samples">
+<span class="sig-name descname"><span class="pre">get_fail_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">call_rate_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_deviation_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ibd_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.get_fail_samples" title="Link to this definition"></a></dt>
+<dd><p>Get samples that failed quality control checks and generate a summary DataFrame.
+This method performs multiple QC checks on samples:
+1. Call rate check
+2. Sex check
+3. Heterozygosity rate check (for MAF &gt; and &lt; threshold)
+4. Duplicates/Relatedness check (using either KING or IBD)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>call_rate_thres</strong> (<em>float</em>) – Threshold for call rate filtering</p></li>
+<li><p><strong>std_deviation_het</strong> (<em>float</em>) – Number of standard deviations to use for heterozygosity filtering</p></li>
+<li><p><strong>maf_het</strong> (<em>float</em>) – Minor allele frequency threshold for heterozygosity check</p></li>
+<li><p><strong>ibd_threshold</strong> (<em>float</em>) – Threshold for IBD filtering (only used if use_king=False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Summary DataFrame containing:
+- Counts of samples failing each QC check
+- Number of duplicated sample IDs
+- Total failures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If any required input files are missing</p></li>
+<li><p><strong>TypeError</strong> – If unexpected column types are found in summary DataFrame</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method saves a detailed fail_samples.txt file with all failed samples and their failure reasons.
+Samples failing multiple checks are only counted once in the final summary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.report_call_rate">
+<span class="sig-name descname"><span class="pre">report_call_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#1B9E77'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#D95F02'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.report_call_rate" title="Link to this definition"></a></dt>
+<dd><p>Generate sample call rate analysis plots and identify samples failing the call rate threshold.
+This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
+samples that fail the specified call rate threshold. It generates two sets of plots:
+1. Histograms showing the distribution of missing SNPs (F_MISS)
+2. Scatterplots showing different views of the call rate data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>Path</em>) – Directory containing the input file</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Name of the PLINK format missing rate file</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Call rate threshold for sample filtering (in terms of F_MISS)</p></li>
+<li><p><strong>plots_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory where plots will be saved. If None, uses default plots directory</p></li>
+<li><p><strong>y_axis_cap</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum value for y-axis in capped histogram plots. Default is 10</p></li>
+<li><p><strong>color</strong> (<em>str</em><em>, </em><em>optional</em>) – Color for the main plot elements. Default is ‘#1B9E77’</p></li>
+<li><p><strong>line_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Color for threshold lines in plots. Default is ‘#D95F02’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame containing samples that failed the call rate threshold with columns:
+- FID: Family ID
+- IID: Individual ID
+- Failure: Always set to ‘Call rate’</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method generates two JPEG files:
+- call_rate_{threshold}_histogram.jpeg: Contains histogram plots
+- call_rate_{threshold}_scatterplot.jpeg: Contains scatter plots</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.report_heterozygosity_rate">
+<span class="sig-name descname"><span class="pre">report_heterozygosity_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_ped_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autosomal_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_deviation_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.report_heterozygosity_rate" title="Link to this definition"></a></dt>
+<dd><p>Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
+This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
+and generates visualization plots to aid in quality control analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – Path to the directory containing input files</p></li>
+<li><p><strong>summary_ped_filename</strong> (<em>str</em>) – Filename of the summary PED file containing heterozygosity information</p></li>
+<li><p><strong>autosomal_filename</strong> (<em>str</em>) – Filename of the autosomal file containing call rate information</p></li>
+<li><p><strong>std_deviation_het</strong> (<em>float</em>) – Number of standard deviations to use as threshold for identifying deviant samples</p></li>
+<li><p><strong>maf</strong> (<em>float</em>) – Minor allele frequency threshold used in the analysis</p></li>
+<li><p><strong>split</strong> (<em>str</em>) – Direction of MAF comparison (‘&gt;’ or ‘&lt;’)</p></li>
+<li><p><strong>plots_dir</strong> (<em>str</em>) – Directory where plot files will be saved</p></li>
+<li><p><strong>y_axis_cap</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum value for y-axis in capped histogram plot (default: 80)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame containing samples that failed heterozygosity rate check with columns:
+- FID: Family ID
+- IID: Individual ID
+- Failure: Description of failure type</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function generates two types of plots:
+1. Histograms of heterozygosity rates (both uncapped and capped)
+2. Scatter plot of heterozygosity rate vs missing SNP proportion
+Files are saved as JPEG images in the specified plots directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.report_ibd_analysis">
+<span class="sig-name descname"><span class="pre">report_ibd_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ibd_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.185</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.report_ibd_analysis" title="Link to this definition"></a></dt>
+<dd><p>Analyze IBD (Identity By Descent) to identify duplicated or related samples.
+This method processes IBD analysis results to identify sample pairs with IBD scores
+above a specified threshold, indicating potential duplicates or related individuals.
+For identified pairs, it uses missingness data to determine which sample should be
+removed (keeping the sample with lower missingness rate).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ibd_threshold</strong> (<em>float</em><em>, </em><em>default=0.185</em>) – The PI_HAT threshold above which samples are considered related.
+Typical values: &gt;0.98 for duplicates, &gt;0.5 for first-degree relatives.</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em><em>, </em><em>default=100000</em>) – Number of rows to process at a time when reading the genome file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing samples to be removed, with columns:
+- FID: Family ID
+- IID: Individual ID
+- Failure: Reason for removal (‘Duplicates and relatedness (IBD)’)
+Returns empty DataFrame if no related pairs are found or if KING is used.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If ibd_threshold is not a float.</p></li>
+<li><p><strong>FileNotFoundError</strong> – If required input files (<a href="#id6"><span class="problematic" id="id7">*</span></a>.imiss or <a href="#id8"><span class="problematic" id="id9">*</span></a>.genome) are not found.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method requires two input files:
+- {output_name}-ibd-missing.imiss: Contains sample missingness information
+- {output_name}-ibd.genome: Contains pairwise IBD estimates
+For each related pair, the sample with higher missingness rate is marked for removal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.SampleQC.SampleQC.report_sex_check">
+<span class="sig-name descname"><span class="pre">report_sex_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sex_check_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xchr_imiss_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.SampleQC.SampleQC.report_sex_check" title="Link to this definition"></a></dt>
+<dd><p>Creates a sex check report and visualization based on PLINK’s sex check results.
+This function reads sex check data and X chromosome missingness data, merges them,
+and generates a scatter plot to visualize potential sex discrepancies. It also identifies
+samples that fail sex check quality control.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>Path</em>) – Path to the directory containing input files</p></li>
+<li><p><strong>sex_check_filename</strong> (<em>str</em>) – Filename of PLINK’s sex check results (typically .sexcheck file)</p></li>
+<li><p><strong>xchr_imiss_filename</strong> (<em>str</em>) – Filename of X chromosome missingness data</p></li>
+<li><p><strong>plots_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory where the plot should be saved. If None, uses default plots directory</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame containing samples that failed sex check QC with columns:
+- FID: Family ID
+- IID: Individual ID
+- Failure: Type of failure (always ‘Sex check’)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function creates a scatter plot with:
+- Blue hollow circles for samples with Male PEDSEX
+- Green hollow circles for samples with Female PEDSEX
+- Red filled circles for problematic samples
+- Dotted red vertical lines at F=0.2 and F=0.8
+The plot is saved as ‘sex_check.jpeg’ in the specified plots directory.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="ideal-genome-qc documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="AncestryQC.html" class="btn btn-neutral float-right" title="ideal_genom_qc.AncestryQC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

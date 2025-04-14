@@ -1,0 +1,7 @@
+ideal_genom_qc package
+=======================
+
+.. automodule:: ideal_genom_qc
+   :members:
+   :undoc-members:
+   :show-inheritance:
