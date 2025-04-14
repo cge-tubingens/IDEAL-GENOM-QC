@@ -117,11 +117,12 @@ class ReferenceGenomicMerger():
             None
 
         Side Effects:
-        ------------
+        -------------
             - Creates filtered SNP list files in the output directory
             - Creates new PLINK binary files (.bed, .bim, .fam) in the output directory
             - Sets self.reference_AC_GT_filtered and self.study_AC_GT_filtered paths
             - Logs progress and statistics of filtering operations
+
         Requires:
         ---------
             - Valid PLINK binary files for both study and reference data
@@ -179,36 +180,42 @@ class ReferenceGenomicMerger():
     def execute_ld_pruning(self, ind_pair:list) -> None:
         """
         Execute linkage disequilibrium (LD) pruning on study and reference data.
-        This method performs LD-based pruning using PLINK to remove highly correlated SNPs from both study and reference datasets.
-        The pruning is done using a sliding window approach where SNPs are removed based on their pairwise correlation (r²).
-        Parameters:
-        -----------
-        ind_pair (list): A list containing three elements:
-            - ind_pair[0] (int): Window size in SNPs
-            - ind_pair[1] (int): Number of SNPs to shift the window at each step
+        
+        This method performs LD-based pruning using PLINK to remove highly correlated SNPs 
+        from both study and reference datasets. The pruning is done using a sliding window 
+        approach where SNPs are removed based on their pairwise correlation (r²).
+        
+        Parameters
+        ----------
+        ind_pair : list
+            A list containing three elements:
+            
+            - ind_pair[0] (int): Window size in SNPs  
+            - ind_pair[1] (int): Number of SNPs to shift the window at each step  
             - ind_pair[2] (float): r² threshold for pruning
-
-        Raises:
-        -------
-        TypeError: 
-            If ind_pair is not a list
-        TypeError: 
-            If first two elements of ind_pair are not integers
-        TypeError: 
-            If third element of ind_pair is not a float
         
-        Notes:
+        Raises
         ------
-            - Uses PLINK's --indep-pairwise command for pruning
-            - Excludes high LD regions specified in self.high_ld_regions
-            - Creates pruned datasets for both study and reference data
-            - Updates self.pruned_reference and self.pruned_study with paths to pruned files
-            - Uses all available CPU threads except 2 for processing
+        TypeError
+            If ind_pair is not a list.
+        TypeError
+            If first two elements of ind_pair are not integers.
+        TypeError
+            If third element of ind_pair is not a float.
         
-        Returns:
+        Returns
         -------
-            None
+        None
+        
+        Notes
+        -----
+        - Uses PLINK's `--indep-pairwise` command for pruning.
+        - Excludes high LD regions specified in `self.high_ld_regions`.
+        - Creates pruned datasets for both study and reference data.
+        - Updates `self.pruned_reference` and `self.pruned_study` with paths to pruned files.
+        - Uses all available CPU threads except 2 for processing.
         """
+
 
         if not isinstance(ind_pair, list):
             raise TypeError("ind_pair should be a list")
@@ -311,11 +318,11 @@ class ReferenceGenomicMerger():
         4. Creates new binary files with corrected positions
 
         Returns:
-        -------
+        --------
             None
 
         Side Effects:
-        ------------
+        -------------
             - Creates new PLINK binary files (.bed, .bim, .fam) with updated positions
             - Logs the number of SNPs being updated
             - Modifies self.reference_fixed_pos with path to updated files
@@ -379,7 +386,7 @@ class ReferenceGenomicMerger():
             - Updates self.reference_flipped with the path to new flipped reference files
 
         Dependencies:
-        ------------
+        -------------
             - PLINK must be installed and accessible in system PATH
             - Requires valid PLINK binary files for both study and reference data
             - Requires write permissions in output directory
@@ -585,8 +592,8 @@ class ReferenceGenomicMerger():
         return to_update_chr_file
     
     def _find_position_mismatch(self, study_bim: Path, reference_bim: Path) -> Path:
-        """F
-        ind SNPs with mismatched positions between study and reference datasets.
+        """
+        Find SNPs with mismatched positions between study and reference datasets.
 
         This method compares the base pair positions of SNPs between a study dataset and a 
         reference dataset to identify SNPs that have different positions despite having the 
@@ -628,7 +635,8 @@ class ReferenceGenomicMerger():
         return to_update_pos_file
     
     def _find_allele_flip(self, study_bim: Path, reference_bim: Path, output_filename: Path) -> None:
-        """Find SNPs with allele flips between study and reference datasets.
+        """
+        Find SNPs with allele flips between study and reference datasets.
 
         This method identifies Single Nucleotide Polymorphisms (SNPs) where the alleles are
         flipped between the study and reference datasets. A flip occurs when the allele
@@ -818,6 +826,7 @@ class GenomicOutlierAnalyzer:
         -------
         None
             Results are stored in the ancestry_fails attribute
+
         Raises
         ------
         TypeError
@@ -1420,7 +1429,8 @@ class AncestryQC:
         after the merging process is complete.
         
         Returns:
-        -------
+        --------
+
             None
         """
         
