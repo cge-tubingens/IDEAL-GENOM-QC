@@ -76,7 +76,7 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
         'n_neighbors': [5, 10, 15],
         'metric': ['euclidean', 'chebyshev'],
         'min_dist': [0.01, 0.1, 0.2],
-        'random_state': None,
+        'random_state': 42,
         'case_control_marker': True,
         'color_hue_file': Path('path/to/color_hue_file.txt'), # if needed
         'umap_kwargs': {}
