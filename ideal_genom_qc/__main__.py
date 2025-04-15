@@ -12,6 +12,7 @@ from ideal_genom_qc.AncestryQC import AncestryQC
 from ideal_genom_qc.UMAPplot import UMAPplot
 
 from ideal_genom_qc.get_references import FetcherLDRegions
+from ideal_genom_qc.check_tools import check_required_tools, get_tool_version, ToolNotFoundError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -190,6 +191,16 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
 
 def execute_main()->str:
 
+    required = ['plink', 'plink2']
+
+    try:
+        check_required_tools(required)
+        for tool in required:
+            version = get_tool_version(tool)
+            logger.info(f"{tool} version: {version}")
+    except ToolNotFoundError as e:
+        logger.error(e)
+        
     args = arg_parser()
     args_dict = vars(args)
 
