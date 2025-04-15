@@ -8,7 +8,7 @@ This Python package is designed to execute a genotype quality control pipeline, 
 
 ## Basic requirements
 
-The quality control pipeline is built on `PLINK 1.9` as the main tool. The `ideal_genom_qc` serves as a wrapper for the various QC pipeline steps. To run the pipeline, `PLINK 1.9` must be installed on the system.
+The quality control pipeline is built on `PLINK` as the main tool. The `ideal_genom_qc` serves as a wrapper for the various QC pipeline steps. To run the pipeline, `PLINK1.9` and `PLINK2` must be installed on the system.
 
 The pipeline is designed to seamlessly run with minimal input and produce cleaned binary files as a result as well as several plots along the way. To accomplish this, the following folder structure is expected:
 
@@ -205,6 +205,14 @@ The library can be installed by cloning the GitHub repository:
 git clone https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
 ```
 
+or directly from PyPI:
+
+```
+pip install ideal_genom_qc
+```
+
+It is important to remark that the version in PyPI is the stable one, while the one on GitHub is on development.
+
 ### Setting up the environment
 
 The virtual environment can be created using either `Poetry` or `pip`. Since this is a `Poetry`-based project, we recommend using `Poetry`. Once `Poetry` is installed on your system (refer to [`Poetry` documentation](https://python-poetry.org/docs/) for installation details), navigate to the cloned repository folder and run the following command:
@@ -259,7 +267,7 @@ Using the notebooks is a great way to gain a deeper understanding of how the pip
 A `Dockerfile` is provided to build a container for the pipeline. Since the container interacts with physical files, it is recommended to use the following command:
 
 ```
-docker run -v <path to project folder>:/data <docker_image_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> --use-kingship false
+docker run -v <path to project folder>:/data <docker_image_name>:<tag> --path_params <relative path to parameters.JSON> --file_folders <relative path to paths.JSON> --steps <relative path to steps.JSON> ---recompute-merge true --built 38
 ```
 
 It is important to remark that the path to the files in `paths.JSON` must be relative to their location inside `data` folder in the Docker container.
