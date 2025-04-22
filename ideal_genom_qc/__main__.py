@@ -99,7 +99,8 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             output_path= output_path, 
             output_name= data_dict['output_prefix'], 
             high_ld_file= high_ld_file,
-            recompute_merge=recompute_merge
+            recompute_merge=recompute_merge,
+            built=built
         )
 
         ancestry_qc_steps = {
