@@ -102,6 +102,50 @@ class ReferenceGenomicMerger():
 
         pass
 
+    def execute_rename_snpid(self) -> None:
+        
+        """
+        Executes the SNP ID renaming process using PLINK2.
+        This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
+        The renaming is performed using PLINK2's --set-all-var-ids parameter.
+        
+        Parameter:
+        ----------
+        rename (bool, optional): Flag to control whether SNP renaming should be performed. 
+            Defaults to True.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            TypeError: If rename parameter is not a boolean.
+
+        Notes:
+        ------
+            - The renamed files will be saved with '-renamed' suffix
+            - Thread count is optimized based on available CPU cores
+            - The new SNP ID format will be: chromosome:position:allele1:allele2
+            - Sets self.renamed_snps to True if renaming is performed
+        """
+
+        logger.info("STEP: Renaming SNP IDs in the study data using PLINK2")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.output_path / (self.input_name+ '-renamed')}"
+
+        # Execute PLINK2 command
+        shell_do(plink2_cmd, log=True)
+
+        return
+
     def execute_filter_prob_snps(self)->None:
         """
         Executes the filtering of problematic SNPs (A->T and C->G) from both study and reference data.
