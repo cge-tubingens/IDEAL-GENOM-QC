@@ -1405,7 +1405,6 @@ class AncestryQC:
             output_name= self.output_name,
             high_ld_regions =self.high_ld_regions, 
             reference_files = self.reference_files,
-            rename_snps=self.rename_snps
         )
 
         #rgm.execute_rename_snpid()
