@@ -97,7 +97,7 @@ class SampleQC:
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
             
-            ld_fetcher = FetcherLDRegions()
+            ld_fetcher = FetcherLDRegions(built=built)
             ld_fetcher.get_ld_regions()
 
             high_ld_file = ld_fetcher.ld_regions
@@ -313,8 +313,7 @@ class SampleQC:
         # exclude complex regions
         plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
         prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
-        if not prune_in_file.exists():
-            raise FileNotFoundError(f"Required file {prune_in_file} not found. Ensure the LD pruning step completed successfully.")
+
 
         plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
         # LD prune indep-pairwise test
@@ -978,9 +977,6 @@ class SampleQC:
         else:
 
             fail_duplicates = self.report_ibd_analysis(ibd_threshold)
-        totals = summary.select_dtypes(include="number").sum()
-        if 'count' in totals.index:
-            totals['count'] -= num_dup
             logger.info('Duplicates and relatedness check done with IBD')
 
         # ==========================================================================================================
