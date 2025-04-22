@@ -189,7 +189,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
 
     pass
 
-def execute_main()->str:
+def main()->str:
 
     required = ['plink', 'plink2']
 
@@ -244,4 +244,4 @@ def execute_main()->str:
     return "Pipeline is completed"
 
 if __name__ == "__main__":
-    execute_main()
+    main()
