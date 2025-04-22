@@ -78,7 +78,7 @@ class ReferenceGenomicMerger():
             raise ValueError("built should be either '37' or '38'")
         
         if not input_path.exists():
-            raise FileNotFoundError("input_path does not exist")
+            raise FileNotFoundError(f"input_path does not exist: {input_path}")
         if not output_path.exists():
             raise FileNotFoundError("output_path does not exist")
         if not high_ld_regions.exists():
@@ -187,9 +187,8 @@ class ReferenceGenomicMerger():
 
 
         # find A->T and C->G SNPs in study data
-        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.input_path / f"{self.input_name}.bim", output_filename=self.input_name)
+        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name}-renamed.bim", output_filename=self.input_name)
         logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
-
 
         # find A->T and C->G SNPs in reference data
         filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'], output_filename=self.reference_files['bim'].stem)
@@ -203,16 +202,12 @@ class ReferenceGenomicMerger():
         with open(filtered_reference, 'r') as f:
             logger.info(f"STEP: Filtering problematic SNPs from the reference data: {len(f.readlines())} SNPs filtered")
 
-        if self.renamed_snps:
-        
-            # PLINK command: generate cleaned study data files
-            plink_cmd1 = f"plink --bfile  {str(self.output_path / (self.input_name+'-renamed'))} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
-        else:
-            # PLINK command: generate cleaned study data files
-            plink_cmd1 = f"plink --bfile  {str(self.input_path / self.input_name)} --chr 1-22 --exclude {str(filtered_study)} --keep-allele-order --threads {max_threads} --make-bed --out {str(self.study_AC_GT_filtered)}"
+
+        # PLINK command: generate cleaned study data files
+        plink_cmd1 = f"plink --bfile  {self.output_path / (self.input_name+'-renamed')} --chr 1-22 --exclude {filtered_study} --keep-allele-order --threads {max_threads} --make-bed --out {self.study_AC_GT_filtered}"
 
         # PLINK command: generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --biallelic-only strict --chr 1-22 --exclude {str(filtered_reference)} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {str(self.reference_AC_GT_filtered)}"
+        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --biallelic-only strict --chr 1-22 --exclude {filtered_reference} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -1354,7 +1349,7 @@ class AncestryQC:
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
             
-            ld_fetcher = FetcherLDRegions()
+            ld_fetcher = FetcherLDRegions(built=built)
             ld_fetcher.get_ld_regions()
 
             high_ld_file = ld_fetcher.ld_regions
@@ -1451,7 +1446,7 @@ class AncestryQC:
             reference_files = self.reference_files,
         )
 
-        #rgm.execute_rename_snpid()
+        rgm.execute_rename_snpid()
         rgm.execute_filter_prob_snps()
         rgm.execute_ld_pruning(ind_pair=ind_pair)
         rgm.execute_fix_chromosome_mismatch()
