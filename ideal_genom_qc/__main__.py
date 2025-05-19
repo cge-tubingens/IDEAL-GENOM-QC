@@ -27,11 +27,8 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
     input_path = Path(data_dict['input_directory'])
     output_path = Path(data_dict['output_directory'])
 
-    recompute_merge = recompute_merge.lower()
-    if recompute_merge == 'true':
-        recompute_merge = True
-    else:
-        recompute_merge = False
+    recompute_merge_str = recompute_merge.lower()
+    recompute_merge_bool = (recompute_merge_str == 'true')
 
     high_ld_file = Path(data_dict['high_ld_file'])
 
@@ -99,7 +96,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             output_path= output_path, 
             output_name= data_dict['output_prefix'], 
             high_ld_file= high_ld_file,
-            recompute_merge=recompute_merge,
+            recompute_merge=recompute_merge_bool,
             built=built
         )
 
@@ -164,9 +161,8 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
 
         # instantiate umap class
         umap_plots = UMAPplot(
-            input_path      =os.path.join(data_dict['output_directory'], 'variant_qc_results', 'clean_files'), 
+            input_path      =Path(os.path.join(data_dict['output_directory'], 'variant_qc_results', 'clean_files')), 
             input_name      =data_dict['output_prefix']+'-variantQCed', 
-            dependables_path=data_dict['dependables_directory'],
             output_path     =data_dict['output_directory']
         )
 
