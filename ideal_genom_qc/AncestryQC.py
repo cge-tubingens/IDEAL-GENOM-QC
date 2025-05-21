@@ -427,63 +427,68 @@ class ReferenceGenomicMerger():
         return
     
     def execute_fix_allele_flip(self) -> None:
-        """
-        Executes the allele flipping process between study data and reference panel.
-
-        This method performs the following steps:
-        1. Identifies SNPs requiring allele flipping between study and reference data
-        2. Creates a list of SNPs to flip
-        3. Generates a new reference panel with flipped alleles using PLINK
-
-        The method uses multi-threading capabilities based on available CPU cores,
-        reserving 2 cores for system processes when possible.
-
-        Returns:
-        --------
-            None
-
-        Side Effects:
-        -------------
-            - Creates a .toFlip file containing SNPs requiring allele flipping
-            - Generates new PLINK binary files (.bed, .bim, .fam) with flipped alleles
-            - Logs the number of SNPs requiring flipping
-            - Updates self.reference_flipped with the path to new flipped reference files
-
-        Dependencies:
-        -------------
-            - PLINK must be installed and accessible in system PATH
-            - Requires valid PLINK binary files for both study and reference data
-            - Requires write permissions in output directory
-        """
-
-        logger.info("STEP: Allele flipping between study data and reference panel")
-
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        # File paths
-        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
-        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
-
-        to_flip_file = self.output_path / f"{self.reference_files['bim'].stem}.toFlip"
-        self._find_allele_flip(study_bim, reference_bim, to_flip_file)
-
-        self.reference_flipped = self.output_path / f"{self.reference_files['bim'].stem}-flipped"
-
-        with open(to_flip_file, 'r') as f:
-            logger.info(f"STEP: Allele flipping between study data and reference panel: {len(f.readlines())} SNPs to flip")
-
-        # plink command
-        plink_cmd = f"plink --bfile {self.reference_fixed_pos} --flip {to_flip_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_flipped}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
-
-        return
+            """
+            Executes the allele flipping process between study data and reference panel.
+    
+            This method performs the following steps:
+            1. Identifies SNPs requiring allele flipping between study and reference data
+            2. Creates a list of SNPs to flip
+            3. Generates a new reference panel with flipped alleles using PLINK
+    
+            The method uses multi-threading capabilities based on available CPU cores,
+            reserving 2 cores for system processes when possible.
+    
+            Returns:
+            --------
+                None
+    
+            Side Effects:
+            -------------
+                - Creates a .toFlip file containing SNPs requiring allele flipping
+                - Generates new PLINK binary files (.bed, .bim, .fam) with flipped alleles
+                - Logs the number of SNPs requiring flipping
+                - Updates self.reference_flipped with the path to new flipped reference files
+    
+            Dependencies:
+            -------------
+                - PLINK must be installed and accessible in system PATH
+                - Requires valid PLINK binary files for both study and reference data
+                - Requires write permissions in output directory
+            """
+    
+            logger.info("STEP: Allele flipping between study data and reference panel")
+    
+            cpu_count = os.cpu_count()
+            if cpu_count is not None:
+                max_threads = max(1, cpu_count - 2)
+            else:
+                max_threads = 10
+                
+            # Check if pruned_study and reference_fixed_pos have been properly set
+            if self.pruned_study is None:
+                raise ValueError("pruned_study is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+            if self.reference_fixed_pos is None:
+                raise ValueError("reference_fixed_pos is not set. Make sure execute_fix_possition_mismatch() is called before this method.")
+                
+            # File paths - using with_suffix for consistency and reliability
+            study_bim = self.pruned_study.with_suffix('.bim')
+            reference_bim = self.reference_fixed_pos.with_suffix('.bim')
+    
+            to_flip_file = self.output_path / f"{self.reference_files['bim'].stem}.toFlip"
+            self._find_allele_flip(study_bim, reference_bim, to_flip_file)
+    
+            self.reference_flipped = self.output_path / f"{self.reference_files['bim'].stem}-flipped"
+    
+            with open(to_flip_file, 'r') as f:
+                logger.info(f"STEP: Allele flipping between study data and reference panel: {len(f.readlines())} SNPs to flip")
+    
+            # plink command
+            plink_cmd = f"plink --bfile {self.reference_fixed_pos} --flip {to_flip_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_flipped}"
+    
+            # execute PLINK command
+            shell_do(plink_cmd, log=True)
+    
+            return
 
     def execute_remove_mismatches(self) -> None:
         """
