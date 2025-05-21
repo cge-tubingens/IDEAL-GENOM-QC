@@ -569,10 +569,12 @@ class ReferenceGenomicMerger():
 
         cpu_count = os.cpu_count()
         if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
+            max_threads = cpu_count-2
         else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+            max_threads = 10
+
+        if self.reference_cleaned is None:
+            raise ValueError("reference_cleaned is not set. Make sure execute_remove_mismatches() is called before this method and completed successfully.")
 
         # plink command
         plink_cmd = f"plink --bfile {self.pruned_study} --bmerge {str(self.reference_cleaned.with_suffix('.bed'))} {str(self.reference_cleaned.with_suffix('.bim'))} {str(self.reference_cleaned.with_suffix('.fam'))} --keep-allele-order --threads {max_threads} --make-bed --out {self.output_path / (self.output_name+'-merged')}"
@@ -851,8 +853,9 @@ class GenomicOutlierAnalyzer:
 
         logger.info("STEP: Performing principal component decomposition")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = cpu_count-2
         else:
             max_threads = 10
 
@@ -939,6 +942,9 @@ class GenomicOutlierAnalyzer:
         df_tags = df_tags[['ID', '#IID', 'SuperPop']]
         df_tags = df_tags.rename(columns={'ID': 'ID1', '#IID': 'ID2', 'SuperPop': 'SuperPop'})
 
+        if self.einvectors is None:
+            raise ValueError("einvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
+
         df = pd.read_csv(self.einvectors, sep=r"\s+",engine='python', header=None)
         logger.info("STEP: Identifying ancestry outliers: read eigenvec file")
 
@@ -1004,6 +1010,9 @@ class GenomicOutlierAnalyzer:
             logger.info(f"STEP: Dropping ancestry outliers from the study data: ancestry outliers will be saved in {self.output_path}")
             output_dir = self.output_path
 
+        if self.ancestry_fails is None:
+            raise ValueError("ancestry_fails is not set. Make sure find_ancestry_outliers() is called before this method and completed successfully.")
+
         with open(self.ancestry_fails, 'r') as f:
             logger.info(f"STEP: Dropping ancestry outliers from the study data: {len(f.readlines())} samples identified as ancestry outliers")
 
@@ -1015,7 +1024,7 @@ class GenomicOutlierAnalyzer:
 
         return
     
-    def draw_pca_plot(self, plot_dir: Path = Path(), plot_name: str = 'pca_plot.jpeg') -> None:
+    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.pdf') -> None:
         """
         Generate 2D and 3D PCA plots from eigenvector data and population tags.
         This method creates two PCA visualization plots:
@@ -1062,6 +1071,9 @@ class GenomicOutlierAnalyzer:
             logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
             logger.info(f'STEP: Generating PCA plots: pca plots will be saved in {self.output_path}')
             plot_dir = self.output_path
+
+        if self.population_tags is None:
+            raise ValueError("population_tags is not set. Make sure find_ancestry_outliers() is called before this method and completed successfully.")
 
         # add population tags to pca output
         df_tags = pd.read_csv(self.population_tags, sep='\t')
