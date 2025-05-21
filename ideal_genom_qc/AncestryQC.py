@@ -1084,6 +1084,26 @@ class GenomicOutlierAnalyzer:
         df_tags = pd.read_csv(self.population_tags, sep='\t')
         df_tags['ID1'] = df_tags['ID1'].astype(str)
 
+        if self.einvectors is None:
+            raise ValueError("einvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
+        if self.eigenvalues is None:
+            raise ValueError("eigenvalues is not set. Make sure execute_pca() is called before this method and completed successfully.")
+        
+        # load .eigenval file and calculate variance explained by the first two PCs
+        df_eigenval = pd.read_csv(
+            self.eigenvalues,
+            header=None,
+            sep   =r"\s+",
+            engine='python'
+        )
+
+        total_variance = df_eigenval[0].sum()
+        pc1_var = df_eigenval[0][0]
+        pc2_var = df_eigenval[0][1]
+
+        pc1_var_perc = round((pc1_var / total_variance) * 100, 2)
+        pc2_var_perc = round((pc2_var / total_variance) * 100, 2)
+
         # load .eigenvec file and keep the first three principal components
         df_eigenvec = pd.read_csv(
             self.einvectors,
