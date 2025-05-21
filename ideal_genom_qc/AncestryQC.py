@@ -1115,6 +1115,22 @@ class GenomicOutlierAnalyzer:
         df_eigenvec.columns = ['ID1', 'ID2', 'pc_1', 'pc_2', 'pc_3']
         df_eigenvec['ID1'] = df_eigenvec['ID1'].astype(str)
 
+        if exclude_outliers:
+            # load ancestry outliers
+            if self.ancestry_fails is None:
+                raise ValueError("ancestry_fails is not set. Make sure find_ancestry_outliers() is called before this method and completed successfully.")
+            logger.info("STEP: Generating PCA plots: excluding ancestry outliers")
+
+            df_outliers = pd.read_csv(self.ancestry_fails, sep=r'\s+', header=None, engine='python')
+            df_outliers.columns = ['ID1', 'ID2']
+            df_outliers['ID1'] = df_outliers['ID1'].astype(str)
+            df_outliers['ID2'] = df_outliers['ID2'].astype(str)
+
+            df_eigenvec = df_eigenvec.merge(df_outliers, on=['ID1', 'ID2'], how='left', indicator=True)
+            df_eigenvec = df_eigenvec[df_eigenvec['_merge'] == 'left_only'].drop(columns=['_merge'])
+
+            plot_name = f'no-outliers-{plot_name}'
+
         # merge to get data with tagged populations
         df = pd.merge(df_eigenvec, df_tags, on=['ID1', 'ID2'])
 
