@@ -1172,7 +1172,7 @@ class GenomicOutlierAnalyzer:
         # concatenate the two DataFrames to merge the information
         return pd.concat([df_fam, df_psam], axis=0)
     
-    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: int, stu_threshold: int, reference_pop: str, num_pcs: str = 2) -> str:
+    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2) -> Path:
         """
         Identifies ancestry outliers based on PCA results using two thresholds:
         one for reference population and another for study population.
@@ -1239,6 +1239,9 @@ class GenomicOutlierAnalyzer:
         # generates two data frames with filtered subjects
         df_ref = df_tags[mask1].reset_index(drop=True)
         df_stu = df_tags[mask2].reset_index(drop=True)
+
+        if self.einvectors is None:
+            raise ValueError("einvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
 
         # read .eigenvec file
         df_eigenvec = pd.read_csv(
@@ -1309,7 +1312,7 @@ class GenomicOutlierAnalyzer:
         # save samples considered as ethnicity outliers
         df.to_csv(
             ancestry_fails,
-            header=None,
+            header=False,
             index =False,
             sep   ='\t'
         )
@@ -1394,7 +1397,10 @@ class AncestryQC:
             ld_fetcher = FetcherLDRegions(built=built)
             ld_fetcher.get_ld_regions()
 
-            high_ld_file = ld_fetcher.ld_regions
+            ld_regions = ld_fetcher.ld_regions
+            if ld_regions is None:
+                raise ValueError("Failed to fetch high LD regions file")
+            high_ld_file = ld_regions
             logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
         
         self.input_path = input_path
@@ -1521,7 +1527,7 @@ class AncestryQC:
 
         return
     
-    def run_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4) -> None:
+    def run_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4, aspect_ratio: Union[Literal['auto', 'equal'], float]='equal') -> None:
         """
         Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.
 
@@ -1557,6 +1563,10 @@ class AncestryQC:
         saves results in the directories specified during class initialization.
         """
 
+        # Make sure the reference tag path is valid before creating the analyzer
+        if 'psam' not in self.reference_files or not isinstance(self.reference_files['psam'], Path):
+            raise ValueError("Reference files dictionary must contain a valid 'psam' Path")
+        
         goa = GenomicOutlierAnalyzer(
             input_path= self.input_path, 
             input_name= self.input_name,
