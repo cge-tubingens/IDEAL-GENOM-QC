@@ -275,8 +275,9 @@ class ReferenceGenomicMerger():
         
         logger.info("STEP: LD-based pruning of study and reference data")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = cpu_count-2
         else:
             max_threads = 10
 
@@ -290,7 +291,7 @@ class ReferenceGenomicMerger():
         plink_cmd3 = f"plink --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --make-bed --threads {max_threads} --out {str((self.output_path / (self.reference_files['bim'].stem+'-pruned')))}"
 
         self.pruned_reference = self.output_path / (self.reference_files['bim'].stem+'-pruned')
-        self.pruned_study = self.output_path / self.output_path / (self.input_name+'-pruned')
+        self.pruned_study = self.output_path / (self.input_name+'-pruned')
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
@@ -320,20 +321,30 @@ class ReferenceGenomicMerger():
         -----
         - Creates new PLINK binary files with updated chromosome assignments
         - The updated files are saved with '-updateChr' suffix
+        
+        Raises
+        ------
+        ValueError
+            If pruned_study or pruned_reference is None, meaning execute_ld_pruning() was not called first
         """
 
         logger.info("STEP: Fixing chromosome mismatch between study data and reference panel")
 
+        # Check if pruned_study and pruned_reference have been set
+        if self.pruned_study is None:
+            raise ValueError("pruned_study is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+        if self.pruned_reference is None:
+            raise ValueError("pruned_reference is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+
         cpu_count = os.cpu_count()
         if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
+            max_threads = cpu_count-2
         else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+            max_threads = 10
 
-        # File paths
-        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
-        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
+        # File paths - using with_suffix instead of with_name for more reliability
+        study_bim = self.pruned_study.with_suffix('.bim')
+        reference_bim = self.pruned_reference.with_suffix('.bim')
 
         to_update_chr_file = self._find_chromosome_mismatch(study_bim, reference_bim)
 
@@ -390,9 +401,15 @@ class ReferenceGenomicMerger():
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
-        # File paths
-        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
-        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
+        # Check if pruned_study and reference_fixed_chr have been properly set
+        if self.pruned_study is None:
+            raise ValueError("pruned_study is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+        if self.reference_fixed_chr is None:
+            raise ValueError("reference_fixed_chr is not set. Make sure execute_fix_chromosome_mismatch() is called before this method.")
+            
+        # File paths - using with_suffix instead of with_name for more reliability
+        study_bim = self.pruned_study.with_suffix('.bim')
+        reference_bim = self.reference_fixed_chr.with_suffix('.bim')
 
         to_update_pos_file = self._find_position_mismatch(study_bim, reference_bim)
 
@@ -500,9 +517,14 @@ class ReferenceGenomicMerger():
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
-        # File paths
-        study_bim = self.pruned_study.with_name(self.pruned_study.name + ".bim")
-        reference_bim = self.pruned_reference.with_name(self.pruned_reference.name + ".bim")
+        if self.pruned_study is None:
+            raise ValueError("pruned_study is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+        if self.pruned_reference is None:
+            raise ValueError("pruned_reference is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
+
+        # File paths - using with_suffix instead of with_name for more reliability
+        study_bim = self.pruned_study.with_suffix('.bim')
+        reference_bim = self.pruned_reference.with_suffix('.bim')
 
         mismatches_file = self.output_path / f"{self.reference_files['bim'].stem}.toRemove"
         self._find_allele_flip(study_bim, reference_bim, mismatches_file)
