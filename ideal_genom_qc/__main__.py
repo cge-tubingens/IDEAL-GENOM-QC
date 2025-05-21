@@ -111,6 +111,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
                     "num_pca":ancestry_params['num_pcs'],
                     "ref_threshold":ancestry_params['ref_threshold'],
                     "stu_threshold":ancestry_params['stu_threshold'],
+                    "aspect_ratio":ancestry_params['aspect_ratio'],
                 }
             ),
         }
