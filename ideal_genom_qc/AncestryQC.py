@@ -1648,6 +1648,7 @@ class AncestryQC:
             fails_dir    =self.fail_samples_dir
         )
         goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
-        goa.draw_pca_plot(plot_dir=self.plots_dir)
+        goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio)
+        goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio, exclude_outliers=True)
 
         return
