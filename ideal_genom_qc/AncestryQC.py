@@ -956,6 +956,9 @@ class GenomicOutlierAnalyzer:
         df = df[[0, 1]]
         df = df.rename(columns = {0: 'ID1', 1:'ID2'})
 
+        df['ID2'] = df['ID2'].astype(str)
+        df['ID1'] = df['ID1'].astype(str)
+
         df = pd.merge(df, df_tags, on=['ID1', 'ID2'], how='left')
         df['SuperPop'] = df['SuperPop'].fillna('StPop', inplace=False)
 
@@ -1638,6 +1641,7 @@ class AncestryQC:
         logger.info(f"STEP: Running PCA analysis: `num_pca` = {num_pca}")
         logger.info(f"STEP: Running PCA analysis: `ref_threshold` = {ref_threshold}")
         logger.info(f"STEP: Running PCA analysis: `stu_threshold` = {stu_threshold}")
+        logger.info(f"STEP: Running PCA analysis: `psam_file` = {self.reference_files['psam']}")
 
         goa.execute_pca(pca=pca, maf=maf)
         goa.find_ancestry_outliers(
