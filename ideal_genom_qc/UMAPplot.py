@@ -7,6 +7,7 @@ import umap
 import warnings
 import logging
 import psutil
+from typing import Optional
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class UMAPplot:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38', recompute_pca: bool = True) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_pca: bool = True) -> None:
         """
         Initialize UMAPplot object for population structure analysis.
         This class handles the creation of UMAP plots for genetic data, managing input/output paths
@@ -69,8 +70,6 @@ class UMAPplot:
             raise TypeError("high_ld_regions should be a Path object")
         if not isinstance(input_name, str): 
             raise TypeError("input_name should be a string")
-        if not isinstance(output_name, str):
-            raise TypeError("output_name should be a string")
         if not isinstance(recompute_pca, bool):
             raise TypeError("recompute_merge should be a boolean")
         if not isinstance(built, str):
@@ -88,13 +87,15 @@ class UMAPplot:
             ld_fetcher = FetcherLDRegions()
             ld_fetcher.get_ld_regions()
 
+            if ld_fetcher.ld_regions is None:
+                raise FileNotFoundError("Could not fetch LD regions file.")
+                
             high_ld_file = ld_fetcher.ld_regions
             logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
 
         self.input_path = input_path
         self.input_name = input_name
         self.output_path= output_path
-        self.output_name= output_name
         self.high_ld_regions = high_ld_file
         self.recompute_pca = recompute_pca
         self.built = built
@@ -275,7 +276,7 @@ class UMAPplot:
 
         return
     
-    def generate_plots(self, color_hue_file: Path = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: int = None, umap_kwargs: dict = dict()) -> None:
+    def generate_plots(self, color_hue_file: Optional[Path] = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: Optional[int] = None, umap_kwargs: dict = dict()) -> None:
         """
         Generate UMAP plots with different parameter combinations.
         This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various 
@@ -450,7 +451,7 @@ class UMAPplot:
 
             # generate umap plot for data that passed QC
             warnings = self._umap_plots(
-                plot_name   =f"umap_2d_{count}.jpeg",
+                plot_name   =f"umap_2d_{count}.pdf",
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric'],
@@ -480,7 +481,7 @@ class UMAPplot:
 
         return
     
-    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: int = None, df_metadata: pd.DataFrame = None, hue_col: str = None, umap_kwargs: dict = dict()) -> list:
+    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: Optional[int] = None, df_metadata: Optional[pd.DataFrame] = None, hue_col: Optional[str] = None, umap_kwargs: dict = dict()) -> list:
         """
         Generate and save UMAP (Uniform Manifold Approximation and Projection) plots from PCA data.
         This method reads eigenvector data from a file, performs UMAP dimensionality reduction,
@@ -583,6 +584,10 @@ class UMAPplot:
             sns.set_context(font_scale=0.9)
             fig, ax = plt.subplots(figsize=(5,5))
 
+            scatter_kwargs = {}
+            if style_col is not None:
+                scatter_kwargs['style'] = style_col
+                
             scatter_plot= sns.scatterplot(
                 data=df_2D, 
                 x='umap1', 
@@ -590,10 +595,9 @@ class UMAPplot:
                 hue=hue_col,
                 marker='.',
                 s=5,
-                alpha=0.6,
+                alpha=0.5,
                 ax=ax,
-                style=style_col if style_col is not None else None,
-                edgecolor='black'
+                **scatter_kwargs
             )
             if df_metadata is not None:
                 plt.legend(
@@ -612,12 +616,12 @@ class UMAPplot:
             # Set axis label and size
             ax.set_xlabel('UMAP1', fontsize=7)
             ax.set_ylabel('UMAP2', fontsize=7)
+            ax.set_aspect('equal', adjustable='datalim')
 
             plt.tight_layout()
 
-            scatter_fig = scatter_plot.get_figure()
-            scatter_fig.savefig(self.plots_dir / plot_name, dpi=500)
-            plt.close()
+            fig.savefig(self.plots_dir / plot_name, dpi=500)
+            plt.close(fig)
 
 
             warning = [warn.message.args[0] for warn in w]
