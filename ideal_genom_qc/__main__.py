@@ -162,16 +162,31 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
 
         # instantiate umap class
         umap_plots = UMAPplot(
-            input_path      =Path(os.path.join(data_dict['output_directory'], 'variant_qc_results', 'clean_files')), 
+            input_path      =output_path / 'variant_qc_results' / 'clean_files', 
             input_name      =data_dict['output_prefix']+'-variantQCed', 
-            output_path     =data_dict['output_directory']
+            output_path     =output_path
         )
 
         umap_steps = {
-            'ld_pruning': (umap_plots.ld_pruning, (umap_params['maf'], umap_params['geno'], umap_params['mind'], umap_params['hwe'], umap_params['ind_pair'],)),
-            'comp_pca'  : (umap_plots.compute_pcas, (umap_params['pca'],)),
-            'draw_plots': (umap_plots.generate_plots, (umap_params['n_neighbors'], umap_params['min_dist'], umap_params['metric'], ))
+            'ld_pruning': (umap_plots.ld_pruning, {
+                'maf': umap_params['umap_maf'], 
+                'mind': umap_params['umap_mind'], 
+                'geno': umap_params['umap_geno'], 
+                'hwe': umap_params['umap_hwe'], 
+                'ind_pair': umap_params['umap_ind_pair']
+            }),
+            'comp_pca'  : (umap_plots.compute_pcas, {'pca': umap_params['umap_pca']}),
+            'draw_plots': (umap_plots.generate_plots, {
+                'color_hue_file': Path(umap_params['color_hue_file']),
+                'case_control_markers': umap_params['case_control_marker'],
+                'n_neighbors': umap_params['n_neighbors'],
+                'metric': umap_params['metric'],
+                'min_dist': umap_params['min_dist'],
+                'random_state': umap_params['random_state'],
+                'umap_kwargs': umap_params['umap_kwargs'],
+            })
         }
+
 
         umap_step_description = {
             'ld_pruning': 'LD pruning',
@@ -181,7 +196,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
 
         for name, (func, params) in umap_steps.items():
             print(f"\033[34m{umap_step_description[name]}.\033[0m")
-            func(*params)
+            func(**params)
 
         print("\033[92mUMAP plots done.\033[0m")       
 
