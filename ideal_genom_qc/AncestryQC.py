@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from pathlib import Path
+from typing import Union, Literal
 
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 from ideal_genom_qc.get_references import Fetcher1000Genome, FetcherLDRegions
@@ -175,8 +176,9 @@ class ReferenceGenomicMerger():
 
         logger.info("STEP: Filtering A->T and C->G SNPs from study and reference data.")
 
-        if os.cpu_count() is not None:
-            max_threads = os.cpu_count()-2
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = cpu_count-2
         else:
             max_threads = 10
         
@@ -206,8 +208,14 @@ class ReferenceGenomicMerger():
         # PLINK command: generate cleaned study data files
         plink_cmd1 = f"plink --bfile  {self.output_path / (self.input_name+'-renamed')} --chr 1-22 --exclude {filtered_study} --keep-allele-order --threads {max_threads} --make-bed --out {self.study_AC_GT_filtered}"
 
+        # Make sure the reference bim path is valid and extract the base filename
+        if not self.reference_files.get('bim') or not isinstance(self.reference_files['bim'], Path):
+            raise ValueError("reference_files dictionary must contain a valid 'bim' Path")
+        
+        reference_base = self.reference_files['bim'].with_suffix('')
+        
         # PLINK command: generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile  {self.reference_files['bim'].with_suffix('')} --biallelic-only strict --chr 1-22 --exclude {filtered_reference} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
+        plink_cmd2 = f"plink --bfile {reference_base} --biallelic-only strict --chr 1-22 --exclude {filtered_reference} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
