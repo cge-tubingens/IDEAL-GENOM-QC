@@ -63,27 +63,27 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
         "num_pcs"      : 10,
     },
     "variant_qc": {
-        'chr_y': 24,
-        'miss_data_rate': 0.2,
-        'diff_genotype_rate': 1e-5,
-        'geno': 0.1,
-        'maf': 5e-8,
-        'hwe': 5e-8,
+        "chr_y": 24,
+        "miss_data_rate": 0.2,
+        "diff_genotype_rate": 1e-5,
+        "geno": 0.1,
+        "maf": 5e-8,
+        "hwe": 5e-8,
     },
     "umap_plot": {
-        'umap_maf': 0.01,
-        'umap_mind': 0.2,
-        'umap_geno': 0.1,
-        'umap_hwe': 5e-8,
-        'umap_ind_pair': [50, 5, 0.2],
-        'umap_pca': 10,
-        'n_neighbors': [5, 10, 15],
-        'metric': ['euclidean', 'chebyshev'],
-        'min_dist': [0.01, 0.1, 0.2],
-        'random_state': 42,
-        'case_control_marker': True,
-        'color_hue_file': Path('path/to/color_hue_file.txt'), # if needed
-        'umap_kwargs': {}
+        "umap_maf": 0.01,
+        "umap_mind": 0.2,
+        "umap_geno": 0.1,
+        "umap_hwe": 5e-8,
+        "umap_ind_pair": [50, 5, 0.2],
+        "umap_pca": 10,
+        "n_neighbors": [5, 10, 15],
+        "metric": ["euclidean", "chebyshev"],
+        "min_dist": [0.01, 0.1, 0.2],
+        "random_state": 42,
+        "case_control_marker": true,
+        "color_hue_file": "path/to/color_hue_file.txt",
+        "umap_kwargs": {}
     }
 }
 ```
