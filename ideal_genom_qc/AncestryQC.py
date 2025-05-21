@@ -1136,21 +1136,36 @@ class GenomicOutlierAnalyzer:
 
         # generates a 2D scatter plot
         fig, ax = plt.subplots(figsize=(10,10))
-        scatter_plot= sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
-        scatter_fig = scatter_plot.get_figure()
-        scatter_fig.savefig(plot_dir / f'2D-{plot_name}', dpi=400)
+        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
+        ax.set_aspect(aspect_ratio, adjustable='datalim')
+        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
+        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', dpi=400)
+
+        fig.clf()
+        plt.close()
+
+        fig3, ax3 = plt.subplots(figsize=(10,10))
+        df_zoom = df[(df['SuperPop'] == 'StPop') | (df['SuperPop'] == reference_pop)].reset_index(drop=True)
+        sns.scatterplot(data=df_zoom, x='pc_1', y='pc_2', hue='SuperPop', ax=ax3, marker='.', s=70)
+        ax.set_aspect(aspect_ratio, adjustable='datalim')
+        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
+        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', dpi=400)
 
         # generates a 3D scatter plot
         fig2= plt.figure()
         ax  = fig2.add_subplot(111, projection='3d')
 
-        for s in df['SuperPop'].unique():
+        grouped = df.groupby('SuperPop')
+        for s, group in grouped:
             ax.scatter(
-                xs=df.pc_1[df.SuperPop==s],
-                ys=df.pc_2[df.SuperPop==s],
-                zs=df.pc_3[df.SuperPop==s], 
+                group['pc_1'],
+                group['pc_2'],
+                group['pc_3'],
                 label=s
             )
+
         ax.legend()
         plt.savefig(plot_dir / f'3D-{plot_name}', dpi=400)
         plt.close()
