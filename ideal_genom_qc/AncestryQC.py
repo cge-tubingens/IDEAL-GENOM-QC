@@ -1324,6 +1324,9 @@ class GenomicOutlierAnalyzer:
                 new_col_names.append(f"pc_{k-1}")
         df_eigenvec.columns = new_col_names
 
+        df_eigenvec['ID1'] = df_eigenvec['ID1'].astype(str)
+        df_eigenvec['ID2'] = df_eigenvec['ID2'].astype(str)
+
         # merge filtered subjects with its principal components
         df_ref = df_ref.merge(df_eigenvec, on=['ID1', 'ID2'])\
             .drop(columns=['SuperPop'], inplace=False)
