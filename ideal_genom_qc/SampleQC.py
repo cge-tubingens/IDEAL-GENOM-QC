@@ -18,6 +18,7 @@ from ideal_genom_qc.Helpers import shell_do
 from ideal_genom_qc.get_references import FetcherLDRegions
 
 from pathlib import Path
+from typing import Optional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -100,7 +101,9 @@ class SampleQC:
             ld_fetcher = FetcherLDRegions(built=built)
             ld_fetcher.get_ld_regions()
 
-            high_ld_file = ld_fetcher.ld_regions
+            ld_regions = ld_fetcher.ld_regions
+            if ld_regions is None:
+                raise ValueError("Failed to fetch high LD regions file")
             logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
         
         self.input_path  = Path(input_path)
@@ -331,7 +334,7 @@ class SampleQC:
 
         return
     
-    def execute_miss_genotype(self, mind: float = 0.2)->dict:
+    def execute_miss_genotype(self, mind: float = 0.2) -> None:
         """
         Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
         This method performs two main operations:
@@ -754,7 +757,7 @@ class SampleQC:
 
         return
 
-    def _compute_heterozigozity(self, ped_file: Path, map_file: Path = None) -> None:
+    def _compute_heterozigozity(self, ped_file: Path, map_file: Optional[Path] = None) -> None:
         """
         Computes heterozygosity statistics from a PED file and writes results to a summary file.
         This method analyzes a PED file to calculate homozygosity and heterozygosity rates
@@ -1057,7 +1060,7 @@ class SampleQC:
 
         return
   
-    def report_call_rate(self, directory: Path, filename: str, threshold: float, plots_dir: Path = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02') -> pd.DataFrame:
+    def report_call_rate(self, directory: Path, filename: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02') -> pd.DataFrame:
         """
         Generate sample call rate analysis plots and identify samples failing the call rate threshold.
         This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
@@ -1115,13 +1118,13 @@ class SampleQC:
         fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 
         # First subplot: Full histogram
-        axes1[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[0])
+        axes1[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[0]) # type: ignore
         axes1[0].set_title("Sample Call Rate Distribution")
         axes1[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
         axes1[0].set_ylabel("Frequency")
 
         # Second subplot: Histogram with capped y-axis
-        axes1[1] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[1])
+        axes1[1] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes1[1]) # type: ignore
         axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
         axes1[1].set_title("Sample Call Rate Distribution (Capped)")
         axes1[1].set_xlabel("Proportion of missing SNPs (F_MISS)")
@@ -1133,7 +1136,7 @@ class SampleQC:
         fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
 
         # First subplot: capped y-axis
-        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color=color, alpha=0.7, ax=axes2[0])
+        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color=color, alpha=0.7, ax=axes2[0]) # type: ignore
         axes2[0].set_ylim(0, y_axis_cap)  # Cap y-axis
         axes2[0].set_title("Sample Call Rate Distribution (Capped)")
         axes2[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
@@ -1186,7 +1189,7 @@ class SampleQC:
 
         return fail_call_rate
     
-    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Path = None) -> pd.DataFrame:
+    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Optional[Path] = None) -> pd.DataFrame:
         """
         Creates a sex check report and visualization based on PLINK's sex check results.
         This function reads sex check data and X chromosome missingness data, merges them,
@@ -1269,9 +1272,9 @@ class SampleQC:
             ax.scatter(
                 group["F"], 
                 group["F_MISS"], 
-                edgecolors=palette[category],     # Map color
+                edgecolors=palette[category],     # Map color # type: ignore
                 facecolors='none',                # Hollow circles
-                s         =size_mapping[category],# Map size
+                s         =size_mapping[category],# Map size # type: ignore
                 label     =category               # Add label for legend
             )
 
@@ -1300,7 +1303,7 @@ class SampleQC:
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory: str, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: str, y_axis_cap: float = 80) -> pd.DataFrame:
+    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: Path, y_axis_cap: float = 80) -> pd.DataFrame:
         """
         Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
         This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
@@ -1383,12 +1386,12 @@ class SampleQC:
 
         fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 
-        axes1[0] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[0])
+        axes1[0] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[0]) # type: ignore
         axes1[0].set_title("Autosomal heterozygosity")
         axes1[0].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
         axes1[0].set_ylabel("Frequency")
 
-        axes1[1] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[1])
+        axes1[1] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[1]) # type: ignore
         axes1[1].set_title("Autosomal heterozygosity (capped)")
         axes1[1].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
         axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
