@@ -624,5 +624,5 @@ class UMAPplot:
             plt.close(fig)
 
 
-            warning = [warn.message.args[0] for warn in w]
+            warning = [warn.message.args[0] for warn in w] # type: ignore
             return warning
