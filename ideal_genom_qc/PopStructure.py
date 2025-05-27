@@ -15,8 +15,9 @@ import seaborn as sns
 
 from pathlib import Path
 
-from ideal_genom_qc.Helpers import shell_do, delete_temp_files
-from ideal_genom_qc.get_references import FetcherLDRegions
+from ideal_genom_qc.Helpers import shell_do
+from ideal_genom_qc.get_references import FetcherLDRegions, Fetcher1000Genome
+from ideal_genom_qc.AncestryQC import ReferenceGenomicMerger
 from sklearn.model_selection import ParameterGrid
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -626,3 +627,215 @@ class UMAPplot:
 
             warning = [warn.message.args[0] for warn in w] # type: ignore
             return warning
+
+class FstSummary:
+
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_merge: bool = False, reference_files: dict = dict()) -> None:
+        """
+        Initialize FstSummary object for Fst analysis.
+        
+        Parameters
+        ----------
+        input_path : Path
+            Path to the directory containing input files
+        input_name : str
+            Name of the input file
+        output_path : Path
+            Path to the directory where results will be saved
+        
+        Raises
+        ------
+        TypeError
+            If input types are incorrect for any parameter
+        FileNotFoundError
+            If input_path or output_path do not exist
+        """
+
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(input_name, str): 
+            raise TypeError("input_name should be a string")
+        if not input_path.exists():
+            raise FileNotFoundError("input_path does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not isinstance(built, str):
+            raise TypeError("built should be a string")
+        if built not in ['37', '38']:
+            raise ValueError("built should be either '37' or '38'") 
+        if not high_ld_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions()
+            ld_fetcher.get_ld_regions()
+
+            if ld_fetcher.ld_regions is None:
+                raise FileNotFoundError("Could not fetch LD regions file.")
+                
+            high_ld_file = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
+
+        self.input_path = input_path
+        self.input_name = input_name
+        self.output_path= output_path
+        self.recompute_merge = recompute_merge
+        self.high_ld_regions = high_ld_file
+        self.built = built
+
+        if not reference_files:
+
+            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for built {self.built}")
+
+            fetcher = Fetcher1000Genome(built=self.built)
+            fetcher.get_1000genomes()
+            fetcher.get_1000genomes_binaries()
+
+            self.reference_files = {
+                'bim': fetcher.bim_file,
+                'bed': fetcher.bed_file,
+                'fam': fetcher.fam_file,
+                'psam': fetcher.psam_file
+            }
+
+        self.results_dir = self.output_path / 'fst_results' 
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+
+        self.merging_dir = self.results_dir / 'merging'
+        self.merging_dir.mkdir(parents=True, exist_ok=True)
+
+    pass
+
+    def merge_reference_study(self, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Merge reference and study data by applying quality control filters and merging steps.
+        This method performs a series of quality control steps to merge study data with reference data:
+        1. Filters problematic SNPs
+        2. Performs LD pruning
+        3. Fixes chromosome mismatches
+        4. Fixes position mismatches  
+        5. Fixes allele flips
+        6. Removes remaining mismatches
+        7. Merges the datasets
+        
+        Parameters
+        ----------
+        ind_pair : list, default [50, 5, 0.2]
+            Parameters for LD pruning: [window size, step size, r2 threshold]
+        
+        Returns
+        -------
+        None
+        
+        Notes
+        -----
+        If recompute_merge is False, the method will skip the merging process and expect
+        merged data to already exist in the merging directory.
+        
+        Raises
+        ------
+        TypeError
+            If ind_pair is not a list
+        """
+
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
+        
+        if not self.recompute_merge:
+            logger.info("STEP: Merging study and reference data: recompute_merge is set to False. Skipping merging step")
+            logger.info(f"STEP: Merging study and reference data: merged data is expected to be in {self.merging_dir}")
+            return
+
+        rgm = ReferenceGenomicMerger(
+            input_path= self.input_path,
+            input_name= self.input_name,
+            output_path= self.merging_dir, 
+            output_name= 'cleaned-with-ref',
+            high_ld_regions =self.high_ld_regions, 
+            reference_files = self.reference_files,
+        )
+
+        rgm.execute_rename_snpid()
+        rgm.execute_filter_prob_snps()
+        rgm.execute_ld_pruning(ind_pair=ind_pair)
+        rgm.execute_fix_chromosome_mismatch()
+        rgm.execute_fix_possition_mismatch()
+        rgm.execute_fix_allele_flip()
+        rgm.execute_remove_mismatches()
+        rgm.execute_merge_data()
+
+        for file in self.merging_dir.iterdir():
+            if file.is_file() and '-merged' not in file.name and file.suffix != '.log':
+                file.unlink()
+
+        return
+    
+    def add_population_tags(self) -> None:
+        """
+        Add population tags to the merged dataset.
+        This method adds population tags to the merged dataset based on the reference files.
+        
+        Returns
+        -------
+        None
+        
+        Notes
+        -----
+        The method expects the merged data to be in the merging directory.
+        
+        Raises
+        ------
+        FileNotFoundError
+            If the merged data file is not found in the merging directory.
+        """
+
+        merged_bed = self.merging_dir / 'cleaned-with-ref-merged.bed'
+        merged_bim = self.merging_dir / 'cleaned-with-ref-merged.bim'
+        merged_fam = self.merging_dir / 'cleaned-with-ref-merged.fam'
+        
+        if not merged_bed.is_file():
+            raise FileNotFoundError(f"Merged data file not found at {merged_bed}")
+        if not merged_bim.is_file():
+            raise FileNotFoundError(f"Merged BIM file not found at {merged_bim}")
+        if not merged_fam.is_file():
+            raise FileNotFoundError(f"Merged FAM file not found at {merged_fam}")
+
+        if 'psam' not in self.reference_files or not isinstance(self.reference_files['psam'], Path):
+            raise ValueError("Reference files dictionary must contain a valid 'psam' Path")
+
+        reference_tags = self.reference_files['psam']
+        
+        df_tags = pd.read_csv(reference_tags, sep=r"\s+", engine='python')
+        df_tags['ID'] = '0'
+        df_tags = df_tags[['ID', '#IID', 'SuperPop']]
+        df_tags = df_tags.rename(columns={'ID': 'ID1', '#IID': 'ID2', 'SuperPop': 'SuperPop'})
+
+        logger.info(f"Population tags loaded from {reference_tags}")
+        logger.info(f'Population tags columns: {df_tags.columns.tolist()}')
+
+        df_merged_fam = pd.read_csv(merged_fam, sep=r"\s+", header=None, engine='python')
+        df_merged_fam = df_merged_fam.rename(columns={0: 'ID1', 1: 'ID2'})
+        #df_merged_fam['SuperPop'] = 'StPop'
+
+        logger.info(f"Merged BIM file loaded from {merged_fam}")
+        logger.info(f'Merged BIM file columns: {df_merged_fam.columns.tolist()}')
+
+        df = pd.merge(
+            df_merged_fam[['ID1', 'ID2']],
+            df_tags,
+            on=['ID1', 'ID2'],
+            how='left'
+        )
+        df['SuperPop'] = df['SuperPop'].fillna('StPop')
+        logger.info(f"Added population tags to the merged dataset")
+
+        self.population_tags = self.merging_dir / 'cleaned-with-ref-merged-pop-tags.csv'
+        df.to_csv(
+            self.population_tags,
+            index=False,
+            sep='\t'
+        )
+
+        return
