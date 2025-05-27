@@ -4,6 +4,7 @@ import logging
 import pandas as pd
 
 from pathlib import Path
+from typing import Optional
 
 from ideal_genom_qc.Helpers import shell_do
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class Fetcher1000Genome:
 
-    def __init__(self, destination: Path = None, built: str = '38'):
+    def __init__(self, destination: Optional[Path] = None, built: str = '38'):
         """
         Initialize a reference data handler.
         This class manages reference data files from 1000 Genomes Project.
@@ -62,7 +63,7 @@ class Fetcher1000Genome:
         
         pass
 
-    def get_1000genomes(self, url_pgen: str = None, url_pvar: str = None, url_psam: str = None)-> Path:
+    def get_1000genomes(self, url_pgen: Optional[str] = None, url_pvar: Optional[str] = None, url_psam: Optional[str] = None)-> Path:
         """
         Download and decompress 1000 Genomes reference data.
         This method downloads the PLINK2 binary files (.pgen, .pvar, .psam) for the 1000 Genomes 
@@ -118,9 +119,12 @@ class Fetcher1000Genome:
         
         logger.info("Downloading 1000 Genomes data...")
         
-        self._download_file(url_pgen, self.destination / "all_phase3.pgen.zst")
-        self.pvar_file = self._download_file(url_pvar, self.destination / "all_phase3.pvar.zst")
-        self.psam_file = self._download_file(url_psam, self.destination / "all_phase3.psam")
+        if url_pgen is not None:
+            self.pgen_file = self._download_file(url_pgen, self.destination / "all_phase3.pgen.zst")
+        if url_pvar is not None:
+            self.pvar_file = self._download_file(url_pvar, self.destination / "all_phase3.pvar.zst")
+        if url_psam is not None:
+            self.psam_file = self._download_file(url_psam, self.destination / "all_phase3.psam")
 
         pgen_file = self.destination / "all_phase3.pgen.zst"
         pgen_decompressed = self.destination / "all_phase3.pgen"
@@ -166,7 +170,7 @@ class Fetcher1000Genome:
             return destination
         except requests.RequestException as e:
             logging.error(f"Failed to download {url}: {e}")
-            return None
+            return Path()
 
     def get_1000genomes_binaries(self) -> Path:
         """
@@ -253,7 +257,7 @@ class Fetcher1000Genome:
     
 class FetcherLDRegions:
 
-    def __init__(self, destination: Path = None, built: str = '38'):
+    def __init__(self, destination: Optional[Path] = None, built: str = '38'):
         """
         Initialize LDRegions object.
         This initializer sets up the destination path for LD regions files and the genome build version.
@@ -359,3 +363,6 @@ class FetcherLDRegions:
                     file.write(f"{line[0]}\t{line[1]}\t{line[2]}\t{line[3]}\n")
             self.ld_regions = out_dir / f"high-LD-regions_GRCH{self.built}.txt"
             return out_dir / f'high-LD-regions_GRCH{self.built}.txt'
+        else:
+            logger.error(f"Unsupported genome build: {self.built}. Only '37' and '38' are supported.")
+            return Path()
