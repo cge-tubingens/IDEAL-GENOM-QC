@@ -32,20 +32,16 @@ def shell_do(command, print_cmd=False, log=False, return_log=False, err=False):
 def arg_parser() -> dict:
 
     # define parser
-    parser = argparse.ArgumentParser(description='Adresses to configuration files')
+    parser = argparse.ArgumentParser(description='Addresses to configuration files')
 
-    # parameters of quality control
-    parser.add_argument('--path-params', type=str, nargs='?', default=None, const=None, required=True, help='Full path to the JSON file containing genotype quality control parameters.')
-
-    # path to data and names of files
-    parser.add_argument('--file-folders', type=str, nargs='?', default=None, const=None, required=True, help='Full path to the JSON file containing folder names and locations for genotype quality control data.')
-
-    # path to steps of the pipeline to be executed
-    parser.add_argument('--steps', type=str, nargs='?', default=None, const=None, required=True, help='Full path to the JSON file containing the pipeline steps to be executed.')
+    ## Required config paths
+    parser.add_argument('--path-params', type=str, required=True, help='Path to JSON file with genotype QC parameters.')
+    parser.add_argument('--file-folders', type=str, required=True, help='Path to JSON file with folder names and locations for QC data.')
+    parser.add_argument('--steps', type=str, required=True, help='Path to JSON file specifying pipeline steps.')
 
     parser.add_argument('--recompute-merge', type=str, nargs='?', default=True, const=None, help='boolean that determines if the merge of the reference data and study data must be recomputed.')
 
-    parser.add_argument('--built', type=str, nargs='?', default='38', const=None, help='Built of the human genome to be used. Values are 37 or 38.')
+    parser.add_argument('--build', type=str, default='38', choices=['37', '38'], help='Genome build to use (37 or 38).')
 
     # parse args and turn into dict
     args = parser.parse_args()
