@@ -50,7 +50,7 @@ def arg_parser() -> dict:
     # parse args and turn into dict
     args = parser.parse_args()
 
-    return args
+    return vars(args)
 
 def delete_temp_files(files_to_keep: list, path_to_folder: str) -> None:
 
