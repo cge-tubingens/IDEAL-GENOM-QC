@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 
 from pathlib import Path
+from typing import Optional
 
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 
@@ -242,7 +243,7 @@ class VariantQC:
 
         return
     
-    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8, male_female_y_cap: int = None, hwe_y_cap: int = None) -> pd.DataFrame:
+    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8, male_female_y_cap: Optional[int] = None, hwe_y_cap: Optional[int] = None) -> pd.DataFrame:
         """
         Identify and consolidate failing variants based on multiple quality control criteria.
         This method combines the results of three QC checks:
@@ -279,7 +280,6 @@ class VariantQC:
         # ==========================================================================================================
 
         fail_missing_data = self.report_missing_data(
-            directory      =self.results_dir, 
             filename_male  =self.males_missing_data, 
             filename_female=self.females_missing_data,
             threshold      =marker_call_rate_thres,
@@ -291,7 +291,6 @@ class VariantQC:
         # ==========================================================================================================
 
         fail_genotype = self.report_different_genotype_call_rate(
-            directory=self.results_dir, 
             filename =self.case_control_missing, 
             threshold=case_controls_thres, 
         )
@@ -300,6 +299,10 @@ class VariantQC:
         #                                             MARKERS FAILING HWE TEST
         # ==========================================================================================================
 
+        # Make sure self.hwe_results is not None before passing it to report_hwe
+        if self.hwe_results is None:
+            raise ValueError("HWE results not available. Run execute_hwe_test first.")
+            
         fail_hwe = self.report_hwe(
             directory=self.results_dir,
             filename=self.hwe_results,
@@ -360,7 +363,7 @@ class VariantQC:
 
         return
 
-    def report_missing_data(self, directory: str, filename_male: str, filename_female: str, threshold: float, y_axis_cap: int = None) -> pd.DataFrame:
+    def report_missing_data(self, filename_male: Path, filename_female: Path, threshold: float, y_axis_cap: Optional[float] = None) -> pd.DataFrame:
         """
         Analyze and report missing data rates for male and female subjects.
         This method processes missing data information from separate files for male and female subjects,
@@ -395,7 +398,7 @@ class VariantQC:
 
         # load .lmiss file for male subjects
         df_males = pd.read_csv(
-            os.path.join(directory, filename_male),
+            filename_male,
             sep=r"\s+",
             engine='python'
         )
@@ -407,7 +410,7 @@ class VariantQC:
 
         # load .lmiss file for female subjects
         df_females = pd.read_csv(
-            os.path.join(directory, filename_female),
+            filename_female,
             sep=r"\s+",
             engine='python'
         )
@@ -425,7 +428,7 @@ class VariantQC:
 
         return fails
 
-    def report_different_genotype_call_rate(self, directory: str, filename: str, threshold: float) -> pd.DataFrame:
+    def report_different_genotype_call_rate(self, filename: Path, threshold: float) -> pd.DataFrame:
         """
         Reports markers with different genotype call rates based on a given threshold.
         This function reads a .missing file, filters markers with a different genotype call rate
@@ -446,7 +449,7 @@ class VariantQC:
 
         # load .missing file
         df_diffmiss = pd.read_csv(
-            os.path.join(directory, filename),
+            filename,
             sep=r"\s+",
             engine='python'
         )
@@ -458,7 +461,7 @@ class VariantQC:
 
         return fail_diffmiss
     
-    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8, y_lim_cap: int = None) -> pd.DataFrame:
+    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8, y_lim_cap: Optional[float] = None) -> pd.DataFrame:
         """
         Generate Hardy-Weinberg Equilibrium (HWE) test report and visualization.
 
@@ -501,7 +504,7 @@ class VariantQC:
         df_all['P'] = df_all['P'].replace(0, np.finfo(float).tiny)
 
         self._make_histogram(
-            values=-np.log10(df_all['P']), 
+            values=-np.log10(df_all['P']), # type: ignore
             output_name='hwe-histogram', 
             threshold=-np.log10(hwe_threshold), 
             x_label='-log10(P) of HWE test', 
@@ -511,7 +514,7 @@ class VariantQC:
 
         return fail_hwe
     
-    def _make_histogram(self, values:pd.Series, output_name:str, threshold: float, x_label: str, title: str, y_lim_cap: float=None)->None:
+    def _make_histogram(self, values: pd.Series, output_name: str, threshold: float, x_label: str, title: str, y_lim_cap: Optional[float] = None) -> None:
         """
         Creates a histogram plot with a vertical threshold line and saves it to a PDF file.
         
