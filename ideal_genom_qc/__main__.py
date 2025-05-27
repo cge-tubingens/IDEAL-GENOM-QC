@@ -9,7 +9,7 @@ from ideal_genom_qc.Helpers import arg_parser
 from ideal_genom_qc.SampleQC import SampleQC
 from ideal_genom_qc.VariantQC import VariantQC
 from ideal_genom_qc.AncestryQC import AncestryQC
-from ideal_genom_qc.UMAPplot import UMAPplot
+from ideal_genom_qc.PopStructure import UMAPplot, FstSummary
 
 from ideal_genom_qc.get_references import FetcherLDRegions
 from ideal_genom_qc.check_tools import check_required_tools, get_tool_version, ToolNotFoundError
@@ -198,7 +198,33 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             print(f"\033[34m{umap_step_description[name]}.\033[0m")
             func(**params)
 
-        print("\033[92mUMAP plots done.\033[0m")       
+        print("\033[92mUMAP plots done.\033[0m")
+
+    if steps_dict['fst']:
+
+        # instantiate umap class
+        fst = FstSummary(
+            input_path      =output_path / 'variant_qc_results' / 'clean_files', 
+            input_name      =data_dict['output_prefix']+'-variantQCed', 
+            output_path     =output_path,
+            built           =built
+        )
+
+        fst_steps = {
+            'merge_study_reference'    : (fst.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
+            'add_population_tags'       : (fst.add_population_tags, {}),
+        }
+
+        fst_step_description = {
+            'merge_study_reference'    : 'Merge cleaned data with reference panel',
+            'add_population_tags'       : 'Add population tags to the data',
+        }
+
+        for name, (func, params) in fst_steps.items():
+            print(f"\033[34m{fst_step_description[name]}.\033[0m")
+            func(**params)
+
+        print("\033[92mFst computation is done.\033[0m") 
 
     pass
 
@@ -214,14 +240,14 @@ def main()->str:
     except ToolNotFoundError as e:
         logger.error(e)
         
-    args = arg_parser()
-    args_dict = vars(args)
+    args_dict = arg_parser()
+    #args_dict = vars(args)
 
     params_path = args_dict['path_params']
     data_path   = args_dict['file_folders']
     steps_path  = args_dict['steps']
     recompute_merge = args_dict['recompute_merge'].lower()
-    built      = args_dict['built']
+    built      = args_dict['build']
 
     # check path to config files
     if not os.path.exists(data_path):
