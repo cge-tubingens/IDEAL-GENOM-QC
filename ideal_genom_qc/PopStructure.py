@@ -775,22 +775,29 @@ class FstSummary:
     def add_population_tags(self) -> None:
         """
         Add population tags to the merged dataset.
-        This method adds population tags to the merged dataset based on the reference files.
-        
-        Returns
-        -------
-        None
-        
-        Notes
-        -----
-        The method expects the merged data to be in the merging directory.
-        
-        Raises
-        ------
-        FileNotFoundError
-            If the merged data file is not found in the merging directory.
-        """
+        This method adds population super-population tags from the reference dataset to
+        the merged dataset. It reads population information from the reference PSAM file,
+        merges it with the study dataset, and assigns 'StPop' (study population) to samples
+        not present in the reference dataset.
 
+        Requirements:
+        -------------
+            - Merged dataset files (.bed, .bim, .fam) must exist in the merging directory
+            - Reference files dictionary must contain a valid 'psam' Path
+        Raises:
+        -------
+            FileNotFoundError: If any of the required merged files are not found
+            ValueError: If the reference files dictionary doesn't contain a valid 'psam' Path
+        Side Effects:
+        -------------
+            - Creates a new tab-separated file with population tags at 
+              {merging_dir}/cleaned-with-ref-merged-pop-tags.csv
+            - Sets self.population_tags to the path of the created file
+        Returns:
+        --------
+            None
+        """
+       
         merged_bed = self.merging_dir / 'cleaned-with-ref-merged.bed'
         merged_bim = self.merging_dir / 'cleaned-with-ref-merged.bim'
         merged_fam = self.merging_dir / 'cleaned-with-ref-merged.fam'
@@ -841,6 +848,26 @@ class FstSummary:
         return
     
     def compute_fst(self) -> None:
+        """
+        Compute FST (fixation index) statistics between populations.
+
+        This method calculates FST statistics between each super-population in the dataset
+        and a study population ('StPop'). The process involves:
+
+        1. Reading population tags from the specified file
+        2. For each unique super-population (except 'StPop'):
+            - Creating population filter files (keep and within files)
+            - Running PLINK commands to filter the dataset and compute FST statistics
+
+        The method requires the following instance variables to be set:
+        - population_tags: Path to a file containing population information
+        - results_dir: Directory where results will be stored
+        - merging_dir: Directory containing the merged genotype data
+
+        Returns:
+        --------
+             None
+        """
 
         df_tags = pd.read_csv(self.population_tags, sep=r"\s+", engine='python')
 
