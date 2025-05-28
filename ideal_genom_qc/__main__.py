@@ -211,13 +211,17 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
         )
 
         fst_steps = {
-            'merge_study_reference'    : (fst.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
-            'add_population_tags'       : (fst.add_population_tags, {}),
+            'merge_study_reference': (fst.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
+            'add_population_tags'  : (fst.add_population_tags, {}),
+            'compute_fst'          : (fst.compute_fst, {}),
+            'report_fst'           : (fst.report_fst, {}),
         }
 
         fst_step_description = {
-            'merge_study_reference'    : 'Merge cleaned data with reference panel',
-            'add_population_tags'       : 'Add population tags to the data',
+            'merge_study_reference': 'Merge cleaned data with reference panel',
+            'add_population_tags'  : 'Add population tags to the data',
+            'compute_fst'          : 'Compute Fst statistics',
+            'report_fst'           : 'Generate Fst report'
         }
 
         for name, (func, params) in fst_steps.items():
