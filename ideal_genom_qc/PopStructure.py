@@ -839,3 +839,100 @@ class FstSummary:
         )
 
         return
+    
+    def compute_fst(self) -> None:
+
+        df_tags = pd.read_csv(self.population_tags, sep=r"\s+", engine='python')
+
+        files = dict()
+
+        for pop in df_tags['SuperPop'].unique():
+            if pop != 'StPop':
+                df_temp = df_tags[(df_tags['SuperPop'] == pop) | (df_tags['SuperPop'] == 'StPop')].reset_index(drop=True)
+                df_temp[['ID1', 'ID2']].to_csv(self.results_dir / f'keep-{pop}_StPop.txt', sep='\t', index=False, header=False)
+                df_temp.to_csv(self.results_dir / f'within-{pop}_StPop.txt', index=False, header=False, sep='\t',)
+
+                files[pop] = (self.results_dir / f'keep-{pop}_StPop.txt', self.results_dir / f'within-{pop}_StPop.txt')
+
+                logger.info(f"Created keep and within files for population {pop}")
+
+        input_file = self.merging_dir / 'cleaned-with-ref-merged'
+
+        for key in files.keys():
+
+            keep_file, within_file = files[key]
+            output_file = self.results_dir / f'keep-{key}-StPop'
+
+            plink_cmd1 = f"plink --bfile {input_file} --keep {keep_file} --make-bed --out {output_file}"
+            plink_cmd2 = f"plink --bfile {output_file} --fst --within {within_file} --out {self.results_dir / f'fst-{key}-StPop'}"
+
+            plink_cmds = [plink_cmd1, plink_cmd2]
+            for cmd in plink_cmds:
+                shell_do(cmd, log=True)
+        logger.info("Fst computation completed for all populations.")
+
+        return
+    
+    def report_fst(self) -> pd.DataFrame:
+        """
+        Generate a report of Fst results.
+        
+        This method reads the Fst results from the results directory and generates a summary report.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the Fst results summary
+        
+        Raises
+        ------
+        FileNotFoundError
+            If no Fst result files are found in the results directory.
+        """
+
+        df_summary = pd.DataFrame(columns=['SuperPop', 'Fst', 'WeightedFst'])
+
+        # Get a list of all log files in the results directory
+        log_files = [f for f in self.results_dir.iterdir() if f.is_file() and f.suffix == '.log']
+
+        if not log_files:
+            raise FileNotFoundError(f"No log files found in {self.results_dir}")
+
+        logger.info(f"Found {len(log_files)} log files in {self.results_dir}")
+
+        # Extract the population names from log file names
+        # Assuming log files follow the pattern 'fst-{population}-StPop.log'
+        files = {}
+        for log_file in log_files:
+            if log_file.stem.startswith('fst-') and log_file.stem.endswith('-StPop'):
+                pop = log_file.stem.split
+                files[pop] = log_file
+
+        if not files:
+            raise FileNotFoundError(f"No Fst result files found in {self.results_dir}")
+
+        for key in files.keys():
+        
+            log_file = files[key]
+            with open(log_file, 'r') as f:
+
+                lines = f.readlines()
+                for line in lines:
+                    if line.startswith('Mean Fst'):
+                        fst = line.split(':')[1].strip()
+                    if line.startswith('Weighted Fst'):
+                        weighted_fst = line.split(':')[1].strip()
+                df_summary = pd.concat([df_summary, pd.DataFrame({'SuperPop': [key], 'Fst': [fst], 'WeightedFst': [weighted_fst]})], ignore_index=True)
+
+        df_summary.to_csv(
+            self.results_dir / 'fst_summary.csv',
+            index=False,
+            sep='\t'
+        )
+        logger.info(f"Fst summary report generated at {self.results_dir / 'fst_summary.csv'}")
+
+        for file in self.results_dir.iterdir():
+            if file.is_file() and (file.suffix == '.bed' or file.suffix == '.bim' or file.suffix == '.fam'):
+                file.unlink()
+        
+        return df_summary
