@@ -21,7 +21,6 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ideal_genom_qc.UMAPplot" href="UMAPplot.html" />
     <link rel="prev" title="ideal_genom_qc.SampleQC" href="SampleQC.html" /> 
 </head>
 
@@ -67,11 +66,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_ld_pruning()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_merge_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_remove_mismatches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_rename_snpid()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="UMAPplot.html">ideal_genom_qc.UMAPplot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VariantQC.html">ideal_genom_qc.VariantQC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_references.html">ideal_genom_qc.get_references</a></li>
@@ -139,7 +138,7 @@ merged data to already exist in the merging directory.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.run_pca">
-<span class="sig-name descname"><span class="pre">run_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'equal'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca" title="Link to this definition"></a></dt>
 <dd><p>Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.</p>
 <p>This method executes a complete PCA workflow including:
 1. Running the PCA analysis
@@ -177,7 +176,7 @@ saves results in the directories specified during class initialization.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot">
-<span class="sig-name descname"><span class="pre">draw_pca_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pca_plot.jpeg'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">draw_pca_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_pop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_outliers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pca_plot.pdf'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot" title="Link to this definition"></a></dt>
 <dd><p>Generate 2D and 3D PCA plots from eigenvector data and population tags.
 This method creates two PCA visualization plots:
 - A 2D scatter plot showing PC1 vs PC2 colored by super-population
@@ -408,6 +407,11 @@ the chromosome assignments in the reference panel to match the study data.</p>
 <li><p>Creates new PLINK binary files with updated chromosome assignments</p></li>
 <li><p>The updated files are saved with ‘-updateChr’ suffix</p></li>
 </ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If pruned_study or pruned_reference is None, meaning execute_ld_pruning() was not called first</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -544,6 +548,44 @@ based on available CPU cores.</p>
 </section>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid">
+<span class="sig-name descname"><span class="pre">execute_rename_snpid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid" title="Link to this definition"></a></dt>
+<dd><p>Executes the SNP ID renaming process using PLINK2.
+This method renames SNP IDs in the PLINK binary files to a standardized format of ‘chr:pos:a1:a2’.
+The renaming is performed using PLINK2’s –set-all-var-ids parameter.</p>
+<section id="parameter">
+<h2>Parameter:<a class="headerlink" href="#parameter" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>rename (bool, optional): Flag to control whether SNP renaming should be performed.</dt><dd><p>Defaults to True.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h2>Returns:<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>None</p>
+</div></blockquote>
+</section>
+<section id="raises">
+<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>TypeError: If rename parameter is not a boolean.</p>
+</div></blockquote>
+</section>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>The renamed files will be saved with ‘-renamed’ suffix</p></li>
+<li><p>Thread count is optimized based on available CPU cores</p></li>
+<li><p>The new SNP ID format will be: chromosome:position:allele1:allele2</p></li>
+<li><p>Sets self.renamed_snps to True if renaming is performed</p></li>
+</ul>
+</div></blockquote>
+</section>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -553,7 +595,6 @@ based on available CPU cores.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="SampleQC.html" class="btn btn-neutral float-left" title="ideal_genom_qc.SampleQC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="UMAPplot.html" class="btn btn-neutral float-right" title="ideal_genom_qc.UMAPplot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

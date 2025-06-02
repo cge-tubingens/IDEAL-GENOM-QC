@@ -40,7 +40,7 @@ Documentation
 
    SampleQC
    AncestryQC
-   UMAPplot
+   PopStructure
    VariantQC
    Helpers
    get_references
