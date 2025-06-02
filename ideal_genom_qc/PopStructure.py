@@ -630,7 +630,7 @@ class UMAPplot:
 
 class FstSummary:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_merge: bool = False, reference_files: dict = dict()) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_merge: bool = True, reference_files: dict = dict()) -> None:
         """
         Initialize FstSummary object for Fst analysis.
         
