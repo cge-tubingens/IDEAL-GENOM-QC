@@ -1,5 +1,5 @@
-ideal_genom_qc.UMAPplot
-=======================
+ideal_genom_qc.PopStructure
+===========================
 
 .. automodule:: ideal_genom_qc.PopStructure
    :members:

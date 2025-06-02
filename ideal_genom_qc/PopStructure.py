@@ -780,21 +780,24 @@ class FstSummary:
         merges it with the study dataset, and assigns 'StPop' (study population) to samples
         not present in the reference dataset.
 
-        Requirements:
-        -------------
+        Requirements
+        ------------
             - Merged dataset files (.bed, .bim, .fam) must exist in the merging directory
             - Reference files dictionary must contain a valid 'psam' Path
-        Raises:
-        -------
+        
+        Raises
+        ------
             FileNotFoundError: If any of the required merged files are not found
             ValueError: If the reference files dictionary doesn't contain a valid 'psam' Path
-        Side Effects:
-        -------------
+        
+        Side Effects
+        ------------
             - Creates a new tab-separated file with population tags at 
               {merging_dir}/cleaned-with-ref-merged-pop-tags.csv
             - Sets self.population_tags to the path of the created file
-        Returns:
-        --------
+        
+        Returns
+        -------
             None
         """
        
@@ -853,20 +856,19 @@ class FstSummary:
 
         This method calculates FST statistics between each super-population in the dataset
         and a study population ('StPop'). The process involves:
-
         1. Reading population tags from the specified file
         2. For each unique super-population (except 'StPop'):
-            - Creating population filter files (keep and within files)
-            - Running PLINK commands to filter the dataset and compute FST statistics
+        - Creating population filter files (keep and within files)
+        - Running PLINK commands to filter the dataset and compute FST statistics
 
         The method requires the following instance variables to be set:
-        - population_tags: Path to a file containing population information
-        - results_dir: Directory where results will be stored
-        - merging_dir: Directory containing the merged genotype data
+            - population_tags: Path to a file containing population information
+            - results_dir: Directory where results will be stored
+            - merging_dir: Directory containing the merged genotype data
 
         Returns:
         --------
-             None
+        None
         """
 
         df_tags = pd.read_csv(self.population_tags, sep=r"\s+", engine='python')
@@ -903,7 +905,6 @@ class FstSummary:
     def report_fst(self) -> pd.DataFrame:
         """
         Generate a report of Fst results.
-        
         This method reads the Fst results from the results directory and generates a summary report.
         
         Returns

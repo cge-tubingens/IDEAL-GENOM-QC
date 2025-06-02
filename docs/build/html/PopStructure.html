@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom_qc.UMAPplot &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>ideal_genom_qc.PopStructure &mdash; ideal-genome-qc 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -20,7 +20,9 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ideal_genom_qc.VariantQC" href="VariantQC.html" />
+    <link rel="prev" title="ideal_genom_qc.AncestryQC" href="AncestryQC.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,9 +44,25 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SampleQC.html">ideal_genom_qc.SampleQC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">ideal_genom_qc.AncestryQC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ideal_genom_qc.PopStructure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary"><code class="docutils literal notranslate"><span class="pre">FstSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags"><code class="docutils literal notranslate"><span class="pre">FstSummary.add_population_tags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.compute_fst()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.merge_reference_study"><code class="docutils literal notranslate"><span class="pre">FstSummary.merge_reference_study()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.report_fst()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot"><code class="docutils literal notranslate"><span class="pre">UMAPplot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.compute_pcas"><code class="docutils literal notranslate"><span class="pre">UMAPplot.compute_pcas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots"><code class="docutils literal notranslate"><span class="pre">UMAPplot.generate_plots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.ld_pruning"><code class="docutils literal notranslate"><span class="pre">UMAPplot.ld_pruning()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="VariantQC.html">ideal_genom_qc.VariantQC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_references.html">ideal_genom_qc.get_references</a></li>
@@ -64,7 +82,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ideal_genom_qc.UMAPplot</li>
+      <li class="breadcrumb-item active">ideal_genom_qc.PopStructure</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/PopStructure.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -75,7 +93,7 @@
            <div itemprop="articleBody">
              
   <section id="module-ideal_genom_qc.PopStructure">
-<span id="ideal-genom-qc-umapplot"></span><h1>ideal_genom_qc.UMAPplot<a class="headerlink" href="#module-ideal_genom_qc.PopStructure" title="Link to this heading"></a></h1>
+<span id="ideal-genom-qc-popstructure"></span><h1>ideal_genom_qc.PopStructure<a class="headerlink" href="#module-ideal_genom_qc.PopStructure" title="Link to this heading"></a></h1>
 <p>Module to draw plots based on UMAP dimension reduction</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary">
@@ -90,23 +108,24 @@ the merged dataset. It reads population information from the reference PSAM file
 merges it with the study dataset, and assigns ‘StPop’ (study population) to samples
 not present in the reference dataset.</p>
 <section id="requirements">
-<h2>Requirements:<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><p>Merged dataset files (.bed, .bim, .fam) must exist in the merging directory</p></li>
 <li><p>Reference files dictionary must contain a valid ‘psam’ Path</p></li>
 </ul>
 </div></blockquote>
-</section>
-<section id="raises">
-<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>FileNotFoundError: If any of the required merged files are not found
-ValueError: If the reference files dictionary doesn’t contain a valid ‘psam’ Path</p>
-</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">raises FileNotFoundError<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If any of the required merged files are not found:</p>
+</dd>
+<dt class="field-even">raises ValueError<span class="colon">:</span></dt>
+<dd class="field-even"><p>If the reference files dictionary doesn’t contain a valid ‘psam’ Path:</p>
+</dd>
+</dl>
 </section>
 <section id="side-effects">
-<h2>Side Effects:<a class="headerlink" href="#side-effects" title="Link to this heading"></a></h2>
+<h2>Side Effects<a class="headerlink" href="#side-effects" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><p>Creates a new tab-separated file with population tags at
@@ -114,12 +133,11 @@ ValueError: If the reference files dictionary doesn’t contain a valid ‘psam�
 <li><p>Sets self.population_tags to the path of the created file</p></li>
 </ul>
 </div></blockquote>
-</section>
-<section id="returns">
-<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">rtype<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </section>
 </dd></dl>
 
@@ -128,27 +146,22 @@ ValueError: If the reference files dictionary doesn’t contain a valid ‘psam�
 <span class="sig-name descname"><span class="pre">compute_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst" title="Link to this definition"></a></dt>
 <dd><p>Compute FST (fixation index) statistics between populations.</p>
 <p>This method calculates FST statistics between each super-population in the dataset
-and a study population (‘StPop’). The process involves:</p>
-<ol class="arabic simple">
-<li><p>Reading population tags from the specified file</p></li>
-<li><dl class="simple">
-<dt>For each unique super-population (except ‘StPop’):</dt><dd><ul class="simple">
-<li><p>Creating population filter files (keep and within files)</p></li>
-<li><p>Running PLINK commands to filter the dataset and compute FST statistics</p></li>
+and a study population (‘StPop’). The process involves:
+1. Reading population tags from the specified file
+2. For each unique super-population (except ‘StPop’):
+- Creating population filter files (keep and within files)
+- Running PLINK commands to filter the dataset and compute FST statistics</p>
+<dl class="simple">
+<dt>The method requires the following instance variables to be set:</dt><dd><ul class="simple">
+<li><p>population_tags: Path to a file containing population information</p></li>
+<li><p>results_dir: Directory where results will be stored</p></li>
+<li><p>merging_dir: Directory containing the merged genotype data</p></li>
 </ul>
 </dd>
 </dl>
-</li>
-</ol>
-<p>The method requires the following instance variables to be set:
-- population_tags: Path to a file containing population information
-- results_dir: Directory where results will be stored
-- merging_dir: Directory containing the merged genotype data</p>
-<section id="id1">
-<h2>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<p>None</p>
 </section>
 </dd></dl>
 
@@ -185,8 +198,8 @@ merged data to already exist in the merging directory.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.report_fst">
 <span class="sig-name descname"><span class="pre">report_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst" title="Link to this definition"></a></dt>
-<dd><p>Generate a report of Fst results.</p>
-<p>This method reads the Fst results from the results directory and generates a summary report.</p>
+<dd><p>Generate a report of Fst results.
+This method reads the Fst results from the results directory and generates a summary report.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataFrame containing the Fst results summary</p>
@@ -337,7 +350,10 @@ Variants with p-value below this are removed. Must be between 0 and 1.</p></li>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="AncestryQC.html" class="btn btn-neutral float-left" title="ideal_genom_qc.AncestryQC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="VariantQC.html" class="btn btn-neutral float-right" title="ideal_genom_qc.VariantQC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
