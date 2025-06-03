@@ -933,8 +933,9 @@ class FstSummary:
         files = {}
         for log_file in log_files:
             if log_file.stem.startswith('fst-') and log_file.stem.endswith('-StPop'):
-                pop = log_file.stem.split
+                pop = log_file.stem.split('-')[1]
                 files[pop] = log_file
+                logger.info(f"Found Fst result file for population {pop} at {log_file}")
 
         if not files:
             raise FileNotFoundError(f"No Fst result files found in {self.results_dir}")
