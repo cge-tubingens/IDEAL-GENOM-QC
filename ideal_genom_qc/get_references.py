@@ -1,5 +1,6 @@
 import requests
 import logging
+import psutil
 
 import pandas as pd
 
@@ -44,6 +45,11 @@ class Fetcher1000Genome:
         fam_file: Path 
             Path to FAM format file
         """
+
+        if not isinstance(built, str):
+            raise TypeError("Built must be a string representing the genome build version (e.g., '37' or '38').")
+        if built not in ['37', '38']:
+            raise ValueError("Built must be either '37' or '38'.")
 
         if not destination:
             destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
@@ -206,8 +212,12 @@ class Fetcher1000Genome:
         
         logger.info("Converting 1000 Genomes data into bfiles...")
 
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
         # plink2 command
-        plink2_cmd = f"plink2 --pfile {self.destination / 'all_phase3'} vzs --chr 1-22,X,Y,MT --snps-only --max-alleles 2 --make-bed --out {self.destination / 'all_phase3'}"
+        plink2_cmd = f"plink2 --pfile {self.destination / 'all_phase3'} vzs --chr 1-22,X,Y,MT --snps-only --max-alleles 2 --memory 10000 --make-bed --out {self.destination / 'all_phase3'}"
         
         # execute plink2 command
         shell_do(plink2_cmd)
@@ -219,7 +229,7 @@ class Fetcher1000Genome:
         logger.info("Downloaded 1000 Genomes data deleted.")
 
         # PLINK2 command
-        plink2_cmd = f"plink2 --bfile {self.destination / 'all_phase3'} --set-all-var-ids @:#:$r:$a --make-bed --out {self.destination / f'1kG_phase3_GRCh{self.built}'}"
+        plink2_cmd = f"plink2 --bfile {self.destination / 'all_phase3'} --set-all-var-ids @:#:$r:$a --memory 1000 --make-bed --out {self.destination / f'1kG_phase3_GRCh{self.built}'}"
 
         shell_do(plink2_cmd, log=True)
 
