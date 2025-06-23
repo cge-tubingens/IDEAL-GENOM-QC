@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import time, gc, psutil
 
 from pathlib import Path
 
@@ -84,6 +85,11 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             print(f"\033[1m{step_description[name]}.\033[0m")
             func(**params)
 
+            time.sleep(3)  # to avoid overwhelming the system with too many operations at once
+            gc.collect()  # clear memory after each step
+
+            mem = psutil.virtual_memory()
+            logger.info(f"Memory usage after {name}: {mem.percent}%")
         print("\033[92mSample quality control done.\033[0m")
 
     # execute step by step
