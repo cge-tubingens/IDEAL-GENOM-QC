@@ -6,6 +6,7 @@ import os
 import psutil
 import warnings
 import logging
+import time
 
 import pandas as pd
 import numpy as np
@@ -479,15 +480,16 @@ class SampleQC:
         plink_cmd1 = f"plink --bfile {self.pruned_file} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
 
         # extract xchr SNPs
-        plink_cmd2 = f"plink --bfile {self.pruned_file} --chr 23 --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
+        plink_cmd2 = f"plink --bfile {self.pruned_file} --chr 23 --keep-allele-order --threads {max_threads}  --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
 
         # run missingness on xchr SNPs
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-xchr')} --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-xchr')} --threads {max_threads}  --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
         for cmd in cmds:
             shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
         self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
         self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.imiss')
