@@ -391,6 +391,19 @@ class SampleQC:
 
         logger.info(f"STEP: Missing genotype check. `mind` set to {mind}")
 
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+
         # PLINK command: run mssingness across file genome-wide 
         plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --out {self.results_dir / (self.input_name+'-missing')}"
 
