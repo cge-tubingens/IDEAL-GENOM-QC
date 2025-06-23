@@ -575,6 +575,7 @@ class SampleQC:
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
         for cmd in cmds:
             shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
         self._compute_heterozigozity(
             ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')).with_suffix('.ped')
