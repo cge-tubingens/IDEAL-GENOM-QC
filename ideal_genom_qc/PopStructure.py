@@ -603,7 +603,7 @@ class UMAPplot:
                 y='umap2', 
                 hue=hue_col,
                 marker='.',
-                s=5,
+                s=10,
                 alpha=0.5,
                 ax=ax,
                 **scatter_kwargs
