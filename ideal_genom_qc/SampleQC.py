@@ -555,7 +555,7 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
 
         # extract autosomal SNPS
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --autosome --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --autosome --keep-allele-order --memory {memory} --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
 
         # extract SNPs with minor allele frequency greater than threshold
         plink_cmd2 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
