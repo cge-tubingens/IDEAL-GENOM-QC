@@ -1247,6 +1247,21 @@ class SampleQC:
         - Dotted red vertical lines at F=0.2 and F=0.8
         The plot is saved as 'sex_check.jpeg' in the specified plots directory.
         """
+
+        if not isinstance(directory, Path):
+            raise TypeError("directory should be a Path object")
+        if not isinstance(sex_check_filename, str):
+            raise TypeError("sex_check_filename should be a string")
+        if not isinstance(xchr_imiss_filename, str):
+            raise TypeError("xchr_imiss_filename should be a string")
+        if not isinstance(format, str):
+            raise TypeError("format should be a string")
+        if not isinstance(plots_dir, (Path, type(None))):
+            raise TypeError("plots_dir should be a Path object or None")
+        if not directory.exists():
+            raise FileNotFoundError(f"Directory {directory} does not exist")
+        if format not in ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps']:
+            raise ValueError("format should be one of ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps]")
         
         if not plots_dir:
             plots_dir = self.plots_dir
