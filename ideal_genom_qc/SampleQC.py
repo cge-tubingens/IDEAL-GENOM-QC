@@ -104,13 +104,16 @@ class SampleQC:
             ld_regions = ld_fetcher.ld_regions
             if ld_regions is None:
                 raise ValueError("Failed to fetch high LD regions file")
-            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
+            logger.info(f"High LD file fetched from the package and saved at {ld_regions}")
+        else:
+            logger.info(f"High LD file found at {high_ld_file}")
+            ld_regions = high_ld_file
         
         self.input_path  = Path(input_path)
         self.output_path = Path(output_path)
         self.input_name  = input_name
         self.output_name = output_name
-        self.high_ld_file = high_ld_file
+        self.high_ld_file = ld_regions
 
         self.renamed_snps = False
         self.hh_to_missing= False
