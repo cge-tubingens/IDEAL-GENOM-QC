@@ -19,7 +19,7 @@ from ideal_genom_qc.Helpers import shell_do
 from ideal_genom_qc.get_references import FetcherLDRegions
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -409,12 +409,13 @@ class SampleQC:
         plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
 
         # PLINK command: produce a log file with samples excluded at CR 80% and generate plots
-        plink_cmd2 = f"plink --bfile {self.pruned_file} --mind {mind} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-mind')}"
+        #plink_cmd2 = f"plink --bfile {self.pruned_file} --mind {mind} --memory {memory} --threads {max_threads} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-mind')}"
 
         # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        #cmds = [plink_cmd1, plink_cmd2]
+        #for cmd in cmds:
+        #    shell_do(cmd, log=True)
+        shell_do(plink_cmd1, log=True)
 
         self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.imiss')
         if not self.call_rate_miss.exists():
@@ -925,8 +926,7 @@ class SampleQC:
 
         # load samples who failed call rate check
         fail_call_rate = self.report_call_rate(
-            directory    =self.results_dir, 
-            filename     =self.call_rate_miss,
+            file_path     =self.call_rate_miss,
             threshold    =call_rate_thres, 
             plots_dir    =self.plots_dir,
             y_axis_cap   =10
@@ -1079,7 +1079,7 @@ class SampleQC:
 
         return
   
-    def report_call_rate(self, directory: Path, filename: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> pd.DataFrame:
+    def report_call_rate(self, file_path: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: Union[int, float] = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> pd.DataFrame:
         """
         Generate sample call rate analysis plots and identify samples failing the call rate threshold.
         This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
@@ -1121,12 +1121,34 @@ class SampleQC:
         - call_rate_{threshold}_scatterplot.<format>: Contains scatter plots
         """
         
+        if not isinstance(file_path, Path):
+            raise TypeError("directory should be a Path object")
+        if  not file_path.exists():
+            raise FileNotFoundError(f"File {file_path} does not exist")
+        if not file_path.is_file():
+            raise FileNotFoundError(f"Path {file_path} is not a file")
+        if not isinstance(threshold, Path):
+            raise TypeError("threshold should be a float object")
+        if not (0 <= threshold <= 1):
+            raise ValueError("threshold should be between 0 and 1")
+        if not isinstance(plots_dir, (Path, type(None))):
+            raise TypeError("plots_dir should be a Path object or None")
+        if not isinstance(y_axis_cap, (int, float)):
+            raise TypeError("y_axis_cap should be an int or float")
+        if not isinstance(color, str):
+            raise TypeError("color should be a string representing a color")
+        if not isinstance(line_color, str):
+            raise TypeError("line_color should be a string representing a color")
+        if not isinstance(format, str):
+            raise TypeError("format should be a string representing the file format (e.g., 'png', 'pdf')")
+        
+        
         if not plots_dir:
             plots_dir = self.plots_dir
 
         # load samples that failed sex check
         df_call_rate = pd.read_csv(
-            directory / filename,
+            file_path,
             sep=r'\s+',
             engine='python'
         )
@@ -1341,7 +1363,7 @@ class SampleQC:
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: Path, y_axis_cap: float = 80, format: str = 'png') -> pd.DataFrame:
+    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png') -> pd.DataFrame:
         """
         Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
         This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
@@ -1383,6 +1405,29 @@ class SampleQC:
         2. Scatter plot of heterozygosity rate vs missing SNP proportion
         Files are saved as JPEG images in the specified plots directory.
         """
+
+        if not isinstance(directory, Path):
+            raise TypeError("directory should be a Path object")
+        if not isinstance(summary_ped_filename, str):
+            raise TypeError("summary_ped_filename should be a string")
+        if not isinstance(autosomal_filename, str):
+            raise TypeError("autosomal_filename should be a string")
+        if not isinstance(std_deviation_het, (float, int)):
+            raise TypeError("std_deviation_het should be a float or int")
+        if not isinstance(maf, float):
+            raise TypeError("maf should be a float")
+        if maf<0 or maf>0.5:
+            raise ValueError("maf should be between 0 and 0.5")
+        if not isinstance(split, str):
+            raise TypeError("split should be a string")
+        if not isinstance(plots_dir, Path):
+            raise TypeError("plots_dir should be a Path object")
+        if not isinstance(y_axis_cap, (float, int)):
+            raise TypeError("y_axis_cap should be a float or int")
+        if not isinstance(format, str):
+            raise TypeError("format should be a string")
+        if format not in ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps']:
+            raise ValueError("format should be one of ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps]")
         
         # load samples that failed heterozygosity rate check with MAF > threshold
         maf_file = directory / summary_ped_filename
@@ -1518,6 +1563,8 @@ class SampleQC:
         
         if not isinstance(ibd_threshold, float):
             raise TypeError("ibd_threshold should be a float")
+        if not isinstance(chunk_size, int):
+            raise TypeError("chunk_size should be an integer")
 
         if self.use_king:
             return pd.DataFrame()
