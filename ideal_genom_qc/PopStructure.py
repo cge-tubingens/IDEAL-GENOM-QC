@@ -207,11 +207,19 @@ class UMAPplot:
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        logger.info(f"Using {max_threads} threads for PLINK commands")
+        logger.info(f"Available memory: {available_memory_mb:.2f} MB, using {memory} MB for PLINK commands")
+
         # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {self.high_ld_regions} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {self.results_dir / self.input_name}"
+        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {self.high_ld_regions} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --memory {memory} --out {self.results_dir / self.input_name}"
 
         # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --keep-allele-order --extract {self.results_dir / (self.input_name+'.prune.in')} --make-bed --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDpruned')}"
+        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --keep-allele-order --extract {self.results_dir / (self.input_name+'.prune.in')} --make-bed --threads {max_threads} --memory {memory} --out {self.results_dir / (self.input_name+'-LDpruned')}"
 
         # execute plink command
         cmds = [plink_cmd1, plink_cmd2]
