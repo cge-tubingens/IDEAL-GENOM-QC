@@ -405,7 +405,7 @@ class SampleQC:
 
 
         # PLINK command: run mssingness across file genome-wide 
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --out {self.results_dir / (self.input_name+'-missing')}"
+        plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
 
         # PLINK command: produce a log file with samples excluded at CR 80% and generate plots
         plink_cmd2 = f"plink --bfile {self.pruned_file} --mind {mind} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-mind')}"
