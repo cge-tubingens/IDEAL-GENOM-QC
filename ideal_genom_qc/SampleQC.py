@@ -1079,7 +1079,7 @@ class SampleQC:
 
         return
   
-    def report_call_rate(self, directory: Path, filename: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02') -> pd.DataFrame:
+    def report_call_rate(self, directory: Path, filename: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: int = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> pd.DataFrame:
         """
         Generate sample call rate analysis plots and identify samples failing the call rate threshold.
         This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
@@ -1103,6 +1103,8 @@ class SampleQC:
             Color for the main plot elements. Default is '#1B9E77'
         line_color : str, optional
             Color for threshold lines in plots. Default is '#D95F02'
+        format : str, optional
+            Format for saving plots. Default is 'png'
         
         Returns
         -------
@@ -1114,9 +1116,9 @@ class SampleQC:
         
         Notes
         -----
-        The method generates two JPEG files:
-        - call_rate_{threshold}_histogram.jpeg: Contains histogram plots
-        - call_rate_{threshold}_scatterplot.jpeg: Contains scatter plots
+        The method generates two image files:
+        - call_rate_{threshold}_histogram.<format>: Contains histogram plots
+        - call_rate_{threshold}_scatterplot.<format>: Contains scatter plots
         """
         
         if not plots_dir:
@@ -1149,13 +1151,13 @@ class SampleQC:
         axes1[1].set_xlabel("Proportion of missing SNPs (F_MISS)")
 
         plt.tight_layout()
-        plt.savefig(plots_dir / f"call_rate_{threshold}_histogram.jpeg", dpi=400)
+        plt.savefig(plots_dir / f"call_rate_{threshold}_histogram.{format}", dpi=400)
         plt.show(block=False)
 
         fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
 
         # First subplot: capped y-axis
-        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=50, color=color, alpha=0.7, ax=axes2[0]) # type: ignore
+        axes2[0] = sns.histplot(df_call_rate['F_MISS'], bins=30, color=color, alpha=0.7, ax=axes2[0]) # type: ignore
         axes2[0].set_ylim(0, y_axis_cap)  # Cap y-axis
         axes2[0].set_title("Sample Call Rate Distribution (Capped)")
         axes2[0].set_xlabel("Proportion of missing SNPs (F_MISS)")
@@ -1203,12 +1205,12 @@ class SampleQC:
         axes2[2].axvline(threshold, linewidth=2, color=line_color, linestyle='dashed')
 
         plt.tight_layout()
-        plt.savefig(plots_dir / f"call_rate_{threshold}_scatterplot.jpeg", dpi=400)
+        plt.savefig(plots_dir / f"call_rate_{threshold}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
 
         return fail_call_rate
     
-    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Optional[Path] = None) -> pd.DataFrame:
+    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Optional[Path] = None, format: str = 'png') -> pd.DataFrame:
         """
         Creates a sex check report and visualization based on PLINK's sex check results.
         This function reads sex check data and X chromosome missingness data, merges them,
@@ -1225,6 +1227,8 @@ class SampleQC:
             Filename of X chromosome missingness data
         plots_dir : Path, optional
             Directory where the plot should be saved. If None, uses default plots directory
+        format : str, optional
+            Format for saving the plot. Default is 'png'
         
         Returns
         -------
@@ -1318,11 +1322,11 @@ class SampleQC:
         plt.legend(title='', loc='best')
         
         plt.tight_layout()
-        plt.savefig(plots_dir / 'sex_check.jpeg', dpi=400)
+        plt.savefig(plots_dir / f'sex_check.{format}', dpi=400)
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: Path, y_axis_cap: float = 80) -> pd.DataFrame:
+    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: float, maf: float, split: str, plots_dir: Path, y_axis_cap: float = 80, format: str = 'png') -> pd.DataFrame:
         """
         Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
         This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
@@ -1346,6 +1350,8 @@ class SampleQC:
             Directory where plot files will be saved
         y_axis_cap : float, optional
             Maximum value for y-axis in capped histogram plot (default: 80)
+        format : str, optional
+            Format for saving plots (default: 'png')
         
         Returns
         -------
@@ -1419,9 +1425,9 @@ class SampleQC:
         plt.tight_layout()
         
         if split == '>':
-            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_histogram.jpeg", dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_histogram.{format}", dpi=400)
         else:
-            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_histogram.jpeg", dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_histogram.{format}", dpi=400)
         
         plt.show(block=False)
 
@@ -1448,9 +1454,9 @@ class SampleQC:
 
         plt.tight_layout()
         if split == '>':
-            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_scatterplot.jpeg", dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_greater_{maf}_scatterplot.{format}", dpi=400)
         else:
-            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_scatterplot.jpeg", dpi=400)
+            plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
 
         return fail_het
