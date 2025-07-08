@@ -318,15 +318,18 @@ class SampleQC:
             ld_input = self.input_name
 
         # exclude complex regions
-        plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --memory {memory} --threads {max_threads} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        
         prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
 
 
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
         # LD prune indep-pairwise test
-        plink_cmd2 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')} --memory {memory} --threads {max_threads}"
+        plink_cmd2 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')}"
 
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+
+        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+
+        #plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
 
         self.pruned_file = self.results_dir / (self.input_name + '-LDpruned')
 
@@ -335,6 +338,7 @@ class SampleQC:
         for cmd in cmds:
             logger.info(f"Executing PLINK command: {cmd}")
             shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
         return
     
@@ -404,17 +408,9 @@ class SampleQC:
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
-
         # PLINK command: run mssingness across file genome-wide 
         plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
 
-        # PLINK command: produce a log file with samples excluded at CR 80% and generate plots
-        #plink_cmd2 = f"plink --bfile {self.pruned_file} --mind {mind} --memory {memory} --threads {max_threads} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-mind')}"
-
-        # execute PLINK commands
-        #cmds = [plink_cmd1, plink_cmd2]
-        #for cmd in cmds:
-        #    shell_do(cmd, log=True)
         shell_do(plink_cmd1, log=True)
 
         self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.imiss')
@@ -424,8 +420,8 @@ class SampleQC:
         return
     
     def execute_sex_check(self, sex_check: list = [0.2, 0.8]) -> None:
-        """
-        Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
+        """Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
+        
         This method performs sex check analysis by:
         1. Running PLINK's --check-sex command on pruned data
         2. Extracting X chromosome SNPs
@@ -466,8 +462,6 @@ class SampleQC:
             raise ValueError("sex_check must have two elements")
         if not all(isinstance(i, float) for i in sex_check):
             raise TypeError("All elements in sex_check must be floats")
-        if sum(sex_check) != 1:
-            raise ValueError("The sum of sex_check elements must be equal to 1")
         
         logger.info(f"STEP: Check discordant sex information.")
 
@@ -1127,7 +1121,7 @@ class SampleQC:
             raise FileNotFoundError(f"File {file_path} does not exist")
         if not file_path.is_file():
             raise FileNotFoundError(f"Path {file_path} is not a file")
-        if not isinstance(threshold, Path):
+        if not isinstance(threshold, float):
             raise TypeError("threshold should be a float object")
         if not (0 <= threshold <= 1):
             raise ValueError("threshold should be between 0 and 1")
@@ -1141,7 +1135,6 @@ class SampleQC:
             raise TypeError("line_color should be a string representing a color")
         if not isinstance(format, str):
             raise TypeError("format should be a string representing the file format (e.g., 'png', 'pdf')")
-        
         
         if not plots_dir:
             plots_dir = self.plots_dir
@@ -1232,7 +1225,7 @@ class SampleQC:
 
         return fail_call_rate
     
-    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, plots_dir: Optional[Path] = None, format: str = 'png') -> pd.DataFrame:
+    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, f_coeff_thresholds: list = [0.2, 0.8],  plots_dir: Optional[Path] = None, format: str = 'png', fig_size: tuple = (8,6)) -> pd.DataFrame:
         """
         Creates a sex check report and visualization based on PLINK's sex check results.
         This function reads sex check data and X chromosome missingness data, merges them,
@@ -1325,7 +1318,7 @@ class SampleQC:
         }
 
         # Create the Matplotlib scatter plot
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=fig_size)
 
         # Iterate through categories to plot each group separately
         for category, group in df.groupby("Category"):
@@ -1348,9 +1341,11 @@ class SampleQC:
             edgecolors=palette['Female PEDSEX'],
         )
 
+        ax.set_ylim(bottom=-0.01)  
+
         # Add vertical lines
-        plt.axvline(x=0.8, color='red', linestyle='dotted')
-        plt.axvline(x=0.2, color='red', linestyle='dotted')
+        plt.axvline(x=f_coeff_thresholds[0], color='red', linestyle='dotted')
+        plt.axvline(x=f_coeff_thresholds[1], color='red', linestyle='dotted')
 
         # Customize labels and legend
         plt.title("Sex Check")
@@ -1363,7 +1358,7 @@ class SampleQC:
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png') -> pd.DataFrame:
+    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> pd.DataFrame:
         """
         Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
         This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
@@ -1496,7 +1491,9 @@ class SampleQC:
         df_het.loc[mask_minus, 'Deviated']= f'{std_deviation_het}xSD Excluded'
 
         # Create the scatter plot
-        plt.figure(figsize=(10, 6))
+        fig= plt.figure(figsize=scatter_fig_size)
+        ax = fig.add_subplot(111)
+
         sns.scatterplot(
             data   =df_het,
             x      ='Percent_het',
@@ -1507,6 +1504,9 @@ class SampleQC:
             size   ='Deviated',
             sizes  ={'Not Excluded': 20, f'{std_deviation_het}xSD Excluded': 30}
         )
+
+        ax.set_ylim(bottom=-0.01) 
+
         plt.title("Autosomal heterozygosity and call rate")
         plt.xlabel(f"% Heterozygosity MAF {split} {maf}")
         plt.ylabel("Proportion of missing SNPs")
