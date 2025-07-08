@@ -7,7 +7,7 @@ import umap
 import warnings
 import logging
 import psutil
-from typing import Optional
+from typing import Optional, Union, Literal
 
 import pandas as pd
 import matplotlib.pyplot as plt
