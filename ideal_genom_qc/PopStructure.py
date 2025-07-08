@@ -460,7 +460,7 @@ class UMAPplot:
 
             # generate umap plot for data that passed QC
             warnings = self._umap_plots(
-                plot_name   =f"umap_2d_{count}.pdf",
+                plot_name   =f"umap_2d_{count}.svg",
                 n_neighbors =params['n_neighbors'],
                 min_dist    =params['min_dist'],
                 metric      =params['metric'],
