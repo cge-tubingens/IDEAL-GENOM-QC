@@ -488,6 +488,12 @@ class UMAPplot:
 
         self.files_to_keep.append('plots_parameters.csv')
 
+        # generate PCA plot for comparison
+        self._pca_plot(
+            df_metadata = df_metadata, 
+            plot_dir = self.plots_dir
+        )
+
         return
     
     def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: Optional[int] = None, df_metadata: Optional[pd.DataFrame] = None, hue_col: Optional[str] = None, umap_kwargs: dict = dict()) -> list:
@@ -635,6 +641,72 @@ class UMAPplot:
 
             warning = [warn.message.args[0] for warn in w] # type: ignore
             return warning
+        
+    def _pca_plot(self, df_metadata: Optional[pd.DataFrame] = None, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
+
+        if not plot_dir.exists():
+            logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
+            logger.info(f'STEP: Generating PCA plots: pca plots will be saved in {self.output_path}')
+            plot_dir = self.output_path
+
+        df_eigenvec = pd.read_csv(
+            self.results_dir / (self.input_name+'.eigenvec'),
+            header=None,
+            sep=' '
+        )
+        logger.info(f"Eigenvector file loaded from {self.results_dir / (self.input_name+'.eigenvec')}")
+        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
+
+        # load .eigenval file and calculate variance explained by the first two PCs
+        df_eigenval = pd.read_csv(
+            self.results_dir / (self.input_name+'.eigenval'),
+            header=None,
+            sep   =r"\s+",
+            engine='python'
+        )
+
+        total_variance = df_eigenval[0].sum()
+        pc1_var = df_eigenval[0][0]
+        pc2_var = df_eigenval[0][1]
+
+        pc1_var_perc = round((pc1_var / total_variance) * 100, 2)
+        pc2_var_perc = round((pc2_var / total_variance) * 100, 2)
+
+        # rename columns
+        num_pc = df_eigenvec.shape[1]-2
+        new_cols = [f"pc_{k}" for k in range(1,num_pc+1)]
+        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
+
+        if df_metadata is not None:
+            # merge metadata with eigenvector data
+            df = df_eigenvec.merge(
+                df_metadata,
+                on=['ID1', 'ID2'],
+                how='inner'
+            )
+            logger.info(f"Metadata file merged with eigenvector file")
+            logger.info(f"Merged file has {df.shape[0]} rows and {df.shape[1]} columns")
+
+        else:
+            df = df_eigenvec.copy()
+            logger.info(f"No metadata file provided. Using eigenvector file only.")
+            logger.info(f"Eigenvector file has {df.shape[0]} rows and {df.shape[1]} columns")
+
+        logger.info(f"Generating PCA plot with {df.shape[0]} samples and {df.shape[1]} features")
+        logger.info(f"Variance explained by PC1: {pc1_var_perc}%, PC2: {pc2_var_perc}%")
+        logger.info(f"df columns: {df.columns.tolist()}")
+
+        # generates a 2D scatter plot
+        fig, ax = plt.subplots(figsize=(10,10))
+        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
+        ax.set_aspect('equal', adjustable='datalim')
+        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
+        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig.savefig(plot_dir / f'2D-aspect-equal-{plot_name}', dpi=400)
+
+        fig.clf()
+
+        return
 
 class FstSummary:
 
