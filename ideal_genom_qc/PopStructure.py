@@ -715,7 +715,7 @@ class UMAPplot:
 
         # generates a 2D scatter plot
         fig, ax = plt.subplots(figsize=(10,10))
-        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
+        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue=hue_col, ax=ax, marker='.', s=70)
         ax.set_aspect('equal', adjustable='datalim')
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
