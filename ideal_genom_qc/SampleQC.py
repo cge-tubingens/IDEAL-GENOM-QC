@@ -379,23 +379,7 @@ class SampleQC:
         - {output_name}-mind.bed: New binary file with filtered samples
         """
 
-        if not isinstance(mind, float):
-            raise TypeError("mind should be a float")
-        
-        # Check if mind is in range
-        if mind < 0 or mind > 1:
-            raise ValueError("mind should be between 0 and 1")
-        
-        # Check if mind is around typical values
-        if mind < 0.02 or mind > 0.1:
-            warnings.warn(
-                f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1. "
-                f"Values below 0.02 may exclude too few samples with high missingness, potentially affecting data quality, "
-                f"while values above 0.1 may exclude too many samples, reducing the dataset size significantly.",
-                UserWarning
-            )
-
-        logger.info(f"STEP: Missing genotype check. `mind` set to {mind}")
+        logger.info(f"STEP: Missing genotype check.")
 
         cpu_count = os.cpu_count()
         if cpu_count is not None:
