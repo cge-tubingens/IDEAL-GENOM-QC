@@ -30,7 +30,7 @@ class SampleQC:
         
         """
         Initialize SampleQC class for quality control of genetic data.
-        This class handles quality control procedures for genetic data files in PLINK format
+        This class handles quality control procedures for genetic data files in PLINK binary format
         (bed, bim, fam). It sets up the directory structure and validates input files.
         
         Parameters
