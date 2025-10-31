@@ -651,7 +651,7 @@ class UMAPplot:
             warning = [warn.message.args[0] for warn in w] # type: ignore
             return warning
         
-    def _pca_plot(self, df_metadata: Optional[pd.DataFrame] = None, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
+    def _pca_plot(self, df_metadata: Optional[pd.DataFrame] = None, hue_col: Optional[str] = None, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
 
         if not plot_dir.exists():
             logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
