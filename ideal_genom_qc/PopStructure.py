@@ -696,6 +696,14 @@ class UMAPplot:
             logger.info(f"Metadata file merged with eigenvector file")
             logger.info(f"Merged file has {df.shape[0]} rows and {df.shape[1]} columns")
 
+            if hue_col is not None:
+                if hue_col in df.columns:
+                    logger.info(f"Using column '{hue_col}' for coloring the PCA plot")
+                else:
+                    raise ValueError(f"Column '{hue_col}' not found in metadata file")
+            else:
+                hue_col = df_metadata.columns[2] if df_metadata.shape[1] > 2 else None
+
         else:
             df = df_eigenvec.copy()
             logger.info(f"No metadata file provided. Using eigenvector file only.")
