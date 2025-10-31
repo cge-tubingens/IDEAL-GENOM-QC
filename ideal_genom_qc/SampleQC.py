@@ -457,13 +457,15 @@ class SampleQC:
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --check-sex {sex_check[0]} {sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --check-sex max-female-xf={sex_check[0]} min-male-xf={sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
+
+        print(plink_cmd1)
 
         # extract xchr SNPs
-        plink_cmd2 = f"plink --bfile {self.pruned_file} --chr 23 --keep-allele-order --threads {max_threads}  --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
+        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --chr 23 --keep-allele-order --threads {max_threads}  --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
 
         # run missingness on xchr SNPs
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-xchr')} --threads {max_threads}  --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-xchr')} --threads {max_threads}  --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
@@ -472,7 +474,7 @@ class SampleQC:
             time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
         self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
-        self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.imiss')
+        self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.smiss')
 
         return
 
