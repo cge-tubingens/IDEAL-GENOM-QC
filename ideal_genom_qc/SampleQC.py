@@ -394,11 +394,11 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
 
         # PLINK command: run mssingness across file genome-wide 
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
 
         shell_do(plink_cmd1, log=True)
 
-        self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.imiss')
+        self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.smiss')
         if not self.call_rate_miss.exists():
             raise FileNotFoundError(f"Missing file: {self.call_rate_miss}")
 
