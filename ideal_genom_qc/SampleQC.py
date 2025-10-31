@@ -235,7 +235,7 @@ class SampleQC:
         input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
 
         # PLINK command: convert haploid genotypes to missing
-        plink_cmd = f"plink --bfile {self.input_path / input_file} --set-hh-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
+        plink_cmd = f"plink2 --bfile {self.input_path / input_file} --set-invalid-haploid-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
