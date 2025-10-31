@@ -1032,7 +1032,7 @@ class GenomicOutlierAnalyzer:
 
         return
     
-    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.pdf') -> None:
+    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
         """
         Generate 2D and 3D PCA plots from eigenvector data and population tags.
         This method creates two PCA visualization plots:
@@ -1143,6 +1143,7 @@ class GenomicOutlierAnalyzer:
         ax.set_aspect(aspect_ratio, adjustable='datalim')
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig.tight_layout()
         fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', dpi=400)
 
         fig.clf()
@@ -1154,6 +1155,7 @@ class GenomicOutlierAnalyzer:
         ax.set_aspect(aspect_ratio, adjustable='datalim')
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig3.tight_layout()
         fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', dpi=400)
 
         # generates a 3D scatter plot
