@@ -319,16 +319,16 @@ class SampleQC:
             ld_input = self.input_name
 
         # exclude complex regions
-        plink_cmd1 = f"plink --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --memory {memory} --threads {max_threads} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        plink_cmd1 = f"plink2 --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --memory {memory} --threads {max_threads} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
         
         prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
 
 
         # LD prune indep-pairwise test
-        plink_cmd2 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')}"
+        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')}"
 
 
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
 
         #plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
 
