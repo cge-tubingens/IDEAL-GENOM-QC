@@ -537,47 +537,57 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
 
         # extract autosomal SNPS
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --autosome --keep-allele-order --memory {memory} --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --autosome --keep-allele-order --memory {memory} --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
 
         # extract SNPs with minor allele frequency greater than threshold
-        plink_cmd2 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
+        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
 
         # extract SNPs with minor allele frequency less than threshold
-        plink_cmd3 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22')} --exclude {(self.results_dir / (self.output_name+'-chr1-22-mafgreater')).with_suffix('.bim')} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafless')}"
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --exclude {(self.results_dir / (self.output_name+'-chr1-22-mafgreater')).with_suffix('.bim')} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafless')}"
 
         # get missingness to plot against het
-        plink_cmd4 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing')}"
-        plink_cmd5 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafless-missing')}"
+        plink_cmd4 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing')}"
+        plink_cmd5 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafless-missing')}"
 
-        # convert both to ped/map files for heterozigosity computation
-        plink_cmd6 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
-        plink_cmd7 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
+        # compute heterozigosity for both MAF groups
+        plink_cmd6 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --memory {memory} --threads {max_threads}"
+        plink_cmd7 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafless')} --memory {memory} --threads {max_threads}"
 
+#        # convert both to ped/map files for heterozigosity computation
+#        plink_cmd6 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
+#        plink_cmd7 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
+#
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
         for cmd in cmds:
             shell_do(cmd, log=True)
             time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
-        self._compute_heterozigozity(
-            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')).with_suffix('.ped')
-        )
-        self._compute_heterozigozity(
-            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafless-recode')).with_suffix('.ped')
-        )
+#        self._compute_heterozigozity(
+#            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')).with_suffix('.ped')
+#        )
+#        self._compute_heterozigozity(
+#            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafless-recode')).with_suffix('.ped')
+#        )
 
-        self.summary_greater = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped')
-        if not self.summary_greater.exists():
-            raise FileNotFoundError(f"Missing file: {self.summary_greater}")
-        self.summary_less    = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafless-recode.ped')
-        if not self.summary_less.exists():
-            raise FileNotFoundError(f"Missing file: {self.summary_less}")
-        self.maf_greater_miss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.imiss')
-        if not self.maf_greater_miss.exists():
-            raise FileNotFoundError(f"Missing file: {self.maf_greater_miss}")
-        self.maf_less_miss   = self.results_dir / (self.output_name+'-chr1-22-mafless-missing.imiss')
-        if not self.maf_less_miss.exists():
-            raise FileNotFoundError(f"Missing file: {self.maf_less_miss}")
+        self.maf_greater_het= self.results_dir / (self.output_name+'-chr1-22-mafgreater.het')
+        if not self.maf_greater_het.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_greater_het}")
+        self.maf_less_het   = self.results_dir / (self.output_name+'-chr1-22-mafless.het')
+        if not self.maf_less_het.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_less_het}")
+#        self.summary_greater = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped')
+#        if not self.summary_greater.exists():
+#            raise FileNotFoundError(f"Missing file: {self.summary_greater}")
+#        self.summary_less    = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafless-recode.ped')
+#        if not self.summary_less.exists():
+#            raise FileNotFoundError(f"Missing file: {self.summary_less}")
+        self.maf_greater_smiss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.smiss')
+        if not self.maf_greater_smiss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_greater_smiss}")
+        self.maf_less_smiss   = self.results_dir / (self.output_name+'-chr1-22-mafless-missing.smiss')
+        if not self.maf_less_smiss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_less_smiss}")
 
         return
 
@@ -639,16 +649,16 @@ class SampleQC:
 
         return
 
-    def execute_kingship(self, kingship: float = 0.354) -> None:
-        """
-        Execute kinship analysis to identify and handle sample relatedness.
-        This method performs kinship analysis using PLINK2 to identify duplicate samples and related individuals. 
-        It first computes a kinship coefficient matrix for all samples and then prunes samples based on the 
-        specified kingship threshold.
+    def execute_kinship(self, kinship: float = 0.354) -> None:
+        """Execute kinship analysis to identify and handle sample relatedness.
+
+        This method performs kinship analysis using PLINK2 to identify duplicate samples and related individuals.
+        It first computes a kinship coefficient matrix for all samples and then prunes samples based on the
+        specified kinship threshold.
         
         Parameters
         ----------
-        kingship : float, optional
+        kinship : float, optional
             The kinship coefficient threshold used to identify related samples. Must be between 0 and 1.
             Samples with kinship coefficients above this threshold will be marked for removal.
             Default is 0.354 (equivalent to first-degree relatives).
@@ -660,9 +670,9 @@ class SampleQC:
         Raises
         ------
         TypeError
-            If kingship parameter is not a float.
+            If kinship parameter is not a float.
         ValueError
-            If kingship parameter is not between 0 and 1.
+            If kinship parameter is not between 0 and 1.
         FileNotFoundError
             If the expected output file from PLINK2 is not created.
         
@@ -674,13 +684,20 @@ class SampleQC:
         - Updates self.kinship_miss with path to file containing samples to be removed
         """
 
-        if not isinstance(kingship, float):
-            raise TypeError("kingship should be a float")
-        if kingship < 0 or kingship >1:
-            raise ValueError("kingship should be between 0 and 1")
-        
-        logger.info(f"STEP: Duplicates and relatedness check with Kingship. `kingship` set to {kingship}")
-        
+        if not isinstance(kinship, float):
+            raise TypeError("kinship should be a float")
+        if kinship < 0 or kinship >1:
+            raise ValueError("kinship should be between 0 and 1")
+
+        logger.info(f"STEP: Duplicates and relatedness check with Kinship. `kinship` set to {kinship}")
+
+        if self.hh_to_missing:
+            kinship_input = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            kinship_input = self.input_name+'-renamed'
+        else:
+            kinship_input = self.input_name
+
         cpu_count = os.cpu_count()
         if cpu_count is not None:
             max_threads = max(1, cpu_count - 2)
@@ -694,10 +711,10 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
         
         # Compute kinship-coefficient matrix for all samples
-        plink2_cmd1 = f"plink2 --bfile {self.pruned_file} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
+        plink2_cmd1 = f"plink2 --bfile {self.input_path / kinship_input} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
 
         # Prune for Monozygotic Twins OR Duplicates
-        plink2_cmd2 = f"plink2 --bfile {self.pruned_file} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kingship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
+        plink2_cmd2 = f"plink2 --bfile {self.input_path / kinship_input} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kinship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
 
         # execute PLINK commands
         cmds = [plink2_cmd1, plink2_cmd2]
@@ -712,7 +729,7 @@ class SampleQC:
 
         return
     
-    def execute_duplicate_relatedness(self, kingship: float = 0.354, use_king: bool = True) -> None:
+    def execute_duplicate_relatedness(self, kinship: float = 0.354, use_kinship: bool = True) -> None:
         """
         Execute duplicate and relatedness analysis on the genotype data.
         This method performs either IBD (Identity by Descent) or KING kinship coefficient
@@ -742,19 +759,19 @@ class SampleQC:
         The method will store the analysis type (KING or IBD) in the use_king attribute.
         """
 
-        if not isinstance(use_king, bool):
-            raise TypeError("use_king must be a boolean")
-        if not isinstance(kingship, float):
-            raise TypeError("kingship must be a float")
+        if not isinstance(use_kinship, bool):
+            raise TypeError("use_kinship must be a boolean")
+        if not isinstance(kinship, float):
+            raise TypeError("kinship must be a float")
 
         logger.info("STEP: Duplicates and relatedness check")
-        
-        if use_king:
-            self.execute_kingship(kingship)
+
+        if use_kinship:
+            self.execute_kinship(kinship)
         else:
             self.execute_ibd()
 
-        self.use_king = use_king
+        self.use_kinship = use_kinship
 
         return
 
@@ -893,7 +910,7 @@ class SampleQC:
             self.results_dir / (self.output_name + '-chr1-22-mafless-missing.imiss')
         ]
 
-        if not self.use_king:
+        if not self.use_kinship:
             required_files.append(self.results_dir / (self.output_name + '-ibd-missing.imiss'))
             required_files.append(self.results_dir / (self.output_name + '-ibd.genome'))
 
@@ -933,9 +950,8 @@ class SampleQC:
         # ==========================================================================================================
 
         fail_het_greater = self.report_heterozygosity_rate(
-            directory           = self.results_dir, 
-            summary_ped_filename= 'Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped', 
-            autosomal_filename  = self.output_name+'-chr1-22-mafgreater-missing.imiss', 
+            het_filename        = self.maf_greater_het, 
+            autosomal_filename  = self.maf_greater_smiss, 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '>',
@@ -945,9 +961,8 @@ class SampleQC:
         logger.info(f'Heterozygosity rate check done for MAF > {maf_het}')
 
         fail_het_less = self.report_heterozygosity_rate(
-            directory           = self.results_dir, 
-            summary_ped_filename= 'Summary-'+self.output_name+'-chr1-22-mafless-recode.ped', 
-            autosomal_filename  = self.output_name+'-chr1-22-mafless-missing.imiss', 
+            het_filename        = self.maf_less_het, 
+            autosomal_filename  = self.maf_less_smiss, 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '<',
@@ -960,7 +975,7 @@ class SampleQC:
         #                                       DUPLICATES-RELATEDNESS CHECK
         # ==========================================================================================================
 
-        if self.use_king:
+        if self.use_kinship:
 
             # load samples that failed duplicates and relatedness check
             duplicates_file = self.results_dir / (self.output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
@@ -1132,6 +1147,7 @@ class SampleQC:
             sep=r'\s+',
             engine='python'
         )
+        df_call_rate.columns = [col.lstrip('#') for col in df_call_rate.columns]
 
         # filter samples that fail call rate
         fail_call_rate = df_call_rate[df_call_rate['F_MISS'] > threshold][['FID', 'IID']].reset_index(drop=True)
@@ -1273,14 +1289,16 @@ class SampleQC:
             sep   =r'\s+',
             engine='python'
         )
+        df_sexcheck.columns = [col.lstrip('#') for col in df_sexcheck.columns]
 
-        df_xchr_imiss = pd.read_csv(
+        df_xchr_smiss = pd.read_csv(
             directory / xchr_imiss_filename,
             sep   =r'\s+',
             engine='python'
         )
+        df_xchr_smiss.columns = [col.lstrip('#') for col in df_xchr_smiss.columns]
 
-        df = pd.merge(df_sexcheck, df_xchr_imiss, on=['FID', 'IID'], how='inner')
+        df = pd.merge(df_sexcheck, df_xchr_smiss, on=['FID', 'IID'], how='inner')
 
         fail_sexcheck = df[df['STATUS'] == 'PROBLEM'][['FID', 'IID']].reset_index(drop=True)
         fail_sexcheck['Failure'] = 'Sex check'
@@ -1345,7 +1363,7 @@ class SampleQC:
 
         return fail_sexcheck
     
-    def report_heterozygosity_rate(self, directory: Path, summary_ped_filename: str, autosomal_filename: str, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> pd.DataFrame:
+    def report_heterozygosity_rate(self, het_filename: Path, autosomal_filename: Path, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> pd.DataFrame:
         """
         Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
         This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
@@ -1388,12 +1406,10 @@ class SampleQC:
         Files are saved as JPEG images in the specified plots directory.
         """
 
-        if not isinstance(directory, Path):
-            raise TypeError("directory should be a Path object")
-        if not isinstance(summary_ped_filename, str):
-            raise TypeError("summary_ped_filename should be a string")
-        if not isinstance(autosomal_filename, str):
-            raise TypeError("autosomal_filename should be a string")
+        if not isinstance(het_filename, Path):
+            raise TypeError("het_filename should be a Path object")
+        if not isinstance(autosomal_filename, Path):
+            raise TypeError("autosomal_filename should be a Path object")
         if not isinstance(std_deviation_het, (float, int)):
             raise TypeError("std_deviation_het should be a float or int")
         if not isinstance(maf, float):
@@ -1412,35 +1428,36 @@ class SampleQC:
             raise ValueError("format should be one of ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps]")
         
         # load samples that failed heterozygosity rate check with MAF > threshold
-        maf_file = directory / summary_ped_filename
-        df_maf = pd.read_csv(
-            maf_file,
+        df_het = pd.read_csv(
+            het_filename,
             sep   =r'\s+',
             engine='python'
         )
+        df_het.columns = [col.lstrip('#') for col in df_het.columns]
+        df_het["HET_RATE"] = 1 - (df_het["O(HOM)"] / df_het["OBS_CT"])
+
 
         # autosomal call rate per individual
-        autosomal_file = directory / autosomal_filename
         df_autosomal = pd.read_csv(
-            autosomal_file,
+            autosomal_filename,
             sep   =r'\s+',
             engine='python'
         )
+        df_autosomal.columns = [col.lstrip('#') for col in df_autosomal.columns]
 
         # merge both dataframes
         df_het = pd.merge(
-            df_maf[['ID', 'Percent_het']],
+            df_het[['FID', 'IID', 'HET_RATE']],
             df_autosomal[['FID', 'IID', 'F_MISS']],
-            left_on ='ID',
-            right_on='IID',
-            how     ='inner'
+            on =['FID', 'IID'],
+            how='inner'
         )
 
-        mean_percent= df_het['Percent_het'].mean()
-        sd_percent  = df_het['Percent_het'].std()
+        mean_percent= df_het['HET_RATE'].mean()
+        sd_percent  = df_het['HET_RATE'].std()
 
-        mask_plus = df_het['Percent_het'] > mean_percent + std_deviation_het*sd_percent
-        mask_minus= df_het['Percent_het'] < mean_percent - std_deviation_het*sd_percent
+        mask_plus = df_het['HET_RATE'] > mean_percent + std_deviation_het*sd_percent
+        mask_minus= df_het['HET_RATE'] < mean_percent - std_deviation_het*sd_percent
 
         fail_het = df_het[mask_plus | mask_minus][['FID', 'IID']].reset_index(drop=True)
 
@@ -1453,12 +1470,12 @@ class SampleQC:
 
         fig1, axes1 = plt.subplots(1, 2, figsize=(12, 5), sharey=False)
 
-        axes1[0] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[0]) # type: ignore
+        axes1[0] = sns.histplot(df_het['HET_RATE'], bins=30, color='green', alpha=0.7, ax=axes1[0]) # type: ignore
         axes1[0].set_title("Autosomal heterozygosity")
         axes1[0].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
         axes1[0].set_ylabel("Frequency")
 
-        axes1[1] = sns.histplot(df_het['Percent_het'], bins=30, color='green', alpha=0.7, ax=axes1[1]) # type: ignore
+        axes1[1] = sns.histplot(df_het['HET_RATE'], bins=30, color='green', alpha=0.7, ax=axes1[1]) # type: ignore
         axes1[1].set_title("Autosomal heterozygosity (capped)")
         axes1[1].set_xlabel(f"% Heterozygosity MAF {split} {maf}")
         axes1[1].set_ylim(0, y_axis_cap)  # Cap y-axis
@@ -1483,7 +1500,7 @@ class SampleQC:
 
         sns.scatterplot(
             data   =df_het,
-            x      ='Percent_het',
+            x      ='HET_RATE',
             y      ='F_MISS',
             hue    ='Deviated',
             palette={'Not Excluded': 'blue', f'{std_deviation_het}xSD Excluded': 'red'},
@@ -1553,7 +1570,7 @@ class SampleQC:
         if not isinstance(chunk_size, int):
             raise TypeError("chunk_size should be an integer")
 
-        if self.use_king:
+        if self.use_kinship:
             return pd.DataFrame()
 
         # File paths
