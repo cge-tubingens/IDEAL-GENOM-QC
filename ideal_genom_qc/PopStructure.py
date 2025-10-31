@@ -285,7 +285,7 @@ class UMAPplot:
 
         return
     
-    def generate_plots(self, color_hue_file: Optional[Path] = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: Optional[int] = None, umap_kwargs: dict = dict()) -> None:
+    def generate_plots(self, color_hue_file: Optional[Path] = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: Optional[int] = None, format: str = 'pdf', umap_kwargs: dict = dict()) -> None:
         """
         Generate UMAP plots with different parameter combinations.
         This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various 
@@ -312,6 +312,8 @@ class UMAPplot:
         random_state : int, optional
             Random seed for reproducibility. Must be non-negative.
             Default is None.
+        format : str, optional
+            Format of the output plot files. Supported formats are 'pdf', 'png', 'jpeg', etc.
         umap_kwargs : dict, optional
             Additional keyword arguments to pass to the UMAP constructor.
             Default is an empty dictionary.
@@ -319,7 +321,7 @@ class UMAPplot:
         Returns
         -------
         None
-            Saves UMAP plots as JPEG files and parameters as a CSV file in the results directory.
+            Saves UMAP plots as pdf files (by default but can be modified) and parameters as a CSV file in the results directory.
         
         Raises
         ------
