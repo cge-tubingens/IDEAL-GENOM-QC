@@ -95,6 +95,7 @@ class SampleQC:
             raise FileNotFoundError(".fam file not found")
         if not (input_path / f"{input_name}.bim").exists():
             raise FileNotFoundError(".bim file not found")
+        
         if not high_ld_file.is_file():
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
