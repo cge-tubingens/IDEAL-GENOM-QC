@@ -343,9 +343,9 @@ class SampleQC:
 
         return
     
-    def execute_miss_genotype(self, mind: float = 0.2) -> None:
-        """
-        Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+    def execute_miss_genotype(self) -> None:
+        """Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+        
         This method performs two main operations:
         1. Generates missingness statistics for all samples
         2. Filters samples based on the specified missingness threshold (mind)
