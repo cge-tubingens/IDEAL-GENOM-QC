@@ -384,6 +384,11 @@ class UMAPplot:
         # Check if case_control_markers is a boolean
         if not isinstance(case_control_markers, bool):
             raise TypeError("case_control_markers should be of type bool.")
+        
+        if format not in ['pdf', 'png', 'jpeg', 'svg']:
+            raise ValueError("format should be one of 'pdf', 'png', 'svg', or 'jpeg'.")
+        if not isinstance(umap_kwargs, dict):
+            raise TypeError("umap_kwargs should be a dictionary.")
 
         logger.info("Generating UMAP plots with the following parameters:")
         logger.info(f"UMAP parameters: n_neighbors={n_neighbors}, min_dist={min_dist}, metric={metric}")
