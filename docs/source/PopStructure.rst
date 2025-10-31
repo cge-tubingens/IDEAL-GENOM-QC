@@ -1,5 +1,5 @@
-ideal_genom_qc.PopStructure
-===========================
+Population Structure
+====================
 
 .. automodule:: ideal_genom_qc.PopStructure
    :members:
