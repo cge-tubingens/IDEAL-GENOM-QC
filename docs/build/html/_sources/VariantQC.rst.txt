@@ -1,5 +1,5 @@
-ideal_genom_qc.VariantQC
-========================
+VariantQC
+=========
 
 .. automodule:: ideal_genom_qc.VariantQC
    :members:

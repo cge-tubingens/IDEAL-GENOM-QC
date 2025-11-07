@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom_qc.VariantQC &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>VariantQC &mdash; ideal-genome-qc 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ideal_genom_qc.Helpers" href="Helpers.html" /> 
+    <link rel="next" title="Helpers" href="Helpers.html" />
+    <link rel="prev" title="Population Structure" href="PopStructure.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,9 +45,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">ideal_genom_qc.SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">ideal_genom_qc.AncestryQC</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ideal_genom_qc.VariantQC</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">VariantQC</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC"><code class="docutils literal notranslate"><span class="pre">VariantQC</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_different_genotype_call_rate"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_different_genotype_call_rate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_drop_variants"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_drop_variants()</span></code></a></li>
@@ -60,8 +62,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">ideal_genom_qc.get_references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
 
         </div>
@@ -78,7 +80,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ideal_genom_qc.VariantQC</li>
+      <li class="breadcrumb-item active">VariantQC</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/VariantQC.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -89,7 +91,7 @@
            <div itemprop="articleBody">
              
   <section id="module-ideal_genom_qc.VariantQC">
-<span id="ideal-genom-qc-variantqc"></span><h1>ideal_genom_qc.VariantQC<a class="headerlink" href="#module-ideal_genom_qc.VariantQC" title="Link to this heading"></a></h1>
+<span id="variantqc"></span><h1>VariantQC<a class="headerlink" href="#module-ideal_genom_qc.VariantQC" title="Link to this heading"></a></h1>
 <p>Python module to perform variant quality control</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC">
@@ -101,29 +103,20 @@
 <dd><p>Execute test for different genotype call rates between cases and controls using PLINK.</p>
 <p>This method performs the following operations:
 1. Calculates available memory for PLINK execution
-2. Runs PLINK’s –test-missing command to identify markers with significantly different</p>
-<blockquote>
-<div><p>missing rates between cases and controls</p>
-</div></blockquote>
-<ol class="arabic simple" start="3">
-<li><p>Generates a .missing file with the results</p></li>
-</ol>
+2. Runs PLINK’s –test-missing command to identify markers with significantly different
+missing rates between cases and controls
+3. Generates a .missing file with the results</p>
 <p>The method uses approximately 2/3 of available system memory for PLINK execution.</p>
-<section id="returns">
-<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
-</section>
-<section id="side-effects">
-<h2>Side effects:<a class="headerlink" href="#side-effects" title="Link to this heading"></a></h2>
-<blockquote>
-<div><ul class="simple">
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
 <li><p>Creates a .missing file in the results directory</p></li>
 <li><p>Sets self.case_control_missing path attribute</p></li>
 </ul>
-</div></blockquote>
-</section>
 </dd></dl>
 
 <dl class="py method">
@@ -163,14 +156,14 @@ with suffix ‘-variantQCed’.</p>
 3. Saves results to a .hwe output file</p>
 <p>The HWE test is used to assess whether genotype frequencies in a population remain constant
 across generations under specific conditions.</p>
-<section id="id1">
-<h2>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
 </section>
-<section id="id2">
-<h2>Side effects:<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<section id="side-effects">
+<h2>Side effects:<a class="headerlink" href="#side-effects" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><p>Creates a .hwe output file in the results directory</p></li>
@@ -256,8 +249,8 @@ filename (str): The name of the .missing file.
 threshold (float): The threshold for filtering markers based on the P-value.</p>
 </div></blockquote>
 </section>
-<section id="id3">
-<h2>Returns:<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="id1">
+<h2>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <blockquote>
 <div><dl class="simple">
 <dt>pd.DataFrame: A DataFrame containing markers with different genotype call rates</dt><dd><p>below the specified threshold. The DataFrame has two columns:
@@ -334,7 +327,8 @@ with columns [‘SNP’, ‘Failure’] where ‘Failure’ indicates the failin
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Helpers.html" class="btn btn-neutral float-right" title="ideal_genom_qc.Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="PopStructure.html" class="btn btn-neutral float-left" title="Population Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Helpers.html" class="btn btn-neutral float-right" title="Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom_qc.PopStructure &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>Population Structure &mdash; ideal-genome-qc 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ideal_genom_qc.VariantQC" href="VariantQC.html" />
-    <link rel="prev" title="ideal_genom_qc.AncestryQC" href="AncestryQC.html" /> 
+    <link rel="next" title="VariantQC" href="VariantQC.html" />
+    <link rel="prev" title="AncestryQC" href="AncestryQC.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,9 +45,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">ideal_genom_qc.SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">ideal_genom_qc.AncestryQC</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ideal_genom_qc.PopStructure</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Population Structure</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary"><code class="docutils literal notranslate"><span class="pre">FstSummary</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags"><code class="docutils literal notranslate"><span class="pre">FstSummary.add_population_tags()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.compute_fst()</span></code></a></li>
@@ -63,9 +63,9 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">ideal_genom_qc.VariantQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">ideal_genom_qc.get_references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
 
         </div>
@@ -82,7 +82,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ideal_genom_qc.PopStructure</li>
+      <li class="breadcrumb-item active">Population Structure</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/PopStructure.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -93,7 +93,7 @@
            <div itemprop="articleBody">
              
   <section id="module-ideal_genom_qc.PopStructure">
-<span id="ideal-genom-qc-popstructure"></span><h1>ideal_genom_qc.PopStructure<a class="headerlink" href="#module-ideal_genom_qc.PopStructure" title="Link to this heading"></a></h1>
+<span id="population-structure"></span><h1>Population Structure<a class="headerlink" href="#module-ideal_genom_qc.PopStructure" title="Link to this heading"></a></h1>
 <p>Module to draw plots based on UMAP dimension reduction</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary">
@@ -255,7 +255,7 @@ meaningful analysis.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.generate_plots">
-<span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_hue_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_control_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['euclidean']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">umap_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_hue_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_control_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['euclidean']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">umap_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots" title="Link to this definition"></a></dt>
 <dd><p>Generate UMAP plots with different parameter combinations.
 This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various
 combinations of parameters. It can incorporate color coding based on metadata and case-control markers.</p>
@@ -275,12 +275,13 @@ Default is [0.5].</p></li>
 Default is [‘euclidean’].</p></li>
 <li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility. Must be non-negative.
 Default is None.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – Format of the output plot files. Supported formats are ‘pdf’, ‘png’, ‘jpeg’, etc.</p></li>
 <li><p><strong>umap_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments to pass to the UMAP constructor.
 Default is an empty dictionary.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Saves UMAP plots as JPEG files and parameters as a CSV file in the results directory.</p>
+<dd class="field-even"><p>Saves UMAP plots as pdf files (by default but can be modified) and parameters as a CSV file in the results directory.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -351,8 +352,8 @@ Variants with p-value below this are removed. Must be between 0 and 1.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="AncestryQC.html" class="btn btn-neutral float-left" title="ideal_genom_qc.AncestryQC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="VariantQC.html" class="btn btn-neutral float-right" title="ideal_genom_qc.VariantQC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="AncestryQC.html" class="btn btn-neutral float-left" title="AncestryQC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="VariantQC.html" class="btn btn-neutral float-right" title="VariantQC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

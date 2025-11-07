@@ -1,5 +1,5 @@
-ideal_genom_qc.Helpers
-======================
+Helpers
+=======
 
 .. automodule:: ideal_genom_qc.Helpers
    :members:

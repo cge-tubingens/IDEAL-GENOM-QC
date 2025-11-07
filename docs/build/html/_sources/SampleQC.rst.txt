@@ -1,5 +1,5 @@
-ideal_genom_qc.SampleQC
-=======================
+SampleQC
+========
 
 .. automodule:: ideal_genom_qc.SampleQC
    :members:

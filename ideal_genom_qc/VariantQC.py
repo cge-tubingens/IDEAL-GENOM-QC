@@ -172,19 +172,19 @@ class VariantQC:
         This method performs the following operations:
         1. Calculates available memory for PLINK execution
         2. Runs PLINK's --test-missing command to identify markers with significantly different
-            missing rates between cases and controls
+        missing rates between cases and controls
         3. Generates a .missing file with the results
 
         The method uses approximately 2/3 of available system memory for PLINK execution.
 
-        Returns:
-        --------
-             None
+        Returns
+        -------
+            None
 
-        Side effects:
-        -------------
-            - Creates a .missing file in the results directory
-            - Sets self.case_control_missing path attribute
+        Notes
+        -----
+        - Creates a .missing file in the results directory
+        - Sets self.case_control_missing path attribute
         """
 
 

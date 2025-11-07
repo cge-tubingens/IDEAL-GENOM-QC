@@ -1,5 +1,5 @@
-ideal_genom_qc.AncestryQC
-=========================
+AncestryQC
+==========
 
 .. automodule:: ideal_genom_qc.AncestryQC
    :members:

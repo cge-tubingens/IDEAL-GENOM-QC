@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom_qc.get_references &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>Get References &mdash; ideal-genome-qc 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="ideal_genom_qc.Helpers" href="Helpers.html" /> 
+    <link rel="prev" title="Helpers" href="Helpers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,11 +44,12 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">ideal_genom_qc.SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">ideal_genom_qc.AncestryQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">ideal_genom_qc.VariantQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">ideal_genom_qc.Helpers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ideal_genom_qc.get_references</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Get References</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.get_references.Fetcher1000Genome"><code class="docutils literal notranslate"><span class="pre">Fetcher1000Genome</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.get_references.Fetcher1000Genome.get_1000genomes"><code class="docutils literal notranslate"><span class="pre">Fetcher1000Genome.get_1000genomes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.get_references.Fetcher1000Genome.get_1000genomes_binaries"><code class="docutils literal notranslate"><span class="pre">Fetcher1000Genome.get_1000genomes_binaries()</span></code></a></li>
@@ -76,7 +77,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ideal_genom_qc.get_references</li>
+      <li class="breadcrumb-item active">Get References</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/get_references.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -87,7 +88,7 @@
            <div itemprop="articleBody">
              
   <section id="module-ideal_genom_qc.get_references">
-<span id="ideal-genom-qc-get-references"></span><h1>ideal_genom_qc.get_references<a class="headerlink" href="#module-ideal_genom_qc.get_references" title="Link to this heading"></a></h1>
+<span id="get-references"></span><h1>Get References<a class="headerlink" href="#module-ideal_genom_qc.get_references" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.get_references.Fetcher1000Genome">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.get_references.</span></span><span class="sig-name descname"><span class="pre">Fetcher1000Genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.get_references.Fetcher1000Genome" title="Link to this definition"></a></dt>
@@ -193,7 +194,7 @@ GitHub repository. For build 38, it creates the file from predefined coordinates
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Helpers.html" class="btn btn-neutral float-left" title="ideal_genom_qc.Helpers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Helpers.html" class="btn btn-neutral float-left" title="Helpers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
