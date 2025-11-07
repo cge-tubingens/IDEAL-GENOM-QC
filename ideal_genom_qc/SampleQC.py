@@ -630,10 +630,10 @@ class SampleQC:
             raise FileNotFoundError(f"Missing file: {self.pruned_file}")
 
         # PLINK command
-        plink_cmd1 = f"plink --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
 
         # PLINK command
-        plink_cmd2 = f"plink --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
+        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
