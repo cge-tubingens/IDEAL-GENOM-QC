@@ -1526,8 +1526,8 @@ class SampleQC:
         return fail_het
 
     def report_ibd_analysis(self, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> pd.DataFrame:
-        """
-        Analyze IBD (Identity By Descent) to identify duplicated or related samples.
+        """Analyze IBD (Identity By Descent) to identify duplicated or related samples.
+        
         This method processes IBD analysis results to identify sample pairs with IBD scores
         above a specified threshold, indicating potential duplicates or related individuals.
         For identified pairs, it uses missingness data to determine which sample should be
@@ -1555,7 +1555,7 @@ class SampleQC:
         TypeError
             If ibd_threshold is not a float.
         FileNotFoundError
-            If required input files (*.imiss or *.genome) are not found.
+            If required input files (``*.smiss`` or ``*.genome``) are not found.
         
         Notes
         -----
