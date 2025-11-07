@@ -6,7 +6,7 @@
 ideal-genome-qc documentation
 =============================
 
-**ideal-genom-qc** is a Python library for performing automated and reproducible quality control (QC) on genomic data, with a focus on ancestry, variant filtering, and sample-level QC. It is designed to integrate with modern bioinformatics tools and supports visualizations and report generation.
+**ideal-genom-qc** is a Python library for performing automated and reproducible quality control (QC) on human genomic data for case-control studies. It is designed to integrate with modern bioinformatics tools and supports visualizations and report generation.
 
 Features
 --------
