@@ -5,7 +5,7 @@ import time, gc, psutil
 
 from pathlib import Path
 
-from ideal_genom_qc.Helpers import arg_parser
+from ideal_genom_qc.Helpers import arg_parser, validate_config
 
 from ideal_genom_qc.SampleQC import SampleQC
 from ideal_genom_qc.VariantQC import VariantQC
