@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration Guide &mdash; IDEAL-GENOM-QC v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            IDEAL-GENOM-QC
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-files-overview">Configuration Files Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters-configuration">Parameters Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-qc-parameters">Sample QC Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ancestry-qc-parameters">Ancestry QC Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variant-qc-parameters">Variant QC Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#umap-plotting-parameters">UMAP Plotting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#paths-configuration">Paths Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#steps-configuration">Steps Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-ld-regions">Custom LD Regions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#population-categories">Population Categories</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-tuning">Performance Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">IDEAL-GENOM-QC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Configuration Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration-guide">
+<h1>Configuration Guide<a class="headerlink" href="#configuration-guide" title="Link to this heading"></a></h1>
+<p>This guide provides detailed information about configuring IDEAL-GENOM-QC for your specific needs. Understanding these parameters will help you optimize the quality control process for your genomic data.</p>
+<section id="configuration-files-overview">
+<h2>Configuration Files Overview<a class="headerlink" href="#configuration-files-overview" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM-QC uses three JSON configuration files:</p>
+<ol class="arabic simple">
+<li><p><strong>parameters.json</strong>: QC thresholds and algorithm parameters</p></li>
+<li><p><strong>paths.json</strong>: File and directory paths</p></li>
+<li><p><strong>steps.json</strong>: Pipeline steps to execute</p></li>
+</ol>
+</section>
+<section id="parameters-configuration">
+<h2>Parameters Configuration<a class="headerlink" href="#parameters-configuration" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">parameters.json</span></code> file controls the behavior of each QC module. Each section corresponds to a specific QC step.</p>
+<section id="sample-qc-parameters">
+<h3>Sample QC Parameters<a class="headerlink" href="#sample-qc-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sample_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;rename_snp&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hh_to_missing&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;use_kinship&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;mind&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sex_check&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;het_deviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;kinship&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.354</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ibd_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.185</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Parameter Descriptions:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rename_snp</span></code> (bool): Whether to rename SNPs for consistency</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hh_to_missing</span></code> (bool): Convert heterozygous haploid calls to missing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_kinship</span></code> (bool): Use KING kinship estimation for relatedness</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ind_pair</span></code> (list): LD pruning parameters [window_size, step_size, r2_threshold]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mind</span></code> (float): Maximum missing data rate per individual (0.0-1.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sex_check</span></code> (list): F coefficient thresholds [female_max, male_min]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maf</span></code> (float): Minor allele frequency threshold</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">het_deviation</span></code> (float): Standard deviations from mean heterozygosity</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kinship</span></code> (float): Kinship coefficient threshold for relatedness</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ibd_threshold</span></code> (float): IBD threshold for identifying duplicates</p></li>
+</ul>
+<p><strong>Recommended Values:</strong></p>
+<p>We have recommended the default values based on our experience with case-control studies. Adjust these parameters based on your study design and data quality. It is advisable to run the pipeline with different thresholds and visually inspect the results.</p>
+</section>
+<section id="ancestry-qc-parameters">
+<h3>Ancestry QC Parameters<a class="headerlink" href="#ancestry-qc-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ancestry_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;pca&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ref_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;stu_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;reference_pop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SAS&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;num_pcs&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Parameter Descriptions:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ind_pair</span></code>: LD pruning parameters for PCA</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pca</span></code>: Number of principal components to compute</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maf</span></code>: MAF threshold for variants used in PCA</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ref_threshold</span></code>: SD threshold for reference population outliers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stu_threshold</span></code>: SD threshold for study population outliers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reference_pop</span></code>: Reference population code (EUR, AFR, AMR, EAS, SAS)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_pcs</span></code>: Number of PCs to use for ancestry assignment</p></li>
+</ul>
+<p><strong>Reference Population Codes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EUR</span></code>: European</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AFR</span></code>: African</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AMR</span></code>: Admixed American</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EAS</span></code>: East Asian</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SAS</span></code>: South Asian</p></li>
+</ul>
+</section>
+<section id="variant-qc-parameters">
+<h3>Variant QC Parameters<a class="headerlink" href="#variant-qc-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;variant_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;chr_y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;miss_data_rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;diff_genotype_rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;geno&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hwe&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Parameter Descriptions:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">chr_y</span></code>: Chromosome Y identifier (23 or 24)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">miss_data_rate</span></code>: Maximum missing data rate per variant</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diff_genotype_rate</span></code>: Differential missing rate between cases/controls</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geno</span></code>: Maximum missing genotype rate</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maf</span></code>: Minor allele frequency threshold (very low for rare variants)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hwe</span></code>: Hardy-Weinberg equilibrium p-value threshold</p></li>
+</ul>
+</section>
+<section id="umap-plotting-parameters">
+<h3>UMAP Plotting Parameters<a class="headerlink" href="#umap-plotting-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;umap_plot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;umap_maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_mind&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_geno&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_hwe&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;umap_pca&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;n_neighbors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;chebyshev&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;min_dist&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;random_state&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;case_control_marker&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;color_hue_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_kwargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Parameter Descriptions:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n_neighbors</span></code>: List of neighbor values for UMAP</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metric</span></code>: Distance metrics to try</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_dist</span></code>: Minimum distances for UMAP embedding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code>: Random seed for reproducibility</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">case_control_marker</span></code>: Whether to color by case/control status</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">color_hue_file</span></code>: Optional file for custom sample coloring</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">umap_kwargs</span></code>: Additional UMAP parameters</p></li>
+</ul>
+</section>
+</section>
+<section id="paths-configuration">
+<h2>Paths Configuration<a class="headerlink" href="#paths-configuration" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">paths.json</span></code> file specifies all file and directory locations:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;input_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/inputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;input_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/outputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;high_ld_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/high-LD-regions.txt&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Path Guidelines:</strong></p>
+<ul class="simple">
+<li><p>Use <strong>absolute paths</strong> for reliability</p></li>
+<li><p>Ensure directories exist before running</p></li>
+<li><p>Use consistent naming conventions</p></li>
+<li><p>Avoid spaces and special characters in paths</p></li>
+</ul>
+<p><strong>Docker Paths:</strong></p>
+<p>When using Docker, paths should be relative to the container’s <code class="docutils literal notranslate"><span class="pre">/data</span></code> directory:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;input_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/inputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;input_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/outputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;high_ld_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/dependables/high-LD-regions.txt&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="steps-configuration">
+<h2>Steps Configuration<a class="headerlink" href="#steps-configuration" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">steps.json</span></code> file controls which pipeline steps to execute:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ancestry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;umap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fst&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Step Dependencies:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sample</span></code> → <code class="docutils literal notranslate"><span class="pre">ancestry</span></code> → <code class="docutils literal notranslate"><span class="pre">variant</span></code> → <code class="docutils literal notranslate"><span class="pre">umap</span></code> → <code class="docutils literal notranslate"><span class="pre">fst</span></code></p></li>
+<li><p>You can skip steps, but maintain dependencies</p></li>
+<li><p>Results from previous steps are required for subsequent steps</p></li>
+</ul>
+<p><strong>Common Configurations:</strong></p>
+<p><em>Full Pipeline:</em></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ancestry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;umap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fst&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><em>Sample QC Only:</em></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ancestry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;umap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fst&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<section id="custom-ld-regions">
+<h3>Custom LD Regions<a class="headerlink" href="#custom-ld-regions" title="Link to this heading"></a></h3>
+<p>Provide your own high-LD regions file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># high-LD-regions.txt format
+1   48000000    52000000    # Chromosome, start, end
+2   85000000    100000000
+6   25000000    35000000
+</pre></div>
+</div>
+</section>
+<section id="population-categories">
+<h3>Population Categories<a class="headerlink" href="#population-categories" title="Link to this heading"></a></h3>
+<p>For custom population visualization, create a population file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># population_categories.txt format
+FID1    IID1    EUR
+FID2    IID2    AFR
+FID3    IID3    SAS
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-tuning">
+<h2>Performance Tuning<a class="headerlink" href="#performance-tuning" title="Link to this heading"></a></h2>
+<p><strong>Memory Optimization:</strong></p>
+<ul class="simple">
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">ind_pair</span></code> window size for large datasets</p></li>
+<li><p>Reduce <code class="docutils literal notranslate"><span class="pre">pca</span></code> components if memory is limited</p></li>
+<li><p>Process chromosomes separately for very large datasets</p></li>
+</ul>
+<p><strong>Speed Optimization:</strong></p>
+<ul class="simple">
+<li><p>Use SSD storage for temporary files</p></li>
+<li><p>Increase available CPU cores</p></li>
+<li><p>Consider splitting large datasets</p></li>
+</ul>
+<p><strong>Disk Space Management:</strong></p>
+<ul class="simple">
+<li><p>Monitor intermediate file sizes</p></li>
+<li><p>Clean up temporary files regularly</p></li>
+<li><p>Use compression for archival storage</p></li>
+</ul>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Version Control</strong>: Keep configuration files under version control</p></li>
+<li><p><strong>Documentation</strong>: Document parameter choices and rationale</p></li>
+<li><p><strong>Validation</strong>: Always validate results visually</p></li>
+<li><p><strong>Backup</strong>: Keep copies of successful configurations</p></li>
+<li><p><strong>Testing</strong>: Test parameter changes on small datasets first</p></li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p><strong>Common Configuration Issues:</strong></p>
+<ul class="simple">
+<li><p><strong>Path not found</strong>: Check absolute paths and permissions</p></li>
+<li><p><strong>Parameter out of range</strong>: Verify threshold values are reasonable</p></li>
+<li><p><strong>JSON syntax errors</strong>: Validate JSON format</p></li>
+<li><p><strong>Memory errors</strong>: Reduce dataset size or adjust parameters</p></li>
+</ul>
+<p>See the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting Guide</span></a> guide for more detailed solutions.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; IDEAL-GENOM-QC v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Configuration Guide" href="configuration.html" />
+    <link rel="prev" title="Installation Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            IDEAL-GENOM-QC
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-prepare-your-data">Step 1: Prepare Your Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-configuration-files">Step 2: Configuration Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parameters-json-qc-parameters"><strong>parameters.json</strong> - QC Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#paths-json-file-paths"><strong>paths.json</strong> - File Paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#steps-json-pipeline-steps"><strong>steps.json</strong> - Pipeline Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-running-the-pipeline">Step 3: Running the Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-understanding-results">Step 4: Understanding Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">IDEAL-GENOM-QC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p>This guide will help you get up and running with IDEAL-GENOM-QC quickly. We’ll walk through setting up your first quality control pipeline step by step.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM-QC follows a structured workflow:</p>
+<ol class="arabic simple">
+<li><p><strong>Project Setup</strong>: Organize your data and configuration files</p></li>
+<li><p><strong>Configuration</strong>: Set parameters, paths, and pipeline steps</p></li>
+<li><p><strong>Execution</strong>: Run the QC pipeline</p></li>
+<li><p><strong>Results</strong>: Review outputs and visualizations</p></li>
+</ol>
+</section>
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM-QC expects a specific folder structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>my_project/
+├── inputData/
+│   ├── mydata.bed
+│   ├── mydata.bim
+│   └── mydata.fam
+├── outputData/
+├── configFiles/
+│   ├── parameters.json
+│   ├── paths.json
+│   └── steps.json
+└── dependables/
+    └── high-LD-regions.txt
+</pre></div>
+</div>
+<p><strong>Folder Descriptions:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">inputData/</span></code>: Contains your PLINK binary files (.bed, .bim, .fam)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">outputData/</span></code>: Will contain all pipeline results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">configFiles/</span></code>: Contains configuration files (required)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dependables/</span></code>: Optional files like custom LD regions</p></li>
+</ul>
+</section>
+<section id="step-1-prepare-your-data">
+<h2>Step 1: Prepare Your Data<a class="headerlink" href="#step-1-prepare-your-data" title="Link to this heading"></a></h2>
+<p>Ensure your genetic data is in PLINK binary format:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.bed</span></code>: Binary genotype file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.bim</span></code>: Variant information file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.fam</span></code>: Sample information file</p></li>
+</ul>
+<p>If your data is in a different format, convert it first:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert VCF to PLINK</span>
+plink<span class="w"> </span>--vcf<span class="w"> </span>mydata.vcf<span class="w"> </span>--make-bed<span class="w"> </span>--out<span class="w"> </span>inputData/mydata
+</pre></div>
+</div>
+</section>
+<section id="step-2-configuration-files">
+<h2>Step 2: Configuration Files<a class="headerlink" href="#step-2-configuration-files" title="Link to this heading"></a></h2>
+<p>Create three JSON configuration files in the <code class="docutils literal notranslate"><span class="pre">configFiles/</span></code> directory:</p>
+<section id="parameters-json-qc-parameters">
+<h3><strong>parameters.json</strong> - QC Parameters<a class="headerlink" href="#parameters-json-qc-parameters" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sample_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;rename_snp&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hh_to_missing&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;use_kingship&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;mind&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sex_check&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;het_deviation&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;kingship&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.354</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ibd_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.185</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;ancestry_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;pca&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ref_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;stu_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;reference_pop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SAS&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;num_pcs&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;variant_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;chr_y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;miss_data_rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;diff_genotype_rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;geno&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hwe&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;umap_plot&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;umap_maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_mind&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_geno&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_hwe&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e-8</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;umap_ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;umap_pca&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;n_neighbors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;chebyshev&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;min_dist&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;random_state&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;case_control_marker&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="paths-json-file-paths">
+<h3><strong>paths.json</strong> - File Paths<a class="headerlink" href="#paths-json-file-paths" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;input_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/my_project/inputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;input_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/my_project/outputData&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;output_prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;high_ld_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/full/path/to/my_project/dependables/high-LD-regions.txt&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The paths should be absolute paths to ensure proper file access. In addition, the high-LD-regions.txt is optional; if not provided (or if the path is not correct), the default file included with IDEAL-GENOM-QC will be used.</p>
+</section>
+<section id="steps-json-pipeline-steps">
+<h3><strong>steps.json</strong> - Pipeline Steps<a class="headerlink" href="#steps-json-pipeline-steps" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ancestry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;umap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;fst&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the current version, all steps must be included in the JSON file, even if set to false. It is important to remark that the steps will always be executed in the following order: Sample QC, Ancestry QC, Variant QC, UMAP Plotting, and FST Calculation. Moreover, each step depends on the previous one, meaning that if a step is set to true, all preceding steps must also be set to true or, at least, the resulting files from the previous step must be available in the output folder.</p>
+</section>
+</section>
+<section id="step-3-running-the-pipeline">
+<h2>Step 3: Running the Pipeline<a class="headerlink" href="#step-3-running-the-pipeline" title="Link to this heading"></a></h2>
+<p><strong>Command Line Interface:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--path_params<span class="w"> </span>/path/to/configFiles/parameters.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--file_folders<span class="w"> </span>/path/to/configFiles/paths.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--steps<span class="w"> </span>/path/to/configFiles/steps.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--recompute-merge<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--built<span class="w"> </span><span class="m">38</span>
+</pre></div>
+</div>
+<p><strong>Using Poetry:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--path_params<span class="w"> </span>configFiles/parameters.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--file_folders<span class="w"> </span>configFiles/paths.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--steps<span class="w"> </span>configFiles/steps.json<span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--recompute-merge<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\\</span>
+<span class="w">    </span>--built<span class="w"> </span><span class="m">38</span>
+</pre></div>
+</div>
+<p><strong>Python API:</strong></p>
+<p>A shorter example using the Python API to run Sample QC:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom_qc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleQC</span><span class="p">,</span> <span class="n">AncestryQC</span><span class="p">,</span> <span class="n">VariantQC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Initialize components</span>
+<span class="n">sample_qc</span> <span class="o">=</span> <span class="n">SampleQC</span><span class="p">(</span>
+    <span class="n">input_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;inputData&quot;</span><span class="p">),</span>
+    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;outputData&quot;</span><span class="p">),</span>
+    <span class="n">output_name</span><span class="o">=</span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+    <span class="n">high_ld_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;dependables/high-LD-regions.txt&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Run sample QC</span>
+<span class="n">sample_qc</span><span class="o">.</span><span class="n">execute_sample_qc_pipeline</span><span class="p">(</span>
+    <span class="n">mind</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">sex_check</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+    <span class="n">maf</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">het_deviation</span><span class="o">=</span><span class="mi">3</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-understanding-results">
+<h2>Step 4: Understanding Results<a class="headerlink" href="#step-4-understanding-results" title="Link to this heading"></a></h2>
+<p>After running the pipeline, your <code class="docutils literal notranslate"><span class="pre">outputData/</span></code> folder will contain:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>outputData/
+├── ancestry_results/
+│   ├── clean_files/
+│   ├── fail_samples/
+│   └── ancestryQC_plots/
+├── sample_qc_results/
+│   ├── clean_files/
+│   ├── fail_samples/
+│   └── sampleQC_plots/
+├── variant_qc_results/
+│   ├── clean_files/
+│   ├── fail_samples/
+│   └── variantQC_plots/
+└── umap_plots/
+</pre></div>
+</div>
+<p><strong>Key Output Files:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clean_files/</span></code>: Final cleaned PLINK files ready for GWAS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fail_samples/</span></code>: Lists of samples/variants that failed QC</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*QC_plots/</span></code>: Visualization reports for each QC step</p></li>
+</ul>
+<p><strong>Quality Control Reports:</strong></p>
+<p>Each QC step generates informative plots:</p>
+<ul class="simple">
+<li><p><strong>Sample QC</strong>: Heterozygosity, missing data, kinship plots</p></li>
+<li><p><strong>Ancestry QC</strong>: PCA plots showing population structure</p></li>
+<li><p><strong>Variant QC</strong>: MAF, HWE, missing data distributions</p></li>
+<li><p><strong>UMAP Plots</strong>: Population structure visualization</p></li>
+</ul>
+</section>
+<section id="example-workflow">
+<h2>Example Workflow<a class="headerlink" href="#example-workflow" title="Link to this heading"></a></h2>
+<p>Here’s a complete example using the Python API:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom_qc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleQC</span><span class="p">,</span> <span class="n">AncestryQC</span><span class="p">,</span> <span class="n">VariantQC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="c1"># Load configuration</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;configFiles/parameters.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># Initialize QC components</span>
+<span class="n">base_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="n">sample_qc</span> <span class="o">=</span> <span class="n">SampleQC</span><span class="p">(</span>
+    <span class="n">input_path</span><span class="o">=</span><span class="n">base_path</span> <span class="o">/</span> <span class="s2">&quot;inputData&quot;</span><span class="p">,</span>
+    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="n">base_path</span> <span class="o">/</span> <span class="s2">&quot;outputData&quot;</span><span class="p">,</span>
+    <span class="n">output_name</span><span class="o">=</span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+    <span class="n">high_ld_file</span><span class="o">=</span><span class="n">base_path</span> <span class="o">/</span> <span class="s2">&quot;dependables&quot;</span> <span class="o">/</span> <span class="s2">&quot;high-LD-regions.txt&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Run complete QC pipeline</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running Sample QC...&quot;</span><span class="p">)</span>
+<span class="n">sample_qc</span><span class="o">.</span><span class="n">run_sample_qc</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;sample_qc&#39;</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running Ancestry QC...&quot;</span><span class="p">)</span>
+<span class="n">ancestry_qc</span> <span class="o">=</span> <span class="n">AncestryQC</span><span class="p">(</span>
+    <span class="n">input_path</span><span class="o">=</span><span class="n">base_path</span> <span class="o">/</span> <span class="s2">&quot;outputData&quot;</span> <span class="o">/</span> <span class="s2">&quot;sample_qc_results&quot;</span> <span class="o">/</span> <span class="s2">&quot;clean_files&quot;</span><span class="p">,</span>
+    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;clean_data_after_sample_qc&quot;</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="n">base_path</span> <span class="o">/</span> <span class="s2">&quot;outputData&quot;</span><span class="p">,</span>
+    <span class="n">output_name</span><span class="o">=</span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
+    <span class="n">built</span><span class="o">=</span><span class="s2">&quot;38&quot;</span>
+<span class="p">)</span>
+<span class="n">ancestry_qc</span><span class="o">.</span><span class="n">run_ancestry_qc</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;ancestry_qc&#39;</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;QC Pipeline completed!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Explore the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> for more advanced usage</p></li>
+<li><p>Check the <a class="reference internal" href="configuration.html"><span class="doc">Configuration Guide</span></a> guide for parameter tuning</p></li>
+<li><p>Review the API documentation for each module</p></li>
+<li><p>See the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting Guide</span></a> guide if you encounter issues</p></li>
+</ul>
+<p><strong>Need Help?</strong></p>
+<ul class="simple">
+<li><p>Check our <a class="reference external" href="faq.html">FAQ</a></p></li>
+<li><p>Browse the examples in the <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code> folder</p></li>
+<li><p>Report issues on <a class="reference external" href="https://github.com/cge-tubingens/IDEAL-GENOM-QC/issues">GitHub</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

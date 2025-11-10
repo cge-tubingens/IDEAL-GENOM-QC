@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AncestryQC &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>AncestryQC &mdash; IDEAL-GENOM-QC v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -29,13 +29,16 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            ideal-genome-qc
+            IDEAL-GENOM-QC
           </a>
+              <div class="version">
+                0.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -44,30 +47,47 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">AncestryQC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC"><code class="docutils literal notranslate"><span class="pre">AncestryQC</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study"><code class="docutils literal notranslate"><span class="pre">AncestryQC.merge_reference_study()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca"><code class="docutils literal notranslate"><span class="pre">AncestryQC.run_pca()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.__init__"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_rename_snpid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_filter_prob_snps"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_filter_prob_snps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_ld_pruning()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_chromosome_mismatch"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_chromosome_mismatch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_possition_mismatch"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_possition_mismatch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_allele_flip()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_remove_mismatches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_merge_data()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.draw_pca_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.execute_drop_ancestry_outliers()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.execute_pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.find_ancestry_outliers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.__init__"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.__init__()</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.einvectors"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.einvectors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.eigenvalues"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.eigenvalues</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.ancestry_fails"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.ancestry_fails</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.population_tags"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.population_tags</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_filter_prob_snps"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_filter_prob_snps()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_allele_flip()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_chromosome_mismatch"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_chromosome_mismatch()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_possition_mismatch"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_fix_possition_mismatch()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_ld_pruning()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_merge_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_remove_mismatches()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger.execute_rename_snpid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.execute_pca()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.find_ancestry_outliers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.execute_drop_ancestry_outliers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer.draw_pca_plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC"><code class="docutils literal notranslate"><span class="pre">AncestryQC</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC.__init__"><code class="docutils literal notranslate"><span class="pre">AncestryQC.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study"><code class="docutils literal notranslate"><span class="pre">AncestryQC.merge_reference_study()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca"><code class="docutils literal notranslate"><span class="pre">AncestryQC.run_pca()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -77,14 +97,20 @@
 <li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+</ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">ideal-genome-qc</a>
+          <a href="index.html">IDEAL-GENOM-QC</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -105,215 +131,100 @@
   <section id="module-ideal_genom_qc.AncestryQC">
 <span id="ancestryqc"></span><h1>AncestryQC<a class="headerlink" href="#module-ideal_genom_qc.AncestryQC" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">AncestryQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename_snps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study">
-<span class="sig-name descname"><span class="pre">merge_reference_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study" title="Link to this definition"></a></dt>
-<dd><p>Merge reference and study data by applying quality control filters and merging steps.
-This method performs a series of quality control steps to merge study data with reference data:
-1. Filters problematic SNPs
-2. Performs LD pruning
-3. Fixes chromosome mismatches
-4. Fixes position mismatches
-5. Fixes allele flips
-6. Removes remaining mismatches
-7. Merges the datasets</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ind_pair</strong> (<em>list</em><em>, </em><em>default</em><em> [</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for LD pruning: [window size, step size, r2 threshold]</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>If recompute_merge is False, the method will skip the merging process and expect
-merged data to already exist in the merging directory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If ind_pair is not a list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.run_pca">
-<span class="sig-name descname"><span class="pre">run_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'equal'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca" title="Link to this definition"></a></dt>
-<dd><p>Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.</p>
-<p>This method executes a complete PCA workflow including:
-1. Running the PCA analysis
-2. Identifying ancestry outliers
-3. Removing identified outliers
-4. Generating PCA plots</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ref_population</strong> (<em>str</em>) – Reference population identifier for ancestry comparison</p></li>
-<li><p><strong>pca</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of principal components to calculate (default=10)</p></li>
-<li><p><strong>maf</strong> (<em>float</em><em>, </em><em>optional</em>) – Minor allele frequency threshold for filtering (default=0.01)</p></li>
-<li><p><strong>num_pca</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of principal components to use in outlier detection (default=10)</p></li>
-<li><p><strong>ref_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold for reference population outlier detection (default=4)</p></li>
-<li><p><strong>stu_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold for study population outlier detection (default=4)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Results are saved to specified output directories</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method uses the GenomicOutlierAnalyzer class to perform the analysis and
-saves results in the directories specified during class initialization.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">GenomicOutlierAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merged_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot">
-<span class="sig-name descname"><span class="pre">draw_pca_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_pop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_outliers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pca_plot.svg'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot" title="Link to this definition"></a></dt>
-<dd><p>Generate 2D and 3D PCA plots from eigenvector data and population tags.
-This method creates two PCA visualization plots:
-- A 2D scatter plot showing PC1 vs PC2 colored by super-population
-- A 3D scatter plot showing PC1 vs PC2 vs PC3 colored by super-population</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>plot_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory path where plots will be saved. Defaults to current directory.
-If directory doesn’t exist, plots will be saved in self.output_path</p></li>
-<li><p><strong>plot_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Base name for the plot files. Defaults to ‘pca_plot.jpeg’.
-Final filenames will be prefixed with ‘2D-’ and ‘3D-’</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If plot_dir is not a Path object
-    If plot_name is not a string</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Requires the following class attributes to be set:
-- self.population_tags : Path to population tags file (tab-separated)
-- self.einvectors : Path to eigenvectors file (space-separated)
-- self.output_path : Path to output directory (used if plot_dir doesn’t exist)
-The population tags file should contain columns ‘ID1’, ‘ID2’, and ‘SuperPop’
-The eigenvectors file should contain the principal components data</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers">
-<span class="sig-name descname"><span class="pre">execute_drop_ancestry_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers" title="Link to this definition"></a></dt>
-<dd><p>Drop ancestry outliers from the study data by removing samples identified as ancestry outliers
-using PLINK command line tool.
-This method reads a file containing samples identified as ancestry outliers and creates new
-binary PLINK files excluding these samples.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>output_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory where the cleaned files will be saved. If not provided or doesn’t exist,
-files will be saved in self.output_path.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If output_dir is not a Path object.</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method creates new PLINK binary files (.bed, .bim, .fam) with the suffix ‘-ancestry-cleaned’
-excluding the samples listed in self.ancestry_fails file.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca">
-<span class="sig-name descname"><span class="pre">execute_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca" title="Link to this definition"></a></dt>
-<dd><p>Perform Principal Component Analysis (PCA) on the genetic data using PLINK.</p>
-<p>This method executes PCA on the merged genetic data file, calculating the specified
-number of principal components. It automatically determines the optimal number of
-threads and memory allocation based on system resources.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pca</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of principal components to calculate.
-Must be a positive integer.</p></li>
-<li><p><strong>maf</strong> (<em>float</em><em>, </em><em>default=0.01</em>) – Minor allele frequency threshold for filtering variants.
-Must be between 0 and 0.5.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>TypeError</strong> – If pca is not an integer or maf is not a float</p></li>
-<li><p><strong>ValueError</strong> – If pca is not positive or maf is not between 0 and 0.5</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method creates two output files:
-- {output_name}-pca.eigenvec: Contains the eigenvectors (PC loadings)
-- {output_name}-pca.eigenval: Contains the eigenvalues</p>
-<p>The results are stored in self.einvectors and self.eigenvalues attributes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers">
-<span class="sig-name descname"><span class="pre">find_ancestry_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_pop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fails_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers" title="Link to this definition"></a></dt>
-<dd><p>Identifies ancestry outliers in the dataset based on PCA analysis.
-This method analyzes population structure using principal component analysis (PCA) and identifies
-samples that are potential ancestry outliers based on their distance from reference populations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ref_threshold</strong> (<em>float</em>) – Distance threshold for reference population samples</p></li>
-<li><p><strong>stu_threshold</strong> (<em>float</em>) – Distance threshold for study population samples</p></li>
-<li><p><strong>reference_pop</strong> (<em>str</em>) – Name of the reference population to compare against</p></li>
-<li><p><strong>num_pcs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of principal components to use in the analysis (default is 2)</p></li>
-<li><p><strong>fails_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory path to save failed samples information (default is empty Path)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Results are stored in the ancestry_fails attribute</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – If parameters are not of the expected type</p></li>
-<li><p><strong>ValueError</strong> – If num_pcs is not a positive integer</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method requires:
-- A reference tags file with population information
-- An eigenvectors file from PCA analysis
-- Both files should be previously set in the class instance
-The results are saved in:
-- population_tags: CSV file with population assignments
-- ancestry_fails: List of samples identified as ancestry outliers</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">ReferenceGenomicMerger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">ReferenceGenomicMerger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize AncestryQC class.
+This class performs ancestry quality control on genetic data by comparing study samples against reference populations.</p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>input_path: Path</dt><dd><p>Path to directory containing input files</p>
+</dd>
+<dt>input_name: str</dt><dd><p>Name of input file without extension</p>
+</dd>
+<dt>output_path: Path</dt><dd><p>Path to directory for output files</p>
+</dd>
+<dt>output_name: str</dt><dd><p>Name for output files without extension</p>
+</dd>
+<dt>high_ld_regions: Path</dt><dd><p>Path to file containing high LD regions to exclude</p>
+</dd>
+<dt>reference_files: dict</dt><dd><p>Dictionary containing paths to reference population files</p>
+</dd>
+<dt>built: str (optional)</dt><dd><p>Genome build version (‘37’ or ‘38’). Defaults to ‘38’</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>TypeError:</dt><dd><p>If input arguments are not of correct type</p>
+</dd>
+<dt>ValueError:</dt><dd><p>If genome build version is not ‘37’ or ‘38’</p>
+</dd>
+<dt>FileNotFoundError:</dt><dd><p>If required input files/directories do not exist</p>
+</dd>
+</dl>
+</section>
+<section id="attributes">
+<h2>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>reference_AC_GT_filtered: Filtered reference allele counts and genotypes
+study_AC_GT_filtered: Filtered study allele counts and genotypes
+pruned_reference: LD-pruned reference data
+pruned_study: LD-pruned study data
+reference_fixed_chr: Reference data with fixed chromosomes
+reference_fixed_pos: Reference data with fixed positions
+reference_flipped: Reference data with flipped alleles
+reference_cleaned: Final cleaned reference data</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid">
+<span class="sig-name descname"><span class="pre">execute_rename_snpid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_rename_snpid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid" title="Link to this definition"></a></dt>
+<dd><p>Executes the SNP ID renaming process using PLINK2.
+This method renames SNP IDs in the PLINK binary files to a standardized format of ‘chr:pos:a1:a2’.
+The renaming is performed using PLINK2’s –set-all-var-ids parameter.</p>
+<section id="parameter">
+<h2>Parameter:<a class="headerlink" href="#parameter" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>rename (bool, optional): Flag to control whether SNP renaming should be performed.</dt><dd><p>Defaults to True.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>None</p>
+</div></blockquote>
+</section>
+<section id="id1">
+<h2>Raises:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>TypeError: If rename parameter is not a boolean.</p>
+</div></blockquote>
+</section>
+<section id="notes">
+<h2>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>The renamed files will be saved with ‘-renamed’ suffix</p></li>
+<li><p>Thread count is optimized based on available CPU cores</p></li>
+<li><p>The new SNP ID format will be: chromosome:position:allele1:allele2</p></li>
+<li><p>Sets self.renamed_snps to True if renaming is performed</p></li>
+</ul>
+</div></blockquote>
+</section>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_filter_prob_snps">
-<span class="sig-name descname"><span class="pre">execute_filter_prob_snps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_filter_prob_snps" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute_filter_prob_snps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_filter_prob_snps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_filter_prob_snps" title="Link to this definition"></a></dt>
 <dd><p>Executes the filtering of problematic SNPs (A-&gt;T and C-&gt;G) from both study and reference data.
 This method performs the following operations:
 1. Identifies and filters A-&gt;T and C-&gt;G SNPs from study data
@@ -321,8 +232,8 @@ This method performs the following operations:
 3. Creates new PLINK binary files excluding the identified problematic SNPs
 4. Uses maximum available CPU threads (total cores - 2) and 2/3 of available memory
 The method handles both renamed and original SNP scenarios, determined by self.renamed_snps.</p>
-<section id="returns">
-<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<section id="id2">
+<h2>Returns:<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
@@ -350,47 +261,46 @@ The method handles both renamed and original SNP scenarios, determined by self.r
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip">
-<span class="sig-name descname"><span class="pre">execute_fix_allele_flip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip" title="Link to this definition"></a></dt>
-<dd><p>Executes the allele flipping process between study data and reference panel.</p>
-<p>This method performs the following steps:
-1. Identifies SNPs requiring allele flipping between study and reference data
-2. Creates a list of SNPs to flip
-3. Generates a new reference panel with flipped alleles using PLINK</p>
-<p>The method uses multi-threading capabilities based on available CPU cores,
-reserving 2 cores for system processes when possible.</p>
-<section id="id1">
-<h2>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
-</section>
-<section id="id2">
-<h2>Side Effects:<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><p>Creates a .toFlip file containing SNPs requiring allele flipping</p></li>
-<li><p>Generates new PLINK binary files (.bed, .bim, .fam) with flipped alleles</p></li>
-<li><p>Logs the number of SNPs requiring flipping</p></li>
-<li><p>Updates self.reference_flipped with the path to new flipped reference files</p></li>
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning">
+<span class="sig-name descname"><span class="pre">execute_ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_ld_pruning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning" title="Link to this definition"></a></dt>
+<dd><p>Execute linkage disequilibrium (LD) pruning on study and reference data.</p>
+<p>This method performs LD-based pruning using PLINK to remove highly correlated SNPs
+from both study and reference datasets. The pruning is done using a sliding window
+approach where SNPs are removed based on their pairwise correlation (r²).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind_pair</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – <p>A list containing three elements:</p>
+<ul class="simple">
+<li><p>ind_pair[0] (int): Window size in SNPs</p></li>
+<li><p>ind_pair[1] (int): Number of SNPs to shift the window at each step</p></li>
+<li><p>ind_pair[2] (float): r² threshold for pruning</p></li>
 </ul>
-</div></blockquote>
-</section>
-<section id="dependencies">
-<h2>Dependencies:<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><p>PLINK must be installed and accessible in system PATH</p></li>
-<li><p>Requires valid PLINK binary files for both study and reference data</p></li>
-<li><p>Requires write permissions in output directory</p></li>
+</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If ind_pair is not a list.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If first two elements of ind_pair are not integers.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If third element of ind_pair is not a float.</p></li>
 </ul>
-</div></blockquote>
-</section>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Uses PLINK’s <cite>–indep-pairwise</cite> command for pruning.</p></li>
+<li><p>Excludes high LD regions specified in <cite>self.high_ld_regions</cite>.</p></li>
+<li><p>Creates pruned datasets for both study and reference data.</p></li>
+<li><p>Updates <cite>self.pruned_reference</cite> and <cite>self.pruned_study</cite> with paths to pruned files.</p></li>
+<li><p>Uses all available CPU threads except 2 for processing.</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_chromosome_mismatch">
-<span class="sig-name descname"><span class="pre">execute_fix_chromosome_mismatch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_chromosome_mismatch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute_fix_chromosome_mismatch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_fix_chromosome_mismatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_chromosome_mismatch" title="Link to this definition"></a></dt>
 <dd><p>Fix chromosome mismatch between study data and reference panel.</p>
 <p>This method executes PLINK commands to correct any chromosome mismatches between the study data
 and reference panel datasets. It identifies mismatches using internal methods and updates
@@ -411,14 +321,14 @@ the chromosome assignments in the reference panel to match the study data.</p>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ValueError</strong> – If pruned_study or pruned_reference is None, meaning execute_ld_pruning() was not called first</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If pruned_study or pruned_reference is None, meaning execute_ld_pruning() was not called first</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_possition_mismatch">
-<span class="sig-name descname"><span class="pre">execute_fix_possition_mismatch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_possition_mismatch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute_fix_possition_mismatch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_fix_possition_mismatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_possition_mismatch" title="Link to this definition"></a></dt>
 <dd><p>Fixes position mismatches between study data and reference panel.</p>
 <p>This method executes PLINK commands to update the positions of SNPs in the reference panel
 to match those in the study data. It processes previously identified position mismatches
@@ -444,8 +354,8 @@ and creates new binary PLINK files with corrected positions.</p>
 </ul>
 </div></blockquote>
 </section>
-<section id="id5">
-<h2>Dependencies:<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="dependencies">
+<h2>Dependencies:<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
 <li><p>Requires PLINK to be installed and accessible</p></li>
@@ -457,66 +367,39 @@ and creates new binary PLINK files with corrected positions.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning">
-<span class="sig-name descname"><span class="pre">execute_ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_ld_pruning" title="Link to this definition"></a></dt>
-<dd><p>Execute linkage disequilibrium (LD) pruning on study and reference data.</p>
-<p>This method performs LD-based pruning using PLINK to remove highly correlated SNPs
-from both study and reference datasets. The pruning is done using a sliding window
-approach where SNPs are removed based on their pairwise correlation (r²).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ind_pair</strong> (<em>list</em>) – <p>A list containing three elements:</p>
-<ul class="simple">
-<li><p>ind_pair[0] (int): Window size in SNPs</p></li>
-<li><p>ind_pair[1] (int): Number of SNPs to shift the window at each step</p></li>
-<li><p>ind_pair[2] (float): r² threshold for pruning</p></li>
-</ul>
-</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – If ind_pair is not a list.</p></li>
-<li><p><strong>TypeError</strong> – If first two elements of ind_pair are not integers.</p></li>
-<li><p><strong>TypeError</strong> – If third element of ind_pair is not a float.</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Uses PLINK’s <cite>–indep-pairwise</cite> command for pruning.</p></li>
-<li><p>Excludes high LD regions specified in <cite>self.high_ld_regions</cite>.</p></li>
-<li><p>Creates pruned datasets for both study and reference data.</p></li>
-<li><p>Updates <cite>self.pruned_reference</cite> and <cite>self.pruned_study</cite> with paths to pruned files.</p></li>
-<li><p>Uses all available CPU threads except 2 for processing.</p></li>
-</ul>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data">
-<span class="sig-name descname"><span class="pre">execute_merge_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data" title="Link to this definition"></a></dt>
-<dd><p>Merge study and reference data using PLINK.</p>
-<p>This method merges the pruned study data with the cleaned reference data using PLINK’s
-–bmerge functionality. It automatically determines the optimal number of threads to use
-based on available CPU cores.</p>
-<p>The method:
-1. Calculates optimal thread count (CPU count - 2 or half of available cores)
-2. Constructs PLINK command for merging datasets
-3. Executes the merge operation via shell command</p>
-<section id="id6">
-<h2>Returns:<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip">
+<span class="sig-name descname"><span class="pre">execute_fix_allele_flip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_fix_allele_flip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_fix_allele_flip" title="Link to this definition"></a></dt>
+<dd><p>Executes the allele flipping process between study data and reference panel.</p>
+<p>This method performs the following steps:
+1. Identifies SNPs requiring allele flipping between study and reference data
+2. Creates a list of SNPs to flip
+3. Generates a new reference panel with flipped alleles using PLINK</p>
+<p>The method uses multi-threading capabilities based on available CPU cores,
+reserving 2 cores for system processes when possible.</p>
+<section id="id5">
+<h2>Returns:<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
 </section>
-<section id="id7">
-<h2>Side effects:<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="id6">
+<h2>Side Effects:<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
-<li><p>Creates merged PLINK binary files (.bed, .bim, .fam) in the output directory</p></li>
-<li><p>Logs the merge operation</p></li>
+<li><p>Creates a .toFlip file containing SNPs requiring allele flipping</p></li>
+<li><p>Generates new PLINK binary files (.bed, .bim, .fam) with flipped alleles</p></li>
+<li><p>Logs the number of SNPs requiring flipping</p></li>
+<li><p>Updates self.reference_flipped with the path to new flipped reference files</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id7">
+<h2>Dependencies:<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>PLINK must be installed and accessible in system PATH</p></li>
+<li><p>Requires valid PLINK binary files for both study and reference data</p></li>
+<li><p>Requires write permissions in output directory</p></li>
 </ul>
 </div></blockquote>
 </section>
@@ -524,7 +407,7 @@ based on available CPU cores.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches">
-<span class="sig-name descname"><span class="pre">execute_remove_mismatches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute_remove_mismatches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_remove_mismatches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_remove_mismatches" title="Link to this definition"></a></dt>
 <dd><p>Removes mismatched SNPs from the reference data based on allele comparisons between study and reference datasets.</p>
 <p>This method performs the following steps:
 1. Determines optimal thread count for processing
@@ -551,41 +434,351 @@ based on available CPU cores.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid">
-<span class="sig-name descname"><span class="pre">execute_rename_snpid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_rename_snpid" title="Link to this definition"></a></dt>
-<dd><p>Executes the SNP ID renaming process using PLINK2.
-This method renames SNP IDs in the PLINK binary files to a standardized format of ‘chr:pos:a1:a2’.
-The renaming is performed using PLINK2’s –set-all-var-ids parameter.</p>
-<section id="parameter">
-<h2>Parameter:<a class="headerlink" href="#parameter" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>rename (bool, optional): Flag to control whether SNP renaming should be performed.</dt><dd><p>Defaults to True.</p>
-</dd>
-</dl>
-</section>
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data">
+<span class="sig-name descname"><span class="pre">execute_merge_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#ReferenceGenomicMerger.execute_merge_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger.execute_merge_data" title="Link to this definition"></a></dt>
+<dd><p>Merge study and reference data using PLINK.</p>
+<p>This method merges the pruned study data with the cleaned reference data using PLINK’s
+–bmerge functionality. It automatically determines the optimal number of threads to use
+based on available CPU cores.</p>
+<p>The method:
+1. Calculates optimal thread count (CPU count - 2 or half of available cores)
+2. Constructs PLINK command for merging datasets
+3. Executes the merge operation via shell command</p>
 <section id="id10">
 <h2>Returns:<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
 </section>
-<section id="raises">
-<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>TypeError: If rename parameter is not a boolean.</p>
-</div></blockquote>
-</section>
-<section id="notes">
-<h2>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<section id="id11">
+<h2>Side effects:<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
 <blockquote>
 <div><ul class="simple">
-<li><p>The renamed files will be saved with ‘-renamed’ suffix</p></li>
-<li><p>Thread count is optimized based on available CPU cores</p></li>
-<li><p>The new SNP ID format will be: chromosome:position:allele1:allele2</p></li>
-<li><p>Sets self.renamed_snps to True if renaming is performed</p></li>
+<li><p>Creates merged PLINK binary files (.bed, .bim, .fam) in the output directory</p></li>
+<li><p>Logs the merge operation</p></li>
 </ul>
 </div></blockquote>
 </section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">GenomicOutlierAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">merged_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">merged_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize GenomicOutlierAnalyzer object with input and output parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<em>Path</em>) – Path to input directory containing files to process</p></li>
+<li><p><strong>input_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of input file</p></li>
+<li><p><strong>merged_file</strong> (<em>Path</em>) – Path to merged genotype file</p></li>
+<li><p><strong>reference_tags</strong> (<em>Path</em>) – Path to file containing reference population tags</p></li>
+<li><p><strong>output_path</strong> (<em>Path</em>) – Path to output directory</p></li>
+<li><p><strong>output_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name for output files</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.einvectors">
+<span class="sig-name descname"><span class="pre">einvectors</span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.einvectors" title="Link to this definition"></a></dt>
+<dd><p>Principal component eigenvectors, initialized as None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.eigenvalues">
+<span class="sig-name descname"><span class="pre">eigenvalues</span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.eigenvalues" title="Link to this definition"></a></dt>
+<dd><p>Principal component eigenvalues, initialized as None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.ancestry_fails">
+<span class="sig-name descname"><span class="pre">ancestry_fails</span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.ancestry_fails" title="Link to this definition"></a></dt>
+<dd><p>List of samples failing ancestry QC, initialized as None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.population_tags">
+<span class="sig-name descname"><span class="pre">population_tags</span></span><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.population_tags" title="Link to this definition"></a></dt>
+<dd><p>DataFrame containing population reference tags, initialized as None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)">pandas.DataFrame</a>, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca">
+<span class="sig-name descname"><span class="pre">execute_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer.execute_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_pca" title="Link to this definition"></a></dt>
+<dd><p>Perform Principal Component Analysis (PCA) on the genetic data using PLINK.</p>
+<p>This method executes PCA on the merged genetic data file, calculating the specified
+number of principal components. It automatically determines the optimal number of
+threads and memory allocation based on system resources.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pca</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=10</em>) – Number of principal components to calculate.
+Must be a positive integer.</p></li>
+<li><p><strong>maf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.01</em>) – Minor allele frequency threshold for filtering variants.
+Must be between 0 and 0.5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If pca is not an integer or maf is not a float</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If pca is not positive or maf is not between 0 and 0.5</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method creates two output files:
+- {output_name}-pca.eigenvec: Contains the eigenvectors (PC loadings)
+- {output_name}-pca.eigenval: Contains the eigenvalues</p>
+<p>The results are stored in self.einvectors and self.eigenvalues attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers">
+<span class="sig-name descname"><span class="pre">find_ancestry_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_pop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fails_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer.find_ancestry_outliers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.find_ancestry_outliers" title="Link to this definition"></a></dt>
+<dd><p>Identifies ancestry outliers in the dataset based on PCA analysis.
+This method analyzes population structure using principal component analysis (PCA) and identifies
+samples that are potential ancestry outliers based on their distance from reference populations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Distance threshold for reference population samples</p></li>
+<li><p><strong>stu_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Distance threshold for study population samples</p></li>
+<li><p><strong>reference_pop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the reference population to compare against</p></li>
+<li><p><strong>num_pcs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of principal components to use in the analysis (default is 2)</p></li>
+<li><p><strong>fails_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory path to save failed samples information (default is empty Path)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in the ancestry_fails attribute</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If parameters are not of the expected type</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If num_pcs is not a positive integer</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method requires:
+- A reference tags file with population information
+- An eigenvectors file from PCA analysis
+- Both files should be previously set in the class instance
+The results are saved in:
+- population_tags: CSV file with population assignments
+- ancestry_fails: List of samples identified as ancestry outliers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers">
+<span class="sig-name descname"><span class="pre">execute_drop_ancestry_outliers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer.execute_drop_ancestry_outliers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers" title="Link to this definition"></a></dt>
+<dd><p>Drop ancestry outliers from the study data by removing samples identified as ancestry outliers
+using PLINK command line tool.
+This method reads a file containing samples identified as ancestry outliers and creates new
+binary PLINK files excluding these samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory where the cleaned files will be saved. If not provided or doesn’t exist,
+files will be saved in self.output_path.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If output_dir is not a Path object.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method creates new PLINK binary files (.bed, .bim, .fam) with the suffix ‘-ancestry-cleaned’
+excluding the samples listed in self.ancestry_fails file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot">
+<span class="sig-name descname"><span class="pre">draw_pca_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_pop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_outliers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pca_plot.svg'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#GenomicOutlierAnalyzer.draw_pca_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer.draw_pca_plot" title="Link to this definition"></a></dt>
+<dd><p>Generate 2D and 3D PCA plots from eigenvector data and population tags.
+This method creates two PCA visualization plots:
+- A 2D scatter plot showing PC1 vs PC2 colored by super-population
+- A 3D scatter plot showing PC1 vs PC2 vs PC3 colored by super-population</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plot_dir</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory path where plots will be saved. Defaults to current directory.
+If directory doesn’t exist, plots will be saved in self.output_path</p></li>
+<li><p><strong>plot_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Base name for the plot files. Defaults to ‘pca_plot.jpeg’.
+Final filenames will be prefixed with ‘2D-’ and ‘3D-’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If plot_dir is not a Path object
+    If plot_name is not a string</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Requires the following class attributes to be set:
+- self.population_tags : Path to population tags file (tab-separated)
+- self.einvectors : Path to eigenvectors file (space-separated)
+- self.output_path : Path to output directory (used if plot_dir doesn’t exist)
+The population tags file should contain columns ‘ID1’, ‘ID2’, and ‘SuperPop’
+The eigenvectors file should contain the principal components data</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.AncestryQC.</span></span><span class="sig-name descname"><span class="pre">AncestryQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename_snps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#AncestryQC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename_snps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#AncestryQC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize AncestryQC class.
+This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
+and running principal component analysis.</p>
+<section id="id12">
+<h2>Parameters:<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>input_path: Path</dt><dd><p>Path to directory containing input files</p>
+</dd>
+<dt>input_name: str</dt><dd><p>Base name of input files (without extension)</p>
+</dd>
+<dt>output_path: Path</dt><dd><p>Path to directory where output files will be saved</p>
+</dd>
+<dt>output_name: str</dt><dd><p>Base name for output files</p>
+</dd>
+<dt>high_ld_file: Path</dt><dd><p>Path to file containing high LD regions to exclude</p>
+</dd>
+<dt>reference_files: dict (optional)</dt><dd><p>Dictionary with paths to reference files. Must contain ‘bim’, ‘bed’, ‘fam’ and ‘psam’ keys.
+If not provided, will download 1000 Genomes reference files. Defaults to empty dict.</p>
+</dd>
+<dt>recompute_merge: bool (optional):</dt><dd><p>Whether to recompute merge with reference even if merged files exist. Defaults to True.</p>
+</dd>
+<dt>built: str (optional)</dt><dd><p>Genome build version, either ‘37’ or ‘38’. Defaults to ‘38’.</p>
+</dd>
+<dt>rename_snps: bool (optional):</dt><dd><p>Whether to rename SNPs to avoid duplicates during merge. Defaults to False.</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h2>Raises:<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>TypeError: If input arguments are not of expected types
+ValueError: If built is not ‘37’ or ‘38’
+FileNotFoundError: If input_path or output_path do not exist</p>
+</div></blockquote>
+</section>
+<section id="note">
+<h2>Note:<a class="headerlink" href="#note" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>Creates the following directory structure under output_path:
+- ancestry_qc_results/</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>merging/</p></li>
+<li><p>plots/</p></li>
+<li><p>fail_samples/</p></li>
+<li><p>clean_files/</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study">
+<span class="sig-name descname"><span class="pre">merge_reference_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#AncestryQC.merge_reference_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.merge_reference_study" title="Link to this definition"></a></dt>
+<dd><p>Merge reference and study data by applying quality control filters and merging steps.
+This method performs a series of quality control steps to merge study data with reference data:
+1. Filters problematic SNPs
+2. Performs LD pruning
+3. Fixes chromosome mismatches
+4. Fixes position mismatches
+5. Fixes allele flips
+6. Removes remaining mismatches
+7. Merges the datasets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind_pair</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>default</em><em> [</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for LD pruning: [window size, step size, r2 threshold]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If recompute_merge is False, the method will skip the merging process and expect
+merged data to already exist in the merging directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If ind_pair is not a list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.AncestryQC.AncestryQC.run_pca">
+<span class="sig-name descname"><span class="pre">run_pca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_population</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stu_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'equal'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'equal'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/AncestryQC.html#AncestryQC.run_pca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.AncestryQC.AncestryQC.run_pca" title="Link to this definition"></a></dt>
+<dd><p>Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.</p>
+<p>This method executes a complete PCA workflow including:
+1. Running the PCA analysis
+2. Identifying ancestry outliers
+3. Removing identified outliers
+4. Generating PCA plots</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_population</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Reference population identifier for ancestry comparison</p></li>
+<li><p><strong>pca</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of principal components to calculate (default=10)</p></li>
+<li><p><strong>maf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minor allele frequency threshold for filtering (default=0.01)</p></li>
+<li><p><strong>num_pca</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of principal components to use in outlier detection (default=10)</p></li>
+<li><p><strong>ref_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold for reference population outlier detection (default=4)</p></li>
+<li><p><strong>stu_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold for study population outlier detection (default=4)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are saved to specified output directories</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method uses the GenomicOutlierAnalyzer class to perform the analysis and
+saves results in the directories specified during class initialization.</p>
 </dd></dl>
 
 </dd></dl>

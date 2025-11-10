@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation Guide &mdash; IDEAL-GENOM-QC v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="prev" title="IDEAL-GENOM-QC Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            IDEAL-GENOM-QC
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-plink">Installing PLINK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-ideal-genom-qc">Installing IDEAL-GENOM-QC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-pypi-installation-recommended">Option 1: PyPI Installation (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-development-installation">Option 2: Development Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-3-conda-installation">Option 3: Conda Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-installation">Docker Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">IDEAL-GENOM-QC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation-guide">
+<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Link to this heading"></a></h1>
+<section id="system-requirements">
+<h2>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h2>
+<p>Before installing IDEAL-GENOM-QC, ensure you have the following prerequisites:</p>
+<dl class="simple">
+<dt><strong>Software Dependencies</strong></dt><dd><ul class="simple">
+<li><p>Python 3.8 or higher</p></li>
+<li><p>PLINK 1.9 (required for QC operations)</p></li>
+<li><p>PLINK 2.0 (required for QC operations)</p></li>
+</ul>
+</dd>
+<dt><strong>Hardware Requirements</strong></dt><dd><ul class="simple">
+<li><p>Minimum 8GB RAM (16GB recommended for large datasets)</p></li>
+<li><p>At least 10GB free disk space</p></li>
+<li><p>Multi-core processor recommended</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="installing-plink">
+<h2>Installing PLINK<a class="headerlink" href="#installing-plink" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM-QC requires both PLINK 1.9 and PLINK 2.0 to be installed and accessible in your system PATH.</p>
+<p><strong>On Ubuntu/Debian:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install PLINK 1.9</span>
+wget<span class="w"> </span>https://s3.amazonaws.com/plink1-assets/plink_linux_x86_64_20231211.zip
+unzip<span class="w"> </span>plink_linux_x86_64_20231211.zip
+sudo<span class="w"> </span>mv<span class="w"> </span>plink<span class="w"> </span>/usr/local/bin/
+
+<span class="c1"># Install PLINK 2.0</span>
+wget<span class="w"> </span>https://s3.amazonaws.com/plink2-assets/alpha5/plink2_linux_x86_64_20231212.zip
+unzip<span class="w"> </span>plink2_linux_x86_64_20231212.zip
+sudo<span class="w"> </span>mv<span class="w"> </span>plink2<span class="w"> </span>/usr/local/bin/
+</pre></div>
+</div>
+<p><strong>On macOS and Windows</strong></p>
+<p>For PLINK1.9 and PLINK2.0 installation instructions, please refer to the official PLINK website: <cite>https://www.cog-genomics.org/plink/1.9/</cite> and <cite>https://www.cog-genomics.org/plink/2.0/</cite> respectively.</p>
+<p><strong>Verify Installation:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>plink<span class="w"> </span>--version
+plink2<span class="w"> </span>--version
+</pre></div>
+</div>
+</section>
+<section id="installing-ideal-genom-qc">
+<h2>Installing IDEAL-GENOM-QC<a class="headerlink" href="#installing-ideal-genom-qc" title="Link to this heading"></a></h2>
+<section id="option-1-pypi-installation-recommended">
+<h3>Option 1: PyPI Installation (Recommended)<a class="headerlink" href="#option-1-pypi-installation-recommended" title="Link to this heading"></a></h3>
+<p>Install the stable version from PyPI:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>ideal-genom-qc
+</pre></div>
+</div>
+</section>
+<section id="option-2-development-installation">
+<h3>Option 2: Development Installation<a class="headerlink" href="#option-2-development-installation" title="Link to this heading"></a></h3>
+<p>For the latest features and development version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
+<span class="nb">cd</span><span class="w"> </span>IDEAL-GENOM-QC
+</pre></div>
+</div>
+<p>Please, be aware that the development version may be unstable and it may have some bugs.</p>
+<p><strong>Using Poetry (Recommended):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install Poetry if not already installed</span>
+curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-
+
+<span class="c1"># Install dependencies</span>
+poetry<span class="w"> </span>install
+
+<span class="c1"># Activate the virtual environment</span>
+poetry<span class="w"> </span>shell
+</pre></div>
+</div>
+<p><strong>Using pip:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="option-3-conda-installation">
+<h3>Option 3: Conda Installation<a class="headerlink" href="#option-3-conda-installation" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a new conda environment</span>
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ideal-genom-qc<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+conda<span class="w"> </span>activate<span class="w"> </span>ideal-genom-qc
+
+<span class="c1"># Install from PyPI</span>
+pip<span class="w"> </span>install<span class="w"> </span>ideal-genom-qc
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker-installation">
+<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Link to this heading"></a></h2>
+<p>For containerized deployment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the Docker image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>cge-tubingens/ideal-genom-qc:latest
+
+<span class="c1"># Or build from source</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
+<span class="nb">cd</span><span class="w"> </span>IDEAL-GENOM-QC
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ideal-genom-qc<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading"></a></h2>
+<p>Test your installation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ideal_genom_qc</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ideal_genom_qc</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p><strong>Common Issues:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>PLINK not found</strong>: Ensure PLINK is installed and in your PATH</p></li>
+<li><p><strong>Permission errors</strong>: Use <cite>pip install –user</cite> for user-only installation</p></li>
+<li><p><strong>Poetry issues</strong>: Update Poetry to the latest version (2.0+)</p></li>
+</ol>
+<p><strong>Getting Help:</strong></p>
+<ul class="simple">
+<li><p>Check the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting Guide</span></a> guide</p></li>
+<li><p>Report issues on <a class="reference external" href="https://github.com/cge-tubingens/IDEAL-GENOM-QC/issues">GitHub</a></p></li>
+<li><p>Contact the development team</p></li>
+</ul>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>After installation, proceed to the <a class="reference internal" href="getting_started.html"><span class="doc">Getting Started</span></a> guide to learn how to use IDEAL-GENOM-QC.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="IDEAL-GENOM-QC Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

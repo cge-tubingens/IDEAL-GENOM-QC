@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Population Structure &mdash; ideal-genome-qc 0.1.0 documentation</title>
+  <title>Population Structure &mdash; IDEAL-GENOM-QC v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -29,13 +29,16 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            ideal-genome-qc
+            IDEAL-GENOM-QC
           </a>
+              <div class="version">
+                0.1.0
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -44,21 +47,31 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Population Structure</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary"><code class="docutils literal notranslate"><span class="pre">FstSummary</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags"><code class="docutils literal notranslate"><span class="pre">FstSummary.add_population_tags()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.compute_fst()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.merge_reference_study"><code class="docutils literal notranslate"><span class="pre">FstSummary.merge_reference_study()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.report_fst()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot"><code class="docutils literal notranslate"><span class="pre">UMAPplot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.__init__"><code class="docutils literal notranslate"><span class="pre">UMAPplot.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.ld_pruning"><code class="docutils literal notranslate"><span class="pre">UMAPplot.ld_pruning()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.compute_pcas"><code class="docutils literal notranslate"><span class="pre">UMAPplot.compute_pcas()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots"><code class="docutils literal notranslate"><span class="pre">UMAPplot.generate_plots()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.UMAPplot.ld_pruning"><code class="docutils literal notranslate"><span class="pre">UMAPplot.ld_pruning()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary"><code class="docutils literal notranslate"><span class="pre">FstSummary</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.__init__"><code class="docutils literal notranslate"><span class="pre">FstSummary.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.merge_reference_study"><code class="docutils literal notranslate"><span class="pre">FstSummary.merge_reference_study()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags"><code class="docutils literal notranslate"><span class="pre">FstSummary.add_population_tags()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.compute_fst()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst"><code class="docutils literal notranslate"><span class="pre">FstSummary.report_fst()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -67,14 +80,20 @@
 <li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+</ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">ideal-genome-qc</a>
+          <a href="index.html">IDEAL-GENOM-QC</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -96,12 +115,225 @@
 <span id="population-structure"></span><h1>Population Structure<a class="headerlink" href="#module-ideal_genom_qc.PopStructure" title="Link to this heading"></a></h1>
 <p>Module to draw plots based on UMAP dimension reduction</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.PopStructure.</span></span><span class="sig-name descname"><span class="pre">UMAPplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#UMAPplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#UMAPplot.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize UMAPplot object for population structure analysis.
+This class handles the creation of UMAP plots for genetic data, managing input/output paths
+and configuration for the analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<em>Path</em>) – Path to the directory containing input files</p></li>
+<li><p><strong>input_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the input file</p></li>
+<li><p><strong>output_path</strong> (<em>Path</em>) – Path to the directory where results will be saved</p></li>
+<li><p><strong>output_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name for the output files</p></li>
+<li><p><strong>high_ld_file</strong> (<em>Path</em>) – Path to the file containing high LD regions</p></li>
+<li><p><strong>built</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Genome build version, either ‘37’ or ‘38’ (default is ‘38’)</p></li>
+<li><p><strong>recompute_pca</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to recompute PCA analysis (default is True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If input types are incorrect for any parameter</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If built is not ‘37’ or ‘38’</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If input_path or output_path do not exist</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If high_ld_file is not found, it will be automatically fetched from the package.
+Creates ‘umap_results’ and ‘plots’ directories in the output path.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.ld_pruning">
+<span class="sig-name descname"><span class="pre">ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geno</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#UMAPplot.ld_pruning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.ld_pruning" title="Link to this definition"></a></dt>
+<dd><p>Perform Linkage Disequilibrium (LD) pruning on genetic data using PLINK.
+This method filters SNPs based on specified thresholds for various quality control metrics
+and performs LD-based pruning to remove highly correlated variants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.001</em>) – Minor allele frequency threshold. Variants with MAF below this value are removed.
+Must be between 0 and 0.5.</p></li>
+<li><p><strong>geno</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.1</em>) – Maximum per-SNP missing rate. Variants with missing rate above this are removed.
+Must be between 0 and 1.</p></li>
+<li><p><strong>mind</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Maximum per-individual missing rate. Samples with missing rate above this are removed.
+Must be between 0 and 1. Recommended range is 0.02 to 0.1.</p></li>
+<li><p><strong>hwe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=5e-8</em>) – Hardy-Weinberg equilibrium exact test p-value threshold.
+Variants with p-value below this are removed. Must be between 0 and 1.</p></li>
+<li><p><strong>ind_pair</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>default=</em><em>[</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for pairwise LD pruning: [window size, step size, r² threshold].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Creates pruned PLINK binary files in the results directory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Skips processing if recompute_pca is False</p></li>
+<li><p>Uses multithreading with optimal thread count based on system CPU</p></li>
+<li><p>Generates intermediate files: .prune.in and .prune.out</p></li>
+<li><p>Creates final LD-pruned dataset with ‘-LDpruned’ suffix</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If input parameters are not of type float</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If input parameters are outside their valid ranges</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><strong>UserWarning</strong></a> – If mind parameter is outside recommended range</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.compute_pcas">
+<span class="sig-name descname"><span class="pre">compute_pcas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#UMAPplot.compute_pcas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.compute_pcas" title="Link to this definition"></a></dt>
+<dd><p>Computes Principal Component Analysis (PCA) using PLINK.</p>
+<p>This method performs PCA on the LD-pruned dataset using PLINK’s –pca command.
+The analysis generates eigenvectors and eigenvalues that can be used for
+population structure analysis and visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pca</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=10</em>) – Number of principal components to compute. Should be a positive integer.
+Values below 3 will trigger a warning as they may be insufficient for
+meaningful analysis.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are written to disk in the results directory with the input_name prefix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If pca parameter is not an integer.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If pca parameter is not positive.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If recompute_pca is False, the method will skip PCA computation</p></li>
+<li><p>Uses PLINK’s –pca command on the LD-pruned dataset</p></li>
+<li><p>Output files are saved in the results directory specified during initialization</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.generate_plots">
+<span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_hue_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_control_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['euclidean']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">umap_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#UMAPplot.generate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots" title="Link to this definition"></a></dt>
+<dd><p>Generate UMAP plots with different parameter combinations.
+This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various
+combinations of parameters. It can incorporate color coding based on metadata and case-control markers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color_hue_file</strong> (<em>Path</em><em>, </em><em>optional</em>) – Path to a tab-separated file containing color hue information. The file should have at least 3 columns,
+where the first two are ID1 and ID2, and the third column contains the values for color coding.
+Default is None.</p></li>
+<li><p><strong>case_control_markers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to include case-control markers in the plots. If True, reads from the .fam file.
+Default is True. If color_hue_file is not provided, the difference between case and control will be used as hue.</p></li>
+<li><p><strong>n_neighbors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – List of values for the n_neighbors parameter in UMAP. Each value must be positive.
+Default is [5].</p></li>
+<li><p><strong>min_dist</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – List of values for the min_dist parameter in UMAP. Each value must be non-negative.
+Default is [0.5].</p></li>
+<li><p><strong>metric</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – List of distance metrics to use in UMAP.
+Default is [‘euclidean’].</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Random seed for reproducibility. Must be non-negative.
+Default is None.</p></li>
+<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Format of the output plot files. Supported formats are ‘pdf’, ‘png’, ‘jpeg’, etc.</p></li>
+<li><p><strong>umap_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Additional keyword arguments to pass to the UMAP constructor.
+Default is an empty dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Saves UMAP plots as pdf files (by default but can be modified) and parameters as a CSV file in the results directory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If input parameters are not of the correct type.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If input parameters have invalid values.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If color_hue_file is specified but not found.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method creates a grid of all possible parameter combinations and generates a UMAP plot for each.
+Parameters for each plot are saved in ‘plots_parameters.csv’.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.PopStructure.</span></span><span class="sig-name descname"><span class="pre">FstSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.PopStructure.</span></span><span class="sig-name descname"><span class="pre">FstSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_merge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize FstSummary object for Fst analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<em>Path</em>) – Path to the directory containing input files</p></li>
+<li><p><strong>input_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the input file</p></li>
+<li><p><strong>output_path</strong> (<em>Path</em>) – Path to the directory where results will be saved</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If input types are incorrect for any parameter</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If input_path or output_path do not exist</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.merge_reference_study">
+<span class="sig-name descname"><span class="pre">merge_reference_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary.merge_reference_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.merge_reference_study" title="Link to this definition"></a></dt>
+<dd><p>Merge reference and study data by applying quality control filters and merging steps.
+This method performs a series of quality control steps to merge study data with reference data:
+1. Filters problematic SNPs
+2. Performs LD pruning
+3. Fixes chromosome mismatches
+4. Fixes position mismatches
+5. Fixes allele flips
+6. Removes remaining mismatches
+7. Merges the datasets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ind_pair</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>default</em><em> [</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for LD pruning: [window size, step size, r2 threshold]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If recompute_merge is False, the method will skip the merging process and expect
+merged data to already exist in the merging directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If ind_pair is not a list</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.add_population_tags">
-<span class="sig-name descname"><span class="pre">add_population_tags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_population_tags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary.add_population_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.add_population_tags" title="Link to this definition"></a></dt>
 <dd><p>Add population tags to the merged dataset.
 This method adds population super-population tags from the reference dataset to
 the merged dataset. It reads population information from the reference PSAM file,
@@ -143,7 +375,7 @@ not present in the reference dataset.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.compute_fst">
-<span class="sig-name descname"><span class="pre">compute_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">compute_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary.compute_fst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.compute_fst" title="Link to this definition"></a></dt>
 <dd><p>Compute FST (fixation index) statistics between populations.</p>
 <p>This method calculates FST statistics between each super-population in the dataset
 and a study population (‘StPop’). The process involves:
@@ -166,38 +398,8 @@ and a study population (‘StPop’). The process involves:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.merge_reference_study">
-<span class="sig-name descname"><span class="pre">merge_reference_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.merge_reference_study" title="Link to this definition"></a></dt>
-<dd><p>Merge reference and study data by applying quality control filters and merging steps.
-This method performs a series of quality control steps to merge study data with reference data:
-1. Filters problematic SNPs
-2. Performs LD pruning
-3. Fixes chromosome mismatches
-4. Fixes position mismatches
-5. Fixes allele flips
-6. Removes remaining mismatches
-7. Merges the datasets</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ind_pair</strong> (<em>list</em><em>, </em><em>default</em><em> [</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for LD pruning: [window size, step size, r2 threshold]</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>If recompute_merge is False, the method will skip the merging process and expect
-merged data to already exist in the merging directory.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If ind_pair is not a list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.FstSummary.report_fst">
-<span class="sig-name descname"><span class="pre">report_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">report_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/PopStructure.html#FstSummary.report_fst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.PopStructure.FstSummary.report_fst" title="Link to this definition"></a></dt>
 <dd><p>Generate a report of Fst results.
 This method reads the Fst results from the results directory and generates a summary report.</p>
 <dl class="field-list simple">
@@ -208,138 +410,7 @@ This method reads the Fst results from the results directory and generates a sum
 <dd class="field-even"><p>pd.DataFrame</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>FileNotFoundError</strong> – If no Fst result files are found in the results directory.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.PopStructure.</span></span><span class="sig-name descname"><span class="pre">UMAPplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PosixPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">built</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute_pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.compute_pcas">
-<span class="sig-name descname"><span class="pre">compute_pcas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pca</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.compute_pcas" title="Link to this definition"></a></dt>
-<dd><p>Computes Principal Component Analysis (PCA) using PLINK.</p>
-<p>This method performs PCA on the LD-pruned dataset using PLINK’s –pca command.
-The analysis generates eigenvectors and eigenvalues that can be used for
-population structure analysis and visualization.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pca</strong> (<em>int</em><em>, </em><em>default=10</em>) – Number of principal components to compute. Should be a positive integer.
-Values below 3 will trigger a warning as they may be insufficient for
-meaningful analysis.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Results are written to disk in the results directory with the input_name prefix.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – If pca parameter is not an integer.</p></li>
-<li><p><strong>ValueError</strong> – If pca parameter is not positive.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>If recompute_pca is False, the method will skip PCA computation</p></li>
-<li><p>Uses PLINK’s –pca command on the LD-pruned dataset</p></li>
-<li><p>Output files are saved in the results directory specified during initialization</p></li>
-</ul>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.generate_plots">
-<span class="sig-name descname"><span class="pre">generate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color_hue_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_control_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['euclidean']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pdf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">umap_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.generate_plots" title="Link to this definition"></a></dt>
-<dd><p>Generate UMAP plots with different parameter combinations.
-This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various
-combinations of parameters. It can incorporate color coding based on metadata and case-control markers.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>color_hue_file</strong> (<em>Path</em><em>, </em><em>optional</em>) – Path to a tab-separated file containing color hue information. The file should have at least 3 columns,
-where the first two are ID1 and ID2, and the third column contains the values for color coding.
-Default is None.</p></li>
-<li><p><strong>case_control_markers</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include case-control markers in the plots. If True, reads from the .fam file.
-Default is True. If color_hue_file is not provided, the difference between case and control will be used as hue.</p></li>
-<li><p><strong>n_neighbors</strong> (<em>list</em><em> of </em><em>int</em><em>, </em><em>optional</em>) – List of values for the n_neighbors parameter in UMAP. Each value must be positive.
-Default is [5].</p></li>
-<li><p><strong>min_dist</strong> (<em>list</em><em> of </em><em>float</em><em>, </em><em>optional</em>) – List of values for the min_dist parameter in UMAP. Each value must be non-negative.
-Default is [0.5].</p></li>
-<li><p><strong>metric</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of distance metrics to use in UMAP.
-Default is [‘euclidean’].</p></li>
-<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility. Must be non-negative.
-Default is None.</p></li>
-<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – Format of the output plot files. Supported formats are ‘pdf’, ‘png’, ‘jpeg’, etc.</p></li>
-<li><p><strong>umap_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments to pass to the UMAP constructor.
-Default is an empty dictionary.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Saves UMAP plots as pdf files (by default but can be modified) and parameters as a CSV file in the results directory.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – If input parameters are not of the correct type.</p></li>
-<li><p><strong>ValueError</strong> – If input parameters have invalid values.</p></li>
-<li><p><strong>FileNotFoundError</strong> – If color_hue_file is specified but not found.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method creates a grid of all possible parameter combinations and generates a UMAP plot for each.
-Parameters for each plot are saved in ‘plots_parameters.csv’.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.PopStructure.UMAPplot.ld_pruning">
-<span class="sig-name descname"><span class="pre">ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geno</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ideal_genom_qc.PopStructure.UMAPplot.ld_pruning" title="Link to this definition"></a></dt>
-<dd><p>Perform Linkage Disequilibrium (LD) pruning on genetic data using PLINK.
-This method filters SNPs based on specified thresholds for various quality control metrics
-and performs LD-based pruning to remove highly correlated variants.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>maf</strong> (<em>float</em><em>, </em><em>default=0.001</em>) – Minor allele frequency threshold. Variants with MAF below this value are removed.
-Must be between 0 and 0.5.</p></li>
-<li><p><strong>geno</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – Maximum per-SNP missing rate. Variants with missing rate above this are removed.
-Must be between 0 and 1.</p></li>
-<li><p><strong>mind</strong> (<em>float</em><em>, </em><em>default=0.2</em>) – Maximum per-individual missing rate. Samples with missing rate above this are removed.
-Must be between 0 and 1. Recommended range is 0.02 to 0.1.</p></li>
-<li><p><strong>hwe</strong> (<em>float</em><em>, </em><em>default=5e-8</em>) – Hardy-Weinberg equilibrium exact test p-value threshold.
-Variants with p-value below this are removed. Must be between 0 and 1.</p></li>
-<li><p><strong>ind_pair</strong> (<em>list</em><em>, </em><em>default=</em><em>[</em><em>50</em><em>, </em><em>5</em><em>, </em><em>0.2</em><em>]</em>) – Parameters for pairwise LD pruning: [window size, step size, r² threshold].</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Creates pruned PLINK binary files in the results directory.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Skips processing if recompute_pca is False</p></li>
-<li><p>Uses multithreading with optimal thread count based on system CPU</p></li>
-<li><p>Generates intermediate files: .prune.in and .prune.out</p></li>
-<li><p>Creates final LD-pruned dataset with ‘-LDpruned’ suffix</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>TypeError</strong> – If input parameters are not of type float</p></li>
-<li><p><strong>ValueError</strong> – If input parameters are outside their valid ranges</p></li>
-<li><p><strong>UserWarning</strong> – If mind parameter is outside recommended range</p></li>
-</ul>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If no Fst result files are found in the results directory.</p>
 </dd>
 </dl>
 </dd></dl>
