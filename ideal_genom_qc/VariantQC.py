@@ -107,8 +107,8 @@ class VariantQC:
         """
         Executes missing data rate analysis using PLINK for male and female subjects separately.
         This method performs two PLINK operations:
-        1. Generates .lmiss and .imiss files for male subjects on chromosome Y
-        2. Generates .lmiss and .imiss files for all subjects excluding chromosome Y
+        1. Generates .vmiss and .smiss files for male subjects on chromosome Y
+        2. Generates .vmiss and .smiss files for all subjects excluding chromosome Y
         
         Parameters
         ----------
@@ -405,7 +405,7 @@ class VariantQC:
         
         ## filter male subjects
         fail_males = df_males[df_males['F_MISS']>=threshold].reset_index(drop=True)
-        fail_males = fail_males[['SNP']].copy()
+        fail_males = fail_males[['ID']].copy()
         fail_males['Failure'] = 'Missing data rate on males'
 
         # load .lmiss file for female subjects
@@ -417,7 +417,7 @@ class VariantQC:
         
         ## filter female subjects
         fail_females = df_females[df_females['F_MISS']>=threshold].reset_index(drop=True)
-        fail_females = fail_females[['SNP']].copy()
+        fail_females = fail_females[['ID']].copy()
         fail_females['Failure'] = 'Missing data rate on females'
 
         self._make_histogram(df_males['F_MISS'], 'missing_data_male', threshold, 'Ratio of missing data', 'Missing data for males', y_lim_cap=y_axis_cap)
