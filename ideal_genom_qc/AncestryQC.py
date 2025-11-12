@@ -207,7 +207,7 @@ class ReferenceGenomicMerger():
 
 
         # PLINK command: generate cleaned study data files
-        plink_cmd1 = f"plink --bfile  {self.output_path / (self.input_name+'-renamed')} --chr 1-22 --exclude {filtered_study} --keep-allele-order --threads {max_threads} --make-bed --out {self.study_AC_GT_filtered}"
+        plink_cmd1 = f"plink2 --bfile  {self.output_path / (self.input_name+'-renamed')} --chr 1-22 --exclude {filtered_study} --threads {max_threads} --make-bed --out {self.study_AC_GT_filtered}"
 
         # Make sure the reference bim path is valid and extract the base filename
         if not self.reference_files.get('bim') or not isinstance(self.reference_files['bim'], Path):
@@ -216,7 +216,7 @@ class ReferenceGenomicMerger():
         reference_base = self.reference_files['bim'].with_suffix('')
         
         # PLINK command: generate cleaned reference data files
-        plink_cmd2 = f"plink --bfile {reference_base} --biallelic-only strict --chr 1-22 --exclude {filtered_reference} --keep-allele-order --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
+        plink_cmd2 = f"plink2 --bfile {reference_base} --max-alleles 2 --chr 1-22 --exclude {filtered_reference} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -283,13 +283,13 @@ class ReferenceGenomicMerger():
             max_threads = 10
 
         # PLINK command: generates prune.in and prune.out files from study data
-        plink_cmd1 = f"plink --bfile {str(self.study_AC_GT_filtered)} --exclude range {self.high_ld_regions} --keep-allele-order --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
+        plink_cmd1 = f"plink2 --bfile {str(self.study_AC_GT_filtered)} --exclude range {self.high_ld_regions} --keep-allele-order --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
 
         # PLINK command: prune study data and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --threads {max_threads} --make-bed --out {str((self.output_path / (self.input_name+'-pruned')))}"
+        plink_cmd2 = f"plink2 --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --threads {max_threads} --make-bed --out {str((self.output_path / (self.input_name+'-pruned')))}"
 
         # PLINK command: generates a pruned reference data files
-        plink_cmd3 = f"plink --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --make-bed --threads {max_threads} --out {str((self.output_path / (self.reference_files['bim'].stem+'-pruned')))}"
+        plink_cmd3 = f"plink2 --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --make-bed --threads {max_threads} --out {str((self.output_path / (self.reference_files['bim'].stem+'-pruned')))}"
 
         self.pruned_reference = self.output_path / (self.reference_files['bim'].stem+'-pruned')
         self.pruned_study = self.output_path / (self.input_name+'-pruned')
@@ -362,7 +362,7 @@ class ReferenceGenomicMerger():
             return
 
         # PLINK command
-        plink_cmd = f"plink --bfile {self.pruned_reference} --update-chr {to_update_chr_file} 1 2 --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
+        plink_cmd = f"plink --bfile {self.pruned_reference} --update-chr {to_update_chr_file} --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
 
         # Execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -434,7 +434,7 @@ class ReferenceGenomicMerger():
             return
 
         # PLINK command
-        plink_cmd = f"plink --bfile {self.reference_fixed_chr} --update-map {to_update_pos_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_pos}"
+        plink_cmd = f"plink2 --bfile {self.reference_fixed_chr} --update-map {to_update_pos_file} --threads {max_threads} --make-bed --out {self.reference_fixed_pos}"
 
         # Execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -495,7 +495,14 @@ class ReferenceGenomicMerger():
             self.reference_flipped = self.output_path / f"{self.reference_files['bim'].stem}-flipped"
     
             with open(to_flip_file, 'r') as f:
-                logger.info(f"STEP: Allele flipping between study data and reference panel: {len(f.readlines())} SNPs to flip")
+                line_count = sum(1 for _ in f)
+                logger.info(f"STEP: Allele flipping between study data and reference panel: {line_count} SNPs to flip")
+
+            if line_count == 0:
+                # No SNPs to flip, copy the fixed position reference to flipped reference
+                self.reference_flipped = self.reference_fixed_pos
+                logger.info("No SNPs require allele flipping. Skipping flipping step.")
+                return
     
             # plink command
             plink_cmd = f"plink --bfile {self.reference_fixed_pos} --flip {to_flip_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_flipped}"
@@ -562,7 +569,7 @@ class ReferenceGenomicMerger():
             return
         
         # plink command
-        plink_cmd = f"plink --bfile {self.reference_flipped} --exclude {mismatches_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_cleaned}"
+        plink_cmd = f"plink2 --bfile {self.reference_flipped} --exclude {mismatches_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_cleaned}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -892,7 +899,7 @@ class GenomicOutlierAnalyzer:
         memory = round(2*available_memory_mb/3,0)
 
         # PLINK command: generate PCA for reference data
-        plink_cmd = f"plink --bfile {str(self.merged_file)} --keep-allele-order --maf {maf} --out {str(self.output_path / (self.output_name+'-pca'))} --pca {pca} --memory {memory} --threads {max_threads}"
+        plink_cmd = f"plink2 --bfile {str(self.merged_file)} --keep-allele-order --maf {maf} --out {str(self.output_path / (self.output_name+'-pca'))} --pca {pca} --memory {memory} --threads {max_threads}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
@@ -1058,7 +1065,7 @@ class GenomicOutlierAnalyzer:
             logger.info(f"STEP: Dropping ancestry outliers from the study data: {len(f.readlines())} samples identified as ancestry outliers")
 
         # create cleaned binary files
-        plink_cmd2 = f"plink --bfile {str(self.input_path / self.input_name)} --allow-no-sex --remove {str(self.ancestry_fails)} --make-bed --out {str(output_dir / (self.output_name+'-ancestry-cleaned'))}"
+        plink_cmd2 = f"plink2 --bfile {str(self.input_path / self.input_name)} --allow-no-sex --remove {str(self.ancestry_fails)} --make-bed --out {str(output_dir / (self.output_name+'-ancestry-cleaned'))}"
 
         # execute PLINK command
         shell_do(plink_cmd2, log=True)
@@ -1136,14 +1143,16 @@ class GenomicOutlierAnalyzer:
         total_variance = df_eigenval[0].sum()
         pc1_var = df_eigenval[0][0]
         pc2_var = df_eigenval[0][1]
+        pc3_var = df_eigenval[0][2]
 
         pc1_var_perc = round((pc1_var / total_variance) * 100, 2)
         pc2_var_perc = round((pc2_var / total_variance) * 100, 2)
+        pc3_var_perc = round((pc3_var / total_variance) * 100, 2)
 
         # load .eigenvec file and keep the first three principal components
         df_eigenvec = pd.read_csv(
             self.einvectors,
-            header=None,
+            #header=None,
             sep   =r"\s+",
             engine='python'
         )
@@ -1185,7 +1194,7 @@ class GenomicOutlierAnalyzer:
         fig3, ax3 = plt.subplots(figsize=(10,10))
         df_zoom = df[(df['SuperPop'] == 'StPop') | (df['SuperPop'] == reference_pop)].reset_index(drop=True)
         sns.scatterplot(data=df_zoom, x='pc_1', y='pc_2', hue='SuperPop', ax=ax3, marker='.', s=70)
-        ax.set_aspect(aspect_ratio, adjustable='datalim')
+        ax3.set_aspect(aspect_ratio, adjustable='datalim')
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
         fig3.tight_layout()
@@ -1412,7 +1421,7 @@ class GenomicOutlierAnalyzer:
         # read .eigenvec file
         df_eigenvec = pd.read_csv(
             self.einvectors,
-            header=None,
+            #header=None,
             sep   =r"\s+",
             engine='python'
         )
