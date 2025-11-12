@@ -737,10 +737,10 @@ class SampleQC:
         
         Parameters
         ----------
-        kingship : float, optional
+        kinship : float, optional
             The KING kinship coefficient threshold for identifying related samples.
             Default is 0.354, which corresponds to duplicates/MZ twins.
-        use_king : bool, optional
+        use_kinship : bool, optional
             If True, uses KING algorithm for relatedness analysis.
             If False, uses traditional IBD analysis.
             Default is True.
@@ -752,11 +752,11 @@ class SampleQC:
         Raises
         ------
         TypeError
-            If kingship is not a float or use_king is not a boolean.
+            If kinship is not a float or use_kinship is not a boolean.
         
         Notes
         -----
-        The method will store the analysis type (KING or IBD) in the use_king attribute.
+        The method will store the analysis type (KING or IBD) in the use_kinship attribute.
         """
 
         if not isinstance(use_kinship, bool):
