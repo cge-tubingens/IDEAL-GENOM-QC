@@ -1400,7 +1400,75 @@ class GenomicOutlierAnalyzer:
         )
 
         return ancestry_fails
+    
+    def _compute_distances(
+        self,
+        data_df: Union[pd.DataFrame, np.ndarray],
+        vec_mean: Union[pd.Series, np.ndarray],
+        vec_std: Union[pd.Series, np.ndarray],
+        distance: Union[str, float] = 'infinity'
+    ) -> np.ndarray:
+        """
+        Compute standardized Minkowski- or Chebyshev-type distances between each
+        row in data_df and the reference centroid (vec_mean).
 
+        Parameters
+        ----------
+        data_df : DataFrame or ndarray
+            Samples as rows, features as columns.
+        vec_mean : Series or ndarray
+            Reference mean vector.
+        vec_std : Series or ndarray
+            Reference standard deviation vector.
+        distance : str or float
+            Distance metric:
+            - 'infinity' or 'chebyshev' → Chebyshev distance
+            - numeric p >= 1 → Minkowski distance with order p
+
+        Returns
+        -------
+        np.ndarray
+            Vector of distances (length = number of samples).
+        """
+
+        # Convert inputs to numpy arrays
+        X = np.asarray(data_df)
+        mu = np.asarray(vec_mean)
+        sigma = np.asarray(vec_std)
+
+        # Standardize data (avoid division by zero)
+        sigma_safe = np.where(sigma == 0, 1, sigma)
+        X_std = (X - mu) / sigma_safe
+
+        # Determine which metric to use
+        if isinstance(distance, str):
+            distance = distance.lower()
+            if distance in ['infinity', 'chebyshev']:
+                metric = 'chebyshev'
+                kwargs = {}
+            else:
+                raise ValueError("distance must be 'infinity' or 'chebyshev' when passed as string")
+        elif isinstance(distance, (float, int)):
+            if distance == float('inf'):
+                metric = 'chebyshev'
+                kwargs = {}
+            elif distance >= 1:
+                metric = 'minkowski'
+                kwargs = {'p': distance}
+            else:
+                raise ValueError("numeric distance must be >= 1 or float('inf')")
+        else:
+            raise TypeError("distance must be a string or numeric value")
+
+        # Compute distances from standardized data to origin
+        if metric == 'chebyshev':
+            distances = dist.cdist(X_std, [np.zeros_like(mu)], metric='chebyshev').flatten()
+        else:
+            # For minkowski distance, pass p parameter explicitly
+            p_value = kwargs.get('p', 2)
+            distances = dist.cdist(X_std, [np.zeros_like(mu)], metric='minkowski', p=p_value).flatten()
+
+        return distances
 class AncestryQC:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38', rename_snps: bool = False) -> None:
