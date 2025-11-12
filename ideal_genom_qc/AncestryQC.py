@@ -1698,9 +1698,18 @@ class AncestryQC:
         num_pca : int, optional
             Number of principal components to use in outlier detection (default=10)
         ref_threshold : float, optional
-            Threshold for reference population outlier detection (default=4)
+            Distance threshold for reference population outlier detection (default=4)
         stu_threshold : float, optional
-            Threshold for study population outlier detection (default=4)
+            Distance threshold for study population outlier detection (default=4)
+        aspect_ratio : str or float, optional
+            Aspect ratio for PCA plots (default='equal')
+        distance_metric : str or float, optional
+            Distance metric to use for outlier detection:
+            - 'infinity' or 'chebyshev' → Chebyshev distance (L∞ norm)
+            - numeric p >= 1 → Minkowski distance with order p (e.g., 2 for Euclidean)
+            Default is 'infinity' (Chebyshev distance)
+        explained_variance_threshold : float, optional
+            Threshold for reporting significant principal components based on explained variance (default=0.01)
 
         Returns
         -------
@@ -1711,6 +1720,8 @@ class AncestryQC:
         -----
         The method uses the GenomicOutlierAnalyzer class to perform the analysis and 
         saves results in the directories specified during class initialization.
+        The distance-based outlier detection provides more robust identification of
+        ancestry outliers compared to per-dimension thresholds.
         """
 
         # Make sure the reference tag path is valid before creating the analyzer
@@ -1732,6 +1743,7 @@ class AncestryQC:
         logger.info(f"STEP: Running PCA analysis: `num_pca` = {num_pca}")
         logger.info(f"STEP: Running PCA analysis: `ref_threshold` = {ref_threshold}")
         logger.info(f"STEP: Running PCA analysis: `stu_threshold` = {stu_threshold}")
+        logger.info(f"STEP: Running PCA analysis: `distance_metric` = {distance_metric}")
         logger.info(f"STEP: Running PCA analysis: `psam_file` = {self.reference_files['psam']}")
 
         goa.execute_pca(pca=pca, maf=maf)
@@ -1740,7 +1752,8 @@ class AncestryQC:
             stu_threshold=stu_threshold, 
             reference_pop=ref_population, 
             num_pcs      =num_pca, 
-            fails_dir    =self.fail_samples_dir
+            fails_dir    =self.fail_samples_dir,
+            distance_metric=distance_metric
         )
         goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
         goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio)
