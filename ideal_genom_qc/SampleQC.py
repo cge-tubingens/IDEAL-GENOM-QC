@@ -937,7 +937,7 @@ class SampleQC:
         fail_sexcheck = self.report_sex_check(
             directory          =self.results_dir, 
             sex_check_filename =self.output_name+'-sexcheck.sexcheck', 
-            xchr_imiss_filename=self.output_name+'-xchr-missing.imiss',
+            xchr_imiss_filename=self.output_name+'-xchr-missing.smiss',
             plots_dir          =self.plots_dir
         )
 
