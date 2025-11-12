@@ -173,26 +173,15 @@ def main()->str:
         logger.error(e)
         
     args_dict = arg_parser()
-    #args_dict = vars(args)
+
+    # check CLI config arguments
+    validate_config(args_dict['file_folders'], args_dict['path_params'], args_dict['steps'], args_dict['build'])
 
     params_path = args_dict['path_params']
     data_path   = args_dict['file_folders']
     steps_path  = args_dict['steps']
     recompute_merge = args_dict['recompute_merge'].lower()
     built      = args_dict['build']
-
-    # check path to config files
-    if not os.path.exists(data_path):
-        raise FileNotFoundError("Configuration file with path to data and analysis results cannot be found.")
-    
-    if not os.path.exists(params_path):
-        raise FileNotFoundError("Configuration file with pipeline parameters cannot be found.")
-    
-    if not os.path.exists(steps_path):
-        raise FileNotFoundError("Configuration file with pipeline steps cannot be found.")
-    
-    if built not in ['37', '38']:
-        raise ValueError("Built of the human genome must be 37 or 38.")
 
     # open config file
     with open(data_path, 'r') as file:
