@@ -1183,6 +1183,68 @@ class GenomicOutlierAnalyzer:
 
         return
     
+    def report_pca(self, threshold: float = 0.01)-> None:
+
+        if self.eigenvalues is None:
+            raise ValueError("eigenvalues is not set. Make sure execute_pca() is called before this method and completed successfully.")
+
+        eigenvalues = np.loadtxt(self.eigenvalues)
+
+        # -------------------------------
+        # 2. Compute variance explained
+        # -------------------------------
+        var_explained = eigenvalues / np.sum(eigenvalues)
+        cum_var = np.cumsum(var_explained)
+
+        # -------------------------------
+        # 3. Scree plot and cumulative variance in subplots
+        # -------------------------------
+        fig, axes = plt.subplots(1, 2, figsize=(14,5))
+
+        # Scree plot
+        axes[0].plot(range(1, len(eigenvalues)+1), eigenvalues, 'o-', color='blue')
+        axes[0].set_xlabel('Principal Component')
+        axes[0].set_ylabel('Eigenvalue')
+        axes[0].set_title('Scree Plot (Eigenvalues)')
+        axes[0].grid(True)
+
+        # Cumulative variance plot
+        axes[1].plot(range(1, len(eigenvalues)+1), cum_var, 'o-', color='green')
+        axes[1].set_xlabel('Principal Component')
+        axes[1].set_ylabel('Cumulative Variance Explained')
+        axes[1].set_title('Cumulative Variance Explained')
+        axes[1].grid(True)
+
+        plt.tight_layout()
+        plt.savefig(self.output_path / (self.output_name + '_scree_plot.png'), dpi=600)
+        plt.show()        
+        
+
+        # -------------------------------
+        # 4. Determine significant PCs
+        # -------------------------------
+        threshold = 0.01  # >1% variance
+        significant_threshold = var_explained > threshold
+
+        # -------------------------------
+        # 5. Create table
+        # -------------------------------
+        df = pd.DataFrame({
+            'PC': range(1, len(eigenvalues)+1),
+            'Eigenvalue': eigenvalues,
+            'Variance_Explained': var_explained,
+            'Cumulative_Variance': cum_var,
+            'Significant_Threshold': significant_threshold
+        })
+
+        df.to_csv(self.output_path / (self.output_name + '_pca_report.tsv'), sep='\t', index=False)
+
+        # Optional: summary
+        print("\nSummary:")
+        print(f"PCs > {threshold*100}% variance: {np.sum(significant_threshold)}")
+
+        return
+    
     def _set_population_tags(self, psam_path: Path, study_fam_path: Path) -> pd.DataFrame:
         """
         Sets population tags for genetic data by combining information from a PSAM file and a study FAM file.
@@ -1758,6 +1820,7 @@ class AncestryQC:
         goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
         goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio)
         goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio, exclude_outliers=True)
+        goa.report_pca(threshold=explained_variance_threshold)
 
         return
 
