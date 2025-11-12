@@ -899,6 +899,11 @@ class GenomicOutlierAnalyzer:
             Number of principal components to use in the analysis (default is 2)
         fails_dir : Path, optional
             Directory path to save failed samples information (default is empty Path)
+        distance_metric : str or float, optional
+            Distance metric to use for outlier detection:
+            - 'infinity' or 'chebyshev' → Chebyshev distance (L∞ norm)
+            - numeric p >= 1 → Minkowski distance with order p (e.g., 2 for Euclidean)
+            Default is 'infinity' (Chebyshev distance)
         
         Returns
         -------
@@ -911,6 +916,7 @@ class GenomicOutlierAnalyzer:
             If parameters are not of the expected type
         ValueError
             If num_pcs is not a positive integer
+            If distance_metric has invalid value
         
         Notes
         -----
