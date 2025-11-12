@@ -352,7 +352,14 @@ class ReferenceGenomicMerger():
         self.reference_fixed_chr = self.output_path / f"{self.reference_files['bim'].stem}-updateChr"
 
         with open(to_update_chr_file, 'r') as f:
-            logger.info(f"STEP: Fixing chromosome mismatch between study data and reference panel: {len(f.readlines())} SNPs to update")
+            line_count = sum(1 for _ in f)
+            logger.info(f"STEP: Fixing chromosome mismatch between study data and reference panel: {line_count} SNPs to update")
+
+        if line_count == 0:
+            # No SNPs to update, copy the pruned reference to fixed chromosome reference
+            self.reference_fixed_chr = self.pruned_reference
+            logger.info("No chromosome mismatches found. Skipping chromosome update step.")
+            return
 
         # PLINK command
         plink_cmd = f"plink --bfile {self.pruned_reference} --update-chr {to_update_chr_file} 1 2 --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
@@ -417,7 +424,14 @@ class ReferenceGenomicMerger():
         self.reference_fixed_pos = self.output_path / f"{self.reference_files['bim'].stem}-updatePos"
 
         with open(to_update_pos_file, 'r') as f:
-            logger.info(f"STEP: Fixing position mismatch between study data and reference panel: {len(f.readlines())} SNPs to update")
+            line_count = sum(1 for _ in f)
+            logger.info(f"STEP: Fixing position mismatch between study data and reference panel: {line_count} SNPs to update")
+
+        if line_count == 0:
+            # No SNPs to update, copy the fixed chromosome reference to fixed position reference
+            self.reference_fixed_pos = self.reference_fixed_chr
+            logger.info("No position mismatches found. Skipping position update step.")
+            return
 
         # PLINK command
         plink_cmd = f"plink --bfile {self.reference_fixed_chr} --update-map {to_update_pos_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_fixed_pos}"
@@ -538,8 +552,15 @@ class ReferenceGenomicMerger():
         self.reference_cleaned = self.output_path / f"{self.reference_files['bim'].stem}-cleaned"
 
         with open(mismatches_file, 'r') as f:
-            logger.info(f"STEP: Removing mismatched SNPs from reference data: {len(f.readlines())} SNPs to remove")
+            line_count = sum(1 for _ in f)
+            logger.info(f"STEP: Removing mismatched SNPs from reference data: {line_count} SNPs to remove")
 
+        if line_count == 0:
+            # No mismatches to remove, copy the flipped reference to cleaned reference
+            self.reference_cleaned = self.reference_flipped
+            logger.info("No mismatched SNPs found. Skipping removal step.")
+            return
+        
         # plink command
         plink_cmd = f"plink --bfile {self.reference_flipped} --exclude {mismatches_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_cleaned}"
 
