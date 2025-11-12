@@ -187,7 +187,6 @@ class VariantQC:
         - Sets self.case_control_missing path attribute
         """
 
-
         logger.info("Identifying markers with different genotype call rates between cases and controls...")
 
         # Get the virtual memory details
