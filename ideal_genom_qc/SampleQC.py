@@ -986,9 +986,9 @@ class SampleQC:
             # filter samples that failed duplicates and relatedness check
             df_duplicates.columns = ['FID', 'IID']
             fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
-            fail_duplicates['Failure'] = 'Duplicates and relatedness (Kingship)'
+            fail_duplicates['Failure'] = 'Duplicates and relatedness (Kinship)'
 
-            logger.info('Duplicates and relatedness check done with kingship')
+            logger.info('Duplicates and relatedness check done with kinship')
 
         else:
 
