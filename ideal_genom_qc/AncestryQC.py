@@ -881,7 +881,7 @@ class GenomicOutlierAnalyzer:
 
         return
     
-    def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path()) -> None:
+    def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path(), distance_metric: Union[str, float] = 'infinity') -> None:
         """
         Identifies ancestry outliers in the dataset based on PCA analysis.
         This method analyzes population structure using principal component analysis (PCA) and identifies
