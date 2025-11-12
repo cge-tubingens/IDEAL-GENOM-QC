@@ -9,6 +9,7 @@ import seaborn as sns
 
 from pathlib import Path
 from typing import Union, Literal
+from scipy.spatial import distance as dist
 
 from ideal_genom_qc.Helpers import shell_do, delete_temp_files
 from ideal_genom_qc.get_references import Fetcher1000Genome, FetcherLDRegions
@@ -920,6 +921,10 @@ class GenomicOutlierAnalyzer:
         The results are saved in:
         - population_tags: CSV file with population assignments
         - ancestry_fails: List of samples identified as ancestry outliers
+        
+        The distance-based approach provides more robust outlier detection compared to 
+        per-dimension thresholds by considering the overall multivariate distance from 
+        population centroids.
         """
 
         if not isinstance(ref_threshold, (float, int)):
@@ -973,7 +978,8 @@ class GenomicOutlierAnalyzer:
             ref_threshold= ref_threshold,
             stu_threshold= stu_threshold,
             reference_pop= reference_pop,
-            num_pcs      = num_pcs
+            num_pcs      = num_pcs,
+            distance_metric= distance_metric
         )
 
         self.ancestry_fails = ancestry_fails
@@ -1233,9 +1239,9 @@ class GenomicOutlierAnalyzer:
         # concatenate the two DataFrames to merge the information
         return pd.concat([df_fam, df_psam], axis=0)
     
-    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2) -> Path:
+    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, distance_metric: Union[str, float] = 'infinity') -> Path:
         """
-        Identifies ancestry outliers based on PCA results using two thresholds:
+        Identifies ancestry outliers based on PCA results using distance-based thresholds:
         one for reference population and another for study population.
 
         Parameters
@@ -1244,18 +1250,23 @@ class GenomicOutlierAnalyzer:
             Path where the output file will be saved
         df_tags : pd.DataFrame
             DataFrame containing subject IDs and population tags
-        ref_threshold : int
-            Number of standard deviations from reference population mean to consider a subject as outlier
-        stu_threshold : int
-            Number of standard deviations from study population mean to consider a subject as outlier
+        ref_threshold : float
+            Distance threshold for identifying outliers relative to reference population mean
+        stu_threshold : float
+            Distance threshold for identifying outliers relative to study population mean
         reference_pop : str
             Reference population name as it appears in df_tags
         num_pcs : int, optional
             Number of principal components to use in the analysis (default is 2)
+        distance_metric : str or float, optional
+            Distance metric to use:
+            - 'infinity' or 'chebyshev' → Chebyshev distance (L∞ norm)
+            - numeric p >= 1 → Minkowski distance with order p (e.g., 2 for Euclidean)
+            Default is 'infinity'
 
         Returns
         -------
-        str
+        Path
             Path to the output file containing the IDs of subjects identified as ancestry outliers
 
         Raises
@@ -1264,17 +1275,22 @@ class GenomicOutlierAnalyzer:
             If ref_threshold, stu_threshold are not numeric
             If reference_pop is not a string
             If num_pcs is not an integer
+            If distance_metric is not a string or numeric value
         ValueError
             If ref_threshold, stu_threshold are not positive
             If num_pcs is less than 1
             If num_pcs is greater than available PCs in eigenvec file
+            If distance_metric has invalid value
 
         Notes
         -----
-        The method identifies outliers that deviate significantly from both:
-        1. The reference population mean (by ref_threshold standard deviations)
-        2. The study population mean (by stu_threshold standard deviations)
-        Only subjects that are outliers in both criteria are included in the final output.
+        The method identifies outliers using a distance-based approach that considers
+        the overall multivariate distance from population centroids, rather than 
+        per-dimension thresholds. This provides more robust outlier detection.
+        
+        Subjects are identified as outliers if they exceed BOTH:
+        1. The reference population distance threshold (ref_threshold)
+        2. The study population distance threshold (stu_threshold)
         """
 
         if not isinstance(ref_threshold, (float, int)):
@@ -1336,38 +1352,38 @@ class GenomicOutlierAnalyzer:
             .drop(columns=['SuperPop'], inplace=False)
 
         # computes mean and standard deviation by columns in reference data
-        mean_ref= df_ref[df_ref.columns[2:]].mean()
+        mean_ref = df_ref[df_ref.columns[2:]].mean()
         std_ref = df_ref[df_ref.columns[2:]].std()
 
-        # creates empty data frame
-        outliers_1 = pd.DataFrame(columns=df_ref.columns)
-        outliers_1[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
-
-        # identifies subjects with more than `ref_threshold` std deviations from the reference mean
-        for col in outliers_1.columns[2:]:
-            outliers_1[col] = (np.abs(df_stu[col] - mean_ref[col]) > ref_threshold*std_ref[col])
-
-        outliers_1['is_out'] = (np.sum(outliers_1.iloc[:,2:], axis=1) >0)
-
-        df_1 = outliers_1[outliers_1['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
-
         # computes mean and standard deviation by columns in study data
-        mean_stu= df_stu[df_stu.columns[2:]].mean()
+        mean_stu = df_stu[df_stu.columns[2:]].mean()
         std_stu = df_stu[df_stu.columns[2:]].std()
 
-        # creates empty data frame
-        outliers_2 = pd.DataFrame(columns=df_ref.columns)
-        outliers_2[df_stu.columns[:2]] = df_stu[df_stu.columns[:2]]
+        # Compute distances from study samples to reference population centroid
+        distances_ref = self._compute_distances(
+            data_df=df_stu[df_stu.columns[2:]], 
+            vec_mean=mean_ref, 
+            vec_std=std_ref,
+            distance=distance_metric
+        )
 
-        # identifies subjects with more than `stu_threshold` std deviation from the study mean
-        for col in outliers_2.columns[2:]:
-            outliers_2[col] = (np.abs(df_stu[col] - mean_stu[col]) > stu_threshold*std_stu[col])
+        # Compute distances from study samples to study population centroid
+        distances_stu = self._compute_distances(
+            data_df=df_stu[df_stu.columns[2:]], 
+            vec_mean=mean_stu, 
+            vec_std=std_stu,
+            distance=distance_metric
+        )
 
-        outliers_2['is_out'] = (np.sum(outliers_2.iloc[:,2:], axis=1) >0)
+        # Identify outliers based on distance thresholds
+        ref_outliers_mask = distances_ref > ref_threshold
+        stu_outliers_mask = distances_stu > stu_threshold
 
-        df_2 = outliers_2[outliers_2['is_out']].reset_index(drop=True)[['ID1', 'ID2']].copy()
+        # Subjects must be outliers relative to both reference and study populations
+        combined_outliers_mask = ref_outliers_mask & stu_outliers_mask
 
-        df = pd.merge(df_1, df_2, on=['ID1', 'ID2'])
+        # Get the outlier samples
+        df_outliers = df_stu[combined_outliers_mask][['ID1', 'ID2']].copy()
 
         ancestry_fails = output_path / (self.output_name + '_fail-ancestry-qc.txt')
 
