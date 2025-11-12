@@ -1387,10 +1387,12 @@ class GenomicOutlierAnalyzer:
 
         ancestry_fails = output_path / (self.output_name + '_fail-ancestry-qc.txt')
 
-        logger.info(f"STEP: Identifying ancestry outliers: {df.shape[0]} samples identified as ancestry outliers")
+        logger.info(f"STEP: Identifying ancestry outliers using {distance_metric} distance metric")
+        logger.info(f"STEP: Reference threshold: {ref_threshold}, Study threshold: {stu_threshold}")
+        logger.info(f"STEP: Identifying ancestry outliers: {df_outliers.shape[0]} samples identified as ancestry outliers")
 
         # save samples considered as ethnicity outliers
-        df.to_csv(
+        df_outliers.to_csv(
             ancestry_fails,
             header=False,
             index =False,
