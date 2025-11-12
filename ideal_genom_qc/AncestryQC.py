@@ -1739,15 +1739,16 @@ class AncestryQC:
 
         return
     
-    def run_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4, aspect_ratio: Union[Literal['auto', 'equal'], float]='equal') -> None:
+    def execute_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4, aspect_ratio: Union[Literal['auto', 'equal'], float]='equal', distance_metric: Union[str, float] = 'infinity', explained_variance_threshold: float = 0.01) -> None:
         """
         Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.
 
         This method executes a complete PCA workflow including:
         1. Running the PCA analysis
-        2. Identifying ancestry outliers
+        2. Identifying ancestry outliers using distance-based detection
         3. Removing identified outliers
         4. Generating PCA plots
+        5. Reporting PCA results
 
         Parameters
         ----------
