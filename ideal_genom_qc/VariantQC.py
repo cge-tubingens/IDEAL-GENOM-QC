@@ -567,3 +567,64 @@ class VariantQC:
         plt.close()
 
         return None
+
+    def execute_variant_qc_pipeline(self, variant_params: dict) -> None:
+        """
+        Execute a comprehensive variant quality control pipeline.
+        This method runs a series of quality control steps on genetic variants,
+        including missing data analysis, genotype calling assessment, Hardy-Weinberg
+        equilibrium testing, and variant filtering based on specified thresholds.
+        Parameters
+        ----------
+        variant_params : dict
+            Dictionary containing quality control parameters with the following keys:
+            - 'chr-y' : bool or str
+                Flag for chromosome Y analysis
+            - 'miss_data_rate' : float
+                Threshold for missing data rate filtering
+            - 'diff_genotype_rate' : float
+                Threshold for differential genotype call rate between cases/controls
+            - 'hwe' : float
+                Hardy-Weinberg equilibrium p-value threshold
+            - 'maf' : float
+                Minor allele frequency threshold for variant filtering
+            - 'geno' : float
+                Genotype call rate threshold for variant filtering
+        Returns
+        -------
+        None
+            This method performs quality control operations in-place and does not
+            return any values.
+        Notes
+        -----
+        The pipeline executes the following steps in order:
+        1. Missing data rate computation (sex-stratified analysis)
+        2. Case/control nonrandom missingness test
+        3. Hardy-Weinberg equilibrium test
+        4. Identification of variants failing QC thresholds
+        5. Removal of variants that failed quality control
+        Each step prints a colored status message indicating the current operation
+        being performed.
+        """
+        
+        variant_qc_steps = {
+            'Missing data rate'         : (self.execute_missing_data_rate, {'chr_y': variant_params['chr-y']}),
+            'Different genotype'        : (self.execute_different_genotype_call_rate, {}),
+            'Hardy-Weinberg equilibrium': (self.execute_hwe_test, {}),
+            'Get fail variants'         : (self.get_fail_variants, {'marker_call_rate_thres': variant_params['miss_data_rate'], 'case_controls_thres': variant_params['diff_genotype_rate'], 'hwe_threshold':variant_params['hwe']}),
+            'Drop fail variants'        : (self.execute_drop_variants, {'maf': variant_params['maf'], 'geno': variant_params['geno'], 'hwe': variant_params['hwe']}),
+        }
+
+        variant_step_description = {
+            'Missing data rate'         : 'Compute missing data rate for males and females',
+            'Different genotype'        : 'Case/control nonrandom missingness test',
+            'Hardy-Weinberg equilibrium': 'Hardy-Weinberg equilibrium test',
+            'Get fail variants'         : 'Get variants that failed quality control',
+            'Drop fail variants'        : 'Drop variants that failed quality control'
+        }
+
+        for name, (func, params) in variant_qc_steps.items():
+            print(f"\033[34m{variant_step_description[name]}.\033[0m")
+            func(**params)
+
+        return
