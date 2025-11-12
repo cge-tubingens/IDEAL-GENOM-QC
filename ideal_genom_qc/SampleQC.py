@@ -903,11 +903,9 @@ class SampleQC:
         required_files = [
             self.call_rate_miss,
             self.results_dir / (self.output_name + '-sexcheck.sexcheck'),
-            self.results_dir / (self.output_name + '-xchr-missing.imiss'),
-            self.results_dir / ('Summary-' + self.output_name + '-chr1-22-mafgreater-recode.ped'),
-            self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing.imiss'),
-            self.results_dir / ('Summary-' + self.output_name + '-chr1-22-mafless-recode.ped'),
-            self.results_dir / (self.output_name + '-chr1-22-mafless-missing.imiss')
+            self.results_dir / (self.output_name + '-xchr-missing.smiss'),
+            self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing.smiss'),
+            self.results_dir / (self.output_name + '-chr1-22-mafless-missing.smiss')
         ]
 
         if not self.use_kinship:
