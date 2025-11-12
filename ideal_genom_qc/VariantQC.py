@@ -323,9 +323,12 @@ class VariantQC:
 
         fails = fails.drop(columns=['Failure'], inplace=False)
 
-        fails.to_csv(self.fails_dir / 'fail_markers.txt', sep='\t', header=False, index=False)
+        fails.to_csv(self.fails_dir / 'fail_markers.txt', header=False, index=False)
 
-        return pd.concat([summary, dups_row, total_row], ignore_index=True)
+        df_report = pd.concat([summary, dups_row, total_row], ignore_index=True)
+        df_report.to_csv(self.results_dir / 'variant_qc_summary.tsv', sep='\t', index=False)
+
+        return df_report
 
     def execute_drop_variants(self, maf: float = 5e-8, geno: float = 0.1, hwe: float = 5e-8) -> None:
         """
