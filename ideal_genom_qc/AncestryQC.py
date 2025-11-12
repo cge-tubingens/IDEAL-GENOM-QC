@@ -1760,3 +1760,36 @@ class AncestryQC:
         goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio, exclude_outliers=True)
 
         return
+
+    def execute_ancestry_pipeline(self, ancestry_params: dict) -> None:
+
+        ancestry_qc_steps = {
+            'merge_study_reference'    : (self.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
+            'delete_intermediate_files': (self._clean_merging_dir, {}),
+            'pca_analysis'             : (self.execute_pca, 
+                {
+                    "ref_population": ancestry_params['reference_pop'],
+                    "pca":ancestry_params['pca'],
+                    "maf":ancestry_params['maf'],
+                    "num_pca":ancestry_params['num_pcs'],
+                    "ref_threshold":ancestry_params['ref_threshold'],
+                    "stu_threshold":ancestry_params['stu_threshold'],
+                    "aspect_ratio":ancestry_params['aspect_ratio'],
+                    "distance_metric":ancestry_params['distance_metric'],
+                    "explained_variance_threshold":ancestry_params['explained_variance_threshold']
+                }
+            ),
+        }
+
+        step_description = {
+            'merge_study_reference'    : "Merge reference genome with study genome",
+            'delete_intermediate_files': "Delete intermediate files generated during merging",
+            'pca_analysis'             : "Run a PCA analysis to perfom ancestry QC"
+        }
+
+        for name, (func, params) in ancestry_qc_steps.items():
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            func(**params)
+
+
+        return
