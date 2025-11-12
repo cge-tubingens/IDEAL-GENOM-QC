@@ -1066,7 +1066,7 @@ class SampleQC:
         if not fail_samples_file.exists():
             raise FileNotFoundError(f"Required file {fail_samples_file} not found. Ensure the fail_samples.txt file is generated before executing this step.")
 
-        plink_cmd = f"plink --bfile {self.input_path / binary_name} --remove {fail_samples_file} --keep-allele-order --make-bed --out {self.clean_dir / (self.output_name+'-clean-samples')}"
+        plink_cmd = f"plink2 --bfile {self.input_path / binary_name} --remove {fail_samples_file} --keep-allele-order --make-bed --out {self.clean_dir / (self.output_name+'-clean-samples')}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
