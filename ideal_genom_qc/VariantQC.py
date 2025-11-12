@@ -92,7 +92,7 @@ class VariantQC:
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
         # create fails folder
-        self.fails_dir = self.results_dir / 'fail_samples'
+        self.fails_dir = self.results_dir / 'fail_markers'
         self.fails_dir.mkdir(parents=True, exist_ok=True)
 
         # create clean files folder
