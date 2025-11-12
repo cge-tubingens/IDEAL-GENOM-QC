@@ -52,43 +52,8 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             high_ld_file    =high_ld_file
         )
 
-        sample_qc_steps = {
-            'rename SNPs'           : (sample_qc.execute_rename_snpid, {"rename": sample_params['rename_snp']}),
-            'hh_to_missing'         : (sample_qc.execute_haploid_to_missing, {"hh_to_missing": sample_params['hh_to_missing']}),
-            'ld_pruning'            : (sample_qc.execute_ld_pruning, {"ind_pair": sample_params['ind_pair']}),
-            'miss_genotype'         : (sample_qc.execute_miss_genotype, { "mind": sample_params['mind']}),
-            'sex_check'             : (sample_qc.execute_sex_check, {"sex_check": sample_params['sex_check']}),
-            'heterozygosity'        : (sample_qc.execute_heterozygosity_rate, {"maf": sample_params['maf']}),
-            'duplicates_relatedness': (sample_qc.execute_duplicate_relatedness, {"kingship": sample_params['kingship'], "use_king": sample_params['use_kingship']}),
-            'get_fail_samples'      : (sample_qc.get_fail_samples, {"call_rate_thres": sample_params['mind'], "std_deviation_het": sample_params['het_deviation'], "maf_het": sample_params['maf'], "ibd_threshold": sample_params['ibd_threshold']}),
-            'drop_fail_samples'     : (sample_qc.execute_drop_samples, {}),
-            'clean_input_files'     : (sample_qc.clean_input_folder, {}),
-            'clean_results_files'   : (sample_qc.clean_result_folder, {}),
-        }
-
-        step_description = {
-            'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
-            'hh_to_missing'         : 'Solve hh warnings by setting to missing',
-            'ld_pruning'            : 'Perform LD pruning',
-            'miss_genotype'         : 'Get samples with high missing rate',
-            'sex_check'             : 'Get samples with discordant sex information',
-            'heterozygosity'        : 'Get samples with high heterozygosity rate',
-            'duplicates_relatedness': 'Get samples with high relatedness rate or duplicates',
-            'get_fail_samples'      : 'Get samples that failed quality control',
-            'drop_fail_samples'     : 'Drop samples that failed quality control',
-            'clean_input_files'     : 'Clean input folder',
-            'clean_results_files'   : 'Clean results folder',
-        }
-
-        for name, (func, params) in sample_qc_steps.items():
-            print(f"\033[1m{step_description[name]}.\033[0m")
-            func(**params)
-
-            time.sleep(3)  # to avoid overwhelming the system with too many operations at once
-            gc.collect()  # clear memory after each step
-
-            mem = psutil.virtual_memory()
-            logger.info(f"Memory usage after {name}: {mem.percent}%")
+        # Execute the complete sample QC pipeline
+        sample_qc.execute_sample_qc_pipeline(sample_params)
         print("\033[92mSample quality control done.\033[0m")
 
     # execute step by step
@@ -105,31 +70,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             built=built
         )
 
-        ancestry_qc_steps = {
-            'merge_study_reference'    : (ancestry_qc.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
-            'delete_intermediate_files': (ancestry_qc._clean_merging_dir, {}),
-            'pca_analysis'             : (ancestry_qc.run_pca, 
-                {
-                    "ref_population": ancestry_params['reference_pop'],
-                    "pca":ancestry_params['pca'],
-                    "maf":ancestry_params['maf'],
-                    "num_pca":ancestry_params['num_pcs'],
-                    "ref_threshold":ancestry_params['ref_threshold'],
-                    "stu_threshold":ancestry_params['stu_threshold'],
-                    "aspect_ratio":ancestry_params['aspect_ratio'],
-                }
-            ),
-        }
-
-        step_description = {
-            'merge_study_reference'    : "Merge reference genome with study genome",
-            'delete_intermediate_files': "Delete intermediate files generated during merging",
-            'pca_analysis'             : "Run a PCA analysis to perfom ancestry QC"
-        }
-
-        for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[1m{step_description[name]}.\033[0m")
-            func(**params)
+        ancestry_qc.execute_ancestry_pipeline(ancestry_params)
 
         print("\033[92mAncestry outliers analysis done.\033[0m")
 
@@ -141,25 +82,7 @@ def qc_pipeline(params_dict: dict, data_dict: dict, steps_dict: dict, recompute_
             output_name     =data_dict['output_prefix']
         )
 
-        variant_qc_steps = {
-            'Missing data rate'         : (variant_qc.execute_missing_data_rate, {'chr_y': variant_qc_params['chr-y']}),
-            'Different genotype'        : (variant_qc.execute_different_genotype_call_rate, {}),
-            'Hardy-Weinberg equilibrium': (variant_qc.execute_hwe_test, {}),
-            'Get fail variants'         : (variant_qc.get_fail_variants, {'marker_call_rate_thres': variant_qc_params['miss_data_rate'], 'case_controls_thres': variant_qc_params['diff_genotype_rate'], 'hwe_threshold':variant_qc_params['hwe']}),
-            'Drop fail variants'        : (variant_qc.execute_drop_variants, {'maf': variant_qc_params['maf'], 'geno': variant_qc_params['geno'], 'hwe': variant_qc_params['hwe']}),
-        }
-
-        variant_step_description = {
-            'Missing data rate'         : 'Compute missing data rate for males and females',
-            'Different genotype'        : 'Case/control nonrandom missingness test',
-            'Hardy-Weinberg equilibrium': 'Hardy-Weinberg equilibrium test',
-            'Get fail variants'         : 'Get variants that failed quality control',
-            'Drop fail variants'        : 'Drop variants that failed quality control'
-        }
-
-        for name, (func, params) in variant_qc_steps.items():
-            print(f"\033[34m{variant_step_description[name]}.\033[0m")
-            func(**params)
+        variant_qc.execute_variant_qc_pipeline(variant_qc_params)
 
         print("\033[92mVariant quality control done.\033[0m")
 
