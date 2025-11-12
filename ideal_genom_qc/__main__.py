@@ -201,7 +201,7 @@ def main()->str:
         built    =built
     )
 
-    return "Pipeline is completed"
+    return "✅ Pipeline is completed"
 
 if __name__ == "__main__":
     main()
