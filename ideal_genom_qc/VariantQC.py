@@ -150,13 +150,13 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # generates  .lmiss and .imiss files for male subjects
-        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --missing --filter-males --chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-males-only')} --memory {memory}"
+        plink_cmd1 = f"plink2 --bfile {self.input_path / self.input_name} --missing --filter-males --chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-males-only')} --memory {memory}"
 
         # generates .lmiss and. imiss files for female subjects
-        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --missing --not-chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-not-y')} --memory {memory}"
+        plink_cmd2 = f"plink2 --bfile {self.input_path / self.input_name} --missing --not-chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-not-y')} --memory {memory}"
 
-        self.males_missing_data = self.results_dir / (self.output_name+'-missing-males-only.lmiss')
-        self.females_missing_data = self.results_dir / (self.output_name+'-missing-not-y.lmiss')
+        self.males_missing_data = self.results_dir / (self.output_name+'-missing-males-only.vmiss')
+        self.females_missing_data = self.results_dir / (self.output_name+'-missing-not-y.vmiss')
 
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2]
@@ -235,7 +235,7 @@ class VariantQC:
         memory = round(2*available_memory_mb/3,0)
 
         # PLINK command to compute HWE test
-        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --hardy --out {self.results_dir / (self.output_name+'-hwe')} --memory {memory}"
+        plink_cmd = f"plink2 --bfile {self.input_path / self.input_name} --hardy --out {self.results_dir / (self.output_name+'-hwe')} --memory {memory}"
 
         # execute PLINK command
         shell_do(plink_cmd, log=True)
