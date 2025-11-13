@@ -1567,6 +1567,7 @@ class GenomicOutlierAnalyzer:
             distances = dist.cdist(X_std, [np.zeros_like(mu)], metric='minkowski', p=p_value).flatten()
 
         return distances
+    
 class AncestryQC:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38', rename_snps: bool = False) -> None:

@@ -553,22 +553,11 @@ class SampleQC:
         plink_cmd6 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --memory {memory} --threads {max_threads}"
         plink_cmd7 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafless')} --memory {memory} --threads {max_threads}"
 
-#        # convert both to ped/map files for heterozigosity computation
-#        plink_cmd6 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')} --memory {memory} --threads {max_threads}"
-#        plink_cmd7 = f"plink --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --recode --out {self.results_dir / (self.output_name+'-chr1-22-mafless-recode')} --memory {memory} --threads {max_threads}"
-#
         # execute PLINK commands
         cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
         for cmd in cmds:
             shell_do(cmd, log=True)
             time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
-
-#        self._compute_heterozigozity(
-#            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafgreater-recode')).with_suffix('.ped')
-#        )
-#        self._compute_heterozigozity(
-#            ped_file=(self.results_dir / (self.output_name+'-chr1-22-mafless-recode')).with_suffix('.ped')
-#        )
 
         self.maf_greater_het= self.results_dir / (self.output_name+'-chr1-22-mafgreater.het')
         if not self.maf_greater_het.exists():
@@ -576,12 +565,6 @@ class SampleQC:
         self.maf_less_het   = self.results_dir / (self.output_name+'-chr1-22-mafless.het')
         if not self.maf_less_het.exists():
             raise FileNotFoundError(f"Missing file: {self.maf_less_het}")
-#        self.summary_greater = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafgreater-recode.ped')
-#        if not self.summary_greater.exists():
-#            raise FileNotFoundError(f"Missing file: {self.summary_greater}")
-#        self.summary_less    = self.results_dir / ('Summary-'+self.output_name+'-chr1-22-mafless-recode.ped')
-#        if not self.summary_less.exists():
-#            raise FileNotFoundError(f"Missing file: {self.summary_less}")
         self.maf_greater_smiss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.smiss')
         if not self.maf_greater_smiss.exists():
             raise FileNotFoundError(f"Missing file: {self.maf_greater_smiss}")

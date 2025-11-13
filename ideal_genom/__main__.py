@@ -5,13 +5,13 @@ from pathlib import Path
 
 from ideal_genom_qc.Helpers import arg_parser, validate_config
 
-from ideal_genom_qc.SampleQC import SampleQC
-from ideal_genom_qc.VariantQC import VariantQC
-from ideal_genom_qc.AncestryQC import AncestryQC
-from ideal_genom_qc.PopStructure import UMAPplot, FstSummary
+from ideal_genom_qc.QualityControl.SampleQC import SampleQC
+from ideal_genom_qc.QualityControl.VariantQC import VariantQC
+from ideal_genom_qc.QualityControl.AncestryQC import AncestryQC
+from ideal_genom_qc.PopStructure.PopStructure import UMAPplot, FstSummary
 
 from ideal_genom_qc.get_references import FetcherLDRegions
-from ideal_genom_qc.check_tools import check_required_tools, get_tool_version, ToolNotFoundError
+from ideal_genom_qc.Utilities.check_tools import check_required_tools, get_tool_version, ToolNotFoundError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

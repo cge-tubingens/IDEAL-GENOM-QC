@@ -17,7 +17,7 @@ from pathlib import Path
 
 from ideal_genom_qc.Helpers import shell_do
 from ideal_genom_qc.get_references import FetcherLDRegions, Fetcher1000Genome
-from ideal_genom_qc.AncestryQC import ReferenceGenomicMerger
+from ideal_genom_qc.QualityControl.AncestryQC import ReferenceGenomicMerger
 from sklearn.model_selection import ParameterGrid
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
