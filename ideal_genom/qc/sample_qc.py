@@ -971,10 +971,11 @@ class SampleQC:
         # Check if required files exist
         required_files = [
             self.call_rate_miss,
-            self.results_dir / (self.output_name + '-sexcheck.sexcheck'),
-            self.results_dir / (self.output_name + '-xchr-missing.smiss'),
-            self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing.smiss'),
-            self.results_dir / (self.output_name + '-chr1-22-mafless-missing.smiss')
+            self.sexcheck_miss,
+            self.xchr_miss,
+            self.maf_greater_het,
+            self.maf_less_het,
+            self.kinship_miss
         ]
 
         if not self.use_kinship:
