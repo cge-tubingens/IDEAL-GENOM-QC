@@ -182,10 +182,14 @@ class SampleQC:
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
-        plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.input_path / (self.input_name+ '-renamed')}"
-
         # Execute PLINK2 command
-        shell_do(plink2_cmd, log=True)
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--set-all-var-ids', '@:#:$r:$a',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.input_path / (self.input_name + '-renamed'))
+        ])
 
         return
     
@@ -234,11 +238,14 @@ class SampleQC:
         # Dynamically set the input file name based on whether SNPs are renamed
         input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
 
-        # PLINK command: convert haploid genotypes to missing
-        plink_cmd = f"plink2 --bfile {self.input_path / input_file} --set-invalid-haploid-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        # Execute PLINK2 command: convert haploid genotypes to missing
+        run_plink2([
+            '--bfile', str(self.input_path / input_file),
+            '--set-invalid-haploid-missing',
+            '--keep-allele-order',
+            '--make-bed',
+            '--out', str(self.input_path / (self.input_name + '-hh-missing'))
+        ])
 
         return
     
@@ -318,28 +325,43 @@ class SampleQC:
         else:
             ld_input = self.input_name
 
-        # exclude complex regions
-        plink_cmd1 = f"plink2 --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --memory {memory} --threads {max_threads} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        # Exclude complex regions
+        run_plink2([
+            '--bfile', str(self.input_path / ld_input),
+            '--exclude', str(self.high_ld_file),
+            '--memory', str(memory),
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.results_dir / (self.input_name + '-LDregionExcluded'))
+        ])
+        time.sleep(5)
         
         prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
 
-
         # LD prune indep-pairwise test
-        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')}"
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.input_name + '-LDregionExcluded')),
+            '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
+            '--keep-allele-order',
+            '--memory', str(memory),
+            '--threads', str(max_threads),
+            '--out', str(self.results_dir / (self.input_name + '-LDregionExcluded-prunning'))
+        ])
+        time.sleep(5)
 
-
-        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
-
-        #plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+        # Extract pruned SNPs
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.input_name + '-LDregionExcluded')),
+            '--extract', str(prune_in_file),
+            '--keep-allele-order',
+            '--make-bed',
+            '--out', str(self.results_dir / (self.input_name + '-LDpruned')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
+        ])
+        time.sleep(5)
 
         self.pruned_file = self.results_dir / (self.input_name + '-LDpruned')
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
-        for cmd in cmds:
-            logger.info(f"Executing PLINK command: {cmd}")
-            shell_do(cmd, log=True)
-            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
 
         return
     
