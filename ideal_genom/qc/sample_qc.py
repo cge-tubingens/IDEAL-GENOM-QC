@@ -782,15 +782,22 @@ class SampleQC:
         memory = round(2*available_memory_mb/3,0)
         
         # Compute kinship-coefficient matrix for all samples
-        plink2_cmd1 = f"plink2 --bfile {self.input_path / kinship_input} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
+        run_plink2([
+            '--bfile', str(self.input_path / kinship_input),
+            '--make-king', 'triangle', 'bin',
+            '--out', str(self.results_dir / (self.output_name + '-kinship-coefficient-matrix')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
+        ])
 
         # Prune for Monozygotic Twins OR Duplicates
-        plink2_cmd2 = f"plink2 --bfile {self.input_path / kinship_input} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kinship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
-
-        # execute PLINK commands
-        cmds = [plink2_cmd1, plink2_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        run_plink2([
+            '--bfile', str(self.input_path / kinship_input),
+            '--king-cutoff', str(self.results_dir / (self.output_name + '-kinship-coefficient-matrix')), str(kinship),
+            '--out', str(self.results_dir / (self.output_name + '-kinship-pruned-duplicates')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
+        ])
 
         self.kinship_miss = (self.results_dir / (self.output_name+'-kinship-pruned-duplicates')).with_suffix('.king.cutoff.out.id')
 
