@@ -1,5 +1,5 @@
 [project]
-name = "ideal-genom-qc"
+name = "ideal-genom"
 version = "0.2.0"
 description = "package to run a genotype quality control pipeline"
 authors = [{name="Luis Giraldo González", email="luisggon@protonmail.com"}, {name="Amabel Tenghe", email="tenghe.amabel@gmail.com"}]
@@ -41,4 +41,4 @@ requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
-ideal_genom_qc = "ideal_genom_qc.__main__:main"
+ideal_genom_qc = "ideal_genom.__main__:main"
