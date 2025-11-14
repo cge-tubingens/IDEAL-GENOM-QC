@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import seaborn as sns
 
-from ideal_genom_qc.Helpers import shell_do
-from ideal_genom_qc.get_references import FetcherLDRegions
+from ideal_genom.utilities.Helpers import shell_do
+from ideal_genom.utilities.get_references import FetcherLDRegions
 
 from pathlib import Path
 from typing import Optional, Union
@@ -24,7 +24,7 @@ from typing import Optional, Union
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class SampleQC:
+class SampleQC_old:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38') -> None:
         
@@ -1771,3 +1771,741 @@ class SampleQC:
         logger.info("Sample Quality Control Pipeline completed successfully")
 
         return
+
+class SampleQC:
+
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38') -> None:
+        
+        """
+        Initialize SampleQC class for quality control of genetic data.
+        This class handles quality control procedures for genetic data files in PLINK binary format
+        (bed, bim, fam). It sets up the directory structure and validates input files.
+        
+        Parameters
+        ----------
+        input_path : Path
+            Directory path containing the input PLINK files
+        input_name : str
+            Base name of the input PLINK files (without extension)
+        output_path : Path
+            Directory path where output files will be saved
+        output_name : str
+            Base name for output files (without extension)
+        high_ld_file : Path
+            Path to file containing high LD regions. If not found, will be fetched from package
+        built : str, optional
+            Genome build version, either '37' or '38' (default='38')
+        
+        Raises
+        ------
+        TypeError
+            If input types are incorrect
+        ValueError
+            If genome build version is not '37' or '38'
+        FileNotFoundError
+            If input paths or required PLINK files are not found
+        
+        Attributes
+        ----------
+        renamed_snps : bool
+            Flag indicating if SNPs should be renamed
+        hh_to_missing : bool
+            Flag indicating if heterozygous haploid genotypes should be set to missing
+        pruned_file : None
+            Placeholder for pruned file path
+        results_dir : Path
+            Directory for all QC results
+        fails_dir : Path
+            Directory for failed samples
+        clean_dir : Path
+            Directory for clean files
+        plots_dir : Path
+            Directory for QC plots
+        """
+
+        if not isinstance(input_path, Path) or not isinstance(output_path, Path):
+            raise TypeError("input_path and output_path should be of type Path")
+        if not isinstance(input_name, str) or not isinstance(output_name, str):
+            raise TypeError("input_name and output_name should be of type str")
+        if not isinstance(high_ld_file, Path):
+            raise TypeError("high_ld_file should be of type Path")
+        
+        if not isinstance(built, str):
+            raise TypeError("built should be of type str")
+        if built not in ['37', '38']:
+            raise ValueError("built should be either 37 or 38")
+        
+        if not input_path.exists() or not output_path.exists():
+            raise FileNotFoundError("input_path or output_path is not a valid path")
+        if not (input_path / f"{input_name}.bed").exists():
+            raise FileNotFoundError(".bed file not found")
+        if not (input_path / f"{input_name}.fam").exists():
+            raise FileNotFoundError(".fam file not found")
+        if not (input_path / f"{input_name}.bim").exists():
+            raise FileNotFoundError(".bim file not found")
+        
+        if not high_ld_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions(built=built)
+            ld_fetcher.get_ld_regions()
+
+            ld_regions = ld_fetcher.ld_regions
+            if ld_regions is None:
+                raise ValueError("Failed to fetch high LD regions file")
+            logger.info(f"High LD file fetched from the package and saved at {ld_regions}")
+        else:
+            logger.info(f"High LD file found at {high_ld_file}")
+            ld_regions = high_ld_file
+        
+        self.input_path  = Path(input_path)
+        self.output_path = Path(output_path)
+        self.input_name  = input_name
+        self.output_name = output_name
+        self.high_ld_file = ld_regions
+
+        self.renamed_snps = False
+        self.hh_to_missing= False
+        self.pruned_file = None
+
+        # create results folder
+        self.results_dir = self.output_path / 'sample_qc_results'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+
+        # create fails folder
+        self.fails_dir = self.results_dir / 'fail_samples'
+        self.fails_dir.mkdir(parents=True, exist_ok=True)
+
+        # create clean files folder
+        self.clean_dir = self.results_dir / 'clean_files'
+        self.clean_dir.mkdir(parents=True, exist_ok=True)
+        
+        # create figures folder
+        self.plots_dir = self.results_dir / 'plots'
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
+
+    def execute_rename_snpid(self, rename: bool = True) -> None:
+        
+        """
+        Executes the SNP ID renaming process using PLINK2.
+        This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
+        The renaming is performed using PLINK2's --set-all-var-ids parameter.
+        
+        Parameter:
+        ----------
+        rename (bool, optional): Flag to control whether SNP renaming should be performed. 
+            Defaults to True.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            TypeError: If rename parameter is not a boolean.
+
+        Notes:
+        ------
+            - The renamed files will be saved with '-renamed' suffix
+            - Thread count is optimized based on available CPU cores
+            - The new SNP ID format will be: chromosome:position:allele1:allele2
+            - Sets self.renamed_snps to True if renaming is performed
+        """
+
+        if not isinstance(rename, bool):
+            raise TypeError("rename must be a boolean")
+        
+        if not rename:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
+            return
+        else:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
+            self.renamed_snps = True
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.input_path / (self.input_name+ '-renamed')}"
+
+        # Execute PLINK2 command
+        shell_do(plink2_cmd, log=True)
+
+        return
+    
+    def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
+
+        """
+        Convert haploid genotypes to missing values in PLINK binary files.
+        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
+        missing values in the genotype data. This is often useful for quality control 
+        of genetic data, particularly for variants on sex chromosomes.
+        
+        Parameters
+        ----------
+        hh_to_missing : bool, default=True
+            If True, converts haploid genotypes to missing values.
+            If False, skips the conversion step.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If hh_to_missing is not a boolean value.
+        
+        Notes
+        -----
+        The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
+        new files with suffix '-hh-missing'. The input files are determined based on whether
+        SNPs have been previously renamed (checks self.renamed_snps).
+        """
+
+        if not isinstance(hh_to_missing, bool):
+            raise TypeError("hh_to_missing must be a boolean")
+        
+        if not hh_to_missing:
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
+            return
+        else:
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
+            self.hh_to_missing = True
+        
+        logger.info("STEP: Convert haploid genotypes to missing values")
+
+        # Dynamically set the input file name based on whether SNPs are renamed
+        input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
+
+        # PLINK command: convert haploid genotypes to missing
+        plink_cmd = f"plink2 --bfile {self.input_path / input_file} --set-invalid-haploid-missing --keep-allele-order --make-bed --out {self.input_path / (self.input_name+'-hh-missing')}"
+
+        # execute PLINK command
+        shell_do(plink_cmd, log=True)
+
+        return
+    
+    def execute_ld_pruning(self, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
+        This method performs LD pruning in three steps:
+        1. Excludes complex/high LD regions
+        2. Identifies SNPs for pruning using indep-pairwise test
+        3. Creates final pruned dataset
+
+        Parameters
+        ----------
+        ind_pair : list, optional
+            List of three elements for LD pruning parameters:
+            - Window size (int): Number of SNPs to analyze in each window
+            - Step size (int): Number of SNPs to shift window at each step
+            - r² threshold (float): Correlation coefficient threshold for pruning
+            Default is [50, 5, 0.2]
+        
+        Raises
+        ------
+        TypeError
+            If ind_pair is not a list
+            If first two elements of ind_pair are not integers
+            If third element of ind_pair is not float
+        ValueError
+            If ind_pair does not contain exactly three elements
+            If window size or step size is not positive
+            If r² threshold is not between 0 and 1
+        FileNotFoundError
+            If required pruning input file is not found
+        
+        Notes
+        -----
+        - Uses available CPU cores (leaving 2 cores free) and 2/3 of available memory
+        - Creates intermediate and final files with suffixes:
+          * '-LDregionExcluded'
+          * '-LDregionExcluded-prunning'
+          * '-LDpruned'
+        - Updates self.pruned_file with path to final pruned dataset
+        """
+        
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
+        if len(ind_pair) != 3:
+            raise ValueError("ind_pair must have exactly three elements")
+        
+        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
+            raise TypeError("The first two elements in ind_pair values should be integers (window size and step size)")
+        if ind_pair[0] <= 0 or ind_pair[1] <= 0:
+            raise ValueError("Window size and step size must be positive integers")
+        
+        if not isinstance(ind_pair[2], float):
+            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
+        if not (0 < ind_pair[2] <= 1):
+            raise ValueError("The r^2 threshold must be a float between 0 and 1")
+
+        logger.info("STEP: LD pruning")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        if self.hh_to_missing:
+            ld_input = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            ld_input = self.input_name+'-renamed'
+        else:
+            ld_input = self.input_name
+
+        # exclude complex regions
+        plink_cmd1 = f"plink2 --bfile {self.input_path / ld_input} --exclude {self.high_ld_file} --memory {memory} --threads {max_threads} --make-bed --out {self.results_dir / (self.input_name+'-LDregionExcluded')}"
+        
+        prune_in_file = (self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')
+
+
+        # LD prune indep-pairwise test
+        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --keep-allele-order --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-LDregionExcluded-prunning')}"
+
+
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {prune_in_file} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+
+        #plink_cmd3 = f"plink --bfile {self.results_dir / (self.input_name+'-LDregionExcluded')} --extract {(self.results_dir / (self.input_name+'-LDregionExcluded-prunning')).with_suffix('.prune.in')} --keep-allele-order --make-bed --out {self.results_dir / (self.input_name + '-LDpruned')} --memory {memory} --threads {max_threads}"
+
+        self.pruned_file = self.results_dir / (self.input_name + '-LDpruned')
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
+        for cmd in cmds:
+            logger.info(f"Executing PLINK command: {cmd}")
+            shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
+
+        return
+    
+    def execute_miss_genotype(self) -> None:
+        """Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+        
+        This method performs two main operations:
+        1. Generates missingness statistics for all samples
+        2. Filters samples based on the specified missingness threshold (mind)
+        
+        Parameters
+        ----------
+        mind : float, optional
+            The missingness threshold for sample filtering (default is 0.2).
+            Samples with missingness rates above this threshold will be removed.
+            Recommended range is between 0.02 and 0.1.
+        
+        Returns
+        -------
+        dict
+            Dictionary containing missingness analysis results
+        
+        Raises
+        ------
+        TypeError
+            If mind parameter is not a float
+        ValueError
+            If mind parameter is not between 0 and 1
+        FileNotFoundError
+            If the output .imiss file is not generated
+            If mind value is outside recommended range (0.02-0.1)
+        
+        Notes
+        -----
+        This function creates two files:
+        - {input_name}-missing.imiss: Contains missingness statistics for all samples
+        - {output_name}-mind.bed: New binary file with filtered samples
+        """
+
+        logger.info(f"STEP: Missing genotype check.")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        # PLINK command: run mssingness across file genome-wide 
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
+
+        shell_do(plink_cmd1, log=True)
+
+        self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.smiss')
+        if not self.call_rate_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.call_rate_miss}")
+
+        return
+    
+    def execute_sex_check(self, sex_check: list = [0.2, 0.8]) -> None:
+        """Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
+        
+        This method performs sex check analysis by:
+        1. Running PLINK's --check-sex command on pruned data
+        2. Extracting X chromosome SNPs
+        3. Calculating missingness rates for X chromosome SNPs
+        
+        Parameters
+        ----------
+        sex_check : list of float, default=[0.2, 0.8]
+            List containing two float values that define the F-statistic boundaries for sex determination.
+            The values must sum to 1.0. First value is the lower bound, second is the upper bound.
+            Samples with F-statistics below the first value are called female, above the second value are called male.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If sex_check is not a list or if its elements are not floats
+        ValueError
+            If sex_check doesn't contain exactly 2 elements or if they don't sum to 1
+        
+        Notes
+        -----
+        The method creates the following output files:
+        - {output_name}-sexcheck.sexcheck : Contains sex check results
+        - {output_name}-xchr.bed/bim/fam : X chromosome SNP data
+        - {output_name}-xchr-missing.imiss : X chromosome missingness data
+        The number of threads used is automatically determined based on available CPU cores,
+        using max(available cores - 2, 1) or falling back to half of logical cores if CPU count
+        cannot be determined.
+        """
+
+        if not isinstance(sex_check, list):
+            raise TypeError("sex_check should be a list")
+        if len(sex_check) != 2:
+            raise ValueError("sex_check must have two elements")
+        if not all(isinstance(i, float) for i in sex_check):
+            raise TypeError("All elements in sex_check must be floats")
+        
+        logger.info(f"STEP: Check discordant sex information.")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --check-sex max-female-xf={sex_check[0]} min-male-xf={sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
+
+        print(plink_cmd1)
+
+        # extract xchr SNPs
+        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --chr 23 --keep-allele-order --threads {max_threads}  --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
+
+        # run missingness on xchr SNPs
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-xchr')} --threads {max_threads}  --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
+
+        self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
+        self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.smiss')
+
+        return
+
+    def execute_heterozygosity_rate(self, maf: float = 0.01) -> None:
+        """
+        Executes heterozygosity rate analysis on genetic data using PLINK.
+
+        This method performs a series of PLINK commands to analyze heterozygosity rates in genetic data,
+        separating SNPs based on minor allele frequency (MAF) threshold and computing heterozygosity
+        for both groups.
+
+        Parameters
+        ----------
+        maf : float, optional
+            Minor allele frequency threshold used to split SNPs into two groups.
+            Must be between 0 and 0.5. Default is 0.01.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If maf is not a float
+        ValueError
+            If maf is not between 0 and 0.5
+        FileNotFoundError
+            If any of the expected output files are not created
+
+        Notes
+        -----
+        The method:
+        1. Extracts autosomal SNPs
+        2. Splits SNPs based on MAF threshold
+        3. Computes missingness
+        4. Converts to PED/MAP format
+        5. Computes heterozygosity for both MAF groups
+
+        The computation uses optimized threading based on available CPU cores and memory.
+        """
+
+        if not isinstance(maf, float):
+            raise TypeError("maf should be a float")
+        if maf <= 0 or maf >= 0.5:
+            raise ValueError("maf should be between 0 and 0.5")
+
+        logger.info(f"STEP: Heterozygosity rate check. `maf` set to {maf}")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+
+        # extract autosomal SNPS
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --autosome --keep-allele-order --memory {memory} --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
+
+        # extract SNPs with minor allele frequency greater than threshold
+        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
+
+        # extract SNPs with minor allele frequency less than threshold
+        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --exclude {(self.results_dir / (self.output_name+'-chr1-22-mafgreater')).with_suffix('.bim')} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafless')}"
+
+        # get missingness to plot against het
+        plink_cmd4 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing')}"
+        plink_cmd5 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafless-missing')}"
+
+        # compute heterozigosity for both MAF groups
+        plink_cmd6 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --memory {memory} --threads {max_threads}"
+        plink_cmd7 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafless')} --memory {memory} --threads {max_threads}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
+
+        self.maf_greater_het= self.results_dir / (self.output_name+'-chr1-22-mafgreater.het')
+        if not self.maf_greater_het.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_greater_het}")
+        self.maf_less_het   = self.results_dir / (self.output_name+'-chr1-22-mafless.het')
+        if not self.maf_less_het.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_less_het}")
+        self.maf_greater_smiss= self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing.smiss')
+        if not self.maf_greater_smiss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_greater_smiss}")
+        self.maf_less_smiss   = self.results_dir / (self.output_name+'-chr1-22-mafless-missing.smiss')
+        if not self.maf_less_smiss.exists():
+            raise FileNotFoundError(f"Missing file: {self.maf_less_smiss}")
+
+        return
+
+    def execute_ibd(self) -> None:
+        """
+        Execute Identity by Descent (IBD) analysis using PLINK.
+
+        This method performs duplicate and relatedness checks using IBD analysis. It runs two PLINK commands:
+        1. Generates genome-wide IBD estimates
+        2. Calculates missing genotype rates
+
+        The method uses optimal thread count based on available CPU cores and validates input/output files.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            FileNotFoundError: If required input pruned file is missing or if expected output files are not generated
+
+        Required instance attributes:
+            pruned_file: Path to pruned PLINK binary file
+            results_dir: Directory path for output files
+            output_name: Base name for output files
+            ibd_miss: Path to missing genotype rate file (set by method)
+            genome: Path to IBD estimates file (set by method)
+        """
+
+        logger.info("STEP: Duplicates and relatedness check with IBD")
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        if not self.pruned_file or not self.pruned_file.exists():
+            raise FileNotFoundError(f"Missing file: {self.pruned_file}")
+
+        # PLINK command
+        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
+
+        # PLINK command
+        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
+
+        # execute PLINK commands
+        cmds = [plink_cmd1, plink_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
+        if not self.ibd_miss.exists():
+            raise FileNotFoundError(f"Missing file: {self.ibd_miss}")
+        self.genome = self.results_dir / (self.output_name+'-ibd.genome')
+        if not self.genome.exists():
+            raise FileNotFoundError(f"Missing file: {self.genome}")
+
+        return
+
+    def execute_kinship(self, kinship: float = 0.354) -> None:
+        """Execute kinship analysis to identify and handle sample relatedness.
+
+        This method performs kinship analysis using PLINK2 to identify duplicate samples and related individuals.
+        It first computes a kinship coefficient matrix for all samples and then prunes samples based on the
+        specified kinship threshold.
+        
+        Parameters
+        ----------
+        kinship : float, optional
+            The kinship coefficient threshold used to identify related samples. Must be between 0 and 1.
+            Samples with kinship coefficients above this threshold will be marked for removal.
+            Default is 0.354 (equivalent to first-degree relatives).
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If kinship parameter is not a float.
+        ValueError
+            If kinship parameter is not between 0 and 1.
+        FileNotFoundError
+            If the expected output file from PLINK2 is not created.
+        
+        Notes
+        -----
+        - Uses PLINK2 to compute kinship coefficients and perform sample pruning
+        - Automatically determines optimal thread count and memory usage based on system resources
+        - Creates output files with kinship coefficient matrix and list of samples to be removed
+        - Updates self.kinship_miss with path to file containing samples to be removed
+        """
+
+        if not isinstance(kinship, float):
+            raise TypeError("kinship should be a float")
+        if kinship < 0 or kinship >1:
+            raise ValueError("kinship should be between 0 and 1")
+
+        logger.info(f"STEP: Duplicates and relatedness check with Kinship. `kinship` set to {kinship}")
+
+        if self.hh_to_missing:
+            kinship_input = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            kinship_input = self.input_name+'-renamed'
+        else:
+            kinship_input = self.input_name
+
+        cpu_count = os.cpu_count()
+        if cpu_count is not None:
+            max_threads = max(1, cpu_count - 2)
+        else:
+            # Dynamically calculate fallback as half of available cores or default to 2
+            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+
+        # Get the virtual memory details
+        memory_info = psutil.virtual_memory()
+        available_memory_mb = memory_info.available / (1024 * 1024)
+        memory = round(2*available_memory_mb/3,0)
+        
+        # Compute kinship-coefficient matrix for all samples
+        plink2_cmd1 = f"plink2 --bfile {self.input_path / kinship_input} --make-king triangle bin --out {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} --memory {memory} --threads {max_threads}"
+
+        # Prune for Monozygotic Twins OR Duplicates
+        plink2_cmd2 = f"plink2 --bfile {self.input_path / kinship_input} --king-cutoff {self.results_dir / (self.output_name+'-kinship-coefficient-matrix')} {kinship} --out {self.results_dir / (self.output_name+'-kinship-pruned-duplicates')} --memory {memory} --threads {max_threads}"
+
+        # execute PLINK commands
+        cmds = [plink2_cmd1, plink2_cmd2]
+        for cmd in cmds:
+            shell_do(cmd, log=True)
+
+        self.kinship_miss = (self.results_dir / (self.output_name+'-kinship-pruned-duplicates')).with_suffix('.king.cutoff.out.id')
+
+        # Check if the file exists
+        if not self.kinship_miss.exists():
+            raise FileNotFoundError(f"Expected file {self.kinship_miss} was not created. Ensure the PLINK2 command executed successfully.")
+
+        return
+    
+    def execute_duplicate_relatedness(self, kinship: float = 0.354, use_kinship: bool = True) -> None:
+        """
+        Execute duplicate and relatedness analysis on the genotype data.
+        This method performs either IBD (Identity by Descent) or KING kinship coefficient
+        analysis to identify duplicate samples and related individuals in the dataset.
+        
+        Parameters
+        ----------
+        kinship : float, optional
+            The KING kinship coefficient threshold for identifying related samples.
+            Default is 0.354, which corresponds to duplicates/MZ twins.
+        use_kinship : bool, optional
+            If True, uses KING algorithm for relatedness analysis.
+            If False, uses traditional IBD analysis.
+            Default is True.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If kinship is not a float or use_kinship is not a boolean.
+        
+        Notes
+        -----
+        The method will store the analysis type (KING or IBD) in the use_kinship attribute.
+        """
+
+        if not isinstance(use_kinship, bool):
+            raise TypeError("use_kinship must be a boolean")
+        if not isinstance(kinship, float):
+            raise TypeError("kinship must be a float")
+
+        logger.info("STEP: Duplicates and relatedness check")
+
+        if use_kinship:
+            self.execute_kinship(kinship)
+        else:
+            self.execute_ibd()
+
+        self.use_kinship = use_kinship
+
+        return
+
+class SampleQCReport:
+
+    pass
