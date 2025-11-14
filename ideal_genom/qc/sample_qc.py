@@ -852,131 +852,122 @@ class SampleQC:
         self.use_kinship = use_kinship
 
         return
-
-    def _compute_heterozigozity(self, ped_file: Path, map_file: Optional[Path] = None) -> None:
-        """
-        Computes heterozygosity statistics from a PED file and writes results to a summary file.
-        This method analyzes a PED file to calculate homozygosity and heterozygosity rates
-        for each individual. The results are written to a summary file in the same directory
-        as the input PED file.
+    
+    def _analyze_ibd_failures(self, ibd_threshold: float, chunk_size: int = 100000) -> pd.DataFrame:
+        """Helper method to analyze IBD failures in chunks.
         
         Parameters
         ----------
-        ped_file : Path
-            Path to the input PED file containing genotype data
-        map_file : Path, optional
-            Path to the MAP file (not used in current implementation)
-        
-        Returns
-        -------
-        None
-            Results are written to a summary file named "Summary-{ped_filename}"
-        The output summary file contains the following columns:
-        - ID: Individual identifier
-        - total: Total number of valid genotypes
-        - num_hom: Number of homozygous genotypes
-        - num_het: Number of heterozygous genotypes  
-        - Percent_hom: Percentage of homozygous genotypes
-        - Percent_het: Percentage of heterozygous genotypes
-        
-        sNotes
-        -----
-        - Missing alleles (coded as '0' or 'N') are excluded from calculations
-        - The method assumes PED file format with genotype data starting from column 7
-        - Handles FileNotFound and IOError exceptions with appropriate error messages
-        """
-        
-        # Define output file name
-        summary_file= f"Summary-{ped_file.name}"
-        output_path = ped_file.parent / summary_file
-
-        try:
-            with open(ped_file, 'r') as ped, open(output_path, 'w') as output:
-                # Write the header to the summary file
-                output.write("ID\ttotal\tnum_hom\tnum_het\tPercent_hom\tPercent_het\n")
-
-                for line in ped:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    
-                    # Split the line into columns
-                    columns = line.split()
-                    individual_id = columns[1]  # Individual ID (second column)
-                    genotype_data = columns[6:]  # Genotype data starts at the 7th column
-
-                    # Initialize counters
-                    total= 0
-                    hom  = 0
-                    het  = 0
-
-                    # Iterate through genotype pairs
-                    for i in range(0, len(genotype_data), 2):
-                        allele1 = genotype_data[i]
-                        allele2 = genotype_data[i + 1]
-
-                        if allele1 == allele2:
-                            if allele1 not in ['0', 'N']:  # Exclude missing alleles
-                                hom += 1
-                                total += 1
-                        elif allele1 != allele2:
-                            het += 1
-                            total += 1
-
-                    # Calculate percentages
-                    hom_percent = (hom / total) * 100 if total > 0 else 0.0
-                    het_percent = (het / total) * 100 if total > 0 else 0.0
-
-                    # Write the statistics to the output file
-                    output.write(f"{individual_id}\t{total}\t{hom}\t{het}\t"
-                                 f"{hom_percent:.2f}\t{het_percent:.2f}\n")
-
-            print(f"Summary written to {summary_file}")
-        except FileNotFoundError:
-            print(f"Error: File {ped_file} not found.")
-        except IOError as e:
-            logger.error(f"Error: {e}")
-
-    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
-        """
-        Get samples that failed quality control checks and generate a summary DataFrame.
-        This method performs multiple QC checks on samples:
-        1. Call rate check
-        2. Sex check
-        3. Heterozygosity rate check (for MAF > and < threshold)
-        4. Duplicates/Relatedness check (using either KING or IBD)
-        
-        Parameters
-        ----------
-        call_rate_thres : float
-            Threshold for call rate filtering
-        std_deviation_het : float 
-            Number of standard deviations to use for heterozygosity filtering
-        maf_het : float
-            Minor allele frequency threshold for heterozygosity check
         ibd_threshold : float
-            Threshold for IBD filtering (only used if use_king=False)
-        
+            PI_HAT threshold for identifying related samples
+        chunk_size : int
+            Number of rows to process at a time
+            
         Returns
         -------
         pd.DataFrame
-            Summary DataFrame containing:
-            - Counts of samples failing each QC check
-            - Number of duplicated sample IDs
-            - Total failures
-        
-        Raises
-        ------
-        FileNotFoundError
-            If any required input files are missing
-        TypeError
-            If unexpected column types are found in summary DataFrame
-        
-        Notes
-        -----
-        The method saves a detailed fail_samples.txt file with all failed samples and their failure reasons.
-        Samples failing multiple checks are only counted once in the final summary.
+            DataFrame with failed samples (FID, IID, Failure columns)
         """
+        imiss_path = self.results_dir / (self.output_name + '-ibd-missing.imiss')
+        genome_path = self.results_dir / (self.output_name + '-ibd.genome')
+
+        # Load missingness data
+        df_imiss = pd.read_csv(imiss_path, sep=r'\s+', engine='python')
+        df_imiss.columns = [col.lstrip('#') for col in df_imiss.columns]
+
+        # Process genome file in chunks
+        duplicates = []
+        for chunk in pd.read_csv(
+            genome_path,
+            usecols=['FID1', 'IID1', 'FID2', 'IID2', 'PI_HAT'],
+            sep=r'\s+',
+            engine='python',
+            chunksize=chunk_size,
+        ):
+            filtered_chunk = chunk[chunk['PI_HAT'] > ibd_threshold]
+            if not filtered_chunk.empty:
+                duplicates.append(filtered_chunk)
+
+        if not duplicates:
+            return pd.DataFrame(columns=['FID', 'IID', 'Failure'])
+
+        df_dup = pd.concat(duplicates, ignore_index=True)
+
+        # Merge with missingness
+        imiss_related1 = pd.merge(
+            df_dup[['FID1', 'IID1']],
+            df_imiss[['FID', 'IID', 'F_MISS']],
+            left_on=['FID1', 'IID1'],
+            right_on=['FID', 'IID'],
+        ).rename(columns={'F_MISS': 'F_MISS_1'})
+
+        imiss_related2 = pd.merge(
+            df_dup[['FID2', 'IID2']],
+            df_imiss[['FID', 'IID', 'F_MISS']],
+            left_on=['FID2', 'IID2'],
+            right_on=['FID', 'IID'],
+        ).rename(columns={'F_MISS': 'F_MISS_2'})
+
+        # Decide which samples to remove (keep one with lower missingness)
+        to_remove = pd.concat(
+            [
+                imiss_related1[['FID1', 'IID1', 'F_MISS_1']],
+                imiss_related2[['FID2', 'IID2', 'F_MISS_2']],
+            ],
+            axis=1,
+        )
+
+        to_remove['FID'], to_remove['IID'] = np.where(
+            to_remove['F_MISS_1'] > to_remove['F_MISS_2'],
+            (to_remove['FID1'], to_remove['IID1']),
+            (to_remove['FID2'], to_remove['IID2']),
+        )
+
+        fail_duplicates = to_remove[['FID', 'IID']].drop_duplicates().reset_index(drop=True)
+        fail_duplicates['Failure'] = 'Duplicates and relatedness (IBD)'
+
+        return fail_duplicates
+    
+    def _analyze_heterozygosity_failures(self, het_file: Path, std_deviation_het: float, maf_het: float, maf_direction: str) -> pd.DataFrame:
+        """Helper method to analyze heterozygosity failures.
+        
+        Parameters
+        ----------
+        het_file : Path
+            Path to the .het file
+        std_deviation_het : float
+            Number of standard deviations for outlier detection
+        maf_het : float
+            MAF threshold used
+        maf_direction : str
+            Direction of MAF comparison ('>' or '<')
+            
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with failed samples (FID, IID, Failure columns)
+        """
+        # Load heterozygosity data
+        df_het = pd.read_csv(het_file, sep=r'\s+', engine='python')
+        df_het.columns = [col.lstrip('#') for col in df_het.columns]
+        df_het["HET_RATE"] = 1 - (df_het["O(HOM)"] / df_het["OBS_CT"])
+
+        # Calculate mean and standard deviation
+        mean_percent = df_het['HET_RATE'].mean()
+        sd_percent = df_het['HET_RATE'].std()
+
+        # Identify outliers
+        mask_plus = df_het['HET_RATE'] > mean_percent + std_deviation_het * sd_percent
+        mask_minus = df_het['HET_RATE'] < mean_percent - std_deviation_het * sd_percent
+
+        # Filter failed samples
+        fail_het = df_het[mask_plus | mask_minus][['FID', 'IID']].copy()
+        fail_het['Failure'] = f'Heterozygosity rate (MAF {maf_direction} {maf_het})'
+
+        return fail_het
+    
+    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
+
         # Check if required files exist
         required_files = [
             self.call_rate_miss,
