@@ -985,6 +985,258 @@ class SampleQC:
         for file in required_files:
             if not file.exists():
                 raise FileNotFoundError(f"Required file not found: {file}")
+            
+        # Load and filter call rate failures in chunks
+        fail_call_rate_chunks = []
+        for chunk in pd.read_csv(
+            self.call_rate_miss,
+            sep=r'\s+',
+            engine='python',
+            chunksize=10000
+        ):
+            chunk.columns = [col.lstrip('#') for col in chunk.columns]
+            failed_chunk = chunk[chunk['F_MISS'] > call_rate_thres][['FID', 'IID']].copy()
+            if not failed_chunk.empty:
+                fail_call_rate_chunks.append(failed_chunk)
+        
+        if fail_call_rate_chunks:
+            fail_call_rate = pd.concat(fail_call_rate_chunks, ignore_index=True)
+            fail_call_rate['Failure'] = 'Call rate'
+        else:
+            fail_call_rate = pd.DataFrame(columns=['FID', 'IID', 'Failure'])
+
+        # Load and filter sex check failures in chunks
+        fail_sexcheck_chunks = []
+        for chunk in pd.read_csv(
+            self.results_dir / (self.output_name + '-sexcheck.sexcheck'),
+            sep=r'\s+',
+            engine='python',
+            chunksize=10000
+        ):
+            chunk.columns = [col.lstrip('#') for col in chunk.columns]
+            failed_chunk = chunk[chunk['STATUS'] == 'PROBLEM'][['FID', 'IID']].copy()
+            if not failed_chunk.empty:
+                fail_sexcheck_chunks.append(failed_chunk)
+        
+        if fail_sexcheck_chunks:
+            fail_sexcheck = pd.concat(fail_sexcheck_chunks, ignore_index=True)
+            fail_sexcheck['Failure'] = 'Sex check'
+        else:
+            fail_sexcheck = pd.DataFrame(columns=['FID', 'IID', 'Failure'])
+
+        # Heterozygosity failures for MAF greater than threshold
+        fail_het_greater = self._analyze_heterozygosity_failures(
+            het_file=self.maf_greater_het,
+            std_deviation_het=std_deviation_het,
+            maf_het=maf_het,
+            maf_direction='>'
+        )
+
+        # Heterozygosity failures for MAF less than threshold
+        fail_het_less = self._analyze_heterozygosity_failures(
+            het_file=self.maf_less_het,
+            std_deviation_het=std_deviation_het,
+            maf_het=maf_het,
+            maf_direction='<'
+        )
+
+        # Duplicates and relatedness check
+        if self.use_kinship:
+            # Load kinship-based duplicates/related samples
+            df_duplicates = pd.read_csv(
+                self.kinship_miss,
+                sep=r'\s+',
+                engine='python'
+            )
+            df_duplicates.columns = ['FID', 'IID']
+            fail_duplicates = df_duplicates[['FID', 'IID']].copy()
+            fail_duplicates['Failure'] = 'Duplicates and relatedness (Kinship)'
+            
+            del df_duplicates
+        else:
+            # Use IBD analysis (complex chunked processing)
+            fail_duplicates = self._analyze_ibd_failures(ibd_threshold=ibd_threshold)
+
+        # Merge all failure DataFrames
+        fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates]
+        df_all_fails = pd.concat(fails, axis=0, ignore_index=True)
+
+        # Create summary statistics
+        summary = df_all_fails['Failure'].value_counts().reset_index()
+        num_dup = df_all_fails.duplicated(subset=['FID', 'IID']).sum()
+
+        # Remove duplicate sample IDs (samples failing multiple checks)
+        df_unique_fails = df_all_fails.drop_duplicates(subset=['FID', 'IID'])
+
+        # Save to file
+        df_unique_fails.to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
+
+        # Add summary rows
+        totals = summary.select_dtypes(include="number").sum() - num_dup
+        dups_row = pd.DataFrame({'Failure': ['Duplicated Sample IDs'], 'count': [-num_dup]})
+        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
+        summary = pd.concat([summary, dups_row, total_row], ignore_index=True)
+
+        logger.info(f"Total samples failing QC: {len(df_unique_fails)}")
+        logger.info(f"Samples failing multiple checks: {num_dup}")
+
+        return summary
+    
+    def execute_drop_samples(self) -> None:
+        """
+        Execute the removal of samples that failed quality control checks using PLINK.
+        This method performs the following steps:
+        1. Determines the appropriate binary file name based on previous processing steps
+        2. Reads the fail_samples.txt file containing samples to be removed
+        3. Executes PLINK command to create new binary files excluding failed samples
+        
+        Raises:
+        -------
+            FileNotFoundError: If the fail_samples.txt file is not found in the fails directory
+
+        Returns:
+        --------
+            None
+
+        Notes:
+        ------
+            - The output files will be created with suffix '-clean-samples'
+            - The method preserves allele order during the operation
+            - Input files must be in PLINK binary format (.bed, .bim, .fam)
+        """
+        
+        logger.info("STEP: Drop samples that failed quality control checks")
+
+        if self.hh_to_missing:
+            binary_name = self.input_name+'-hh-missing'
+        elif self.renamed_snps:
+            binary_name = self.input_name+'-renamed'
+        else:
+            binary_name = self.input_name
+
+        logger.info(f"Binary file name: {binary_name}")
+
+        # Drop samples
+        fail_samples_file = self.fails_dir / 'fail_samples.txt'
+        if not fail_samples_file.exists():
+            raise FileNotFoundError(f"Required file {fail_samples_file} not found. Ensure the fail_samples.txt file is generated before executing this step.")
+
+        # Execute PLINK2 command
+        run_plink2([
+            '--bfile', str(self.input_path / binary_name),
+            '--remove', str(fail_samples_file),
+            '--keep-allele-order',
+            '--make-bed',
+            '--out', str(self.clean_dir / (self.output_name + '-clean-samples'))
+        ])
+
+        return
+    
+    def execute_sample_qc_pipeline(self, sample_params: dict) -> None:
+        """
+        Execute the complete sample quality control pipeline.
+        
+        This method runs all sample QC steps in the correct order with proper
+        memory management and logging. It encapsulates the entire workflow
+        that was previously handled in the main script.
+        
+        Parameters
+        ----------
+        sample_params : dict
+            Dictionary containing all sample QC parameters with keys:
+            - 'rename_snp': bool, whether to rename SNPs
+            - 'hh_to_missing': bool, whether to convert haploid to missing
+            - 'ind_pair': list, LD pruning parameters [window, step, r2]
+            - 'mind': float, missing genotype rate threshold
+            - 'sex_check': list, sex check F-statistic thresholds
+            - 'maf': float, minor allele frequency for heterozygosity
+            - 'kinship': float, kinship coefficient threshold
+            - 'use_kinship': bool, whether to use KING vs IBD
+            - 'het_deviation': float, standard deviations for het filtering
+            - 'ibd_threshold': float, IBD threshold for relatedness
+        
+        Returns
+        -------
+        None
+        
+        Notes
+        -----
+        The pipeline executes steps in this order:
+        1. Rename SNPs (optional)
+        2. Convert haploid to missing (optional)
+        3. LD pruning
+        4. Missing genotype analysis
+        5. Sex check
+        6. Heterozygosity rate analysis
+        7. Duplicate/relatedness analysis
+        8. Identify failed samples
+        9. Remove failed samples
+        10. Clean up temporary files
+        
+        Memory usage is monitored after each step and garbage collection
+        is performed to prevent memory issues with large datasets.
+        """
+        
+        sample_qc_steps = {
+            'rename SNPs'           : (self.execute_rename_snpid, {"rename": sample_params['rename_snp']}),
+            'hh_to_missing'         : (self.execute_haploid_to_missing, {"hh_to_missing": sample_params['hh_to_missing']}),
+            'ld_pruning'            : (self.execute_ld_pruning, {"ind_pair": sample_params['ind_pair']}),
+            'miss_genotype'         : (self.execute_miss_genotype, {}),
+            'sex_check'             : (self.execute_sex_check, {"sex_check": sample_params['sex_check']}),
+            'heterozygosity'        : (self.execute_heterozygosity_rate, {"maf": sample_params['maf']}),
+            'duplicates_relatedness': (self.execute_duplicate_relatedness, {"kinship": sample_params['kinship'], "use_kinship": sample_params['use_kinship']}),
+            'get_fail_samples'      : (self.get_fail_samples, {"call_rate_thres": sample_params['mind'], "std_deviation_het": sample_params['het_deviation'], "maf_het": sample_params['maf'], "ibd_threshold": sample_params['ibd_threshold']}),
+            'drop_fail_samples'     : (self.execute_drop_samples, {}),
+            #'clean_input_files'     : (self.clean_input_folder, {}),
+            #'clean_results_files'   : (self.clean_result_folder, {}),
+        }
+
+        step_description = {
+            'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
+            'hh_to_missing'         : 'Solve hh warnings by setting to missing',
+            'ld_pruning'            : 'Perform LD pruning',
+            'miss_genotype'         : 'Get samples with high missing rate',
+            'sex_check'             : 'Get samples with discordant sex information',
+            'heterozygosity'        : 'Get samples with high heterozygosity rate',
+            'duplicates_relatedness': 'Get samples with high relatedness rate or duplicates',
+            'get_fail_samples'      : 'Get samples that failed quality control',
+            'drop_fail_samples'     : 'Drop samples that failed quality control',
+            'clean_input_files'     : 'Clean input folder',
+            'clean_results_files'   : 'Clean results folder',
+        }
+
+        logger.info("Starting Sample Quality Control Pipeline")
+        
+        for name, (func, params) in sample_qc_steps.items():
+            print(f"\033[1m{step_description[name]}.\033[0m")
+            
+            try:
+                func(**params)
+                logger.info(f"Successfully completed step: {name}")
+            except Exception as e:
+                logger.error(f"Error in step '{name}': {str(e)}")
+                raise
+
+            # Memory management
+            time.sleep(3)  # to avoid overwhelming the system with too many operations at once
+            gc.collect()  # clear memory after each step
+
+            mem = psutil.virtual_memory()
+            logger.info(f"Memory usage after {name}: {mem.percent}%")
+            
+        logger.info("Sample Quality Control Pipeline completed successfully")
+
+        return
+
+
+class SampleQCReport:
+
+    def __init__(self) -> None:
+        pass
+
+    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
+       
+
 
         # ==========================================================================================================
         #                                             CALL RATE CHECK
