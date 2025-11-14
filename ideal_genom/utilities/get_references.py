@@ -7,7 +7,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Optional
 
-from ideal_genom_qc.Helpers import shell_do
+from ideal_genom.utilities.Helpers import shell_do
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
