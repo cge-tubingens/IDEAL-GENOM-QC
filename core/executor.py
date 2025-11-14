@@ -91,16 +91,13 @@ def shell_do(
             subprocess_kwargs['stderr'] = subprocess.STDOUT
             
             try:
-                result = subprocess.run(**subprocess_kwargs)
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Command failed with exit code {e.returncode}")
+                result = subprocess.run(**subprocess_kwargs, check=False)
+            except Exception as e:
+                logger.error(f"Command execution error: {e}")
                 if check:
-                    raise CommandExecutionError(
-                        f"Command failed: {cmd_str}\n"
-                        f"Exit code: {e.returncode}\n"
-                        f"See log: {log_file}"
-                    )
-                return e
+                    raise CommandExecutionError(f"Failed to execute: {cmd_str}\nError: {e}")
+                # Create a mock CompletedProcess for error case
+                result = subprocess.CompletedProcess(cmd_list, returncode=1)
     else:
         if capture_output:
             subprocess_kwargs['capture_output'] = True
