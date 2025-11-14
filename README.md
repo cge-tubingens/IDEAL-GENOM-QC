@@ -44,13 +44,13 @@ The `parameters.JSON` file contains values for `PLINK` commands that will be use
     "sample_qc": {
         "rename_snp"   : true,
         "hh_to_missing": true,
-        "use_kingship" : true,
+        "use_kinship"  : true,
         "ind_pair"     : [50, 5, 0.2],
         "mind"         : 0.2,
         "sex_check"    : [0.2, 0.8],
         "maf"          : 0.01,
         "het_deviation": 3,
-        "kingship"     : 0.354,
+        "kinship"      : 0.354,
         "ibd_threshold": 0.185
     },
     "ancestry_qc": {
