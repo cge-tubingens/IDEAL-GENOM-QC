@@ -415,10 +415,14 @@ class SampleQC:
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
-        # PLINK command: run mssingness across file genome-wide 
-        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --missing --memory {memory} --threads {max_threads} --out {self.results_dir / (self.input_name+'-missing')}"
-
-        shell_do(plink_cmd1, log=True)
+        # PLINK2 command: run missingness across file genome-wide
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--missing',
+            '--memory', str(memory),
+            '--threads', str(max_threads),
+            '--out', str(self.results_dir / (self.input_name + '-missing'))
+        ])
 
         self.call_rate_miss = (self.results_dir / (self.input_name+'-missing')).with_suffix('.smiss')
         if not self.call_rate_miss.exists():
@@ -479,21 +483,34 @@ class SampleQC:
             # Dynamically calculate fallback as half of available cores or default to 2
             max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
 
-        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --check-sex max-female-xf={sex_check[0]} min-male-xf={sex_check[1]} --threads {max_threads} --out {self.results_dir / (self.output_name+'-sexcheck')}"
+        # Check sex
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--check-sex', f'max-female-xf={sex_check[0]}', f'min-male-xf={sex_check[1]}',
+            '--threads', str(max_threads),
+            '--out', str(self.results_dir / (self.output_name + '-sexcheck'))
+        ])
+        time.sleep(5)
 
-        print(plink_cmd1)
+        # Extract X chromosome SNPs
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--chr', '23',
+            '--keep-allele-order',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.results_dir / (self.output_name + '-xchr'))
+        ])
+        time.sleep(5)
 
-        # extract xchr SNPs
-        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --chr 23 --keep-allele-order --threads {max_threads}  --make-bed --out {self.results_dir / (self.output_name+'-xchr')}"
-
-        # run missingness on xchr SNPs
-        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-xchr')} --threads {max_threads}  --missing --out {self.results_dir / (self.output_name+'-xchr-missing')}"
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
-            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
+        # Run missingness on X chromosome SNPs
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-xchr')),
+            '--threads', str(max_threads),
+            '--missing',
+            '--out', str(self.results_dir / (self.output_name + '-xchr-missing'))
+        ])
+        time.sleep(5)
 
         self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
         self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.smiss')
@@ -558,28 +575,72 @@ class SampleQC:
         available_memory_mb = memory_info.available / (1024 * 1024)
         memory = round(2*available_memory_mb/3,0)
 
-        # extract autosomal SNPS
-        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --autosome --keep-allele-order --memory {memory} --make-bed --out {self.results_dir / (self.output_name+'-chr1-22')}"
+        # Extract autosomal SNPs
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--autosome',
+            '--keep-allele-order',
+            '--memory', str(memory),
+            '--make-bed',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22'))
+        ])
+        time.sleep(5)
 
-        # extract SNPs with minor allele frequency greater than threshold
-        plink_cmd2 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --maf {maf} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')}"
+        # Extract SNPs with MAF greater than threshold
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22')),
+            '--maf', str(maf),
+            '--keep-allele-order',
+            '--make-bed',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater'))
+        ])
+        time.sleep(5)
 
-        # extract SNPs with minor allele frequency less than threshold
-        plink_cmd3 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22')} --exclude {(self.results_dir / (self.output_name+'-chr1-22-mafgreater')).with_suffix('.bim')} --keep-allele-order --make-bed --out {self.results_dir / (self.output_name+'-chr1-22-mafless')}"
+        # Extract SNPs with MAF less than threshold
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22')),
+            '--exclude', str((self.results_dir / (self.output_name + '-chr1-22-mafgreater')).with_suffix('.bim')),
+            '--keep-allele-order',
+            '--make-bed',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless'))
+        ])
+        time.sleep(5)
 
-        # get missingness to plot against het
-        plink_cmd4 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater-missing')}"
-        plink_cmd5 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --missing --out {self.results_dir / (self.output_name+'-chr1-22-mafless-missing')}"
+        # Get missingness for MAF greater group
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater')),
+            '--missing',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing'))
+        ])
+        time.sleep(5)
 
-        # compute heterozigosity for both MAF groups
-        plink_cmd6 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafgreater')} --memory {memory} --threads {max_threads}"
-        plink_cmd7 = f"plink2 --bfile {self.results_dir / (self.output_name+'-chr1-22-mafless')} --het --out {self.results_dir / (self.output_name+'-chr1-22-mafless')} --memory {memory} --threads {max_threads}"
+        # Get missingness for MAF less group
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafless')),
+            '--missing',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless-missing'))
+        ])
+        time.sleep(5)
 
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3, plink_cmd4, plink_cmd5, plink_cmd6, plink_cmd7]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
-            time.sleep(5)  # Adding a small delay to ensure commands are executed sequentially
+        # Compute heterozygosity for MAF greater group
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater')),
+            '--het',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
+        ])
+        time.sleep(5)
+
+        # Compute heterozygosity for MAF less group
+        run_plink2([
+            '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafless')),
+            '--het',
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
+        ])
+        time.sleep(5)
 
         self.maf_greater_het= self.results_dir / (self.output_name+'-chr1-22-mafgreater.het')
         if not self.maf_greater_het.exists():
@@ -634,16 +695,21 @@ class SampleQC:
         if not self.pruned_file or not self.pruned_file.exists():
             raise FileNotFoundError(f"Missing file: {self.pruned_file}")
 
-        # PLINK command
-        plink_cmd1 = f"plink2 --bfile {self.pruned_file} --genome --out {self.results_dir / (self.output_name+'-ibd')} --threads {max_threads}"
+        # Compute IBD
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--genome',
+            '--out', str(self.results_dir / (self.output_name + '-ibd')),
+            '--threads', str(max_threads)
+        ])
 
-        # PLINK command
-        plink_cmd2 = f"plink2 --bfile {self.pruned_file} --allow-no-sex --missing --out {self.results_dir / (self.output_name+'-ibd-missing')}"
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        # Calculate missing genotype rates
+        run_plink2([
+            '--bfile', str(self.pruned_file),
+            '--allow-no-sex',
+            '--missing',
+            '--out', str(self.results_dir / (self.output_name + '-ibd-missing'))
+        ])
 
         self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
         if not self.ibd_miss.exists():
