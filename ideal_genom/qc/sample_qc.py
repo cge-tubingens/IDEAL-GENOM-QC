@@ -4,7 +4,7 @@ Module to perform sample quality control
 
 import os
 import psutil
-import warnings
+import gc
 import logging
 import time
 
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import seaborn as sns
 
-from ideal_genom.utilities.Helpers import shell_do
+from core.executor import run_plink2
 from ideal_genom.utilities.get_references import FetcherLDRegions
 
 from pathlib import Path
