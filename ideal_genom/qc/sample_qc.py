@@ -1104,7 +1104,7 @@ class SampleQC:
         df_unique_fails = df_all_fails.drop_duplicates(subset=['FID', 'IID'])
 
         # Save to file
-        df_unique_fails.to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
+        df_unique_fails[['FID', 'IID']].to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
 
         # Add summary rows
         totals = summary.select_dtypes(include="number").sum() - num_dup
@@ -1114,6 +1114,8 @@ class SampleQC:
 
         logger.info(f"Total samples failing QC: {len(df_unique_fails)}")
         logger.info(f"Samples failing multiple checks: {num_dup}")
+
+        summary.to_csv(self.results_dir / 'fail_summary.txt', index=False, sep='\t')
 
         return summary
     
@@ -1260,13 +1262,86 @@ class SampleQC:
 
         return
 
-
 class SampleQCReport:
 
-    def __init__(self) -> None:
+    def __init__(self, output_path: Path) -> None:
+        self.output_path = output_path
         pass
 
-    def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
+    def report_sample_qc(self,
+            call_rate_smiss: Path,
+            sexcheck_miss: Path,
+            xchr_miss: Path,
+            maf_greater_het: Path,
+            maf_less_het: Path,
+            maf_greater_smiss: Path,
+            maf_less_smiss: Path,
+            genome: Optional[Path]= None,
+            generate_ibd_report: bool = False,
+            call_rate_thres: float = 0.2, 
+            std_deviation_het: float=3, 
+            maf_het: float=0.01, 
+            ibd_threshold: Optional[float] = None
+    ) -> None:
+        """Generate comprehensive quality control visualization reports for sample-level QC.
+        
+        This method orchestrates the generation of all sample QC visualization reports by
+        calling individual reporting methods for call rate, sex check, heterozygosity, and
+        optionally IBD analysis. It generates plots and visualizations without performing
+        any QC execution or sample filtering.
+        
+        Parameters
+        ----------
+        call_rate_smiss : Path
+            Path to the sample missingness file (.smiss) from PLINK --missing command
+        sexcheck_miss : Path
+            Path to the sex check results file (.sexcheck) from PLINK --check-sex
+        xchr_miss : Path
+            Path to the X chromosome missingness file (.smiss)
+        maf_greater_het : Path
+            Path to heterozygosity file (.het) for SNPs with MAF > threshold
+        maf_less_het : Path
+            Path to heterozygosity file (.het) for SNPs with MAF < threshold
+        maf_greater_smiss : Path
+            Path to missingness file (.smiss) for SNPs with MAF > threshold
+        maf_less_smiss : Path
+            Path to missingness file (.smiss) for SNPs with MAF < threshold
+        genome : Optional[Path], default=None
+            Path to the PLINK .genome file for IBD analysis. Required if generate_ibd_report=True
+        generate_ibd_report : bool, default=False
+            Whether to generate IBD analysis visualization
+        call_rate_thres : float, default=0.2
+            Call rate threshold for visualization reference line
+        std_deviation_het : float, default=3
+            Number of standard deviations for heterozygosity outlier visualization
+        maf_het : float, default=0.01
+            Minor allele frequency threshold used in the analysis
+        ibd_threshold : Optional[float], default=None
+            PI_HAT threshold for IBD visualization reference line. Required if generate_ibd_report=True
+        
+        Returns
+        -------
+        None
+            This method generates plots as side effects and does not return data.
+        
+        Raises
+        ------
+        ValueError
+            If generate_ibd_report=True but ibd_threshold or genome is None
+        
+        Notes
+        -----
+        The method generates the following visualizations in sequence:
+        1. Call rate distribution plots (histogram and scatterplots)
+        2. Sex check scatter plot showing F-statistics vs X chr missingness
+        3. Heterozygosity rate plots for MAF > threshold
+        4. Heterozygosity rate plots for MAF < threshold
+        5. IBD PI_HAT distribution histogram (if generate_ibd_report=True)
+        
+        All plots are saved to the output_path directory specified during initialization.
+        This method is intended to be used after execute_sample_qc_pipeline() has completed
+        and all required QC result files have been generated.
+        """
        
 
 
@@ -1275,50 +1350,49 @@ class SampleQCReport:
         # ==========================================================================================================
 
         # load samples who failed call rate check
-        fail_call_rate = self.report_call_rate(
-            file_path     =self.call_rate_miss,
+        self.report_call_rate(
+            smiss_file   =call_rate_smiss,
             threshold    =call_rate_thres, 
-            plots_dir    =self.plots_dir,
+            plots_dir    =self.output_path,
             y_axis_cap   =10
         )
 
-        logger.info('Call rate check done')
+        logger.info('Call rate report done')
 
         # ==========================================================================================================
         #                                             SEX CHECK
         # ==========================================================================================================
 
-        fail_sexcheck = self.report_sex_check(
-            directory          =self.results_dir, 
-            sex_check_filename =self.output_name+'-sexcheck.sexcheck', 
-            xchr_imiss_filename=self.output_name+'-xchr-missing.smiss',
-            plots_dir          =self.plots_dir
+        self.report_sex_check(
+            sex_check_filename =sexcheck_miss, 
+            xchr_imiss_filename=xchr_miss,
+            plots_dir          =self.output_path
         )
 
-        logger.info('Sex check done')
+        logger.info('Sex check report done')
 
         # ==========================================================================================================
         #                                       HETETROZYGOSITY RATE CHECK
         # ==========================================================================================================
 
-        fail_het_greater = self.report_heterozygosity_rate(
-            het_filename        = self.maf_greater_het, 
-            autosomal_filename  = self.maf_greater_smiss, 
+        self.report_heterozygosity_rate(
+            het_filename        = maf_greater_het, 
+            autosomal_filename  = maf_greater_smiss, 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '>',
-            plots_dir           = self.plots_dir
+            plots_dir           = self.output_path
         )
 
         logger.info(f'Heterozygosity rate check done for MAF > {maf_het}')
 
-        fail_het_less = self.report_heterozygosity_rate(
-            het_filename        = self.maf_less_het, 
-            autosomal_filename  = self.maf_less_smiss, 
+        self.report_heterozygosity_rate(
+            het_filename        = maf_less_het, 
+            autosomal_filename  = maf_less_smiss, 
             std_deviation_het   = std_deviation_het,
             maf                 = maf_het,
             split               = '<',
-            plots_dir           = self.plots_dir
+            plots_dir           = self.output_path
         )
 
         logger.info(f'Heterozygosity rate check done for MAF < {maf_het}')
@@ -1327,63 +1401,22 @@ class SampleQCReport:
         #                                       DUPLICATES-RELATEDNESS CHECK
         # ==========================================================================================================
 
-        if self.use_kinship:
+        if generate_ibd_report:
+            
+            if ibd_threshold is not None and genome is not None:
 
-            # load samples that failed duplicates and relatedness check
-            duplicates_file = self.results_dir / (self.output_name+'-kinship-pruned-duplicates.king.cutoff.out.id')
-            df_duplicates = pd.read_csv(
-                duplicates_file,
-                sep   =r'\s+',
-                engine='python'
-            )
+                self.report_ibd_analysis(
+                    genome       =genome, 
+                    ibd_threshold=ibd_threshold
+                )
+                logger.info('Duplicates and relatedness check done with IBD')
 
-            # filter samples that failed duplicates and relatedness check
-            df_duplicates.columns = ['FID', 'IID']
-            fail_duplicates = df_duplicates[['FID', 'IID']].reset_index(drop=True)
-            fail_duplicates['Failure'] = 'Duplicates and relatedness (Kinship)'
+            else:
+                raise ValueError("To generate IBD report, please provide ibd_threshold, ibd_smiss, and genome files.")
 
-            logger.info('Duplicates and relatedness check done with kinship')
-
-        else:
-
-            fail_duplicates = self.report_ibd_analysis(ibd_threshold)
-            logger.info('Duplicates and relatedness check done with IBD')
-
-        # ==========================================================================================================
-        #                                       MERGE ALL FAILURES
-        # ==========================================================================================================
-
-        fails = [fail_call_rate, fail_sexcheck, fail_het_greater, fail_het_less, fail_duplicates] 
-
-        df = pd.concat(fails, axis=0).reset_index(drop=True)
-
-        summary = df['Failure'].value_counts().reset_index()
-        num_dup = df.duplicated(subset=['FID', 'IID']).sum()
-
-        df = df.drop_duplicates(subset=['FID', 'IID'])
-
-        df.to_csv(self.fails_dir / 'fail_samples.txt', index=False, sep='\t')
-
-        totals = summary.select_dtypes(include="number").sum() - num_dup
-        dups_row = pd.DataFrame({summary.columns[0]: ['Duplicated Sample IDs'], summary.columns[1]: [-num_dup]})
-        # Create the total row
-        dups_row = pd.DataFrame({'Failure':['Duplicated Sample IDs'], 'count':[-num_dup]})
-        # Validate column types in the summary DataFrame
-        for col in summary.columns:
-            if not (pd.api.types.is_numeric_dtype(summary[col]) or summary[col].dtype == 'object'):
-                raise TypeError(f"Unexpected column type in summary DataFrame: {col} has type {summary[col].dtype}")
-
-        # Construct the total_row DataFrame
-        total_row = pd.DataFrame({col: [totals[col] if col in totals.index else "Total"] for col in summary.columns})
-
-        # Append the total row to the DataFrame
-        summary = pd.concat([summary, dups_row, total_row], ignore_index=True)
-        
-        return summary
+        return
     
-    
-  
-    def report_call_rate(self, file_path: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: Union[int, float] = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> pd.DataFrame:
+    def report_call_rate(self, smiss_file: Path, threshold: float, plots_dir: Path, y_axis_cap: Union[int, float] = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> None:
         """
         Generate sample call rate analysis plots.
         This method reads a PLINK-format missing rate file and creates visualization plots
@@ -1420,18 +1453,18 @@ class SampleQCReport:
         - call_rate_{threshold}_scatterplot.<format>: Contains scatter plots
         """
         
-        if not isinstance(file_path, Path):
-            raise TypeError("directory should be a Path object")
-        if  not file_path.exists():
-            raise FileNotFoundError(f"File {file_path} does not exist")
-        if not file_path.is_file():
-            raise FileNotFoundError(f"Path {file_path} is not a file")
+        if not isinstance(smiss_file, Path):
+            raise TypeError("smiss_file should be a Path object")
+        if  not smiss_file.exists():
+            raise FileNotFoundError(f"File {smiss_file} does not exist")
+        if not smiss_file.is_file():
+            raise FileNotFoundError(f"Path {smiss_file} is not a file")
         if not isinstance(threshold, float):
             raise TypeError("threshold should be a float object")
         if not (0 <= threshold <= 1):
             raise ValueError("threshold should be between 0 and 1")
-        if not isinstance(plots_dir, (Path, type(None))):
-            raise TypeError("plots_dir should be a Path object or None")
+        if not isinstance(plots_dir, Path):
+            raise TypeError("plots_dir should be a Path object")
         if not isinstance(y_axis_cap, (int, float)):
             raise TypeError("y_axis_cap should be an int or float")
         if not isinstance(color, str):
@@ -1440,13 +1473,10 @@ class SampleQCReport:
             raise TypeError("line_color should be a string representing a color")
         if not isinstance(format, str):
             raise TypeError("format should be a string representing the file format (e.g., 'png', 'pdf')")
-        
-        if not plots_dir:
-            plots_dir = self.plots_dir
 
-        # load samples that failed sex check
+        # load call rate data
         df_call_rate = pd.read_csv(
-            file_path,
+            smiss_file,
             sep=r'\s+',
             engine='python'
         )
@@ -1529,9 +1559,9 @@ class SampleQCReport:
         plt.savefig(plots_dir / f"call_rate_{threshold}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
 
-        return fail_call_rate
+        return
     
-    def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, f_coeff_thresholds: list = [0.2, 0.8],  plots_dir: Optional[Path] = None, format: str = 'png', fig_size: tuple = (8,6)) -> pd.DataFrame:
+    def report_sex_check(self, sex_check_filename: Path, xchr_imiss_filename: Path, plots_dir: Path, f_coeff_thresholds: list = [0.2, 0.8], format: str = 'png', fig_size: tuple = (8,6)) -> None:
         """
         Creates a sex check visualization based on PLINK's sex check results.
         This function reads sex check data and X chromosome missingness data, merges them,
@@ -1568,33 +1598,27 @@ class SampleQCReport:
         The plot is saved as 'sex_check.{format}' in the specified plots directory.
         """
 
-        if not isinstance(directory, Path):
-            raise TypeError("directory should be a Path object")
-        if not isinstance(sex_check_filename, str):
-            raise TypeError("sex_check_filename should be a string")
-        if not isinstance(xchr_imiss_filename, str):
-            raise TypeError("xchr_imiss_filename should be a string")
+        if not isinstance(sex_check_filename, Path):
+            raise TypeError("sex_check_filename should be a Path object")
+        if not isinstance(xchr_imiss_filename, Path):
+            raise TypeError("xchr_imiss_filename should be a Path object")
+        if not isinstance(plots_dir, Path):
+            raise TypeError("plots_dir should be a Path object")
         if not isinstance(format, str):
             raise TypeError("format should be a string")
-        if not isinstance(plots_dir, (Path, type(None))):
-            raise TypeError("plots_dir should be a Path object or None")
-        if not directory.exists():
-            raise FileNotFoundError(f"Directory {directory} does not exist")
         if format not in ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps']:
             raise ValueError("format should be one of ['png', 'jpeg', 'jpg', 'svg', 'pdf', 'ps]")
         
-        if not plots_dir:
-            plots_dir = self.plots_dir
 
         df_sexcheck = pd.read_csv(
-            directory / sex_check_filename,
+            sex_check_filename,
             sep   =r'\s+',
             engine='python'
         )
         df_sexcheck.columns = [col.lstrip('#') for col in df_sexcheck.columns]
 
         df_xchr_smiss = pd.read_csv(
-            directory / xchr_imiss_filename,
+            xchr_imiss_filename,
             sep   =r'\s+',
             engine='python'
         )
@@ -1662,10 +1686,11 @@ class SampleQCReport:
         
         plt.tight_layout()
         plt.savefig(plots_dir / f'sex_check.{format}', dpi=400)
+        plt.show(block=False)
 
-        return fail_sexcheck
+        return
     
-    def report_heterozygosity_rate(self, het_filename: Path, autosomal_filename: Path, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> pd.DataFrame:
+    def report_heterozygosity_rate(self, het_filename: Path, autosomal_filename: Path, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> None:
         """
         Generate heterozygosity rate visualization plots for quality control analysis.
         This function loads heterozygosity and autosomal call rate data, merges them,
@@ -1826,7 +1851,7 @@ class SampleQCReport:
             plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
 
-        return fail_het
+        return
 
     def report_ibd_analysis(self, genome: Path, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> None:
         """Generate visualization of IBD (Identity By Descent) analysis results.
@@ -1837,6 +1862,8 @@ class SampleQCReport:
         
         Parameters
         ----------
+        genome : Path
+            Path to the PLINK .genome file containing pairwise IBD estimates
         ibd_threshold : float, default=0.185
             The PI_HAT threshold for the reference line in the plot.
             Typical values: >0.98 for duplicates, >0.5 for first-degree relatives,
@@ -1869,76 +1896,41 @@ class SampleQCReport:
         if not isinstance(chunk_size, int):
             raise TypeError("chunk_size should be an integer")
 
-        if self.use_kinship:
-            return pd.DataFrame()
-
         # File paths
-
-        imiss_path = self.results_dir / (self.output_name + '-ibd-missing.imiss')
-        genome_path= self.results_dir / (self.output_name + '-ibd.genome')
-
-        if not imiss_path.exists():
-            raise FileNotFoundError(f"Missing file: {imiss_path}")
-        if not genome_path.exists():
-            raise FileNotFoundError(f"Missing file: {genome_path}")
-
-        # Load .imiss file
-        df_imiss = pd.read_csv(imiss_path, sep=r'\s+', engine='python')
+        if not genome.exists():
+            raise FileNotFoundError(f"Missing file: {genome}")
 
         # Initialize dataframe for duplicates
-        duplicates = []
+        filtered_chunks = []
 
         # Process the .genome file in chunks
         for chunk in pd.read_csv(
-            genome_path,
+            genome,
             usecols  =['FID1', 'IID1', 'FID2', 'IID2', 'PI_HAT'],
             sep      =r'\s+',
             engine   ='python',
             chunksize=chunk_size,
         ):
-            # Filter rows with PI_HAT > ibd_threshold
-            filtered_chunk = chunk[chunk['PI_HAT'] > ibd_threshold]
+            # Filter rows with PI_HAT > 0.1 to visualize the full distribution of related samples
+            # (lower than ibd_threshold to show context around the cutoff)
+            filtered_chunk = chunk[chunk['PI_HAT'] > 0.1]
             if not filtered_chunk.empty:
-                duplicates.append(filtered_chunk)
+                filtered_chunks.append(filtered_chunk)
 
-        if not duplicates:
-            return pd.DataFrame(columns=['FID', 'IID', 'Failure'])
 
         # Concatenate all filtered chunks
-        df_dup = pd.concat(duplicates, ignore_index=True)
+        df_chunks = pd.concat(filtered_chunks, ignore_index=True)
 
-        # Merge with missingness data
-        imiss_related1 = pd.merge(
-            df_dup[['FID1', 'IID1']],
-            df_imiss[['FID', 'IID', 'F_MISS']],
-            left_on =['FID1', 'IID1'],
-            right_on=['FID', 'IID'],
-        ).rename(columns={'F_MISS': 'F_MISS_1'})
-
-        imiss_related2 = pd.merge(
-            df_dup[['FID2', 'IID2']],
-            df_imiss[['FID', 'IID', 'F_MISS']],
-            left_on =['FID2', 'IID2'],
-            right_on=['FID', 'IID'],
-        ).rename(columns={'F_MISS': 'F_MISS_2'})
-
-        # Decide which samples to remove
-        to_remove = pd.concat(
-            [
-                imiss_related1[['FID1', 'IID1', 'F_MISS_1']],
-                imiss_related2[['FID2', 'IID2', 'F_MISS_2']],
-            ],
-            axis=1,
-        )
-
-        to_remove['FID'], to_remove['IID'] = np.where(
-            to_remove['F_MISS_1'] > to_remove['F_MISS_2'],
-            (to_remove['FID1'], to_remove['IID1']),
-            (to_remove['FID2'], to_remove['IID2']),
-        )
-
-        to_remove = to_remove[['FID', 'IID']].drop_duplicates().reset_index(drop=True)
-        to_remove['Failure'] = 'Duplicates and relatedness (IBD)'
-
-        return to_remove
-    
+        # Generate histogram of PI_HAT values
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.histplot(data=df_chunks, x='PI_HAT', bins=50, color='#1B9E77', alpha=0.7, ax=ax)
+        ax.axvline(ibd_threshold, color='#D95F02', linestyle='--', linewidth=2, label=f'Threshold ({ibd_threshold})')
+        ax.set_title('Distribution of PI_HAT Values for Related Samples')
+        ax.set_xlabel('PI_HAT (Proportion IBD)')
+        ax.set_ylabel('Frequency')
+        ax.legend()
+        plt.tight_layout()
+        plt.savefig(self.output_path / 'ibd_pihat_distribution.png', dpi=600)
+        plt.show(block=False)
+       
+        return 
