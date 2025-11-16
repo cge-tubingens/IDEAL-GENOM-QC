@@ -363,39 +363,32 @@ class SampleQC:
         return
     
     def execute_miss_genotype(self) -> None:
-        """Execute missing genotype analysis using PLINK to identify and filter samples with high missingness rates.
+        """Execute missing genotype analysis using PLINK to generate sample missingness statistics.
         
-        This method performs two main operations:
-        1. Generates missingness statistics for all samples
-        2. Filters samples based on the specified missingness threshold (mind)
+        This method generates genome-wide missingness statistics for all samples in the dataset.
+        The statistics are used later to identify samples with high missingness rates during
+        the quality control process.
         
         Parameters
         ----------
-        mind : float, optional
-            The missingness threshold for sample filtering (default is 0.2).
-            Samples with missingness rates above this threshold will be removed.
-            Recommended range is between 0.02 and 0.1.
+        None
         
         Returns
         -------
-        dict
-            Dictionary containing missingness analysis results
+        None
         
         Raises
         ------
-        TypeError
-            If mind parameter is not a float
-        ValueError
-            If mind parameter is not between 0 and 1
         FileNotFoundError
-            If the output .imiss file is not generated
-            If mind value is outside recommended range (0.02-0.1)
+            If the output .smiss file is not generated
         
         Notes
         -----
-        This function creates two files:
-        - {input_name}-missing.imiss: Contains missingness statistics for all samples
-        - {output_name}-mind.bed: New binary file with filtered samples
+        This function creates one file:
+        - {input_name}-missing.smiss: Contains missingness statistics for all samples
+        
+        The method automatically optimizes thread count and memory usage based on available
+        system resources (uses max(CPU cores - 2, 1) threads and 2/3 of available memory).
         """
 
         logger.info(f"STEP: Missing genotype check.")
@@ -439,7 +432,7 @@ class SampleQC:
         ----------
         sex_check : list of float, default=[0.2, 0.8]
             List containing two float values that define the F-statistic boundaries for sex determination.
-            The values must sum to 1.0. First value is the lower bound, second is the upper bound.
+            First value is the lower bound (max-female-xf), second is the upper bound (min-male-xf).
             Samples with F-statistics below the first value are called female, above the second value are called male.
         
         Returns
@@ -451,14 +444,15 @@ class SampleQC:
         TypeError
             If sex_check is not a list or if its elements are not floats
         ValueError
-            If sex_check doesn't contain exactly 2 elements or if they don't sum to 1
+            If sex_check doesn't contain exactly 2 elements
         
         Notes
         -----
         The method creates the following output files:
         - {output_name}-sexcheck.sexcheck : Contains sex check results
         - {output_name}-xchr.bed/bim/fam : X chromosome SNP data
-        - {output_name}-xchr-missing.imiss : X chromosome missingness data
+        - {output_name}-xchr-missing.smiss : X chromosome missingness data
+        
         The number of threads used is automatically determined based on available CPU cores,
         using max(available cores - 2, 1) or falling back to half of logical cores if CPU count
         cannot be determined.
@@ -960,6 +954,54 @@ class SampleQC:
         return fail_het
     
     def get_fail_samples(self, call_rate_thres: float, std_deviation_het: float, maf_het: float, ibd_threshold: float) -> pd.DataFrame:
+        """Identify and compile all samples that failed quality control checks.
+        
+        This method aggregates samples that failed various QC checks including call rate,
+        sex check, heterozygosity rate, and duplicate/relatedness checks. It uses chunked
+        reading for memory efficiency with large datasets and provides a summary of failures.
+        
+        Parameters
+        ----------
+        call_rate_thres : float
+            Call rate threshold (F_MISS). Samples with missing rate above this value fail.
+            Recommended range: 0.02 to 0.1.
+        std_deviation_het : float
+            Number of standard deviations from mean heterozygosity rate for outlier detection.
+            Typical value: 3.
+        maf_het : float
+            Minor allele frequency threshold used in heterozygosity analysis.
+            Typical value: 0.01.
+        ibd_threshold : float
+            PI_HAT threshold for IBD-based relatedness detection (only used if use_kinship=False).
+            Typical values: >0.185 for 2nd degree relatives, >0.5 for 1st degree.
+        
+        Returns
+        -------
+        pd.DataFrame
+            Summary DataFrame with columns:
+            - Failure: Type of QC failure
+            - count: Number of samples failing each check
+            Includes additional rows for duplicated sample IDs and totals.
+        
+        Raises
+        ------
+        FileNotFoundError
+            If any required input file from previous QC steps is missing.
+        
+        Notes
+        -----
+        The method:
+        - Reads large files in 10,000-row chunks to manage memory
+        - Identifies samples failing multiple checks (reported as duplicates)
+        - Saves two output files:
+          * fail_samples.txt: List of unique samples to remove (FID, IID)
+          * fail_summary.txt: Summary statistics of failures by type
+        - Uses helper methods _analyze_heterozygosity_failures() and _analyze_ibd_failures()
+          for complex analyses
+        
+        The analysis respects the use_kinship attribute to determine whether to use
+        KING-based or IBD-based relatedness detection.
+        """
 
         # Check if required files exist
         required_files = [
@@ -1343,38 +1385,33 @@ class SampleQCReport:
   
     def report_call_rate(self, file_path: Path, threshold: float, plots_dir: Optional[Path] = None, y_axis_cap: Union[int, float] = 10, color: str = '#1B9E77', line_color: str = '#D95F02', format: str = 'png') -> pd.DataFrame:
         """
-        Generate sample call rate analysis plots and identify samples failing the call rate threshold.
-        This method reads a PLINK-format missing rate file, creates visualization plots, and identifies
-        samples that fail the specified call rate threshold. It generates two sets of plots:
+        Generate sample call rate analysis plots.
+        This method reads a PLINK-format missing rate file and creates visualization plots
+        showing the distribution of missing SNPs across samples. It generates two sets of plots:
         1. Histograms showing the distribution of missing SNPs (F_MISS)
         2. Scatterplots showing different views of the call rate data
         
         Parameters
         ----------
-        directory : Path
-            Directory containing the input file
-        filename : str
-            Name of the PLINK format missing rate file
+        smiss_file : Path
+            Path to the PLINK format missing rate file (.smiss or .imiss)
         threshold : float
-            Call rate threshold for sample filtering (in terms of F_MISS)
-        plots_dir : Path, optional
-            Directory where plots will be saved. If None, uses default plots directory
-        y_axis_cap : int, optional
+            Call rate threshold for visualization reference line (in terms of F_MISS)
+        plots_dir : Path
+            Directory where plots will be saved
+        y_axis_cap : Union[int, float], optional
             Maximum value for y-axis in capped histogram plots. Default is 10
         color : str, optional
             Color for the main plot elements. Default is '#1B9E77'
         line_color : str, optional
             Color for threshold lines in plots. Default is '#D95F02'
         format : str, optional
-            Format for saving plots. Default is 'png'
+            Format for saving plots (e.g., 'png', 'pdf', 'svg'). Default is 'png'
         
         Returns
         -------
-        pd.DataFrame
-            DataFrame containing samples that failed the call rate threshold with columns:
-            - FID: Family ID
-            - IID: Individual ID
-            - Failure: Always set to 'Call rate'
+        None
+            This method generates plots as side effects and does not return data.
         
         Notes
         -----
@@ -1496,31 +1533,30 @@ class SampleQCReport:
     
     def report_sex_check(self, directory: Path, sex_check_filename: str, xchr_imiss_filename: str, f_coeff_thresholds: list = [0.2, 0.8],  plots_dir: Optional[Path] = None, format: str = 'png', fig_size: tuple = (8,6)) -> pd.DataFrame:
         """
-        Creates a sex check report and visualization based on PLINK's sex check results.
+        Creates a sex check visualization based on PLINK's sex check results.
         This function reads sex check data and X chromosome missingness data, merges them,
-        and generates a scatter plot to visualize potential sex discrepancies. It also identifies
-        samples that fail sex check quality control.
+        and generates a scatter plot to visualize potential sex discrepancies.
         
         Parameters
         ----------
-        directory : Path
-            Path to the directory containing input files
-        sex_check_filename : str
-            Filename of PLINK's sex check results (typically .sexcheck file)
-        xchr_imiss_filename : str
-            Filename of X chromosome missingness data
-        plots_dir : Path, optional
-            Directory where the plot should be saved. If None, uses default plots directory
+        sex_check_filename : Path
+            Path to PLINK's sex check results file (typically .sexcheck file)
+        xchr_imiss_filename : Path
+            Path to X chromosome missingness data file (.smiss or .imiss)
+        plots_dir : Path
+            Directory where the plot will be saved
+        f_coeff_thresholds : list, optional
+            List of two F coefficient thresholds [lower, upper] for reference lines.
+            Default is [0.2, 0.8]
         format : str, optional
-            Format for saving the plot. Default is 'png'
+            Format for saving the plot (e.g., 'png', 'pdf', 'svg'). Default is 'png'
+        fig_size : tuple, optional
+            Figure size as (width, height). Default is (8, 6)
         
         Returns
         -------
-        pd.DataFrame
-            DataFrame containing samples that failed sex check QC with columns:
-            - FID: Family ID
-            - IID: Individual ID
-            - Failure: Type of failure (always 'Sex check')
+        None
+            This method generates plots as side effects and does not return data.
         
         Notes
         -----
@@ -1528,8 +1564,8 @@ class SampleQCReport:
         - Blue hollow circles for samples with Male PEDSEX
         - Green hollow circles for samples with Female PEDSEX
         - Red filled circles for problematic samples
-        - Dotted red vertical lines at F=0.2 and F=0.8
-        The plot is saved as 'sex_check.jpeg' in the specified plots directory.
+        - Dotted red vertical lines at the specified F coefficient thresholds
+        The plot is saved as 'sex_check.{format}' in the specified plots directory.
         """
 
         if not isinstance(directory, Path):
@@ -1631,45 +1667,46 @@ class SampleQCReport:
     
     def report_heterozygosity_rate(self, het_filename: Path, autosomal_filename: Path, std_deviation_het: Union[float, int], maf: float, split: str, plots_dir: Path, y_axis_cap: Union[float, int] = 80, format: str = 'png', scatter_fig_size: tuple = (10, 6)) -> pd.DataFrame:
         """
-        Analyze and report heterozygosity rates for samples, creating visualization plots and identifying samples that fail heterozygosity rate checks.
-        This function loads heterozygosity and autosomal call rate data, merges them, identifies samples with deviant heterozygosity rates,
-        and generates visualization plots to aid in quality control analysis.
+        Generate heterozygosity rate visualization plots for quality control analysis.
+        This function loads heterozygosity and autosomal call rate data, merges them,
+        and generates visualization plots showing samples with deviant heterozygosity rates.
         
         Parameters
         ----------
-        directory : str
-            Path to the directory containing input files
-        summary_ped_filename : str
-            Filename of the summary PED file containing heterozygosity information
-        autosomal_filename : str
-            Filename of the autosomal file containing call rate information
-        std_deviation_het : float
+        het_filename : Path
+            Path to the file containing heterozygosity information (.het file)
+        autosomal_filename : Path
+            Path to the autosomal missingness file (.smiss or .imiss)
+        std_deviation_het : Union[float, int]
             Number of standard deviations to use as threshold for identifying deviant samples
         maf : float
             Minor allele frequency threshold used in the analysis
         split : str
-            Direction of MAF comparison ('>' or '<')
-        plots_dir : str
+            Direction of MAF comparison ('>' or '<') to indicate which MAF subset is being analyzed
+        plots_dir : Path
             Directory where plot files will be saved
-        y_axis_cap : float, optional
-            Maximum value for y-axis in capped histogram plot (default: 80)
+        y_axis_cap : Union[float, int], optional
+            Maximum value for y-axis in capped histogram plot. Default is 80
         format : str, optional
-            Format for saving plots (default: 'png')
+            Format for saving plots (e.g., 'png', 'pdf', 'svg'). Default is 'png'
+        scatter_fig_size : tuple, optional
+            Figure size for scatter plot as (width, height). Default is (10, 6)
         
         Returns
         -------
-        pd.DataFrame
-            DataFrame containing samples that failed heterozygosity rate check with columns:
-            - FID: Family ID
-            - IID: Individual ID
-            - Failure: Description of failure type
+        None
+            This method generates plots as side effects and does not return data.
         
         Notes
         -----
         The function generates two types of plots:
         1. Histograms of heterozygosity rates (both uncapped and capped)
         2. Scatter plot of heterozygosity rate vs missing SNP proportion
-        Files are saved as JPEG images in the specified plots directory.
+        Files are saved with names:
+        - heterozygosity_rate_greater_{maf}_histogram.{format} (if split='>')
+        - heterozygosity_rate_less_{maf}_histogram.{format} (if split='<')
+        - heterozygosity_rate_greater_{maf}_scatterplot.{format} (if split='>')
+        - heterozygosity_rate_less_{maf}_scatterplot.{format} (if split='<')
         """
 
         if not isinstance(het_filename, Path):
@@ -1791,44 +1828,40 @@ class SampleQCReport:
 
         return fail_het
 
-    def report_ibd_analysis(self, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> pd.DataFrame:
-        """Analyze IBD (Identity By Descent) to identify duplicated or related samples.
+    def report_ibd_analysis(self, genome: Path, ibd_threshold: float = 0.185, chunk_size: int = 100000) -> None:
+        """Generate visualization of IBD (Identity By Descent) analysis results.
         
-        This method processes IBD analysis results to identify sample pairs with IBD scores
-        above a specified threshold, indicating potential duplicates or related individuals.
-        For identified pairs, it uses missingness data to determine which sample should be
-        removed (keeping the sample with lower missingness rate).
+        This method processes IBD analysis results and creates a histogram showing the
+        distribution of PI_HAT values for related sample pairs. The visualization includes
+        a reference line at the specified threshold to help assess relatedness in the dataset.
         
         Parameters
         ----------
         ibd_threshold : float, default=0.185
-            The PI_HAT threshold above which samples are considered related.
-            Typical values: >0.98 for duplicates, >0.5 for first-degree relatives.
+            The PI_HAT threshold for the reference line in the plot.
+            Typical values: >0.98 for duplicates, >0.5 for first-degree relatives,
+            >0.185 for second-degree relatives.
         chunk_size : int, default=100000
             Number of rows to process at a time when reading the genome file.
         
         Returns
         -------
-        pd.DataFrame
-            A DataFrame containing samples to be removed, with columns:
-            - FID: Family ID
-            - IID: Individual ID
-            - Failure: Reason for removal ('Duplicates and relatedness (IBD)')
-            Returns empty DataFrame if no related pairs are found or if KING is used.
+        None
+            This method generates a plot as a side effect and does not return data.
         
         Raises
         ------
         TypeError
-            If ibd_threshold is not a float.
+            If ibd_threshold is not a float or chunk_size is not an integer.
         FileNotFoundError
-            If required input files (``*.smiss`` or ``*.genome``) are not found.
+            If the genome file is not found.
         
         Notes
         -----
-        The method requires two input files:
-        - {output_name}-ibd-missing.imiss: Contains sample missingness information
-        - {output_name}-ibd.genome: Contains pairwise IBD estimates
-        For each related pair, the sample with higher missingness rate is marked for removal.
+        The method creates a histogram visualization showing:
+        - Distribution of PI_HAT values for sample pairs with PI_HAT > 0.1
+        - A vertical line indicating the ibd_threshold
+        The plot is saved as 'ibd_pihat_distribution.png' in the output directory.
         """
         
         if not isinstance(ibd_threshold, float):
