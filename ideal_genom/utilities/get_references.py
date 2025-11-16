@@ -52,7 +52,7 @@ class Fetcher1000Genome:
             raise ValueError("Built must be either '37' or '38'.")
 
         if not destination:
-            destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_built_{built}"
+            destination = Path(__file__).resolve().parent.parent.parent / "data" / f"1000genomes_built_{built}"
 
         logger.info(f"Destination folder: {destination}")
         
@@ -292,7 +292,7 @@ class FetcherLDRegions:
         """
 
         if not destination:
-            destination = Path(__file__).resolve().parent.parent / "data" / "ld_regions_files"
+            destination = Path(__file__).resolve().parent.parent.parent / "data" / "ld_regions_files"
 
         self.destination = destination
         self.built = built
