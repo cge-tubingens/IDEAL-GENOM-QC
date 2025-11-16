@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import seaborn as sns
 
-from core.executor import run_plink2
+from core.executor import run_plink2, run_plink
 from ideal_genom.utilities.get_references import FetcherLDRegions
 
 from pathlib import Path
@@ -689,7 +689,7 @@ class SampleQC:
             raise FileNotFoundError(f"Missing file: {self.pruned_file}")
 
         # Compute IBD
-        run_plink2([
+        run_plink([
             '--bfile', str(self.pruned_file),
             '--genome',
             '--out', str(self.results_dir / (self.output_name + '-ibd')),
