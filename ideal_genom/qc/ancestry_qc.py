@@ -1570,6 +1570,11 @@ class AncestryQC:
                 'psam': fetcher.psam_file
             }
 
+        self.eigenvalues: Optional[Path] = None
+        self.einvectors: Optional[Path] = None
+        self.ancestry_fails: Optional[Path] = None
+        self.population_tags: Optional[Path] = None
+
         self.results_dir = self.output_path / 'ancestry_qc_results' 
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
