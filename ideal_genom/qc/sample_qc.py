@@ -463,7 +463,7 @@ class SampleQC:
             '--memory', str(memory),
             '--out', str(self.results_dir / (self.output_name + '-sexcheck'))
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Extract X chromosome SNPs
         run_plink2([
@@ -473,7 +473,7 @@ class SampleQC:
             '--make-bed',
             '--out', str(self.results_dir / (self.output_name + '-xchr'))
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Run missingness on X chromosome SNPs
         run_plink2([
@@ -482,7 +482,7 @@ class SampleQC:
             '--missing',
             '--out', str(self.results_dir / (self.output_name + '-xchr-missing'))
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         self.sexcheck_miss = self.results_dir / (self.output_name + '-sexcheck.sexcheck')
         self.xchr_miss = self.results_dir / (self.output_name + '-xchr-missing.smiss')
@@ -543,6 +543,7 @@ class SampleQC:
             '--bfile', str(self.pruned_file),
             '--autosome',
             '--memory', str(memory),
+            '--threads', str(max_threads),
             '--make-bed',
             '--out', str(self.results_dir / (self.output_name + '-chr1-22'))
         ])
@@ -557,7 +558,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Extract SNPs with MAF less than threshold
         run_plink2([
@@ -568,7 +569,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Get missingness for MAF greater group
         run_plink2([
@@ -578,7 +579,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Get missingness for MAF less group
         run_plink2([
@@ -588,7 +589,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Compute heterozygosity for MAF greater group
         run_plink2([
@@ -598,7 +599,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         # Compute heterozygosity for MAF less group
         run_plink2([
@@ -608,7 +609,7 @@ class SampleQC:
             '--memory', str(memory),
             '--threads', str(max_threads)
         ])
-        time.sleep(5)
+        time.sleep(2)
 
         self.maf_greater_het= self.results_dir / (self.output_name+'-chr1-22-mafgreater.het')
         if not self.maf_greater_het.exists():
