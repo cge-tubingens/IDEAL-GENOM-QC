@@ -102,31 +102,21 @@ class ReferenceGenomicMerger:
         self.reference_cleaned: Optional[Path] = None
 
     def execute_rename_snpid(self) -> None:
-        
         """
-        Executes the SNP ID renaming process using PLINK2.
-        This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
-        The renaming is performed using PLINK2's --set-all-var-ids parameter.
+        Execute the SNP ID renaming process using PLINK2.
         
-        Parameter:
-        ----------
-        rename (bool, optional): Flag to control whether SNP renaming should be performed. 
-            Defaults to True.
-
-        Returns:
-        --------
-            None
-
-        Raises:
+        This method renames SNP IDs in the PLINK binary files to a standardized format 
+        of 'chr:pos:a1:a2' using PLINK2's --set-all-var-ids parameter.
+        
+        Returns
         -------
-            TypeError: If rename parameter is not a boolean.
+        None
 
-        Notes:
-        ------
-            - The renamed files will be saved with '-renamed' suffix
-            - Thread count is optimized based on available CPU cores
-            - The new SNP ID format will be: chromosome:position:allele1:allele2
-            - Sets self.renamed_snps to True if renaming is performed
+        Notes
+        -----
+        - The renamed files will be saved with '-renamed' suffix
+        - Thread count is optimized based on available CPU cores
+        - The new SNP ID format will be: chromosome:position:allele1:allele2
         """
 
         logger.info("STEP: Renaming SNP IDs in the study data using PLINK2")
@@ -144,31 +134,27 @@ class ReferenceGenomicMerger:
 
         return
 
-    def execute_filter_prob_snps(self)->None:
+    def execute_filter_prob_snps(self) -> None:
         """
-        Executes the filtering of problematic SNPs (A->T and C->G) from both study and reference data.
-        This method performs the following operations:
-        1. Identifies and filters A->T and C->G SNPs from study data
-        2. Identifies and filters A->T and C->G SNPs from reference data
-        3. Creates new PLINK binary files excluding the identified problematic SNPs
-        4. Uses maximum available CPU threads (total cores - 2) and 2/3 of available memory
-        The method handles both renamed and original SNP scenarios, determined by self.renamed_snps.
+        Filter problematic SNPs (A/T and C/G) from both study and reference data.
         
-        Returns:
-        --------
-            None
+        This method performs the following operations:
+        1. Identifies and filters A/T and C/G SNPs from study data
+        2. Identifies and filters A/T and C/G SNPs from reference data
+        3. Creates new PLINK binary files excluding the identified problematic SNPs
+        4. Uses optimal available CPU threads and memory
+        
+        Returns
+        -------
+        None
 
-        Side Effects:
-        -------------
-            - Creates filtered SNP list files in the output directory
-            - Creates new PLINK binary files (.bed, .bim, .fam) in the output directory
-            - Sets self.reference_AC_GT_filtered and self.study_AC_GT_filtered paths
-            - Logs progress and statistics of filtering operations
-
-        Requires:
-        ---------
-            - Valid PLINK binary files for both study and reference data
-            - Proper initialization of input_path, output_path, and reference_files
+        Notes
+        -----
+        - Creates filtered SNP list files in the output directory
+        - Creates new PLINK binary files (.bed, .bim, .fam) in the output directory
+        - Sets self.reference_AC_GT_filtered and self.study_AC_GT_filtered paths
+        - Logs progress and statistics of filtering operations
+        - Requires valid PLINK binary files for both study and reference data
         """
 
         logger.info("STEP: Filtering A->T and C->G SNPs from study and reference data.")
