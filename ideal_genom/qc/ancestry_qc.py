@@ -1739,9 +1739,6 @@ class AncestryQC:
             distance_metric=distance_metric
         )
         goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
-        goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio)
-        goa.draw_pca_plot(plot_dir=self.plots_dir, reference_pop=ref_population, aspect_ratio=aspect_ratio, exclude_outliers=True)
-        goa.report_pca(threshold=explained_variance_threshold)
 
         return
 
