@@ -1909,3 +1909,108 @@ class SampleQCReport:
         plt.show(block=False)
        
         return 
+
+class SampleQCCleanUp:
+
+    def __init__(self, output_path: Path, input_path: Path) -> None:
+        self.output_path = output_path
+        self.input_path = input_path
+
+    def clean_input_files(self) -> None:
+
+        """Remove intermediate files from input directory.
+
+        This method deletes temporary files created during preprocessing steps:
+        - Files ending with 'hh-missing' (.bed, .bim, .fam)
+        - Files ending with 'renamed' (.bed, .bim, .fam)
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        Only removes files if they exist. No error is raised if files are not found.
+        """
+
+        logger.info("Cleaning up hh-missing and renamed files from input directory")
+
+        extensions = ['.bed', '.bim', '.fam']
+        
+        # Remove hh-missing files
+        for ext in extensions:
+            for file in self.input_path.glob(f'*-hh-missing{ext}'):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
+        
+        # Remove renamed files
+        for ext in extensions:
+            for file in self.input_path.glob(f'*-renamed{ext}'):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
+
+        return
+    
+    def clean_results_files(self) -> None:
+
+        """Remove intermediate files from output directory.
+
+        This method deletes temporary files created during sample QC steps:
+        - Files ending with '.bed', '.bim', '.fam', '.vmiss', '.smiss', '.nosex', '.sexcheck', '.het', '.genome'
+        - Files ending with 'prune.in', 'prune.out'
+        - Files ending with 'king.cutoff.out.id', 'king.cutoff.in.id', 'king.id', 'king.bin'
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        Only removes files if they exist. No error is raised if files are not found.
+        """
+
+        logger.info("Cleaning up intermediate files from output directory")
+
+        # Remove intermediate files
+        extensions = ['.bed', '.bim', '.fam', '.vmiss', '.smiss', '.nosex', '.sexcheck', '.het', '.genome']
+        for ext in extensions:
+            for file in self.output_path.glob(f'*{ext}'):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
+        
+        # Remove prune files
+        prune_patterns = ['*.prune.in', '*.prune.out']
+        for pattern in prune_patterns:
+            for file in self.output_path.glob(pattern):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
+        
+        # Remove kinship files
+        kinship_patterns = ['*.king.cutoff.out.id', '*.king.cutoff.in.id', '*.king.id', '*.king.bin']
+        for pattern in kinship_patterns:
+            for file in self.output_path.glob(pattern):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
+
+        return
+    
+    def clean_all(self) -> None:
+        """Remove all intermediate files from input and output directories.
+
+        This method calls clean_input_files() and clean_results_files()
+        to remove temporary files created during preprocessing and sample QC steps.
+
+        Returns
+        -------
+        None
+        """
+
+        self.clean_input_files()
+        self.clean_results_files()
+
+        return
