@@ -964,11 +964,16 @@ class GenomicOutlierAnalyzer:
         max_threads = get_optimal_threads()
         memory = get_available_memory()
 
-        # PLINK command: generate PCA for reference data
-        plink_cmd = f"plink2 --bfile {str(self.merged_file)} --keep-allele-order --maf {maf} --out {str(self.output_path / (self.output_name+'-pca'))} --pca {pca} --memory {memory} --threads {max_threads}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        # Execute PLINK2 command: generate PCA for reference data
+        run_plink2([
+            '--bfile', str(self.merged_file),
+            '--keep-allele-order',
+            '--maf', str(maf),
+            '--out', str(self.output_path / (self.output_name + '-pca')),
+            '--pca', str(pca),
+            '--memory', str(int(memory)),
+            '--threads', str(max_threads)
+        ])
 
         self.einvectors = self.output_path / (self.output_name+'-pca.eigenvec')
         self.eigenvalues = self.output_path / (self.output_name+'-pca.eigenval')
