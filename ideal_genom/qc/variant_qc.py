@@ -313,14 +313,20 @@ class VariantQC:
         logger.info("Removing markers failing quality control...")
 
         # create cleaned binary files
-        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --exclude {self.fails_dir / 'fail_markers.txt'} --autosome --maf {maf} --hwe {hwe} --geno {geno} --make-bed --out {self.clean_dir / (self.output_name+'-variantQCed')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        run_plink([
+            '--bfile', str(self.input_path / self.input_name),
+            '--exclude', str(self.fails_dir / 'fail_markers.txt'),
+            '--autosome',
+            '--maf', str(maf),
+            '--hwe', str(hwe), 'midp',
+            '--geno', str(geno),
+            '--make-bed',
+            '--out', str(self.clean_dir / (self.output_name+'-variantQCed'))
+        ])
 
         return
 
-    def report_missing_data(self, filename_male: Path, filename_female: Path, threshold: float, y_axis_cap: Optional[float] = None) -> pd.DataFrame:
+    def report_missing_data(self, filename_male: Path, filename_female: Path, threshold: float) -> pd.DataFrame:
         """
         Analyze and report missing data rates for male and female subjects.
         This method processes missing data information from separate files for male and female subjects,
