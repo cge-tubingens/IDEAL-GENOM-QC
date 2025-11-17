@@ -749,6 +749,60 @@ class ReferenceGenomicMerger:
 
         return
     
+    def execute_merging_pipeline(self, ind_pair: list = [50, 5, 0.2]) -> None:
+        """
+        Execute complete reference-study merging pipeline.
+        
+        This method runs all steps required to harmonize and merge study data
+        with reference panel data:
+        1. Rename SNP IDs to standardized format
+        2. Filter problematic SNPs (A/T and C/G variants)
+        3. Perform LD-based pruning
+        4. Fix chromosome mismatches
+        5. Fix position mismatches
+        6. Fix allele flips
+        7. Remove remaining mismatches
+        8. Merge the datasets
+        
+        Parameters
+        ----------
+        ind_pair : list, default [50, 5, 0.2]
+            LD pruning parameters: [window size, step size, r² threshold]
+            
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If ind_pair is not a list
+        
+        Notes
+        -----
+        All intermediate files are created in the output_path directory.
+        The final merged files will have '-merged' suffix.
+        """
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
+        
+        logger.info("Starting Reference-Study Merging Pipeline")
+        logger.info(f"LD pruning parameters: window={ind_pair[0]}, step={ind_pair[1]}, r²={ind_pair[2]}")
+        
+        # Execute pipeline steps sequentially
+        self.execute_rename_snpid()
+        self.execute_filter_prob_snps()
+        self.execute_ld_pruning(ind_pair=ind_pair)
+        self.execute_fix_chromosome_mismatch()
+        self.execute_fix_position_mismatch()
+        self.execute_fix_allele_flip()
+        self.execute_remove_mismatches()
+        self.execute_merge_data()
+        
+        logger.info("Reference-Study Merging Pipeline completed successfully")
+        
+        return
+    
 class GenomicOutlierAnalyzer:
 
     def __init__(self, input_path: Path, input_name: str, merged_file: Path, reference_tags: Path, output_path: Path, output_name: str) -> None:
