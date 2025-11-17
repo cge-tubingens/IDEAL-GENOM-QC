@@ -22,7 +22,55 @@ from sklearn.model_selection import ParameterGrid
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class UMAPplot:
+class Preaparator:
+
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, build: str = '38', high_ld_regions: Optional[Path] = None) -> None:
+
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(input_name, str): 
+            raise TypeError("input_name should be a string")
+        if not input_path.exists():
+            raise FileNotFoundError("input_path does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not isinstance(build, str):
+            raise TypeError("build should be a string")
+        if build not in ['37', '38']:
+            raise ValueError("build should be either '37' or '38'")
+        
+        if high_ld_regions is not None:
+            if not isinstance(high_ld_regions, Path):
+                raise TypeError("high_ld_regions should be a Path object")
+            if not high_ld_regions.is_file():
+                raise FileNotFoundError("high_ld_regions file does not exist")
+        
+        if high_ld_regions is None:
+            logger.info(f"High LD file not provided.")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions(build=build)
+            ld_fetcher.get_ld_regions()
+
+            if ld_fetcher.ld_regions is None:
+                raise FileNotFoundError("Could not fetch LD regions file.")
+                
+            high_ld_regions = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_regions}")
+        
+        self.input_path = input_path
+        self.input_name = input_name
+        self.output_path= output_path
+        self.build = build
+        self.high_ld_regions = high_ld_regions
+        
+        return
+    
+    def execute_ld_pruning(self):
+        pass
+class UMAPReduction:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_pca: bool = True) -> None:
         """
