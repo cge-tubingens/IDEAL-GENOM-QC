@@ -359,7 +359,7 @@ class VariantQC:
         """
    
 
-        # load .lmiss file for male subjects
+        # load .vmiss file for male subjects
         df_males = pd.read_csv(
             filename_male,
             sep=r"\s+",
@@ -371,7 +371,7 @@ class VariantQC:
         fail_males = fail_males[['ID']].copy()
         fail_males['Failure'] = 'Missing data rate on males'
 
-        # load .lmiss file for female subjects
+        # load .vmiss file for female subjects
         df_females = pd.read_csv(
             filename_female,
             sep=r"\s+",
@@ -382,9 +382,6 @@ class VariantQC:
         fail_females = df_females[df_females['F_MISS']>=threshold].reset_index(drop=True)
         fail_females = fail_females[['ID']].copy()
         fail_females['Failure'] = 'Missing data rate on females'
-
-        self._make_histogram(df_males['F_MISS'], 'missing_data_male', threshold, 'Ratio of missing data', 'Missing data for males', y_lim_cap=y_axis_cap)
-        self._make_histogram(df_females['F_MISS'], 'missing_data_female', threshold, 'Ratio of missing data', 'Missing data for females', y_lim_cap=y_axis_cap)
 
         # concatenate female and male subjects who failed QC
         fails = pd.concat([fail_females, fail_males], axis=0)
@@ -424,110 +421,6 @@ class VariantQC:
 
         return fail_diffmiss
     
-    def report_hwe(self, directory: Path, filename: str, hwe_threshold: float = 5e-8, y_lim_cap: Optional[float] = None) -> pd.DataFrame:
-        """
-        Generate Hardy-Weinberg Equilibrium (HWE) test report and visualization.
-
-        This method reads HWE test results from a file, identifies variants that fail HWE,
-        creates a histogram of -log10(P) values, and returns failed variants.
-
-        Parameters
-        ----------
-        directory : Path
-            Directory path where the HWE test results file is located
-        filename : str
-            Name of the file containing HWE test results
-        hwe_threshold : float, optional
-            P-value threshold for HWE test failure (default: 5e-8)
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing variants that failed HWE test with columns:
-            - SNP: variant identifier
-            - Failure: reason for failure (always 'HWE')
-
-        Notes
-        -----
-        The method creates a histogram plot saved as 'hwe-histogram' showing the
-        distribution of -log10(P) values from HWE tests.
-        """
-
-        df_hwe = pd.read_csv(
-            directory / filename,
-            sep=r"\s+",
-            engine='python'
-        )
-
-        fail_hwe = df_hwe[df_hwe['P']<hwe_threshold].reset_index(drop=True)
-        fail_hwe = fail_hwe[['SNP']].copy()
-        fail_hwe['Failure'] = 'HWE'
-
-        df_all = df_hwe[df_hwe['TEST']=='ALL'].reset_index(drop=True)
-        df_all['P'] = df_all['P'].replace(0, np.finfo(float).tiny)
-
-        self._make_histogram(
-            values=-np.log10(df_all['P']), # type: ignore
-            output_name='hwe-histogram', 
-            threshold=-np.log10(hwe_threshold), 
-            x_label='-log10(P) of HWE test', 
-            title='HWE test',
-            y_lim_cap=y_lim_cap
-        )
-
-        return fail_hwe
-    
-    def _make_histogram(self, values: pd.Series, output_name: str, threshold: float, x_label: str, title: str, y_lim_cap: Optional[float] = None) -> None:
-        """
-        Creates a histogram plot with a vertical threshold line and saves it to a PDF file.
-        
-        Parameters
-        ----------
-        values : pd.Series
-            The data values to plot in the histogram.
-        values: pd.Series
-            Series containing the numeric values to plot.
-        output_name : str
-            Name of the output file (without extension).
-        threshold : float
-            Value where to draw the vertical threshold line.
-        x_label : str
-            Label for the x-axis.
-        title : str
-            Title of the plot.
-        y_lim_cap : float, optional
-            Upper limit for y-axis. If None, automatically determined. Defaults to None.
-        
-        Returns
-        -------
-        None
-            This function saves the plot to a file and displays it but does not return any value.
-        
-        Notes
-        -----
-        The plot is saved as a PDF file in the plots_dir directory defined in the class instance.
-        The histogram uses 50 bins and a predefined color (#1B9E77).
-        """
-
-        plt.clf()
-
-        fig_path = self.plots_dir / f"{output_name}.pdf"
-
-        plt.hist(values, bins=50, color='#1B9E77')
-        plt.xlabel(x_label)
-        plt.ylabel('Number of SNPs')
-        plt.ylim(0, y_lim_cap if y_lim_cap else None)
-        plt.title(title)
-
-        # Draw the vertical line indicating the cut off threshold
-        plt.axvline(x=threshold, linestyle='--', color='red')
-
-        plt.savefig(fig_path, dpi=400)
-        plt.show(block=False)
-        plt.close()
-
-        return None
-
     def execute_variant_qc_pipeline(self, variant_params: dict) -> None:
         """
         Execute a comprehensive variant quality control pipeline.
@@ -568,10 +461,9 @@ class VariantQC:
         """
         
         variant_qc_steps = {
-            'Missing data rate'         : (self.execute_missing_data_rate, {'chr_y': variant_params['chr-y']}),
+            'Missing data rate'         : (self.execute_missing_data_rate, {'chr_y': variant_params['chr_y']}),
             'Different genotype'        : (self.execute_different_genotype_call_rate, {}),
-            'Hardy-Weinberg equilibrium': (self.execute_hwe_test, {}),
-            'Get fail variants'         : (self.get_fail_variants, {'marker_call_rate_thres': variant_params['miss_data_rate'], 'case_controls_thres': variant_params['diff_genotype_rate'], 'hwe_threshold':variant_params['hwe']}),
+            'Get fail variants'         : (self.get_fail_variants, {'marker_call_rate_thres': variant_params['miss_data_rate'], 'case_controls_thres': variant_params['diff_genotype_rate']}),
             'Drop fail variants'        : (self.execute_drop_variants, {'maf': variant_params['maf'], 'geno': variant_params['geno'], 'hwe': variant_params['hwe']}),
         }
 
@@ -586,5 +478,235 @@ class VariantQC:
         for name, (func, params) in variant_qc_steps.items():
             print(f"\033[34m{variant_step_description[name]}.\033[0m")
             func(**params)
+
+        return
+    
+class VariantQCReport:
+    """
+    Handles visualization and reporting for variant quality control results.
+    
+    This class is responsible for generating plots and reports from variant QC analyses,
+    following the Single Responsibility Principle by separating visualization concerns
+    from the main VariantQC logic.
+    
+    Parameters:
+    -----------
+    output_path: Path 
+        Directory path where plots and reports will be saved
+        
+    Raises:
+    -------
+    TypeError: 
+        If output_path is not a Path object
+    FileNotFoundError: 
+        If output_path doesn't exist
+        
+    Attributes:
+    -----------
+    output_path: Path 
+        Path to output directory where visualizations will be saved
+    """
+
+    def __init__(self, output_path: Path) -> None:
+        """
+        Initialize the VariantQCReport class.
+        
+        Parameters:
+        -----------
+        output_path: Path 
+            Directory path where plots and reports will be saved
+            
+        Raises:
+        -------
+        TypeError: 
+            If output_path is not a Path object
+        FileNotFoundError: 
+            If output_path doesn't exist
+        """
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be of type Path")
+        
+        if not output_path.exists():
+            raise FileNotFoundError("output_path is not a valid path")
+            
+        self.output_path = output_path
+
+    def report_variant_qc(
+        self,
+        missing_data_rate_male: Path,
+        missing_data_rate_female: Path,
+        y_axis_cap: Optional[float]=100,
+        missing_data_threshold: float=0.1
+    ) -> None:
+        """
+        Generate comprehensive visualization reports for variant quality control results.
+        
+        This method creates histogram plots for missing data rates (separated by sex) and 
+        Hardy-Weinberg equilibrium test results, providing visual assessment of QC metrics.
+        
+        Parameters
+        ----------
+        missing_data_rate_male : Path
+            Path to the .vmiss file containing missing data statistics for male subjects
+        missing_data_rate_female : Path
+            Path to the .vmiss file containing missing data statistics for female subjects
+        hwe_file : Path
+            Path to the .hwe file containing Hardy-Weinberg equilibrium test results
+        y_axis_cap : float, optional
+            Maximum value for y-axis in histograms. If None, automatically determined. 
+            Default is 100.
+        missing_data_threshold : float, optional
+            Threshold for missing data rate visualization (vertical line). Default is 0.2.
+        hwe_threshold : float, optional
+            P-value threshold for Hardy-Weinberg equilibrium test (vertical line). 
+            Default is 5e-8.
+            
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        FileNotFoundError
+            If any of the input files don't exist
+        pd.errors.EmptyDataError
+            If input files are empty or malformed
+            
+        Notes
+        -----
+        - Creates 'missing_data_male.svg' and 'missing_data_female.svg' plots
+        - Creates 'hwe-histogram.svg' plot
+        - All plots are saved in SVG format with 600 DPI resolution
+        - Threshold lines are displayed in red with dashed style
+        """
+        
+        # ==========================================================================================================
+        #                                             MISSING DATA RATE
+        # ==========================================================================================================
+
+        # load .vmiss file for male subjects
+        df_males = pd.read_csv(
+            missing_data_rate_male,
+            sep=r"\s+",
+            engine='python'
+        )
+
+        self._make_histogram(
+            values  = df_males['F_MISS'], 
+            output_name='missing_data_male',
+            output_path=self.output_path,
+            threshold=missing_data_threshold, 
+            x_label='Ratio of missing data', 
+            title='Missing data for males', 
+            y_lim_cap=y_axis_cap
+        )
+
+        # load .vmiss file for female subjects
+        df_females = pd.read_csv(
+            missing_data_rate_female,
+            sep=r"\s+",
+            engine='python'
+        )
+
+        self._make_histogram(
+            values  = df_females['F_MISS'], 
+            output_name='missing_data_female',
+            output_path=self.output_path,
+            threshold=missing_data_threshold, 
+            x_label='Ratio of missing data', 
+            title='Missing data for females', 
+            y_lim_cap=y_axis_cap
+        )
+
+        return
+
+    def _make_histogram(self, values: pd.Series, output_name: str, output_path: Path, threshold: float, x_label: str, title: str, y_lim_cap: Optional[float] = None, format: str = 'svg') -> None:
+        """
+        Create a histogram plot with a vertical threshold line and save to file.
+        
+        This private method generates standardized histogram visualizations for QC metrics
+        with consistent styling, threshold indicators, and configurable output formats.
+        
+        Parameters
+        ----------
+        values : pd.Series
+            Series containing the numeric values to plot in the histogram
+        output_name : str
+            Name of the output file (without extension)
+        output_path : Path
+            Directory path where the plot will be saved
+        threshold : float
+            Value where to draw the vertical threshold line
+        x_label : str
+            Label for the x-axis
+        title : str
+            Title of the plot
+        y_lim_cap : float, optional
+            Upper limit for y-axis. If None, automatically determined. Default is None.
+        format : str, optional
+            Output file format ('svg', 'pdf', 'png', etc.). Default is 'svg'.
+        
+        Returns
+        -------
+        None
+            This method saves the plot to file but does not return any value.
+        
+        Notes
+        -----
+        - Uses 50 bins for histogram with color '#1B9E77'
+        - Threshold line is displayed in red with dashed style
+        - Plot is saved with 600 DPI resolution
+        - Memory is properly managed with plt.close() after saving
+        """
+
+        plt.clf()
+
+        fig_path = output_path / f"{output_name}"
+
+        plt.hist(values, bins=50, color='#1B9E77')
+        plt.xlabel(x_label)
+        plt.ylabel('Number of SNPs')
+        plt.ylim(0, y_lim_cap if y_lim_cap else None)
+        plt.title(title)
+
+        # Draw the vertical line indicating the cut off threshold
+        plt.axvline(x=threshold, linestyle='--', color='red')
+
+        plt.savefig(fig_path, format=format, dpi=600)
+        plt.show(block=False)
+        plt.close()
+
+        return
+
+class VariantQCCleanUp:
+
+    def __init__(self, output_path: Path) -> None:
+        self.output_path = output_path
+
+    def clean_results_files(self) -> None:
+
+        """Remove intermediate files from output directory.
+
+        This method deletes temporary files created during sample QC steps:
+        - Files ending with '.bed', '.bim', '.fam', '.vmiss', '.smiss', '.nosex', '.missing', '.hwe'
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        Only removes files if they exist. No error is raised if files are not found.
+        """
+
+        logger.info("Cleaning up intermediate files from output directory")
+
+        # Remove intermediate files
+        extensions = ['.bed', '.bim', '.fam', '.vmiss', '.smiss', '.nosex', '.missing', '.hwe']
+        for ext in extensions:
+            for file in self.output_path.glob(f'*{ext}'):
+                if file.exists():
+                    file.unlink()
+                    logger.info(f"Deleted: {file}")
 
         return
