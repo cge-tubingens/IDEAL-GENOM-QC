@@ -1790,14 +1790,27 @@ class AncestryQC:
         }
 
         step_description = {
-            'merge_study_reference'    : "Merge reference genome with study genome",
-            'delete_intermediate_files': "Delete intermediate files generated during merging",
-            'pca_analysis'             : "Run a PCA analysis to perfom ancestry QC"
+            'merge_study_reference'    : "Merging reference genome with study genome",
+            'delete_intermediate_files': "Deleting intermediate files generated during merging",
+            'pca_analysis'             : "Running PCA analysis to perform ancestry QC"
         }
 
-        for name, (func, params) in ancestry_qc_steps.items():
-            print(f"\033[1m{step_description[name]}.\033[0m")
-            func(**params)
-
+        logger.info("=" * 70)
+        logger.info("Starting Ancestry QC Pipeline")
+        logger.info("=" * 70)
+        
+        for step_num, (name, (func, params)) in enumerate(ancestry_qc_steps.items(), 1):
+            logger.info(f"\nSTEP {step_num}/{len(ancestry_qc_steps)}: {step_description[name]}")
+            logger.info("-" * 70)
+            try:
+                func(**params)
+                logger.info(f"✓ Step {step_num} completed successfully")
+            except Exception as e:
+                logger.error(f"✗ Step {step_num} failed: {str(e)}")
+                raise
+        
+        logger.info("=" * 70)
+        logger.info("Ancestry QC Pipeline completed successfully")
+        logger.info("=" * 70)
 
         return
