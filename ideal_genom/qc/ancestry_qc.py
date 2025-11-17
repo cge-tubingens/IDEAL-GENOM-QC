@@ -908,7 +908,7 @@ class GenomicOutlierAnalyzer:
         self.input_path: Path = input_path
         self.input_name: str = input_name
 
-        self.einvectors: Optional[Path] = None
+        self.eigenvectors: Optional[Path] = None
         self.eigenvalues: Optional[Path] = None
         self.ancestry_fails: Optional[Path] = None
         self.population_tags: Optional[Path] = None
@@ -975,7 +975,7 @@ class GenomicOutlierAnalyzer:
             '--threads', str(max_threads)
         ])
 
-        self.einvectors = self.output_path / (self.output_name+'-pca.eigenvec')
+        self.eigenvectors = self.output_path / (self.output_name+'-pca.eigenvec')
         self.eigenvalues = self.output_path / (self.output_name+'-pca.eigenval')
 
         return
@@ -1057,10 +1057,10 @@ class GenomicOutlierAnalyzer:
         df_tags = df_tags[['ID', '#IID', 'SuperPop']]
         df_tags = df_tags.rename(columns={'ID': 'ID1', '#IID': 'ID2', 'SuperPop': 'SuperPop'})
 
-        if self.einvectors is None:
-            raise ValueError("einvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
+        if self.eigenvectors is None:
+            raise ValueError("eigenvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
 
-        df = pd.read_csv(self.einvectors, sep=r"\s+",engine='python', header=None)
+        df = pd.read_csv(self.eigenvectors, sep=r"\s+",engine='python', header=None)
         logger.info("STEP: Identifying ancestry outliers: read eigenvec file")
 
         df = df[[0, 1]]
@@ -1308,12 +1308,12 @@ class GenomicOutlierAnalyzer:
         df_ref = df_tags[mask1].reset_index(drop=True)
         df_stu = df_tags[mask2].reset_index(drop=True)
 
-        if self.einvectors is None:
-            raise ValueError("einvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
+        if self.eigenvectors is None:
+            raise ValueError("eigenvectors is not set. Make sure execute_pca() is called before this method and completed successfully.")
 
         # read .eigenvec file
         df_eigenvec = pd.read_csv(
-            self.einvectors,
+            self.eigenvectors,
             #header=None,
             sep   =r"\s+",
             engine='python'
