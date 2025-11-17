@@ -2,10 +2,7 @@ import subprocess
 import sys
 import argparse
 import os
-import shutil
-import json
 
-from pathlib import Path
 
 def shell_do(command, print_cmd=False, log=False, return_log=False, err=False):
     """
@@ -50,41 +47,6 @@ def arg_parser() -> dict:
     args = parser.parse_args()
 
     return vars(args)
-
-def delete_temp_files(files_to_keep: list, path_to_folder: str) -> None:
-
-    """
-    Function to delete temporary files that were created during the pipeline execution. Moreover, it creates a directory called 'log_files' to save al `.log` files originated from the pipeline execution.
-
-    Parameters
-    ----------
-    files_to_keep: list
-        list of strings where its elements are the names of files and folders that should be kept.
-    path_to_folder: str
-        full path to the folder where the temporary files are located.
-    """
-
-    for file in os.listdir(path_to_folder):
-        file_split = file.split('.')
-        if file_split[-1]!='log' and file not in files_to_keep and file_split[-1]!='hh':
-            if os.path.isfile(os.path.join(path_to_folder, file)):
-                os.remove(
-                    os.path.join(path_to_folder, file)
-                )
-        
-    # create log folder for dependables
-    logs_dir = os.path.join(path_to_folder, 'log_files')
-    if not os.path.exists(logs_dir):
-        os.mkdir(logs_dir)
-
-    for file in os.listdir(path_to_folder):
-        if file.split('.')[-1]=='log' or file.split('.')[-1]=='hh':
-            shutil.move(
-                os.path.join(path_to_folder, file),
-                os.path.join(logs_dir, file)
-            )
-
-    pass
 
 def validate_config(data_path, params_path, steps_path, built):
     """Validate config files and genome build."""
