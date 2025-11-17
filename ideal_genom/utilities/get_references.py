@@ -267,7 +267,7 @@ class Fetcher1000Genome:
     
 class FetcherLDRegions:
 
-    def __init__(self, destination: Optional[Path] = None, built: str = '38'):
+    def __init__(self, destination: Optional[Path] = None, build: str = '38'):
         """
         Initialize LDRegions object.
         This initializer sets up the destination path for LD regions files and the genome build version.
@@ -295,7 +295,7 @@ class FetcherLDRegions:
             destination = Path(__file__).resolve().parent.parent.parent / "data" / "ld_regions_files"
 
         self.destination = destination
-        self.built = built
+        self.build = build
 
         self.ld_regions = None
         
@@ -329,25 +329,25 @@ class FetcherLDRegions:
 
         out_dir = self.destination
 
-        if self.built == '37':
+        if self.build == '37':
             url_ld_regions = r"https://raw.githubusercontent.com/genepi-freiburg/gwas/refs/heads/master/single-pca/high-LD-regions.txt"
         
             ld = requests.get(url_ld_regions)
 
 
             if ld.status_code == 200:
-                with open((out_dir / f"high-LD-regions_GRCh{self.built}.txt"), "wb") as f:
+                with open((out_dir / f"high-LD-regions_GRCh{self.build}.txt"), "wb") as f:
                     f.write(ld.content)
-                logger.info(f"LD regions file for built {self.built} downloaded successfully to {out_dir}")
+                logger.info(f"LD regions file for built {self.build} downloaded successfully to {out_dir}")
 
-                self.ld_regions = out_dir / f"high-LD-regions_GRCh{self.built}.txt"
-                return out_dir / f"high-LD-regions_GRCh{self.built}.txt"
+                self.ld_regions = out_dir / f"high-LD-regions_GRCh{self.build}.txt"
+                return out_dir / f"high-LD-regions_GRCh{self.build}.txt"
             else:
                 logger.info(f"Failed to download .bim file: {ld.status_code}")
 
                 return Path()
 
-        elif self.built == '38':
+        elif self.build == '38':
             # extracted from
             # https://github.com/neurogenetics/GWAS-pipeline
             data = [
@@ -368,11 +368,11 @@ class FetcherLDRegions:
                 (20, 33412194, 35912078, "r15")
             ]
 
-            with open(out_dir / f'high-LD-regions_GRCH{self.built}.txt', 'w') as file:
+            with open(out_dir / f'high-LD-regions_GRCH{self.build}.txt', 'w') as file:
                 for line in data:
                     file.write(f"{line[0]}\t{line[1]}\t{line[2]}\t{line[3]}\n")
-            self.ld_regions = out_dir / f"high-LD-regions_GRCH{self.built}.txt"
-            return out_dir / f'high-LD-regions_GRCH{self.built}.txt'
+            self.ld_regions = out_dir / f"high-LD-regions_GRCH{self.build}.txt"
+            return out_dir / f'high-LD-regions_GRCH{self.build}.txt'
         else:
-            logger.error(f"Unsupported genome build: {self.built}. Only '37' and '38' are supported.")
+            logger.error(f"Unsupported genome build: {self.build}. Only '37' and '38' are supported.")
             return Path()
