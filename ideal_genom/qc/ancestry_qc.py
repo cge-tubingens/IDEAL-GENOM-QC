@@ -505,25 +505,26 @@ class ReferenceGenomicMerger:
 
     def execute_remove_mismatches(self) -> None:
         """
-        Removes mismatched SNPs from the reference data based on allele comparisons between study and reference datasets.
-
-        This method performs the following steps:
-        1. Determines optimal thread count for processing
-        2. Identifies allele mismatches between study and reference BIM files
-        3. Creates a list of SNPs to remove
-        4. Generates a cleaned reference dataset excluding mismatched SNPs
-
-        The method utilizes PLINK to perform the actual SNP removal while maintaining allele order.
-
-        Returns:
-        --------
-            None
-
-        Side Effects:
-        -------------
-            - Creates a file listing SNPs to be removed at {output_path}/{reference_bim_stem}.toRemove
-            - Generates cleaned reference files at {output_path}/{reference_bim_stem}-cleaned.bed/bim/fam
-            - Logs the number of SNPs being removed
+        Remove mismatched SNPs from the reference data.
+        
+        This method identifies and removes SNPs where alleles don't match between 
+        study and reference datasets, generating a cleaned reference dataset.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        ValueError
+            If pruned_study or pruned_reference is None
+        
+        Notes
+        -----
+        - Creates a file listing SNPs to be removed (.toRemove)
+        - Generates cleaned reference files with '-cleaned' suffix
+        - Logs the number of SNPs being removed
+        - Updates self.reference_cleaned with path to cleaned files
         """
 
         logger.info("STEP: Removing mismatched SNPs from reference data")
