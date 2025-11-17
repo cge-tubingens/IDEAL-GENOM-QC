@@ -879,12 +879,34 @@ class GenomicOutlierAnalyzer:
             DataFrame containing population reference tags, initialized as None
         """
 
-        self.merged_file = merged_file
-        self.reference_tags = reference_tags
-        self.output_path= output_path
-        self.output_name= output_name
-        self.input_path = input_path
-        self.input_name = input_name
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(merged_file, Path):
+            raise TypeError("merged_file should be a Path object")
+        if not isinstance(reference_tags, Path):
+            raise TypeError("reference_tags should be a Path object")
+        if not isinstance(input_name, str):
+            raise TypeError("input_name should be a string")
+        if not isinstance(output_name, str):
+            raise TypeError("output_name should be a string")
+        
+        if not input_path.exists():
+            raise FileNotFoundError(f"input_path does not exist: {input_path}")
+        if not output_path.exists():
+            raise FileNotFoundError(f"output_path does not exist: {output_path}")
+        if not merged_file.with_suffix('.bed').exists():
+            raise FileNotFoundError(f"merged_file does not exist: {merged_file}")
+        if not reference_tags.exists():
+            raise FileNotFoundError(f"reference_tags does not exist: {reference_tags}")
+
+        self.merged_file: Path = merged_file
+        self.reference_tags: Path = reference_tags
+        self.output_path: Path = output_path
+        self.output_name: str = output_name
+        self.input_path: Path = input_path
+        self.input_name: str = input_name
 
         self.einvectors = None
         self.eigenvalues = None
