@@ -773,3 +773,11 @@ class UMAPReduction:
         return
 
 
+class TSNEReduction:
+    pass
+
+class Plot2D:
+    pass
+
+class Plot3D:
+    pass
