@@ -984,13 +984,13 @@ class SampleQC:
             self.sexcheck_miss,
             self.xchr_miss,
             self.maf_greater_het,
-            self.maf_less_het,
-            self.kinship_miss
-        ]
+            self.maf_less_het        ]
 
         if not self.use_kinship:
-            required_files.append(self.results_dir / (self.output_name + '-ibd-missing.imiss'))
+            required_files.append(self.results_dir / (self.output_name + '-ibd-missing.smiss'))
             required_files.append(self.results_dir / (self.output_name + '-ibd.genome'))
+        else:
+            required_files.append(self.kinship_miss)
 
         for file in required_files:
             if not file.exists():
