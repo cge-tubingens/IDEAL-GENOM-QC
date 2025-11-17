@@ -197,15 +197,17 @@ class VariantQC:
         logger.info("Identifying markers with different genotype call rates between cases and controls...")
 
         # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        memory = get_available_memory()
+        threads = get_optimal_threads()
 
         # generates .missing file
-        plink_cmd = f"plink --bfile {self.input_path / self.input_name} --test-missing --out {self.results_dir / (self.output_name+'-case-control-missing')} --memory {memory}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        run_plink([
+            '--bfile', str(self.input_path / self.input_name),
+            '--test-missing',
+            '--out', str(self.results_dir / (self.output_name+'-case-control-missing')),
+            '--memory', str(memory),
+            '--threads', str(threads)
+        ])
 
         self.case_control_missing = self.results_dir / (self.output_name+'-case-control-missing.missing')
 
