@@ -1722,14 +1722,12 @@ class AncestryQC:
             output_name= self.output_name
         )
 
-        logger.info(f"STEP: Running PCA analysis: `ref_population` = {ref_population}")
-        logger.info(f"STEP: Running PCA analysis: `pca` = {pca}")
-        logger.info(f"STEP: Running PCA analysis: `maf` = {maf}")
-        logger.info(f"STEP: Running PCA analysis: `num_pca` = {num_pca}")
-        logger.info(f"STEP: Running PCA analysis: `ref_threshold` = {ref_threshold}")
-        logger.info(f"STEP: Running PCA analysis: `stu_threshold` = {stu_threshold}")
-        logger.info(f"STEP: Running PCA analysis: `distance_metric` = {distance_metric}")
-        logger.info(f"STEP: Running PCA analysis: `psam_file` = {self.reference_files['psam']}")
+        logger.info("STEP: Running PCA analysis with parameters:")
+        logger.info(f"  - Reference population: {ref_population}")
+        logger.info(f"  - PCs to calculate: {pca}, PCs for outlier detection: {num_pca}")
+        logger.info(f"  - MAF threshold: {maf}")
+        logger.info(f"  - Outlier thresholds: ref={ref_threshold}, study={stu_threshold}")
+        logger.info(f"  - Distance metric: {distance_metric}")
 
         goa.execute_pca(pca=pca, maf=maf)
         goa.find_ancestry_outliers(
