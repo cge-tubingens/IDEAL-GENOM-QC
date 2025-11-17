@@ -682,7 +682,7 @@ class SampleQC:
             '--memory', str(memory)
         ])
 
-        self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
+        self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.smiss')
         if not self.ibd_miss.exists():
             raise FileNotFoundError(f"Missing file: {self.ibd_miss}")
         self.genome = self.results_dir / (self.output_name+'-ibd.genome')
