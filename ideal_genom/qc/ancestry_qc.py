@@ -961,16 +961,8 @@ class GenomicOutlierAnalyzer:
 
         logger.info("STEP: Performing principal component decomposition")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # PLINK command: generate PCA for reference data
         plink_cmd = f"plink2 --bfile {str(self.merged_file)} --keep-allele-order --maf {maf} --out {str(self.output_path / (self.output_name+'-pca'))} --pca {pca} --memory {memory} --threads {max_threads}"
