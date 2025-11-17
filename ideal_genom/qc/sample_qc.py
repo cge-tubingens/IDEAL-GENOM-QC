@@ -16,6 +16,7 @@ from matplotlib import colormaps
 import seaborn as sns
 
 from core.executor import run_plink2, run_plink
+from core.utils import get_optimal_threads, get_available_memory, count_file_lines
 from ideal_genom.utilities.get_references import FetcherLDRegions
 
 from pathlib import Path
@@ -175,18 +176,15 @@ class SampleQC:
             logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
             self.renamed_snps = True
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # Execute PLINK2 command
         run_plink2([
             '--bfile', str(self.input_path / self.input_name),
             '--set-all-var-ids', '@:#:$r:$a',
             '--threads', str(max_threads),
+            '--memory', str(memory),
             '--make-bed',
             '--out', str(self.input_path / (self.input_name + '-renamed'))
         ])
@@ -238,11 +236,16 @@ class SampleQC:
         # Dynamically set the input file name based on whether SNPs are renamed
         input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
 
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
+
         # Execute PLINK2 command: convert haploid genotypes to missing
         run_plink2([
             '--bfile', str(self.input_path / input_file),
             '--set-invalid-haploid-missing',
             '--make-bed',
+            '--threads', str(max_threads),
+            '--memory', str(memory),
             '--out', str(self.input_path / (self.input_name + '-hh-missing'))
         ])
 
@@ -305,17 +308,8 @@ class SampleQC:
 
         logger.info("STEP: LD pruning")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         if self.hh_to_missing:
             ld_input = self.input_name+'-hh-missing'
@@ -393,17 +387,8 @@ class SampleQC:
 
         logger.info(f"STEP: Missing genotype check.")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # PLINK2 command: run missingness across file genome-wide
         run_plink2([
@@ -467,18 +452,15 @@ class SampleQC:
         
         logger.info(f"STEP: Check discordant sex information.")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # Check sex
         run_plink2([
             '--bfile', str(self.pruned_file),
             '--check-sex', f'max-female-xf={sex_check[0]}', f'min-male-xf={sex_check[1]}',
             '--threads', str(max_threads),
+            '--memory', str(memory),
             '--out', str(self.results_dir / (self.output_name + '-sexcheck'))
         ])
         time.sleep(5)
@@ -553,17 +535,8 @@ class SampleQC:
 
         logger.info(f"STEP: Heterozygosity rate check. `maf` set to {maf}")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # Extract autosomal SNPs
         run_plink2([
@@ -580,7 +553,9 @@ class SampleQC:
             '--bfile', str(self.results_dir / (self.output_name + '-chr1-22')),
             '--maf', str(maf),
             '--make-bed',
-            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater'))
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
         ])
         time.sleep(5)
 
@@ -589,7 +564,9 @@ class SampleQC:
             '--bfile', str(self.results_dir / (self.output_name + '-chr1-22')),
             '--exclude', str((self.results_dir / (self.output_name + '-chr1-22-mafgreater')).with_suffix('.bim')),
             '--make-bed',
-            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless'))
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
         ])
         time.sleep(5)
 
@@ -597,7 +574,9 @@ class SampleQC:
         run_plink2([
             '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater')),
             '--missing',
-            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing'))
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafgreater-missing')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
         ])
         time.sleep(5)
 
@@ -605,7 +584,9 @@ class SampleQC:
         run_plink2([
             '--bfile', str(self.results_dir / (self.output_name + '-chr1-22-mafless')),
             '--missing',
-            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless-missing'))
+            '--out', str(self.results_dir / (self.output_name + '-chr1-22-mafless-missing')),
+            '--memory', str(memory),
+            '--threads', str(max_threads)
         ])
         time.sleep(5)
 
@@ -672,22 +653,23 @@ class SampleQC:
 
         logger.info("STEP: Duplicates and relatedness check with IBD")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
-        if not self.pruned_file or not self.pruned_file.exists():
-            raise FileNotFoundError(f"Missing file: {self.pruned_file}")
+        if self.pruned_file is None or not all([
+            (self.pruned_file.with_suffix('.bed')).exists(),
+            (self.pruned_file.with_suffix('.bim')).exists(),
+            (self.pruned_file.with_suffix('.fam')).exists()
+        ]):
+            raise FileNotFoundError(f"Missing PLINK files: {self.pruned_file}")
 
         # Compute IBD
         run_plink([
             '--bfile', str(self.pruned_file),
             '--genome',
             '--out', str(self.results_dir / (self.output_name + '-ibd')),
-            '--threads', str(max_threads)
+            '--threads', str(max_threads),
+            '--memory', str(memory)
         ])
 
         # Calculate missing genotype rates
@@ -695,7 +677,9 @@ class SampleQC:
             '--bfile', str(self.pruned_file),
             '--allow-no-sex',
             '--missing',
-            '--out', str(self.results_dir / (self.output_name + '-ibd-missing'))
+            '--out', str(self.results_dir / (self.output_name + '-ibd-missing')),
+            '--threads', str(max_threads),
+            '--memory', str(memory)
         ])
 
         self.ibd_miss = self.results_dir / (self.output_name+'-ibd-missing.imiss')
@@ -756,17 +740,8 @@ class SampleQC:
         else:
             kinship_input = self.input_name
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
         
         # Compute kinship-coefficient matrix for all samples
         run_plink2([
