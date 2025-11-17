@@ -143,24 +143,32 @@ class VariantQC:
 
         logger.info("Identifying markers with excessive missing rate...")
 
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
+        memory = get_available_memory()
+        threads = get_optimal_threads()
 
         # generates  .lmiss and .imiss files for male subjects
-        plink_cmd1 = f"plink2 --bfile {self.input_path / self.input_name} --missing --filter-males --chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-males-only')} --memory {memory}"
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--missing',
+            '--filter-males',
+            '--chr', str(chr_y),
+            '--out', str(self.results_dir / (self.output_name+'-missing-males-only')),
+            '--memory', str(memory),
+            '--threads', str(threads)
+        ])
 
         # generates .lmiss and. imiss files for female subjects
-        plink_cmd2 = f"plink2 --bfile {self.input_path / self.input_name} --missing --not-chr {chr_y} --out {self.results_dir / (self.output_name+'-missing-not-y')} --memory {memory}"
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--missing',
+            '--not-chr', str(chr_y),
+            '--out', str(self.results_dir / (self.output_name+'-missing-not-y')),
+            '--memory', str(memory),
+            '--threads', str(threads)
+        ])
 
         self.males_missing_data = self.results_dir / (self.output_name+'-missing-males-only.vmiss')
         self.females_missing_data = self.results_dir / (self.output_name+'-missing-not-y.vmiss')
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
 
         return
 
