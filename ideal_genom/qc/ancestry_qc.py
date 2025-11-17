@@ -85,23 +85,21 @@ class ReferenceGenomicMerger:
         if not high_ld_regions.exists():
             raise FileNotFoundError(f"high_ld_regions does not exist: {high_ld_regions}")
 
-        self.input_path = input_path
-        self.input_name = input_name
-        self.output_path= output_path
-        self.output_name= output_name
-        self.high_ld_regions = high_ld_regions
-        self.reference_files = reference_files
+        self.input_path: Path = input_path
+        self.input_name: str = input_name
+        self.output_path: Path = output_path
+        self.output_name: str = output_name
+        self.high_ld_regions: Path = high_ld_regions
+        self.reference_files: dict = reference_files
 
-        self.reference_AC_GT_filtered= None
-        self.study_AC_GT_filtered    = None
-        self.pruned_reference        = None
-        self.pruned_study            = None
-        self.reference_fixed_chr     = None
-        self.reference_fixed_pos     = None
-        self.reference_flipped       = None
-        self.reference_cleaned       = None
-
-        pass
+        self.reference_AC_GT_filtered: Optional[Path] = None
+        self.study_AC_GT_filtered: Optional[Path] = None
+        self.pruned_reference: Optional[Path] = None
+        self.pruned_study: Optional[Path] = None
+        self.reference_fixed_chr: Optional[Path] = None
+        self.reference_fixed_pos: Optional[Path] = None
+        self.reference_flipped: Optional[Path] = None
+        self.reference_cleaned: Optional[Path] = None
 
     def execute_rename_snpid(self) -> None:
         
