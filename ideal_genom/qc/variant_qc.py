@@ -252,8 +252,7 @@ class VariantQC:
         fail_missing_data = self.report_missing_data(
             filename_male  =self.males_missing_data, 
             filename_female=self.females_missing_data,
-            threshold      =marker_call_rate_thres,
-            y_axis_cap     =male_female_y_cap
+            threshold      =marker_call_rate_thres
         )
 
         # ==========================================================================================================
@@ -265,22 +264,7 @@ class VariantQC:
             threshold=case_controls_thres, 
         )
 
-        # ==========================================================================================================
-        #                                             MARKERS FAILING HWE TEST
-        # ==========================================================================================================
-
-        # Make sure self.hwe_results is not None before passing it to report_hwe
-        if self.hwe_results is None:
-            raise ValueError("HWE results not available. Run execute_hwe_test first.")
-            
-        fail_hwe = self.report_hwe(
-            directory=self.results_dir,
-            filename=self.hwe_results,
-            hwe_threshold=hwe_threshold,
-            y_lim_cap=hwe_y_cap
-        )
-
-        fails = pd.concat([fail_missing_data, fail_genotype, fail_hwe], axis=0, ignore_index=True)
+        fails = pd.concat([fail_missing_data, fail_genotype], axis=0, ignore_index=True)
 
         summary = fails['Failure'].value_counts().reset_index()
         num_dup = fails.duplicated(subset=['SNP']).sum()
