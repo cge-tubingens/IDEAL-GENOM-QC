@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ideal_genom.utilities.Helpers import shell_do
 from ideal_genom.utilities.get_references import FetcherLDRegions, Fetcher1000Genome
-from ideal_genom.qc.AncestryQC import ReferenceGenomicMerger
+from ideal_genom.qc.ancestry_qc import ReferenceGenomicMerger
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -146,7 +146,7 @@ class FstSummary:
         rgm.execute_filter_prob_snps()
         rgm.execute_ld_pruning(ind_pair=ind_pair)
         rgm.execute_fix_chromosome_mismatch()
-        rgm.execute_fix_possition_mismatch()
+        rgm.execute_fix_position_mismatch()
         rgm.execute_fix_allele_flip()
         rgm.execute_remove_mismatches()
         rgm.execute_merge_data()
