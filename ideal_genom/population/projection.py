@@ -22,7 +22,7 @@ from sklearn.model_selection import ParameterGrid
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class Preaparator:
+class Preparator:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, build: str = '38', high_ld_regions: Optional[Path] = None) -> None:
 
