@@ -1743,7 +1743,34 @@ class AncestryQC:
         return
 
     def execute_ancestry_pipeline(self, ancestry_params: dict) -> None:
-
+        """
+        Execute complete ancestry QC pipeline.
+        
+        This method runs the full ancestry quality control workflow including:
+        1. Merging reference and study data
+        2. Cleaning intermediate files
+        3. Running PCA analysis and outlier detection
+        
+        Parameters
+        ----------
+        ancestry_params : dict
+            Dictionary containing pipeline parameters. Required keys:
+            - ind_pair : list - LD pruning parameters [window, step, r2]
+            - reference_pop : str - Reference population name
+            - pca : int - Number of PCs to calculate
+            - maf : float - MAF threshold
+            - num_pcs : int - Number of PCs for outlier detection
+            - ref_threshold : float - Reference outlier threshold
+            - stu_threshold : float - Study outlier threshold
+            - aspect_ratio : str or float - Plot aspect ratio
+            - distance_metric : str or float - Distance metric for outliers
+            - explained_variance_threshold : float - Variance threshold for reporting
+            
+        Returns
+        -------
+        None
+        """
+        
         ancestry_qc_steps = {
             'merge_study_reference'    : (self.merge_reference_study, {"ind_pair":ancestry_params['ind_pair']}),
             'delete_intermediate_files': (self._clean_merging_dir, {}),
