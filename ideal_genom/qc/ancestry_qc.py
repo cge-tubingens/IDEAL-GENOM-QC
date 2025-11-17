@@ -131,14 +131,7 @@ class ReferenceGenomicMerger:
 
         logger.info("STEP: Renaming SNP IDs in the study data using PLINK2")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
-
-        plink2_cmd = f"plink2 --bfile {self.input_path / self.input_name} --set-all-var-ids @:#:$r:$a --threads {max_threads} --make-bed --out {self.output_path / (self.input_name+ '-renamed')}"
+        max_threads = get_optimal_threads()
 
         # Execute PLINK2 command
         shell_do(plink2_cmd, log=True)
@@ -174,17 +167,8 @@ class ReferenceGenomicMerger:
 
         logger.info("STEP: Filtering A->T and C->G SNPs from study and reference data.")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
-        
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
         # find A->T and C->G SNPs in study data
         filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name}-renamed.bim", output_filename=self.input_name)
@@ -273,11 +257,7 @@ class ReferenceGenomicMerger:
         
         logger.info("STEP: LD-based pruning of study and reference data")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        max_threads = get_optimal_threads()
 
         # PLINK command: generates prune.in and prune.out files from study data
         plink_cmd1 = f"plink2 --bfile {str(self.study_AC_GT_filtered)} --exclude range {self.high_ld_regions} --keep-allele-order --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
@@ -334,11 +314,7 @@ class ReferenceGenomicMerger:
         if self.pruned_reference is None:
             raise ValueError("pruned_reference is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        max_threads = get_optimal_threads()
 
         # File paths - using with_suffix instead of with_name for more reliability
         study_bim = self.pruned_study.with_suffix('.bim')
@@ -348,9 +324,8 @@ class ReferenceGenomicMerger:
 
         self.reference_fixed_chr = self.output_path / f"{self.reference_files['bim'].stem}-updateChr"
 
-        with open(to_update_chr_file, 'r') as f:
-            line_count = sum(1 for _ in f)
-            logger.info(f"STEP: Fixing chromosome mismatch between study data and reference panel: {line_count} SNPs to update")
+        line_count = count_file_lines(to_update_chr_file)
+        logger.info(f"STEP: Fixing chromosome mismatch between study data and reference panel: {line_count} SNPs to update")
 
         if line_count == 0:
             # No SNPs to update, copy the pruned reference to fixed chromosome reference
@@ -399,12 +374,7 @@ class ReferenceGenomicMerger:
 
         logger.info("STEP: Fixing position mismatch between study data and reference panel")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        max_threads = get_optimal_threads()
 
         # Check if pruned_study and reference_fixed_chr have been properly set
         if self.pruned_study is None:
@@ -534,12 +504,7 @@ class ReferenceGenomicMerger:
 
         logger.info("STEP: Removing mismatched SNPs from reference data")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        max_threads = get_optimal_threads()
 
         if self.pruned_study is None:
             raise ValueError("pruned_study is not set. Make sure execute_ld_pruning() is called before this method and completed successfully.")
@@ -555,9 +520,8 @@ class ReferenceGenomicMerger:
 
         self.reference_cleaned = self.output_path / f"{self.reference_files['bim'].stem}-cleaned"
 
-        with open(mismatches_file, 'r') as f:
-            line_count = sum(1 for _ in f)
-            logger.info(f"STEP: Removing mismatched SNPs from reference data: {line_count} SNPs to remove")
+        line_count = count_file_lines(mismatches_file)
+        logger.info(f"STEP: Removing mismatched SNPs from reference data: {line_count} SNPs to remove")
 
         if line_count == 0:
             # No mismatches to remove, copy the flipped reference to cleaned reference
@@ -598,11 +562,7 @@ class ReferenceGenomicMerger:
 
         logger.info("STEP: Merging study and reference data")
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        max_threads = get_optimal_threads()
 
         if self.reference_cleaned is None:
             raise ValueError("reference_cleaned is not set. Make sure execute_remove_mismatches() is called before this method and completed successfully.")
