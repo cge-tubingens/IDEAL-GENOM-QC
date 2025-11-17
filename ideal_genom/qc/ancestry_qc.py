@@ -860,6 +860,13 @@ class GenomicOutlierAnalyzer:
         output_name : str
             Name for output files
 
+        Raises
+        ------
+        TypeError
+            If input arguments are not of correct type
+        FileNotFoundError
+            If required input files/directories do not exist
+
         Attributes
         ----------
         einvectors : numpy.ndarray, None
