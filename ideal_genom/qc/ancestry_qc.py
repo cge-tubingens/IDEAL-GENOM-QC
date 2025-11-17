@@ -378,7 +378,7 @@ class ReferenceGenomicMerger:
 
         return
     
-    def execute_fix_possition_mismatch(self) -> None:
+    def execute_fix_position_mismatch(self) -> None:
         """
         Fix position mismatches between study data and reference panel.
         
