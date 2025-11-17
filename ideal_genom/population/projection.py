@@ -70,6 +70,9 @@ class Preparator:
     
     def execute_ld_pruning(self):
         pass
+
+    def compute_pcas(self):
+        pass
 class UMAPReduction:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_pca: bool = True) -> None:
