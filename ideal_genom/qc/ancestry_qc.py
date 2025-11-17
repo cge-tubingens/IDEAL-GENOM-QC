@@ -908,12 +908,10 @@ class GenomicOutlierAnalyzer:
         self.input_path: Path = input_path
         self.input_name: str = input_name
 
-        self.einvectors = None
-        self.eigenvalues = None
-        self.ancestry_fails = None
-        self.population_tags = None
-
-        pass
+        self.einvectors: Optional[Path] = None
+        self.eigenvalues: Optional[Path] = None
+        self.ancestry_fails: Optional[Path] = None
+        self.population_tags: Optional[Path] = None
 
     def execute_pca(self, pca: int = 10, maf: float = 0.01) -> None:
         """
