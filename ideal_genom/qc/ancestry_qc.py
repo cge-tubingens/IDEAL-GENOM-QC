@@ -20,45 +20,55 @@ class ReferenceGenomicMerger:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
         """
-        Initialize AncestryQC class.
-        This class performs ancestry quality control on genetic data by comparing study samples against reference populations.
+        Initialize ReferenceGenomicMerger class.
         
-        Parameters:
-        -----------
-        input_path: Path 
+        This class performs reference-study data merging for genetic data by harmonizing 
+        study samples with reference populations.
+        
+        Parameters
+        ----------
+        input_path : Path
             Path to directory containing input files
-        input_name: str 
+        input_name : str
             Name of input file without extension
-        output_path: Path 
+        output_path : Path
             Path to directory for output files
-        output_name: str 
+        output_name : str
             Name for output files without extension
-        high_ld_regions: Path 
+        high_ld_regions : Path
             Path to file containing high LD regions to exclude
-        reference_files: dict 
+        reference_files : dict
             Dictionary containing paths to reference population files
-        built: str (optional) 
-            Genome build version ('37' or '38'). Defaults to '38'
+        built : str, default='38'
+            Genome build version ('37' or '38')
         
-        Raises:
-        -------
-        TypeError: 
+        Raises
+        ------
+        TypeError
             If input arguments are not of correct type
-        ValueError: 
+        ValueError
             If genome build version is not '37' or '38'
-        FileNotFoundError: 
+        FileNotFoundError
             If required input files/directories do not exist
         
-        Attributes:
-        -----------
-            reference_AC_GT_filtered: Filtered reference allele counts and genotypes
-            study_AC_GT_filtered: Filtered study allele counts and genotypes
-            pruned_reference: LD-pruned reference data
-            pruned_study: LD-pruned study data
-            reference_fixed_chr: Reference data with fixed chromosomes
-            reference_fixed_pos: Reference data with fixed positions
-            reference_flipped: Reference data with flipped alleles
-            reference_cleaned: Final cleaned reference data
+        Attributes
+        ----------
+        reference_AC_GT_filtered : Path or None
+            Filtered reference allele counts and genotypes
+        study_AC_GT_filtered : Path or None
+            Filtered study allele counts and genotypes
+        pruned_reference : Path or None
+            LD-pruned reference data
+        pruned_study : Path or None
+            LD-pruned study data
+        reference_fixed_chr : Path or None
+            Reference data with fixed chromosomes
+        reference_fixed_pos : Path or None
+            Reference data with fixed positions
+        reference_flipped : Path or None
+            Reference data with flipped alleles
+        reference_cleaned : Path or None
+            Final cleaned reference data
         """
 
         if not isinstance(input_path, Path):
