@@ -6,16 +6,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from pathlib import Path
-from typing import Union, Literal
+from typing import Union, Literal, Optional
 from scipy.spatial import distance as dist
 
-from ideal_genom_qc.Helpers import shell_do, delete_temp_files
-from ideal_genom_qc.get_references import Fetcher1000Genome, FetcherLDRegions
+from core.executor import run_plink, run_plink2
+from core.utils import get_optimal_threads, get_available_memory, count_file_lines
+from ideal_genom.utilities.get_references import Fetcher1000Genome, FetcherLDRegions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class ReferenceGenomicMerger():
+class ReferenceGenomicMerger:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
         """
