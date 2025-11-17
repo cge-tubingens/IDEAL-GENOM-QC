@@ -1907,7 +1907,7 @@ class ReportAncestryCheck:
 
         pass
 
-    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
+    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot', format: str = 'svg') -> None:
         """
         Generate 2D and 3D PCA plots from eigenvector data and population tags.
         This method creates two PCA visualization plots:
@@ -2035,7 +2035,7 @@ class ReportAncestryCheck:
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
         fig.tight_layout()
-        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', dpi=400)
+        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', format=format, dpi=400)
 
         fig.clf()
         plt.close()
@@ -2047,7 +2047,7 @@ class ReportAncestryCheck:
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
         fig3.tight_layout()
-        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', dpi=400)
+        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', format=format, dpi=400)
 
         # generates a 3D scatter plot
         fig2= plt.figure()
@@ -2063,7 +2063,7 @@ class ReportAncestryCheck:
             )
 
         ax.legend()
-        plt.savefig(plot_dir / f'3D-{plot_name}', dpi=400)
+        plt.savefig(plot_dir / f'3D-{plot_name}', format=format, dpi=400)
         plt.close()
 
         return
@@ -2131,7 +2131,7 @@ class ReportAncestryCheck:
         axes[1].grid(True)
 
         plt.tight_layout()
-        plt.savefig(self.output_path / (self.output_name + '_scree_plot.png'), dpi=600)
+        plt.savefig(self.output_path / '_scree_plot.png', dpi=600)
         plt.close()
 
         # -------------------------------
@@ -2150,7 +2150,7 @@ class ReportAncestryCheck:
             'Significant_Threshold': significant_threshold
         })
 
-        df.to_csv(self.output_path / (self.output_name + '_pca_report.tsv'), sep='\t', index=False)
+        df.to_csv(self.output_path / '_pca_report.tsv', sep='\t', index=False)
 
         # Optional: summary
         print("\nSummary:")
