@@ -421,9 +421,8 @@ class ReferenceGenomicMerger:
 
         self.reference_fixed_pos = self.output_path / f"{self.reference_files['bim'].stem}-updatePos"
 
-        with open(to_update_pos_file, 'r') as f:
-            line_count = sum(1 for _ in f)
-            logger.info(f"STEP: Fixing position mismatch between study data and reference panel: {line_count} SNPs to update")
+        line_count = count_file_lines(to_update_pos_file)
+        logger.info(f"STEP: Fixing position mismatch between study data and reference panel: {line_count} SNPs to update")
 
         if line_count == 0:
             # No SNPs to update, copy the fixed chromosome reference to fixed position reference
