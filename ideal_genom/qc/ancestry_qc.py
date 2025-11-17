@@ -1814,3 +1814,349 @@ class AncestryQC:
         logger.info("=" * 70)
 
         return
+    
+class ReportAncestryCheck:
+
+    def __init__(self, output_path: Path, output_name: str, population_tags: Optional[Path] = None, einvectors: Optional[Path] = None, eigenvalues: Optional[Path] = None, ancestry_fails: Optional[Path] = None) -> None:
+        """
+        Initialize ReportAncestryCheck class for generating ancestry QC reports and visualizations.
+        
+        Parameters
+        ----------
+        output_path : Path
+            Path to output directory for reports and plots
+        output_name : str
+            Base name for output files
+        population_tags : Path, optional
+            Path to population tags file (can be set later)
+        einvectors : Path, optional
+            Path to eigenvectors file from PCA (can be set later)
+        eigenvalues : Path, optional
+            Path to eigenvalues file from PCA (can be set later)
+        ancestry_fails : Path, optional
+            Path to ancestry fails file (can be set later)
+            
+        Raises
+        ------
+        TypeError
+            If output_path is not a Path object
+            If output_name is not a string
+        """
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(output_name, str):
+            raise TypeError("output_name should be a string")
+        
+        self.output_path: Path = output_path
+        self.output_name: str = output_name
+        self.population_tags: Optional[Path] = population_tags
+        self.einvectors: Optional[Path] = einvectors
+        self.eigenvalues: Optional[Path] = eigenvalues
+        self.ancestry_fails: Optional[Path] = ancestry_fails
+
+    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
+        """
+        Generate 2D and 3D PCA plots from eigenvector data and population tags.
+        This method creates two PCA visualization plots:
+        - A 2D scatter plot showing PC1 vs PC2 colored by super-population
+        - A 3D scatter plot showing PC1 vs PC2 vs PC3 colored by super-population
+        
+        Parameters
+        ----------
+        reference_pop : str
+            Reference population identifier for zoomed plots
+        aspect_ratio : Union[Literal['auto', 'equal'], float]
+            Aspect ratio for the plot axes. Can be 'auto', 'equal', or a numeric value
+        exclude_outliers : bool, default=False
+            Whether to exclude ancestry outliers from the plots
+        plot_dir : Path, optional
+            Directory path where plots will be saved. Defaults to current directory.
+            If directory doesn't exist, plots will be saved in self.output_path
+        plot_name : str, optional
+            Base name for the plot files. Defaults to 'pca_plot.svg'.
+            Final filenames will be prefixed with '2D-' and '3D-'
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If plot_dir is not a Path object
+            If plot_name is not a string
+            If reference_pop is not a string
+        ValueError
+            If required attributes (population_tags, einvectors, eigenvalues) are not set
+        
+        Notes
+        -----
+        Requires the following class attributes to be set:
+        - self.population_tags : Path to population tags file (tab-separated)
+        - self.einvectors : Path to eigenvectors file (space-separated)
+        - self.eigenvalues : Path to eigenvalues file
+        - self.ancestry_fails : Path to ancestry fails file (if exclude_outliers=True)
+        The population tags file should contain columns 'ID1', 'ID2', and 'SuperPop'
+        The eigenvectors file should contain the principal components data
+        """
+
+        logger.info("STEP: Generating PCA plots")
+
+        if not isinstance(reference_pop, str):
+            raise TypeError("reference_pop should be a string")
+        if not isinstance(plot_dir, Path):
+            raise TypeError("plot_dir should be a Path object")
+        if not isinstance(plot_name, str):
+            raise TypeError("plot_name should be a string")
+        if not isinstance(exclude_outliers, bool):
+            raise TypeError("exclude_outliers should be a boolean")
+        
+        if not plot_dir.exists():
+            logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
+            logger.info(f'STEP: Generating PCA plots: pca plots will be saved in {self.output_path}')
+            plot_dir = self.output_path
+
+        if self.population_tags is None:
+            raise ValueError("population_tags is not set. Please set it using the population_tags attribute or pass it during initialization.")
+
+        # add population tags to pca output
+        df_tags = pd.read_csv(self.population_tags, sep='\t')
+        df_tags['ID1'] = df_tags['ID1'].astype(str)
+
+        if self.einvectors is None:
+            raise ValueError("einvectors is not set. Please set it using the einvectors attribute or pass it during initialization.")
+        if self.eigenvalues is None:
+            raise ValueError("eigenvalues is not set. Please set it using the eigenvalues attribute or pass it during initialization.")
+        
+        # load .eigenval file and calculate variance explained by the first two PCs
+        df_eigenval = pd.read_csv(
+            self.eigenvalues,
+            header=None,
+            sep   =r"\s+",
+            engine='python'
+        )
+
+        total_variance = df_eigenval[0].sum()
+        pc1_var = df_eigenval[0][0]
+        pc2_var = df_eigenval[0][1]
+        pc3_var = df_eigenval[0][2]
+
+        pc1_var_perc = round((pc1_var / total_variance) * 100, 2)
+        pc2_var_perc = round((pc2_var / total_variance) * 100, 2)
+        pc3_var_perc = round((pc3_var / total_variance) * 100, 2)
+
+        # load .eigenvec file and keep the first three principal components
+        df_eigenvec = pd.read_csv(
+            self.einvectors,
+            #header=None,
+            sep   =r"\s+",
+            engine='python'
+        )
+        df_eigenvec = df_eigenvec[df_eigenvec.columns[:5]].copy()
+        df_eigenvec.columns = ['ID1', 'ID2', 'pc_1', 'pc_2', 'pc_3']
+        df_eigenvec['ID1'] = df_eigenvec['ID1'].astype(str)
+
+        if exclude_outliers:
+            # load ancestry outliers
+            if self.ancestry_fails is None:
+                raise ValueError("ancestry_fails is not set. Please set it using the ancestry_fails attribute or pass it during initialization.")
+            logger.info("STEP: Generating PCA plots: excluding ancestry outliers")
+
+            df_outliers = pd.read_csv(self.ancestry_fails, sep=r'\s+', header=None, engine='python')
+            df_outliers.columns = ['ID1', 'ID2']
+            df_outliers['ID1'] = df_outliers['ID1'].astype(str)
+            df_outliers['ID2'] = df_outliers['ID2'].astype(str)
+
+            df_eigenvec = df_eigenvec.merge(df_outliers, on=['ID1', 'ID2'], how='left', indicator=True)
+            df_eigenvec = df_eigenvec[df_eigenvec['_merge'] == 'left_only'].drop(columns=['_merge'])
+
+            plot_name = f'no-outliers-{plot_name}'
+
+        # merge to get data with tagged populations
+        df = pd.merge(df_eigenvec, df_tags, on=['ID1', 'ID2'])
+
+        # generates a 2D scatter plot
+        fig, ax = plt.subplots(figsize=(10,10))
+        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue='SuperPop', ax=ax, marker='.', s=70)
+        ax.set_aspect(aspect_ratio, adjustable='datalim')
+        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
+        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig.tight_layout()
+        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', dpi=400)
+
+        fig.clf()
+        plt.close()
+
+        fig3, ax3 = plt.subplots(figsize=(10,10))
+        df_zoom = df[(df['SuperPop'] == 'StPop') | (df['SuperPop'] == reference_pop)].reset_index(drop=True)
+        sns.scatterplot(data=df_zoom, x='pc_1', y='pc_2', hue='SuperPop', ax=ax3, marker='.', s=70)
+        ax3.set_aspect(aspect_ratio, adjustable='datalim')
+        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
+        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
+        fig3.tight_layout()
+        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', dpi=400)
+
+        # generates a 3D scatter plot
+        fig2= plt.figure()
+        ax  = fig2.add_subplot(111, projection='3d')
+
+        grouped = df.groupby('SuperPop')
+        for s, group in grouped:
+            ax.scatter(
+                group['pc_1'],
+                group['pc_2'],
+                group['pc_3'],
+                label=s
+            )
+
+        ax.legend()
+        plt.savefig(plot_dir / f'3D-{plot_name}', dpi=400)
+        plt.close()
+
+        return
+    
+    def report_pca(self, threshold: float = 0.01)-> None:
+        """
+        Generate PCA report including scree plot and variance explained analysis.
+        
+        Parameters
+        ----------
+        threshold : float, default=0.01
+            Threshold for determining significant principal components (as fraction, e.g., 0.01 = 1%)
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        ValueError
+            If eigenvalues attribute is not set
+        TypeError
+            If threshold is not a float
+        
+        Notes
+        -----
+        Creates two output files:
+        - Scree plot with eigenvalues and cumulative variance
+        - TSV file with detailed PCA statistics
+        """
+        
+        if not isinstance(threshold, (float, int)):
+            raise TypeError("threshold should be a float")
+        if threshold <= 0 or threshold >= 1:
+            raise ValueError("threshold should be between 0 and 1")
+        
+        if self.eigenvalues is None:
+            raise ValueError("eigenvalues is not set. Please set it using the eigenvalues attribute or pass it during initialization.")
+
+        eigenvalues = np.loadtxt(self.eigenvalues)
+
+        # -------------------------------
+        # 2. Compute variance explained
+        # -------------------------------
+        var_explained = eigenvalues / np.sum(eigenvalues)
+        cum_var = np.cumsum(var_explained)
+
+        # -------------------------------
+        # 3. Scree plot and cumulative variance in subplots
+        # -------------------------------
+        fig, axes = plt.subplots(1, 2, figsize=(14,5))
+
+        # Scree plot
+        axes[0].plot(range(1, len(eigenvalues)+1), eigenvalues, 'o-', color='blue')
+        axes[0].set_xlabel('Principal Component')
+        axes[0].set_ylabel('Eigenvalue')
+        axes[0].set_title('Scree Plot (Eigenvalues)')
+        axes[0].grid(True)
+
+        # Cumulative variance plot
+        axes[1].plot(range(1, len(eigenvalues)+1), cum_var, 'o-', color='green')
+        axes[1].set_xlabel('Principal Component')
+        axes[1].set_ylabel('Cumulative Variance Explained')
+        axes[1].set_title('Cumulative Variance Explained')
+        axes[1].grid(True)
+
+        plt.tight_layout()
+        plt.savefig(self.output_path / (self.output_name + '_scree_plot.png'), dpi=600)
+        plt.close()
+
+        # -------------------------------
+        # 4. Determine significant PCs
+        # -------------------------------
+        significant_threshold = var_explained > threshold
+
+        # -------------------------------
+        # 5. Create table
+        # -------------------------------
+        df = pd.DataFrame({
+            'PC': range(1, len(eigenvalues)+1),
+            'Eigenvalue': eigenvalues,
+            'Variance_Explained': var_explained,
+            'Cumulative_Variance': cum_var,
+            'Significant_Threshold': significant_threshold
+        })
+
+        df.to_csv(self.output_path / (self.output_name + '_pca_report.tsv'), sep='\t', index=False)
+
+        # Optional: summary
+        print("\nSummary:")
+        print(f"PCs > {threshold*100}% variance: {np.sum(significant_threshold)}")
+
+        return
+    
+    def _set_population_tags(self, psam_path: Path, study_fam_path: Path) -> pd.DataFrame:
+        """
+        Sets population tags for genetic data by combining information from a PSAM file and a study FAM file.
+
+        This method processes population information from reference data (PSAM file) and study data (FAM file), 
+        combining them into a single DataFrame with consistent column naming and structure.
+
+        Parameters
+        ----------
+        psam_path : Path
+            Path to the PSAM file containing reference population information.
+        study_fam_path : Path
+            Path to the FAM file containing study individual IDs.
+
+        Returns
+        -------
+        pd.DataFrame
+            Combined DataFrame containing:
+                - ID1: Family or group identifier (0 for reference data)
+                - ID2: Individual identifier
+                - SuperPop: Population tag ('StPop' for study individuals, actual population for reference data)
+
+        Notes
+        -----
+        The PSAM file should contain at least '#IID' and 'SuperPop' columns.
+        The FAM file should be space-separated with no header.
+        """
+
+        # Read population information from the .psam file
+        df_psam = pd.read_csv(
+            psam_path,
+            sep='\t',
+            usecols=['#IID', 'SuperPop']
+        )
+
+        # Set an ID column and rename columns for consistency
+        df_psam['ID'] = 0
+        df_psam = df_psam[['ID', '#IID', 'SuperPop']]
+        df_psam.columns = ['ID1', 'ID2', 'SuperPop']
+
+        # read individual IDs from the study .fam file
+        df_fam = pd.read_csv(
+            study_fam_path,
+            sep=' ',
+            header=None,
+            index_col=False
+        )
+
+        # select relevant columns, assign a placeholder population tag, and rename columns
+        df_fam = df_fam[df_fam.columns[:2]].copy()
+        df_fam['SuperPop'] = 'StPop'
+        df_fam.columns = ['ID1', 'ID2', 'SuperPop']
+
+        # concatenate the two DataFrames to merge the information
+        return pd.concat([df_fam, df_psam], axis=0)
