@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name:str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
         """
         Initialize AncestryQC class.
         This class performs ancestry quality control on genetic data by comparing study samples against reference populations.
@@ -81,9 +81,9 @@ class ReferenceGenomicMerger:
         if not input_path.exists():
             raise FileNotFoundError(f"input_path does not exist: {input_path}")
         if not output_path.exists():
-            raise FileNotFoundError("output_path does not exist")
+            raise FileNotFoundError(f"output_path does not exist: {output_path}")
         if not high_ld_regions.exists():
-            raise FileNotFoundError("high_ld_regions does not exist")
+            raise FileNotFoundError(f"high_ld_regions does not exist: {high_ld_regions}")
 
         self.input_path = input_path
         self.input_name = input_name
