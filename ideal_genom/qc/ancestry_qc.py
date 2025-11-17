@@ -1634,16 +1634,10 @@ class AncestryQC:
             output_name= self.output_name,
             high_ld_regions =self.high_ld_regions, 
             reference_files = self.reference_files,
+            built= self.built
         )
 
-        rgm.execute_rename_snpid()
-        rgm.execute_filter_prob_snps()
-        rgm.execute_ld_pruning(ind_pair=ind_pair)
-        rgm.execute_fix_chromosome_mismatch()
-        rgm.execute_fix_possition_mismatch()
-        rgm.execute_fix_allele_flip()
-        rgm.execute_remove_mismatches()
-        rgm.execute_merge_data()
+        rgm.execute_merging_pipeline(ind_pair=ind_pair)
 
         return
     
