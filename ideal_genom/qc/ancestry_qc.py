@@ -380,33 +380,27 @@ class ReferenceGenomicMerger:
     
     def execute_fix_possition_mismatch(self) -> None:
         """
-        Fixes position mismatches between study data and reference panel.
-
-        This method executes PLINK commands to update the positions of SNPs in the reference panel
-        to match those in the study data. It processes previously identified position mismatches
-        and creates new binary PLINK files with corrected positions.
-
-        The method:
-        1. Determines optimal thread count for processing
-        2. Identifies position mismatches between study and reference BIM files
-        3. Updates reference panel positions using PLINK
-        4. Creates new binary files with corrected positions
-
-        Returns:
-        --------
-            None
-
-        Side Effects:
-        -------------
-            - Creates new PLINK binary files (.bed, .bim, .fam) with updated positions
-            - Logs the number of SNPs being updated
-            - Modifies self.reference_fixed_pos with path to updated files
-
-        Dependencies:
-        -------------
-            - Requires PLINK to be installed and accessible
-            - Expects pruned study and reference files to exist
-            - Requires previous chromosome fixing step to be completed
+        Fix position mismatches between study data and reference panel.
+        
+        This method updates the positions of SNPs in the reference panel to match those 
+        in the study data, creating new binary PLINK files with corrected positions.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        ValueError
+            If pruned_study or reference_fixed_chr is None
+        
+        Notes
+        -----
+        - Creates new PLINK binary files (.bed, .bim, .fam) with updated positions
+        - Logs the number of SNPs being updated
+        - Updates self.reference_fixed_pos with path to corrected files
+        - Requires PLINK to be installed and accessible
+        - The updated files are saved with '-updatePos' suffix
         """
 
         logger.info("STEP: Fixing position mismatch between study data and reference panel")
