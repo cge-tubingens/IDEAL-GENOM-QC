@@ -213,45 +213,7 @@ class VariantQC:
 
         return
     
-    def execute_hwe_test(self) -> None:
-        """
-        Execute Hardy-Weinberg Equilibrium (HWE) test using PLINK.
-
-        This method performs the following steps:
-        1. Calculates available memory and allocates 2/3 for the test
-        2. Runs PLINK command to compute HWE test on the input binary PLINK files
-        3. Saves results to a .hwe output file
-
-        The HWE test is used to assess whether genotype frequencies in a population remain constant 
-        across generations under specific conditions.
-
-        Returns:
-        --------
-            None
-
-        Side effects:
-        -------------
-            - Creates a .hwe output file in the results directory
-            - Sets self.hwe_results to the name of the output file
-        """
-
-        logger.info('Computing Hardy-Weinberg Equilibrium test...')
-
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
-        # PLINK command to compute HWE test
-        plink_cmd = f"plink2 --bfile {self.input_path / self.input_name} --hardy --out {self.results_dir / (self.output_name+'-hwe')} --memory {memory}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
-        self.hwe_results = self.output_name+'-hwe.hwe'
-
-        return
-    
-    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8, male_female_y_cap: Optional[int] = None, hwe_y_cap: Optional[int] = None) -> pd.DataFrame:
+    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8) -> pd.DataFrame:
         """
         Identify and consolidate failing variants based on multiple quality control criteria.
         This method combines the results of three QC checks:
