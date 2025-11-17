@@ -2,8 +2,6 @@
 Python module to perform variant quality control
 """
 
-import os
-import psutil
 import logging
 
 import matplotlib.pyplot as plt
