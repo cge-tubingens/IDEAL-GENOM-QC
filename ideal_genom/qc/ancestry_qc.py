@@ -134,7 +134,13 @@ class ReferenceGenomicMerger:
         max_threads = get_optimal_threads()
 
         # Execute PLINK2 command
-        shell_do(plink2_cmd, log=True)
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--set-all-var-ids', '@:#:$r:$a',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.output_path / (self.input_name + '-renamed'))
+        ])
 
         return
 
@@ -196,13 +202,28 @@ class ReferenceGenomicMerger:
         
         reference_base = self.reference_files['bim'].with_suffix('')
         
-        # PLINK command: generate cleaned reference data files
-        plink_cmd2 = f"plink2 --bfile {reference_base} --max-alleles 2 --chr 1-22 --exclude {filtered_reference} --allow-extra-chr --memory {memory} --threads {max_threads} --make-bed --out {self.reference_AC_GT_filtered}"
+        # Execute PLINK2 command: generate cleaned study data files
+        run_plink2([
+            '--bfile', str(self.output_path / (self.input_name + '-renamed')),
+            '--chr', '1-22',
+            '--exclude', str(filtered_study),
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.study_AC_GT_filtered)
+        ])
 
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        # Execute PLINK2 command: generate cleaned reference data files
+        run_plink2([
+            '--bfile', str(reference_base),
+            '--max-alleles', '2',
+            '--chr', '1-22',
+            '--exclude', str(filtered_reference),
+            '--allow-extra-chr',
+            '--memory', str(int(memory)),
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.reference_AC_GT_filtered)
+        ])
 
         return
     
@@ -259,22 +280,38 @@ class ReferenceGenomicMerger:
 
         max_threads = get_optimal_threads()
 
-        # PLINK command: generates prune.in and prune.out files from study data
-        plink_cmd1 = f"plink2 --bfile {str(self.study_AC_GT_filtered)} --exclude range {self.high_ld_regions} --keep-allele-order --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --out {str(self.output_path / self.input_name)}"
+        # Execute PLINK2 command: generates prune.in and prune.out files from study data
+        run_plink2([
+            '--bfile', str(self.study_AC_GT_filtered),
+            '--exclude', 'range', str(self.high_ld_regions),
+            '--keep-allele-order',
+            '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
+            '--threads', str(max_threads),
+            '--out', str(self.output_path / self.input_name)
+        ])
 
-        # PLINK command: prune study data and creates a filtered binary file
-        plink_cmd2 = f"plink2 --bfile {str(self.study_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --threads {max_threads} --make-bed --out {str((self.output_path / (self.input_name+'-pruned')))}"
+        # Execute PLINK2 command: prune study data and creates a filtered binary file
+        run_plink2([
+            '--bfile', str(self.study_AC_GT_filtered),
+            '--extract', str((self.output_path / self.input_name).with_suffix('.prune.in')),
+            '--keep-allele-order',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.output_path / (self.input_name + '-pruned'))
+        ])
 
-        # PLINK command: generates a pruned reference data files
-        plink_cmd3 = f"plink2 --bfile {str(self.reference_AC_GT_filtered)} --extract {str((self.output_path / self.input_name).with_suffix('.prune.in'))} --keep-allele-order --make-bed --threads {max_threads} --out {str((self.output_path / (self.reference_files['bim'].stem+'-pruned')))}"
+        # Execute PLINK2 command: generates a pruned reference data files
+        run_plink2([
+            '--bfile', str(self.reference_AC_GT_filtered),
+            '--extract', str((self.output_path / self.input_name).with_suffix('.prune.in')),
+            '--keep-allele-order',
+            '--make-bed',
+            '--threads', str(max_threads),
+            '--out', str(self.output_path / (self.reference_files['bim'].stem + '-pruned'))
+        ])
 
         self.pruned_reference = self.output_path / (self.reference_files['bim'].stem+'-pruned')
         self.pruned_study = self.output_path / (self.input_name+'-pruned')
-
-        # execute PLINK commands
-        cmds = [plink_cmd1, plink_cmd2, plink_cmd3]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
 
         return
     
@@ -333,11 +370,14 @@ class ReferenceGenomicMerger:
             logger.info("No chromosome mismatches found. Skipping chromosome update step.")
             return
 
-        # PLINK command
-        plink_cmd = f"plink --bfile {self.pruned_reference} --update-chr {to_update_chr_file} --threads {max_threads} --make-bed --out {self.reference_fixed_chr}"
-
         # Execute PLINK command
-        shell_do(plink_cmd, log=True)
+        run_plink([
+            '--bfile', str(self.pruned_reference),
+            '--update-chr', str(to_update_chr_file),
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.reference_fixed_chr)
+        ])
 
         return
     
@@ -400,11 +440,14 @@ class ReferenceGenomicMerger:
             logger.info("No position mismatches found. Skipping position update step.")
             return
 
-        # PLINK command
-        plink_cmd = f"plink2 --bfile {self.reference_fixed_chr} --update-map {to_update_pos_file} --threads {max_threads} --make-bed --out {self.reference_fixed_pos}"
-
-        # Execute PLINK command
-        shell_do(plink_cmd, log=True)
+        # Execute PLINK2 command
+        run_plink2([
+            '--bfile', str(self.reference_fixed_chr),
+            '--update-map', str(to_update_pos_file),
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.reference_fixed_pos)
+        ])
 
         return
     
@@ -465,19 +508,21 @@ class ReferenceGenomicMerger:
                 line_count = sum(1 for _ in f)
                 logger.info(f"STEP: Allele flipping between study data and reference panel: {line_count} SNPs to flip")
 
-            if line_count == 0:
-                # No SNPs to flip, copy the fixed position reference to flipped reference
-                self.reference_flipped = self.reference_fixed_pos
-                logger.info("No SNPs require allele flipping. Skipping flipping step.")
-                return
-    
-            # plink command
-            plink_cmd = f"plink --bfile {self.reference_fixed_pos} --flip {to_flip_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_flipped}"
-    
-            # execute PLINK command
-            shell_do(plink_cmd, log=True)
-    
+        if line_count == 0:
+            # No SNPs to flip, copy the fixed position reference to flipped reference
+            self.reference_flipped = self.reference_fixed_pos
+            logger.info("No SNPs require allele flipping. Skipping flipping step.")
             return
+
+        # Execute PLINK command
+        run_plink([
+            '--bfile', str(self.reference_fixed_pos),
+            '--flip', str(to_flip_file),
+            '--keep-allele-order',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.reference_flipped)
+        ])
 
     def execute_remove_mismatches(self) -> None:
         """
@@ -529,11 +574,15 @@ class ReferenceGenomicMerger:
             logger.info("No mismatched SNPs found. Skipping removal step.")
             return
         
-        # plink command
-        plink_cmd = f"plink2 --bfile {self.reference_flipped} --exclude {mismatches_file} --keep-allele-order --threads {max_threads} --make-bed --out {self.reference_cleaned}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        # Execute PLINK2 command
+        run_plink2([
+            '--bfile', str(self.reference_flipped),
+            '--exclude', str(mismatches_file),
+            '--keep-allele-order',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.reference_cleaned)
+        ])
 
         return
     
@@ -567,11 +616,18 @@ class ReferenceGenomicMerger:
         if self.reference_cleaned is None:
             raise ValueError("reference_cleaned is not set. Make sure execute_remove_mismatches() is called before this method and completed successfully.")
 
-        # plink command
-        plink_cmd = f"plink --bfile {self.pruned_study} --bmerge {str(self.reference_cleaned.with_suffix('.bed'))} {str(self.reference_cleaned.with_suffix('.bim'))} {str(self.reference_cleaned.with_suffix('.fam'))} --keep-allele-order --threads {max_threads} --make-bed --out {self.output_path / (self.output_name+'-merged')}"
-
-        # execute PLINK command
-        shell_do(plink_cmd, log=True)
+        # Execute PLINK command
+        run_plink([
+            '--bfile', str(self.pruned_study),
+            '--bmerge',
+            str(self.reference_cleaned.with_suffix('.bed')),
+            str(self.reference_cleaned.with_suffix('.bim')),
+            str(self.reference_cleaned.with_suffix('.fam')),
+            '--keep-allele-order',
+            '--threads', str(max_threads),
+            '--make-bed',
+            '--out', str(self.output_path / (self.output_name + '-merged'))
+        ])
 
         return
 
