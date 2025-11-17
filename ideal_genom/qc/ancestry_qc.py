@@ -1745,6 +1745,11 @@ class AncestryQC:
         )
         goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
 
+        self.eigenvectors = goa.eigenvectors
+        self.eigenvalues   = goa.eigenvalues
+        self.population_tags = goa.population_tags
+        self.ancestry_fails  = goa.ancestry_fails
+
         return
 
     def execute_ancestry_pipeline(self, ancestry_params: dict) -> None:
