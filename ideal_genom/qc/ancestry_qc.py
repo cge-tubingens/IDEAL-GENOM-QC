@@ -162,25 +162,26 @@ class ReferenceGenomicMerger:
         max_threads = get_optimal_threads()
         memory = get_available_memory()
 
-        # find A->T and C->G SNPs in study data
-        filtered_study = self._filter_non_AT_or_GC_snps(target_bim=self.output_path / f"{self.input_name}-renamed.bim", output_filename=self.input_name)
-        logger.info("STEP: Filtering problematic SNPs from the study data: filtered study data")
+        # Find and filter problematic SNPs in both datasets
+        filtered_study = self._filter_non_AT_or_GC_snps(
+            target_bim=self.output_path / f"{self.input_name}-renamed.bim",
+            output_filename=self.input_name
+        )
+        filtered_reference = self._filter_non_AT_or_GC_snps(
+            target_bim=self.reference_files['bim'],
+            output_filename=self.reference_files['bim'].stem
+        )
 
-        # find A->T and C->G SNPs in reference data
-        filtered_reference = self._filter_non_AT_or_GC_snps(target_bim=self.reference_files['bim'], output_filename=self.reference_files['bim'].stem)
-        logger.info("STEP: Filtering problematic SNPs from the study data: filtered reference data")
+        # Set output paths
+        self.reference_AC_GT_filtered = self.output_path / f"{self.reference_files['bim'].stem}-no_ac_gt_snps"
+        self.study_AC_GT_filtered = self.output_path / f"{self.input_name}-no_ac_gt_snps"
 
-        self.reference_AC_GT_filtered= self.output_path / f"{self.reference_files['bim'].stem}-no_ac_gt_snps"
-        self.study_AC_GT_filtered    = self.output_path / f"{self.input_name}-no_ac_gt_snps"
+        # Log filtering statistics
+        study_count = count_file_lines(filtered_study)
+        ref_count = count_file_lines(filtered_reference)
+        logger.info(f"STEP: Filtering problematic SNPs from the study data: {study_count} SNPs filtered")
+        logger.info(f"STEP: Filtering problematic SNPs from the reference data: {ref_count} SNPs filtered")
 
-        with open(filtered_study, 'r') as f:
-            logger.info(f"STEP: Filtering problematic SNPs from the study data: {len(f.readlines())} SNPs filtered")
-        with open(filtered_reference, 'r') as f:
-            logger.info(f"STEP: Filtering problematic SNPs from the reference data: {len(f.readlines())} SNPs filtered")
-
-
-        # PLINK command: generate cleaned study data files
-        plink_cmd1 = f"plink2 --bfile  {self.output_path / (self.input_name+'-renamed')} --chr 1-22 --exclude {filtered_study} --threads {max_threads} --make-bed --out {self.study_AC_GT_filtered}"
 
         # Make sure the reference bim path is valid and extract the base filename
         if not self.reference_files.get('bim') or not isinstance(self.reference_files['bim'], Path):
