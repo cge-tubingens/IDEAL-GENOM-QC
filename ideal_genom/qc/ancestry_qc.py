@@ -1135,11 +1135,14 @@ class GenomicOutlierAnalyzer:
         with open(self.ancestry_fails, 'r') as f:
             logger.info(f"STEP: Dropping ancestry outliers from the study data: {len(f.readlines())} samples identified as ancestry outliers")
 
-        # create cleaned binary files
-        plink_cmd2 = f"plink2 --bfile {str(self.input_path / self.input_name)} --allow-no-sex --remove {str(self.ancestry_fails)} --make-bed --out {str(output_dir / (self.output_name+'-ancestry-cleaned'))}"
-
-        # execute PLINK command
-        shell_do(plink_cmd2, log=True)
+        # Execute PLINK2 command: create cleaned binary files
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--allow-no-sex',
+            '--remove', str(self.ancestry_fails),
+            '--make-bed',
+            '--out', str(output_dir / (self.output_name + '-ancestry-cleaned'))
+        ])
 
         return
     
