@@ -132,7 +132,7 @@ class UMAPReduction:
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
             
-            ld_fetcher = FetcherLDRegions()
+            ld_fetcher = FetcherLDRegions(build=built)
             ld_fetcher.get_ld_regions()
 
             if ld_fetcher.ld_regions is None:
