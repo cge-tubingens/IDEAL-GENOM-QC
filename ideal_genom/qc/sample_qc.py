@@ -830,7 +830,7 @@ class SampleQC:
         pd.DataFrame
             DataFrame with failed samples (FID, IID, Failure columns)
         """
-        imiss_path = self.results_dir / (self.output_name + '-ibd-missing.imiss')
+        imiss_path = self.results_dir / (self.output_name + '-ibd-missing.smiss')
         genome_path = self.results_dir / (self.output_name + '-ibd.genome')
 
         # Load missingness data
