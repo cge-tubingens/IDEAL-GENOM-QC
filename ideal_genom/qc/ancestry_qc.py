@@ -1792,9 +1792,7 @@ class AncestryQC:
                     "num_pca":ancestry_params['num_pcs'],
                     "ref_threshold":ancestry_params['ref_threshold'],
                     "stu_threshold":ancestry_params['stu_threshold'],
-                    "aspect_ratio":ancestry_params['aspect_ratio'],
-                    "distance_metric":ancestry_params['distance_metric'],
-                    "explained_variance_threshold":ancestry_params['explained_variance_threshold']
+                    "distance_metric":ancestry_params['distance_metric']
                 }
             ),
         }
@@ -1827,7 +1825,7 @@ class AncestryQC:
     
 class ReportAncestryCheck:
 
-    def __init__(self, output_path: Path, output_name: str, population_tags: Optional[Path] = None, einvectors: Optional[Path] = None, eigenvalues: Optional[Path] = None, ancestry_fails: Optional[Path] = None) -> None:
+    def __init__(self, output_path: Path,  einvectors: Path,  eigenvalues: Path, ancestry_fails: Path, population_tags: Path) -> None:
         """
         Initialize ReportAncestryCheck class for generating ancestry QC reports and visualizations.
         
@@ -1835,16 +1833,14 @@ class ReportAncestryCheck:
         ----------
         output_path : Path
             Path to output directory for reports and plots
-        output_name : str
-            Base name for output files
-        population_tags : Path, optional
-            Path to population tags file (can be set later)
-        einvectors : Path, optional
-            Path to eigenvectors file from PCA (can be set later)
-        eigenvalues : Path, optional
-            Path to eigenvalues file from PCA (can be set later)
-        ancestry_fails : Path, optional
-            Path to ancestry fails file (can be set later)
+        population_tags : Path
+            Path to population tags file
+        einvectors : Path
+            Path to eigenvectors file from PCA
+        eigenvalues : Path
+            Path to eigenvalues file from PCA
+        ancestry_fails : Path
+            Path to ancestry fails file
             
         Raises
         ------
@@ -1854,15 +1850,62 @@ class ReportAncestryCheck:
         """
         if not isinstance(output_path, Path):
             raise TypeError("output_path should be a Path object")
-        if not isinstance(output_name, str):
-            raise TypeError("output_name should be a string")
+        if not isinstance(population_tags, Path):
+            raise TypeError("population_tags should be a Path object")
+        if not isinstance(einvectors, Path):
+            raise TypeError("einvectors should be a Path object")
+        if not isinstance(eigenvalues, Path):
+            raise TypeError("eigenvalues should be a Path object")
+        if not isinstance(ancestry_fails, Path):
+            raise TypeError("ancestry_fails should be a Path object")
+        
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+        if not population_tags.is_file():
+            raise FileNotFoundError("population_tags file does not exist")
+        if not einvectors.is_file():
+            raise FileNotFoundError("einvectors file does not exist")
+        if not eigenvalues.is_file():
+            raise FileNotFoundError("eigenvalues file does not exist")
+        if not ancestry_fails.is_file():
+            raise FileNotFoundError("ancestry_fails file does not exist")
         
         self.output_path: Path = output_path
-        self.output_name: str = output_name
-        self.population_tags: Optional[Path] = population_tags
-        self.einvectors: Optional[Path] = einvectors
-        self.eigenvalues: Optional[Path] = eigenvalues
-        self.ancestry_fails: Optional[Path] = ancestry_fails
+        self.population_tags: Path = population_tags
+        self.einvectors: Path = einvectors
+        self.eigenvalues: Path = eigenvalues
+        self.ancestry_fails: Path = ancestry_fails
+
+    def report_ancestry_qc(
+            self,
+            reference_pop: str,
+            aspect_ratio: Union[Literal['auto', 'equal'], float]='equal',
+            format: str='svg'
+        ) -> None:
+
+        self.draw_pca_plot(
+            reference_pop=reference_pop,
+            aspect_ratio=aspect_ratio,
+            exclude_outliers=False,
+            plot_dir=self.output_path,
+            plot_name='pca_plot',
+            format=format
+        )
+
+        self.draw_pca_plot(
+            reference_pop=reference_pop,
+            aspect_ratio=aspect_ratio,
+            exclude_outliers=True,
+            plot_dir=self.output_path,
+            plot_name='pca_plot_no_outliers',
+            format=format
+        )
+
+        self.report_pca(
+
+        )
+
+        pass
 
     def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
         """
