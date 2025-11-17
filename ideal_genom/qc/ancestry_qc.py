@@ -569,24 +569,24 @@ class ReferenceGenomicMerger:
     def execute_merge_data(self) -> None:
         """
         Merge study and reference data using PLINK.
-
-        This method merges the pruned study data with the cleaned reference data using PLINK's
-        --bmerge functionality. It automatically determines the optimal number of threads to use
-        based on available CPU cores.
-
-        The method:
-        1. Calculates optimal thread count (CPU count - 2 or half of available cores)
-        2. Constructs PLINK command for merging datasets
-        3. Executes the merge operation via shell command
-
-        Returns:
-        --------
-            None
-
-        Side effects:
-        -------------
-            - Creates merged PLINK binary files (.bed, .bim, .fam) in the output directory
-            - Logs the merge operation
+        
+        This method merges the pruned study data with the cleaned reference data 
+        using PLINK's --bmerge functionality.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        ValueError
+            If reference_cleaned is None
+        
+        Notes
+        -----
+        - Creates merged PLINK binary files (.bed, .bim, .fam) in the output directory
+        - The merged files are saved with '-merged' suffix
+        - Automatically determines optimal number of threads based on available CPU cores
         """
 
         logger.info("STEP: Merging study and reference data")
