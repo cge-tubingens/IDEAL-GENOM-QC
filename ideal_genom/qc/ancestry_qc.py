@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict, built: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict, build: str = '38') -> None:
         """
         Initialize ReferenceGenomicMerger class.
         
@@ -39,7 +39,7 @@ class ReferenceGenomicMerger:
             Path to file containing high LD regions to exclude
         reference_files : dict
             Dictionary containing paths to reference population files
-        built : str, default='38'
+        build : str, default='38'
             Genome build version ('37' or '38')
         
         Raises
@@ -83,10 +83,10 @@ class ReferenceGenomicMerger:
             raise TypeError("input_name should be a string")
         if not isinstance(output_name, str):
             raise TypeError("output_name should be a string")
-        if not isinstance(built, str):
-            raise TypeError("built should be a string")
-        if built not in ['37', '38']:
-            raise ValueError("built should be either '37' or '38'")
+        if not isinstance(build, str):
+            raise TypeError("build should be a string")
+        if build not in ['37', '38']:
+            raise ValueError("build should be either '37' or '38'")
         
         if not input_path.exists():
             raise FileNotFoundError(f"input_path does not exist: {input_path}")
