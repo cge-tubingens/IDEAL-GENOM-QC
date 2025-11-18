@@ -206,7 +206,8 @@ class ReferenceGenomicMerger:
             '--exclude', str(filtered_study),
             '--threads', str(max_threads),
             '--make-bed',
-            '--out', str(self.study_AC_GT_filtered)
+            '--out', str(self.study_AC_GT_filtered),
+            '--memory', str(int(memory))
         ])
 
         # Execute PLINK2 command: generate cleaned reference data files
