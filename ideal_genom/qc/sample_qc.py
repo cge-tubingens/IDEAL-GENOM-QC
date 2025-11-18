@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class SampleQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, built: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, build: str = '38') -> None:
         
         """
         Initialize SampleQC class for quality control of genetic data.
@@ -83,9 +83,9 @@ class SampleQC:
         if not isinstance(high_ld_file, Path):
             raise TypeError("high_ld_file should be of type Path")
         
-        if not isinstance(built, str):
+        if not isinstance(build, str):
             raise TypeError("built should be of type str")
-        if built not in ['37', '38']:
+        if build not in ['37', '38']:
             raise ValueError("built should be either 37 or 38")
         
         if not input_path.exists() or not output_path.exists():
@@ -101,7 +101,7 @@ class SampleQC:
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
             
-            ld_fetcher = FetcherLDRegions(built=built)
+            ld_fetcher = FetcherLDRegions(build=build)
             ld_fetcher.get_ld_regions()
 
             ld_regions = ld_fetcher.ld_regions
