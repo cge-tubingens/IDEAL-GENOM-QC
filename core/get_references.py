@@ -1,36 +1,43 @@
 import requests
 import logging
-import psutil
-
-import pandas as pd
 
 from pathlib import Path
 from typing import Optional
 
-from ideal_genom.utilities.Helpers import shell_do
+from core.executor import run_plink2
+from core.utils import get_available_memory, get_optimal_threads
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 class Fetcher1000Genome:
 
-    def __init__(self, destination: Optional[Path] = None, built: str = '38'):
+    def __init__(self, destination: Optional[Path] = None, build: str = '38'):
         """
         Initialize a reference data handler.
         This class manages reference data files from 1000 Genomes Project.
         
-        Paramters:
+        Parameters:
         ----------
         destination: Path (optional) 
-            Path where reference files will be stored. If not provided, defaults to '../data/1000genomes_built_{built}'.
-        built: str (optional): 
+            Path where reference files will be stored. If not provided, defaults to '../data/1000genomes_build_{build}'.
+        build: str (optional): 
             Human genome build version. Defaults to '38'.
         
         Attributes:
         -----------
         destination: Path 
             Directory path where reference files are stored
-        built: str 
+        build: str 
+            Human genome build version being used
+        pgen_file: Path 
+            Path to PGEN format file
+        pvar_file: Path 
+            Path to PVAR format file 
+        -----------
+        destination: Path 
+            Directory path where reference files are stored
+        build: str 
             Human genome build version being used
         pgen_file: Path 
             Path to PGEN format file
@@ -46,18 +53,18 @@ class Fetcher1000Genome:
             Path to FAM format file
         """
 
-        if not isinstance(built, str):
-            raise TypeError("Built must be a string representing the genome build version (e.g., '37' or '38').")
-        if built not in ['37', '38']:
-            raise ValueError("Built must be either '37' or '38'.")
+        if not isinstance(build, str):
+            raise TypeError("Build must be a string representing the genome build version (e.g., '37' or '38').")
+        if build not in ['37', '38']:
+            raise ValueError("Build must be either '37' or '38'.")
 
         if not destination:
-            destination = Path(__file__).resolve().parent.parent.parent / "data" / f"1000genomes_built_{built}"
+            destination = Path(__file__).resolve().parent.parent / "data" / f"1000genomes_build_{build}"
 
         logger.info(f"Destination folder: {destination}")
         
         self.destination = destination
-        self.built = built
+        self.build = build
 
         self.pgen_file = None
         self.pvar_file = None
@@ -66,8 +73,6 @@ class Fetcher1000Genome:
         self.bed_file = None
         self.bim_file = None
         self.fam_file = None
-        
-        pass
 
     def get_1000genomes(self, url_pgen: Optional[str] = None, url_pvar: Optional[str] = None, url_psam: Optional[str] = None)-> Path:
         """
@@ -97,7 +102,7 @@ class Fetcher1000Genome:
 
         self.destination.mkdir(parents=True, exist_ok=True)
 
-        if self.built == '38':
+        if self.build == '38':
             if url_pgen is None:
                 url_pgen = r"https://www.dropbox.com/s/j72j6uciq5zuzii/all_hg38.pgen.zst?dl=1"
             if url_pvar is None:
@@ -105,7 +110,7 @@ class Fetcher1000Genome:
             if url_psam is None:
                 url_psam = r"https://www.dropbox.com/scl/fi/u5udzzaibgyvxzfnjcvjc/hg38_corrected.psam?rlkey=oecjnk4vmbhc8b1p202l0ih4x&dl=1"
         
-        elif self.built == '37':
+        elif self.build == '37':
             if url_pgen is None:
                 url_pgen = r"https://www.dropbox.com/s/y6ytfoybz48dc0u/all_phase3.pgen.zst?dl=1"
             if url_pvar is None:
@@ -113,38 +118,60 @@ class Fetcher1000Genome:
             if url_psam is None:
                 url_psam = r"https://www.dropbox.com/scl/fi/haqvrumpuzfutklstazwk/phase3_corrected.psam?rlkey=0yyifzj2fb863ddbmsv4jkeq6&dl=1"
 
+        # Check if final binaries already exist
         if self._check_if_binaries_exist():
-
             logger.info("1000 Genomes binaries already exist. Skipping download.")
-
             self.pvar_file = self.destination / "all_phase3.pvar.zst"
             self.psam_file = self.destination / "all_phase3.psam"
             self.pgen_decompressed = self.destination / "all_phase3.pgen"
-
             return self.pgen_decompressed
         
-        logger.info("Downloading 1000 Genomes data...")
+        # Step 1: Download files if not already downloaded
+        if not self._check_downloaded_files_exist():
+            logger.info("Downloading 1000 Genomes data...")
+            
+            try:
+                if url_pgen is not None:
+                    self.pgen_file = self._download_file(url_pgen, self.destination / "all_phase3.pgen.zst")
+                if url_pvar is not None:
+                    self.pvar_file = self._download_file(url_pvar, self.destination / "all_phase3.pvar.zst")
+                if url_psam is not None:
+                    self.psam_file = self._download_file(url_psam, self.destination / "all_phase3.psam")
+                logger.info("Download completed successfully.")
+            except Exception as e:
+                logger.error(f"Download failed: {e}")
+                raise
+        else:
+            logger.info("Downloaded files already exist. Skipping download.")
         
-        if url_pgen is not None:
-            self.pgen_file = self._download_file(url_pgen, self.destination / "all_phase3.pgen.zst")
-        if url_pvar is not None:
-            self.pvar_file = self._download_file(url_pvar, self.destination / "all_phase3.pvar.zst")
-        if url_psam is not None:
-            self.psam_file = self._download_file(url_psam, self.destination / "all_phase3.psam")
-
+        # Step 2: Decompress pgen file if not already decompressed
         pgen_file = self.destination / "all_phase3.pgen.zst"
         pgen_decompressed = self.destination / "all_phase3.pgen"
-
-        logger.info("Decompressing pgen file from 1000 Genomes data...")
-
-        # plink2 command
-        plink2_cmd = f"plink2 --zst-decompress {pgen_file} {pgen_decompressed}"
-
-        # execute plink2 command
-        shell_do(plink2_cmd)
+        
+        if not self._check_decompressed_files_exist():
+            logger.info("Decompressing pgen file from 1000 Genomes data...")
+            
+            try:
+                # Execute plink2 command to decompress
+                run_plink2([
+                    '--zst-decompress', str(pgen_file), str(pgen_decompressed)
+                ])
+                logger.info("Decompression completed successfully.")
+                
+                # Clean up compressed pgen file after successful decompression
+                pgen_file.unlink(missing_ok=True)
+                logger.info("Compressed pgen file cleaned up.")
+                
+            except Exception as e:
+                logger.error(f"Decompression failed: {e}")
+                # Keep compressed file for retry
+                raise
+        else:
+            logger.info("Decompressed pgen file already exists. Skipping decompression.")
+            # Clean up compressed file if decompressed version exists
+            pgen_file.unlink(missing_ok=True)
 
         self.pgen_file = pgen_decompressed
-
         return pgen_decompressed
 
     def _download_file(self, url: str, destination: Path) -> Path:
@@ -175,8 +202,8 @@ class Fetcher1000Genome:
                     out_file.write(chunk)
             return destination
         except requests.RequestException as e:
-            logging.error(f"Failed to download {url}: {e}")
-            return Path()
+            logger.error(f"Failed to download {url}: {e}")
+            raise
 
     def get_1000genomes_binaries(self) -> Path:
         """
@@ -195,56 +222,101 @@ class Fetcher1000Genome:
             The actual files created will be .bed, .bim, .fam and .psam with the same prefix
         """
 
+        # Check if final binaries already exist
         if self._check_if_binaries_exist():
-
             logger.info("1000 Genomes binaries already exist. Skipping conversion into bfiles...")
 
+            # Clean up any remaining intermediate files
             (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
             (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
             (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+            (self.destination / "all_phase3.bed").unlink(missing_ok=True)
+            (self.destination / "all_phase3.bim").unlink(missing_ok=True)
+            (self.destination / "all_phase3.fam").unlink(missing_ok=True)
 
-            self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed')
-            self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim')
-            self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam')
-            self.psam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam')
+            self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bed')
+            self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bim')
+            self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.fam')
+            self.psam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
 
-            return self.destination / "all_phase3"
+            return self.destination / f'1kG_phase3_GRCh{self.build}'
         
-        logger.info("Converting 1000 Genomes data into bfiles...")
-
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
-        # plink2 command
-        plink2_cmd = f"plink2 --pfile {self.destination / 'all_phase3'} vzs --chr 1-22,X,Y,MT --snps-only --max-alleles 2 --memory 10000 --make-bed --out {self.destination / 'all_phase3'}"
+        memory = get_available_memory()
+        threads = get_optimal_threads()
         
-        # execute plink2 command
-        shell_do(plink2_cmd)
+        # Step 1: Convert pfile to intermediate binary format
+        if not self._check_intermediate_binaries_exist():
+            logger.info("Converting pfile to intermediate binary format...")
+            
+            try:
+                run_plink2([
+                    '--pfile', str(self.destination / 'all_phase3'), 'vzs',
+                    '--chr', '1-22,X,Y,MT',
+                    '--snps-only',
+                    '--max-alleles', '2',
+                    '--memory', str(memory),
+                    '--threads', str(threads),
+                    '--make-bed',
+                    '--out', str(self.destination / 'all_phase3')
+                ])
+                logger.info("First conversion step completed successfully.")
+                
+                # Clean up source files after successful first conversion
+                (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
+                (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+                logger.info("Source pfile data cleaned up after first conversion.")
+                
+            except Exception as e:
+                logger.error(f"First conversion step failed: {e}")
+                logger.info("Keeping source files for retry.")
+                raise
+        else:
+            logger.info("Intermediate binary files already exist. Skipping first conversion.")
+            # Clean up source files if intermediate files exist
+            (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
+            (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+        
+        # Step 2: Create final binary files with updated variant IDs
+        logger.info("Creating final binary files with updated variant IDs...")
+        
+        try:
+            run_plink2([
+                '--bfile', str(self.destination / 'all_phase3'),
+                '--set-all-var-ids', '@:#:$r:$a',
+                '--memory', str(memory),
+                '--make-bed',
+                '--out', str(self.destination / f'1kG_phase3_GRCh{self.build}')
+            ])
+            logger.info("Final conversion step completed successfully.")
+            
+            # Verify final files were created successfully
+            if not self._check_if_binaries_exist():
+                raise RuntimeError("Final binary files were not created successfully")
+            
+            # Clean up intermediate files after successful final conversion
+            (self.destination / "all_phase3.bed").unlink(missing_ok=True)
+            (self.destination / "all_phase3.bim").unlink(missing_ok=True)
+            (self.destination / "all_phase3.fam").unlink(missing_ok=True)
+            logger.info("Intermediate binary files cleaned up after successful final conversion.")
+            
+        except Exception as e:
+            logger.error(f"Final conversion step failed: {e}")
+            logger.info("Keeping intermediate files for retry.")
+            raise
 
-        (self.destination / "all_phase3.pgen").unlink(missing_ok=True)
-        (self.destination / "all_phase3.pgen.zst").unlink(missing_ok=True)
-        (self.destination / "all_phase3.pvar.zst").unlink(missing_ok=True)
+        self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bed')
+        self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bim')
+        self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.fam')
 
-        logger.info("Downloaded 1000 Genomes data deleted.")
+        # Rename psam file to match the final naming convention
+        original_psam = self.destination / "all_phase3.psam"
+        final_psam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
+        if original_psam.exists():
+            self.psam_file = original_psam.rename(final_psam)
+        else:
+            self.psam_file = final_psam
 
-        # PLINK2 command
-        plink2_cmd = f"plink2 --bfile {self.destination / 'all_phase3'} --set-all-var-ids @:#:$r:$a --memory 1000 --make-bed --out {self.destination / f'1kG_phase3_GRCh{self.built}'}"
-
-        shell_do(plink2_cmd, log=True)
-
-        (self.destination / "all_phase3.bed").unlink(missing_ok=True)
-        (self.destination / "all_phase3.bim").unlink(missing_ok=True)
-        (self.destination / "all_phase3.fam").unlink(missing_ok=True)
-
-        self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed')
-        self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim')
-        self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam')
-
-        psam_renamed = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam')
-        self.psam_file= (self.destination / "all_phase3.psam").rename(psam_renamed)
-
-        return self.destination / f'1kG_phase3_GRCh{self.built}'
+        return self.destination / f'1kG_phase3_GRCh{self.build}'
     
     def _check_if_binaries_exist(self) -> bool:
         """
@@ -258,12 +330,50 @@ class Fetcher1000Genome:
             bool: True if all required files exist, False otherwise.
         """
 
-        check_bed = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bed').exists()
-        check_bim = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.bim').exists()
-        check_fam = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.fam').exists()
-        check_psam = (self.destination / f'1kG_phase3_GRCh{self.built}').with_suffix('.psam').exists()
+        check_bed = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bed').exists()
+        check_bim = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bim').exists()
+        check_fam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.fam').exists()
+        check_psam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam').exists()
 
         return check_bed and check_bim and check_fam and check_psam
+    
+    def _check_downloaded_files_exist(self) -> bool:
+        """
+        Check if the downloaded raw files exist.
+        
+        Returns:
+        --------
+            bool: True if all downloaded files exist, False otherwise.
+        """
+        pgen_compressed = (self.destination / "all_phase3.pgen.zst").exists()
+        pvar_compressed = (self.destination / "all_phase3.pvar.zst").exists()
+        psam_file = (self.destination / "all_phase3.psam").exists()
+        
+        return pgen_compressed and pvar_compressed and psam_file
+    
+    def _check_decompressed_files_exist(self) -> bool:
+        """
+        Check if the decompressed pgen file exists.
+        
+        Returns:
+        --------
+            bool: True if decompressed pgen exists, False otherwise.
+        """
+        return (self.destination / "all_phase3.pgen").exists()
+    
+    def _check_intermediate_binaries_exist(self) -> bool:
+        """
+        Check if intermediate binary files exist (after first conversion).
+        
+        Returns:
+        --------
+            bool: True if intermediate binaries exist, False otherwise.
+        """
+        check_bed = (self.destination / "all_phase3.bed").exists()
+        check_bim = (self.destination / "all_phase3.bim").exists()
+        check_fam = (self.destination / "all_phase3.fam").exists()
+        
+        return check_bed and check_bim and check_fam
     
 class FetcherLDRegions:
 
@@ -292,7 +402,7 @@ class FetcherLDRegions:
         """
 
         if not destination:
-            destination = Path(__file__).resolve().parent.parent.parent / "data" / "ld_regions_files"
+            destination = Path(__file__).resolve().parent.parent / "data" / "ld_regions_files"
 
         self.destination = destination
         self.build = build
