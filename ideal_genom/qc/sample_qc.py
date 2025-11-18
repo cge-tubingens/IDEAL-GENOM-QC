@@ -17,7 +17,7 @@ import seaborn as sns
 
 from core.executor import run_plink2, run_plink
 from core.utils import get_optimal_threads, get_available_memory, count_file_lines
-from ideal_genom.utilities.get_references import FetcherLDRegions
+from core.get_references import FetcherLDRegions
 
 from pathlib import Path
 from typing import Optional, Union
