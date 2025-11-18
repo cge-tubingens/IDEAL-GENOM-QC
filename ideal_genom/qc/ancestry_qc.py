@@ -636,17 +636,41 @@ class ReferenceGenomicMerger:
         -----
         The input BIM file should be tab-delimited with standard PLINK BIM format.
         Only columns containing SNP ID (column 2) and alleles (columns 5 and 6) are used.
+        Memory-efficient implementation that processes the file in chunks to handle large datasets.
         """
 
-        df = pd.read_csv(
-            target_bim, sep="\t", header=None, usecols=[1, 4, 5], names=["SNP", "A1", "A2"]
-        )
-
         output_file = self.output_path / f"{output_filename}.ac_get_snps"
-
-        filtered_snps = df[df[['A1', 'A2']].apply(lambda x: ''.join(sorted(x)) in {"AT", "TA", "GC", "CG"}, axis=1)]
         
-        filtered_snps[["SNP"]].to_csv(output_file, index=False, header=False)
+        # Define the problematic allele combinations
+        ambiguous_alleles = {"AT", "TA", "GC", "CG"}
+        
+        # Process file in chunks to reduce memory usage
+        chunk_size = 50000  # Process 50K rows at a time
+        
+        with open(output_file, 'w') as out_f:
+            # Use pandas chunking to process large files efficiently
+            for chunk in pd.read_csv(
+                target_bim, 
+                sep="\t", 
+                header=None, 
+                usecols=[1, 4, 5], 
+                names=["SNP", "A1", "A2"],
+                chunksize=chunk_size,
+                dtype=str  # Ensure alleles are treated as strings
+            ):
+                # Vectorized operation to check for ambiguous alleles
+                # Create sorted allele pairs more efficiently
+                allele_pairs = chunk['A1'] + chunk['A2']
+                # Sort each pair: convert to list, sort, join back
+                sorted_pairs = allele_pairs.apply(lambda x: ''.join(sorted(x)))
+                
+                # Filter for ambiguous SNPs
+                ambiguous_mask = sorted_pairs.isin(ambiguous_alleles)
+                ambiguous_snps = chunk.loc[ambiguous_mask, 'SNP']
+                
+                # Write to file immediately to free memory
+                if len(ambiguous_snps) > 0:
+                    ambiguous_snps.to_csv(out_f, index=False, header=False)
 
         return output_file
     
