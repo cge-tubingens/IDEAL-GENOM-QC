@@ -1488,7 +1488,7 @@ class GenomicOutlierAnalyzer:
 
 class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, built: str = '38', rename_snps: bool = False) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, build: str = '38', rename_snps: bool = False) -> None:
         """
         Initialize AncestryQC class.
         This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
@@ -1511,7 +1511,7 @@ class AncestryQC:
             If not provided, will download 1000 Genomes reference files. Defaults to empty dict.
         recompute_merge: bool (optional): 
             Whether to recompute merge with reference even if merged files exist. Defaults to True.
-        built: str (optional) 
+        build: str (optional) 
             Genome build version, either '37' or '38'. Defaults to '38'.
         rename_snps: bool (optional): 
             Whether to rename SNPs to avoid duplicates during merge. Defaults to False.
@@ -1519,7 +1519,7 @@ class AncestryQC:
         Raises:
         -------
             TypeError: If input arguments are not of expected types
-            ValueError: If built is not '37' or '38'
+            ValueError: If build is not '37' or '38'
             FileNotFoundError: If input_path or output_path do not exist
         
         Note:
@@ -1546,10 +1546,10 @@ class AncestryQC:
             raise TypeError("output_name should be a string")
         if not isinstance(recompute_merge, bool):
             raise TypeError("recompute_merge should be a boolean")
-        if not isinstance(built, str):
-            raise TypeError("built should be a string")
-        if built not in ['37', '38']:
-            raise ValueError("built should be either '37' or '38'")
+        if not isinstance(build, str):
+            raise TypeError("build should be a string")
+        if build not in ['37', '38']:
+            raise ValueError("build should be either '37' or '38'")
         if not isinstance(rename_snps, bool):
             raise TypeError("rename_snps should be a boolean")
         
@@ -1561,7 +1561,7 @@ class AncestryQC:
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
             
-            ld_fetcher = FetcherLDRegions(built=built)
+            ld_fetcher = FetcherLDRegions(build=build)
             ld_fetcher.get_ld_regions()
 
             ld_regions = ld_fetcher.ld_regions
@@ -1577,14 +1577,14 @@ class AncestryQC:
         self.reference_files = reference_files
         self.high_ld_regions = high_ld_file
         self.recompute_merge = recompute_merge
-        self.built = built
+        self.build = build
         self.rename_snps = rename_snps
 
         if not reference_files:
 
-            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for built {self.built}")
+            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for build {self.build}")
 
-            fetcher = Fetcher1000Genome(built=self.built)
+            fetcher = Fetcher1000Genome(build=self.build)
             fetcher.get_1000genomes()
             fetcher.get_1000genomes_binaries()
 
@@ -1664,7 +1664,7 @@ class AncestryQC:
             output_name= self.output_name,
             high_ld_regions =self.high_ld_regions, 
             reference_files = self.reference_files,
-            built= self.built
+            build= self.build
         )
 
         rgm.execute_merging_pipeline(ind_pair=ind_pair)
