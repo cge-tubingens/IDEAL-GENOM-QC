@@ -1081,7 +1081,25 @@ class DimensionalityReductionPipeline:
         logger.info(f"Pipeline initialized for {input_name}")
         logger.info(f"Results will be saved to {self.results_dir}")
     
-    def run_pca_preparation(self,
+    def _is_parameter_grid(self, params: Optional[dict]) -> bool:
+        """
+        Check if any parameter values are lists, indicating a parameter grid search.
+        
+        Parameters
+        ----------
+        params : dict, optional
+            Parameter dictionary to check
+            
+        Returns
+        -------
+        bool
+            True if any parameter values are lists (grid search), False otherwise
+        """
+        if params is None:
+            return False
+        return any(isinstance(v, list) for v in params.values())
+    
+    def execute_pca_preparation(self,
                            maf: float = 0.001,
                            geno: float = 0.1,
                            mind: float = 0.2,
