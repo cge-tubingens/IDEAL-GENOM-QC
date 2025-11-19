@@ -1422,9 +1422,17 @@ class DimensionalityReductionPipeline:
                          fam_file: Optional[Path] = None,
                          plot_format: str = 'pdf',
                          dpi: int = 500,
-                         include_pca: bool = True) -> dict:
+                         include_pca: bool = True,
+                         # Grid-specific parameters
+                         save_all_coordinates: bool = True,
+                         generate_all_plots: bool = True,
+                         grid_summary: bool = True) -> dict:
         """
-        Run the complete dimensionality reduction pipeline.
+        Run the complete dimensionality reduction pipeline with automatic parameter grid detection.
+        
+        This method automatically detects whether parameters contain single values or lists.
+        If lists are detected, it runs a parameter grid search exploring all combinations.
+        Otherwise, it runs a single analysis with the provided parameters.
         
         Parameters
         ----------
@@ -1436,11 +1444,15 @@ class DimensionalityReductionPipeline:
         run_umap : bool, default=True
             Whether to run UMAP reduction
         umap_params : dict, optional
-            Parameters for UMAP (n_neighbors, min_dist, metric, random_state, etc.)
+            Parameters for UMAP. Can contain single values or lists for grid search.
+            Example single: {'n_neighbors': 15, 'min_dist': 0.1}
+            Example grid: {'n_neighbors': [10, 15, 30], 'min_dist': [0.1, 0.5]}
         run_tsne : bool, default=True
             Whether to run t-SNE reduction
         tsne_params : dict, optional
-            Parameters for t-SNE (perplexity, learning_rate, n_iter, etc.)
+            Parameters for t-SNE. Can contain single values or lists for grid search.
+            Example single: {'perplexity': 30, 'learning_rate': 200}
+            Example grid: {'perplexity': [20, 30, 50], 'learning_rate': [100, 200]}
         color_hue_file : Path, optional
             Metadata file for plot coloring
         case_control_markers : bool, default=False
@@ -1454,25 +1466,39 @@ class DimensionalityReductionPipeline:
             Resolution for plots
         include_pca : bool, default=True
             Whether to generate PCA plots
+        save_all_coordinates : bool, default=True
+            For grid search: whether to save coordinate files for all parameter combinations
+        generate_all_plots : bool, default=True
+            For grid search: whether to generate plot files for all parameter combinations
+        grid_summary : bool, default=True
+            For grid search: whether to generate summary table of all parameter combinations
         
         Returns
         -------
         dict
-            Results summary with file paths and metadata
+            Results summary with file paths and metadata. For grid searches, includes
+            information about all parameter combinations explored.
         
         Examples
         --------
-        >>> pipeline = DimensionalityReductionPipeline(
-        ...     input_path=Path('data'),
-        ...     input_name='mydata',
-        ...     output_path=Path('results')
-        ... )
+        Single analysis:
+        >>> pipeline = DimensionalityReductionPipeline(...)
         >>> results = pipeline.run_full_pipeline(
-        ...     pca_params={'pca': 20, 'maf': 0.01},
-        ...     force_pca_recompute=False,  # Skip PCA if files exist
-        ...     umap_params={'n_neighbors': 15, 'random_state': 42},
-        ...     tsne_params={'perplexity': 30, 'random_state': 42},
-        ...     color_hue_file=Path('metadata.tsv')
+        ...     umap_params={'n_neighbors': 15, 'min_dist': 0.1},
+        ...     tsne_params={'perplexity': 30}
+        ... )
+        
+        Parameter grid search (automatically detected):
+        >>> results = pipeline.run_full_pipeline(
+        ...     umap_params={
+        ...         'n_neighbors': [10, 15, 30], 
+        ...         'min_dist': [0.1, 0.5],
+        ...         'random_state': [42]
+        ...     },
+        ...     tsne_params={
+        ...         'perplexity': [20, 30, 50],
+        ...         'random_state': [42]
+        ...     }
         ... )
         """
         logger.info("=" * 80)
@@ -1483,6 +1509,60 @@ class DimensionalityReductionPipeline:
         pca_params = pca_params or {}
         umap_params = umap_params or {}
         tsne_params = tsne_params or {}
+        
+        # Check if this is a parameter grid search
+        is_umap_grid = self._is_parameter_grid(umap_params) if run_umap else False
+        is_tsne_grid = self._is_parameter_grid(tsne_params) if run_tsne else False
+        
+        if is_umap_grid or is_tsne_grid:
+            logger.info("Parameter grid search detected - running grid exploration")
+            return self._run_parameter_grid_pipeline(
+                pca_params=pca_params,
+                force_pca_recompute=force_pca_recompute,
+                run_umap=run_umap,
+                umap_params=umap_params if is_umap_grid else None,
+                run_tsne=run_tsne, 
+                tsne_params=tsne_params if is_tsne_grid else None,
+                color_hue_file=color_hue_file,
+                case_control_markers=case_control_markers,
+                fam_file=fam_file,
+                plot_format=plot_format,
+                dpi=dpi,
+                save_all_coordinates=save_all_coordinates,
+                generate_all_plots=generate_all_plots,
+                grid_summary=grid_summary
+            )
+        else:
+            logger.info("Single parameter set detected - running standard pipeline")
+            return self._run_single_parameter_pipeline(
+                pca_params=pca_params,
+                force_pca_recompute=force_pca_recompute,
+                run_umap=run_umap,
+                umap_params=umap_params,
+                run_tsne=run_tsne,
+                tsne_params=tsne_params,
+                color_hue_file=color_hue_file,
+                case_control_markers=case_control_markers,
+                fam_file=fam_file,
+                plot_format=plot_format,
+                dpi=dpi,
+                include_pca=include_pca
+            )
+    
+    def _run_single_parameter_pipeline(self,
+                                     pca_params: dict,
+                                     force_pca_recompute: bool,
+                                     run_umap: bool,
+                                     umap_params: dict,
+                                     run_tsne: bool,
+                                     tsne_params: dict,
+                                     color_hue_file: Optional[Path],
+                                     case_control_markers: bool,
+                                     fam_file: Optional[Path],
+                                     plot_format: str,
+                                     dpi: int,
+                                     include_pca: bool) -> dict:
+        """Run pipeline with single parameter sets (original behavior)."""
         
         results = {
             'input': self.input_name,
