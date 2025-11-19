@@ -22,6 +22,7 @@ dependencies = [
     "jupyter (>=1.1.1, <2.0.0)",
     "llvmlite (>=0.43.0, <1.0.0)",
     "ipywidgets (>=8.1.5, <9.0.0)",
+    "PyYAML (>=6.0, <7.0.0)",
 ]
 
 [project.urls]
@@ -41,4 +42,4 @@ requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
-ideal_genom_qc = "ideal_genom.__main__:main"
+ideal_genom = "ideal_genom.__main__:main"
