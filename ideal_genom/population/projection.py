@@ -1562,3 +1562,320 @@ class DimensionalityReductionPipeline:
         logger.info(f"Results saved to: {self.results_dir}")
         
         return results
+    
+    def _run_parameter_grid_pipeline(self,
+                                   pca_params: dict,
+                                   force_pca_recompute: bool,
+                                   run_umap: bool,
+                                   umap_params: Optional[dict],
+                                   run_tsne: bool,
+                                   tsne_params: Optional[dict],
+                                   color_hue_file: Optional[Path],
+                                   case_control_markers: bool,
+                                   fam_file: Optional[Path],
+                                   plot_format: str,
+                                   dpi: int,
+                                   save_all_coordinates: bool,
+                                   generate_all_plots: bool,
+                                   grid_summary: bool) -> dict:
+        """Run pipeline with parameter grid search."""
+        
+        # First ensure PCA is completed
+        expected_eigenvec = self.results_dir / f"{self.input_name}-pca.eigenvec"
+        expected_eigenval = self.results_dir / f"{self.input_name}-pca.eigenval"
+        
+        if not force_pca_recompute and expected_eigenvec.exists() and expected_eigenval.exists():
+            logger.info("PCA files already exist, skipping PCA preparation")
+            logger.info(f"Using existing eigenvector file: {expected_eigenvec}")
+            logger.info(f"Using existing eigenvalue file: {expected_eigenval}")
+            self.eigenvector_file = expected_eigenvec
+            self.eigenvalue_file = expected_eigenval
+        else:
+            if force_pca_recompute:
+                logger.info("Force recompute enabled, running PCA preparation")
+            else:
+                logger.info("PCA files not found, running PCA preparation")
+            # Add case_control_markers to pca_params if not already present
+            pca_params_with_cc = pca_params.copy()
+            if 'case_control_markers' not in pca_params_with_cc:
+                pca_params_with_cc['case_control_markers'] = case_control_markers
+            self.execute_pca_preparation(**pca_params_with_cc)
+        
+        # Now run the parameter grid
+        return self.execute_parameter_grid(
+            umap_grid=umap_params if (run_umap and umap_params) else None,
+            tsne_grid=tsne_params if (run_tsne and tsne_params) else None,
+            save_coordinates=save_all_coordinates,
+            generate_plots=generate_all_plots,
+            color_hue_file=color_hue_file,
+            case_control_markers=case_control_markers,
+            fam_file=fam_file,
+            plot_format=plot_format
+        )
+    
+    def execute_parameter_grid(self,
+                          umap_grid: Optional[dict] = None,
+                          tsne_grid: Optional[dict] = None,
+                          plot_params: Optional[dict] = None,
+                          save_coordinates: bool = True,
+                          generate_plots: bool = True,
+                          color_hue_file: Optional[Path] = None,
+                          case_control_markers: bool = False,
+                          fam_file: Optional[Path] = None,
+                          plot_format: str = 'pdf') -> dict:
+        """
+        Run systematic parameter grid exploration for UMAP and/or t-SNE.
+        
+        This method explores all combinations of specified parameters, saving
+        coordinates and generating plots for each combination. Results are
+        organized with clear naming conventions for easy comparison.
+        
+        Parameters
+        ----------
+        umap_grid : dict, optional
+            Dictionary with parameter names as keys and lists of values as values.
+            Example: {'n_neighbors': [15, 30], 'min_dist': [0.1, 0.5]}
+        tsne_grid : dict, optional
+            Dictionary with parameter names as keys and lists of values as values.
+            Example: {'perplexity': [20, 50], 'learning_rate': [100, 200]}
+        plot_params : dict, optional
+            Additional parameters for plot generation (figsize, dpi, etc.)
+        save_coordinates : bool, default=True
+            Whether to save coordinate files for each combination
+        generate_plots : bool, default=True
+            Whether to generate plot files for each combination
+        color_hue_file : Path, optional
+            Metadata file for plot coloring
+        case_control_markers : bool, default=False
+            Whether to use case-control markers in plots
+        fam_file : Path, optional
+            Path to .fam file for case-control markers
+        plot_format : str, default='pdf'
+            Output format for plots
+        
+        Returns
+        -------
+        dict
+            Summary of all parameter combinations and results
+            
+        Raises
+        ------
+        RuntimeError
+            If PCA preparation hasn't been run yet
+        ValueError
+            If neither umap_grid nor tsne_grid is provided
+        
+        Examples
+        --------
+        >>> pipeline = DimensionalityReductionPipeline(...)
+        >>> pipeline.run_pca_preparation()
+        >>> results = pipeline.run_parameter_grid(
+        ...     umap_grid={
+        ...         'n_neighbors': [15, 30], 
+        ...         'min_dist': [0.1, 0.5],
+        ...         'random_state': [42]
+        ...     },
+        ...     tsne_grid={
+        ...         'perplexity': [20, 50],
+        ...         'random_state': [42]
+        ...     }
+        ... )
+        """
+        import itertools
+        
+        if self.eigenvector_file is None:
+            raise RuntimeError("Must run PCA preparation before parameter grid. Call run_pca_preparation() first.")
+        
+        if umap_grid is None and tsne_grid is None:
+            raise ValueError("Must provide at least one of umap_grid or tsne_grid")
+        
+        logger.info("=" * 80)
+        logger.info("STARTING PARAMETER GRID EXPLORATION")
+        logger.info("=" * 80)
+        
+        # Set default plot parameters
+        if plot_params is None:
+            plot_params = {'figsize': (6, 6), 'dpi': 500}
+        
+        # Auto-detect fam file if needed
+        if fam_file is None and case_control_markers:
+            potential_fam_file = self.input_path / f"{self.input_name}.fam"
+            if potential_fam_file.exists():
+                fam_file = potential_fam_file
+                logger.info(f"Auto-detected fam file: {fam_file}")
+        
+        results = {
+            'umap_combinations': [],
+            'tsne_combinations': [],
+            'total_combinations': 0,
+            'files_created': []
+        }
+        
+        # UMAP parameter grid
+        if umap_grid is not None:
+            logger.info("Running UMAP parameter grid...")
+            
+            # Generate all UMAP parameter combinations
+            param_names = list(umap_grid.keys())
+            param_values = list(umap_grid.values())
+            umap_combinations = list(itertools.product(*param_values))
+            
+            logger.info(f"UMAP: {len(umap_combinations)} parameter combinations to explore")
+            
+            # Create UMAP grid results directory
+            umap_grid_dir = self.results_dir / 'umap_grid_results'
+            umap_grid_dir.mkdir(parents=True, exist_ok=True)
+            
+            for i, combination in enumerate(umap_combinations):
+                # Create parameter dictionary for this combination
+                params = dict(zip(param_names, combination))
+                
+                # Create readable parameter string for naming
+                param_str = "_".join([f"{k}{v}" for k, v in params.items() if k != 'random_state'])
+                config_name = f"umap_{param_str}"
+                
+                logger.info(f"UMAP {i+1}/{len(umap_combinations)}: {config_name}")
+                
+                # Run UMAP with these parameters
+                umap_result = self.execute_umap(**params)
+                
+                # Save coordinates if requested
+                if save_coordinates:
+                    coords_file = umap_grid_dir / f'{config_name}_coordinates.tsv'
+                    umap_result.to_csv(coords_file, sep='\t', index=False)
+                    results['files_created'].append(str(coords_file))
+                
+                # Generate plot if requested
+                if generate_plots:
+                    # Initialize plotter for this combination
+                    plotter = Plot2D(output_dir=umap_grid_dir)
+                    plotter.prepare_metadata(
+                        color_hue_file=color_hue_file,
+                        case_control_markers=case_control_markers,
+                        fam_file=fam_file
+                    )
+                    
+                    #plot_title = f"UMAP: {', '.join([f'{k}={v}' for k, v in params.items() if k != 'random_state'])}"
+                    plot_name = f'{config_name}_plot.{plot_format}'
+                    
+                    plot_path = plotter.generate_plot(
+                        data=umap_result,
+                        x_col='umap_1',
+                        y_col='umap_2',
+                        plot_name=plot_name,
+                        #title=plot_title,
+                        xlabel='UMAP 1',
+                        ylabel='UMAP 2',
+                        format=plot_format,
+                        **plot_params
+                    )
+                    results['files_created'].append(str(plot_path))
+                
+                # Store combination info
+                combination_info = params.copy()
+                combination_info.update({
+                    'config_name': config_name,
+                    'n_samples': len(umap_result)
+                })
+                results['umap_combinations'].append(combination_info)
+        
+        # t-SNE parameter grid
+        if tsne_grid is not None:
+            logger.info("Running t-SNE parameter grid...")
+            
+            # Generate all t-SNE parameter combinations
+            param_names = list(tsne_grid.keys())
+            param_values = list(tsne_grid.values())
+            tsne_combinations = list(itertools.product(*param_values))
+            
+            logger.info(f"t-SNE: {len(tsne_combinations)} parameter combinations to explore")
+            
+            # Create t-SNE grid results directory
+            tsne_grid_dir = self.results_dir / 'tsne_grid_results'
+            tsne_grid_dir.mkdir(parents=True, exist_ok=True)
+            
+            for i, combination in enumerate(tsne_combinations):
+                # Create parameter dictionary for this combination
+                params = dict(zip(param_names, combination))
+                
+                # Create readable parameter string for naming
+                param_str = "_".join([f"{k}{v}" for k, v in params.items() if k != 'random_state'])
+                config_name = f"tsne_{param_str}"
+                
+                logger.info(f"t-SNE {i+1}/{len(tsne_combinations)}: {config_name}")
+                
+                # Run t-SNE with these parameters
+                tsne_result = self.execute_tsne(**params)
+                
+                # Save coordinates if requested
+                if save_coordinates:
+                    coords_file = tsne_grid_dir / f'{config_name}_coordinates.tsv'
+                    tsne_result.to_csv(coords_file, sep='\t', index=False)
+                    results['files_created'].append(str(coords_file))
+                
+                # Generate plot if requested
+                if generate_plots:
+                    # Initialize plotter for this combination
+                    plotter = Plot2D(output_dir=tsne_grid_dir)
+                    plotter.prepare_metadata(
+                        color_hue_file=color_hue_file,
+                        case_control_markers=case_control_markers,
+                        fam_file=fam_file
+                    )
+                    
+                    plot_title = f"t-SNE: {', '.join([f'{k}={v}' for k, v in params.items() if k != 'random_state'])}"
+                    plot_name = f'{config_name}_plot.{plot_format}'
+                    
+                    plot_path = plotter.generate_plot(
+                        data=tsne_result,
+                        x_col='tsne_1',
+                        y_col='tsne_2',
+                        plot_name=plot_name,
+                        title=plot_title,
+                        xlabel='t-SNE 1',
+                        ylabel='t-SNE 2',
+                        format=plot_format,
+                        **plot_params
+                    )
+                    results['files_created'].append(str(plot_path))
+                
+                # Store combination info
+                combination_info = params.copy()
+                combination_info.update({
+                    'config_name': config_name,
+                    'n_samples': len(tsne_result)
+                })
+                results['tsne_combinations'].append(combination_info)
+        
+        # Calculate total combinations
+        results['total_combinations'] = len(results['umap_combinations']) + len(results['tsne_combinations'])
+        
+        # Save summary of all parameter combinations
+        summary_data = []
+        
+        for combo in results['umap_combinations']:
+            combo_summary = {'method': 'UMAP'}
+            combo_summary.update(combo)
+            summary_data.append(combo_summary)
+        
+        for combo in results['tsne_combinations']:
+            combo_summary = {'method': 't-SNE'}
+            combo_summary.update(combo)
+            summary_data.append(combo_summary)
+        
+        if summary_data:
+            import pandas as pd
+            summary_df = pd.DataFrame(summary_data)
+            summary_file = self.results_dir / 'parameter_grid_summary.tsv'
+            summary_df.to_csv(summary_file, sep='\t', index=False)
+            results['files_created'].append(str(summary_file))
+            logger.info(f"Parameter grid summary saved to: {summary_file}")
+        
+        logger.info("=" * 80)
+        logger.info("PARAMETER GRID EXPLORATION COMPLETED")
+        logger.info("=" * 80)
+        logger.info(f"Total combinations explored: {results['total_combinations']}")
+        logger.info(f"Files created: {len(results['files_created'])}")
+        logger.info(f"Results saved to: {self.results_dir}")
+        
+        return results
