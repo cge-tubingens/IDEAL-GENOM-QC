@@ -1168,7 +1168,7 @@ class DimensionalityReductionPipeline:
         
         return self.eigenvector_file
     
-    def run_umap(self,
+    def execute_umap(self,
                  n_neighbors: int = 15,
                  min_dist: float = 0.1,
                  metric: str = 'euclidean',
@@ -1233,7 +1233,7 @@ class DimensionalityReductionPipeline:
         
         return self.umap_results
     
-    def run_tsne(self,
+    def execute_tsne(self,
                  n_components: int = 2,
                  perplexity: float = 30.0,
                  learning_rate: float = 200.0,
@@ -1406,7 +1406,7 @@ class DimensionalityReductionPipeline:
         logger.info("All plots generated successfully")
         return plot_paths
     
-    def run_full_pipeline(self,
+    def execute_dimensionality_reduction_pipeline(self,
                          # PCA parameters
                          pca_params: Optional[dict] = None,
                          force_pca_recompute: bool = False,
@@ -1511,7 +1511,7 @@ class DimensionalityReductionPipeline:
             pca_params_with_cc = pca_params.copy()
             if 'case_control_markers' not in pca_params_with_cc:
                 pca_params_with_cc['case_control_markers'] = case_control_markers
-            eigenvec_path = self.run_pca_preparation(**pca_params_with_cc)
+            eigenvec_path = self.execute_pca_preparation(**pca_params_with_cc)
             
         results['steps_completed'].append('pca_preparation')
         results['files']['eigenvector'] = str(eigenvec_path)
@@ -1519,15 +1519,15 @@ class DimensionalityReductionPipeline:
         
         # Step 2: UMAP (optional)
         if run_umap:
-            self.run_umap(**umap_params)
+            self.execute_umap(**umap_params)
             results['steps_completed'].append('umap')
             results['files']['umap_coordinates'] = str(
                 self.results_dir / 'umap_results' / 'umap_coordinates.tsv'
             )
-        
+
         # Step 3: t-SNE (optional)
         if run_tsne:
-            self.run_tsne(**tsne_params)
+            self.execute_tsne(**tsne_params)
             results['steps_completed'].append('tsne')
             results['files']['tsne_coordinates'] = str(
                 self.results_dir / 'tsne_results' / 'tsne_coordinates.tsv'
