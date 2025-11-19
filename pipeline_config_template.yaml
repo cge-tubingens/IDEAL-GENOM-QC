@@ -1,0 +1,139 @@
+# IDEAL-GENOM-QC Pipeline Configuration Template
+# This template demonstrates the flexible pipeline configuration system
+# Enable/disable steps as needed for your specific workflow
+
+pipeline:
+  name: "ideal_genom_qc"
+  base_output_dir: "/path/to/output/directory"
+  
+  # Pipeline steps - enable/disable by including/excluding from this list
+  # Steps will be executed in the order specified here
+  steps:
+    
+    # Step 1: Sample Quality Control
+    # Performs individual-level QC including missing data, sex check, heterozygosity, relatedness
+    - name: "sample_qc"
+      enabled: true
+      module: "ideal_genom.qc.sample_qc"
+      class: "SampleQC"
+      init_params:
+        input_path: "/path/to/input/data"
+        input_name: "input_dataset"
+        output_path: "${base_output_dir}/01_sample_qc"
+        output_name: "sample_qc_filtered"
+        high_ld_file: "/path/to/high_ld_regions.txt"
+        build: "38"
+      execute_params:
+        # Sample QC parameters
+        rename_snp: true
+        hh_to_missing: true
+        use_kinship: true
+        ind_pair: [50, 5, 0.2]  # LD pruning: [window_size, step_size, r2_threshold]
+        mind: 0.2               # Missing data threshold per individual
+        sex_check: [0.2, 0.8]   # F coefficient thresholds [female_max, male_min]
+        maf: 0.01               # Minor allele frequency
+        het_deviation: 3        # Heterozygosity standard deviations
+        kinship: 0.354          # Kinship coefficient threshold
+        ibd_threshold: 0.185    # IBD threshold for duplicates
+
+    # Step 2: Ancestry Quality Control
+    # Merges with reference populations and performs ancestry inference
+    - name: "ancestry_qc"
+      enabled: true
+      module: "ideal_genom.qc.ancestry_qc"
+      class: "ReferenceGenomicMerger"  # Note: May need to be updated based on actual class
+      init_params:
+        input_path: "${steps.sample_qc.output_path}"
+        input_name: "${steps.sample_qc.output_name}"
+        output_path: "${base_output_dir}/02_ancestry_qc"
+        output_name: "ancestry_qc_filtered"
+        high_ld_regions: "/path/to/high_ld_regions.txt"
+        reference_files:
+          bed: "/path/to/1000genomes/reference.bed"
+          bim: "/path/to/1000genomes/reference.bim"
+          fam: "/path/to/1000genomes/reference.fam"
+        build: "38"
+      execute_params:
+        # Ancestry QC parameters
+        ind_pair: [50, 5, 0.2]     # LD pruning for PCA
+        pca: 10                    # Number of principal components
+        maf: 0.01                  # MAF threshold for PCA variants
+        ref_threshold: 4           # SD threshold for reference outliers
+        stu_threshold: 4           # SD threshold for study outliers
+        reference_pop: "EUR"       # Reference population (EUR, AFR, AMR, EAS, SAS)
+        num_pcs: 10               # Number of PCs for ancestry assignment
+
+    # Step 3: Variant Quality Control
+    # Performs variant-level QC including HWE, missing data, MAF filtering
+    - name: "variant_qc"
+      enabled: true
+      module: "ideal_genom.qc.variant_qc"
+      class: "VariantQC"
+      init_params:
+        input_path: "${steps.ancestry_qc.output_path}"
+        input_name: "${steps.ancestry_qc.output_name}"
+        output_path: "${base_output_dir}/03_variant_qc"
+        output_name: "variant_qc_filtered"
+      execute_params:
+        # Variant QC parameters
+        geno: 0.02                # Missing data threshold per variant
+        maf: 0.001                # Minor allele frequency threshold
+        hwe: 1e-6                 # Hardy-Weinberg equilibrium p-value
+        chr_y: 24                 # Y chromosome identifier
+
+    # Step 4: Population Analysis / Dimensionality Reduction
+    # Performs PCA, UMAP, and other population structure analyses
+    - name: "population_analysis"
+      enabled: true
+      module: "ideal_genom.population.projection"
+      class: "PCAReduction"
+      init_params:
+        input_path: "${steps.variant_qc.output_path}"
+        input_name: "${steps.variant_qc.output_name}"
+        output_path: "${base_output_dir}/04_population_analysis"
+        output_name: "population_analysis"
+        build: "38"
+        high_ld_regions: "/path/to/high_ld_regions.txt"
+        generate_plot: true
+      execute_params:
+        # Population analysis parameters
+        pca_components: 10        # Number of PCA components
+        umap_n_neighbors: 15      # UMAP n_neighbors parameter
+        umap_min_dist: 0.1       # UMAP min_dist parameter
+        umap_n_components: 2     # UMAP output dimensions
+        tsne_perplexity: 30      # t-SNE perplexity parameter
+        plot_format: "png"        # Plot output format
+        dpi: 600                 # Plot resolution
+
+# Global settings
+settings:
+  # Logging configuration
+  logging:
+    level: "INFO"              # DEBUG, INFO, WARNING, ERROR
+    file_logging: true         # Enable file logging
+    console_logging: true      # Enable console logging
+  
+  # Resource management
+  resources:
+    max_memory: null           # Maximum memory usage (null for auto-detect)
+    max_threads: null          # Maximum threads (null for auto-detect)
+  
+  # File management
+  files:
+    keep_intermediate: true    # Preserve intermediate files
+    compress_outputs: false    # Compress output files
+    overwrite_existing: false  # Overwrite existing output files
+
+# Alternative workflow examples:
+# 
+# For Sample QC + Variant QC only (skip ancestry):
+# Simply remove or set enabled: false for the ancestry_qc step
+# and update variant_qc input_path to: "${steps.sample_qc.output_path}"
+#
+# For Population Analysis only:
+# Remove or disable all other steps and provide direct input paths:
+# input_path: "/path/to/preprocessed/data"
+# input_name: "preprocessed_dataset"
+#
+# For resuming from a specific step:
+# Set enabled: false for completed steps and update input paths accordingly
