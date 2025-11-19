@@ -7,7 +7,7 @@ import pandas as pd
 from pathlib import Path
 
 from ideal_genom.utilities.Helpers import shell_do
-from ideal_genom.utilities.get_references import FetcherLDRegions, Fetcher1000Genome
+from core.get_references import FetcherLDRegions, Fetcher1000Genome
 from ideal_genom.qc.ancestry_qc import ReferenceGenomicMerger
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class FstSummary:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_merge: bool = True, reference_files: dict = dict()) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), build: str = '38', recompute_merge: bool = True, reference_files: dict = dict()) -> None:
         """
         Initialize FstSummary object for Fst analysis.
         
@@ -46,10 +46,10 @@ class FstSummary:
             raise FileNotFoundError("input_path does not exist")
         if not output_path.exists():
             raise FileNotFoundError("output_path does not exist")
-        if not isinstance(built, str):
-            raise TypeError("built should be a string")
-        if built not in ['37', '38']:
-            raise ValueError("built should be either '37' or '38'") 
+        if not isinstance(build, str):
+            raise TypeError("build should be a string")
+        if build not in ['37', '38']:
+            raise ValueError("build should be either '37' or '38'") 
         if not high_ld_file.is_file():
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
@@ -68,13 +68,13 @@ class FstSummary:
         self.output_path= output_path
         self.recompute_merge = recompute_merge
         self.high_ld_regions = high_ld_file
-        self.built = built
+        self.build = build
 
         if not reference_files:
 
-            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for built {self.built}")
+            logger.info(f"No reference files provided. Fetching 1000 Genomes reference data for build {self.build}")
 
-            fetcher = Fetcher1000Genome(built=self.built)
+            fetcher = Fetcher1000Genome(build=self.build)
             fetcher.get_1000genomes()
             fetcher.get_1000genomes_binaries()
 
