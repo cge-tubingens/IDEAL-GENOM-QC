@@ -2,29 +2,28 @@
 Module to draw plots based on UMAP dimension reduction
 """
 
-import os
 import umap
 import warnings
 import logging
-import psutil
-from typing import Optional
+from typing import Optional, Literal
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.manifold import TSNE
 
 from pathlib import Path
 
-from ideal_genom.utilities.Helpers import shell_do
-from ideal_genom.utilities.get_references import FetcherLDRegions
-from sklearn.model_selection import ParameterGrid
+from core.executor import run_plink2
+from core.utils import get_optimal_threads, get_available_memory
+from core.get_references import FetcherLDRegions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class Preparator:
+class PCAReduction:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, build: str = '38', high_ld_regions: Optional[Path] = None) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, build: str = '38', high_ld_regions: Optional[Path] = None, generate_plot: bool = True) -> None:
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -40,6 +39,8 @@ class Preparator:
             raise TypeError("build should be a string")
         if build not in ['37', '38']:
             raise ValueError("build should be either '37' or '38'")
+        if not isinstance(generate_plot, bool):
+            raise TypeError("generate_plot should be a boolean")
         
         if high_ld_regions is not None:
             if not isinstance(high_ld_regions, Path):
@@ -65,722 +66,1481 @@ class Preparator:
         self.output_path= output_path
         self.build = build
         self.high_ld_regions = high_ld_regions
+        self.generate_plot = generate_plot
+
+        self.pruned_data: Optional[Path] = None
         
         return
     
-    def execute_ld_pruning(self):
-        pass
-
-    def compute_pcas(self):
-        pass
-class UMAPReduction:
-
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, high_ld_file: Path=Path(), built: str = '38', recompute_pca: bool = True) -> None:
+    def execute_ld_pruning(self, maf: float = 0.001, geno: float = 0.1, mind: float = 0.2, hwe: float = 5e-8, ind_pair:list = [50, 5, 0.2]) -> None:
         """
-        Initialize UMAPplot object for population structure analysis.
-        This class handles the creation of UMAP plots for genetic data, managing input/output paths
-        and configuration for the analysis.
-
+        Execute linkage disequilibrium (LD) pruning on study and reference data.
+        
+        This method performs LD-based pruning using PLINK to remove highly correlated SNPs 
+        from both study and reference datasets. The pruning is done using a sliding window 
+        approach where SNPs are removed based on their pairwise correlation (r²).
+        
         Parameters
         ----------
-        input_path : Path
-            Path to the directory containing input files
-        input_name : str
-            Name of the input file
-        output_path : Path
-            Path to the directory where results will be saved
-        output_name : str
-            Name for the output files
-        high_ld_file : Path
-            Path to the file containing high LD regions
-        built : str, optional
-            Genome build version, either '37' or '38' (default is '38')
-        recompute_pca : bool, optional
-            Whether to recompute PCA analysis (default is True)
-
+        ind_pair : list
+            A list containing three elements:
+            
+            - ind_pair[0] (int): Window size in SNPs  
+            - ind_pair[1] (int): Number of SNPs to shift the window at each step  
+            - ind_pair[2] (float): r² threshold for pruning
+        
         Raises
         ------
         TypeError
-            If input types are incorrect for any parameter
-        ValueError
-            If built is not '37' or '38'
-        FileNotFoundError
-            If input_path or output_path do not exist
-        
-        Notes
-        -----
-        If high_ld_file is not found, it will be automatically fetched from the package.
-        Creates 'umap_results' and 'plots' directories in the output path.
-        """
-
-        if not isinstance(input_path, Path):
-            raise TypeError("input_path should be a Path object")
-        if not isinstance(output_path, Path):
-            raise TypeError("output_path should be a Path object")
-        if not isinstance(high_ld_file, Path):
-            raise TypeError("high_ld_regions should be a Path object")
-        if not isinstance(input_name, str): 
-            raise TypeError("input_name should be a string")
-        if not isinstance(recompute_pca, bool):
-            raise TypeError("recompute_merge should be a boolean")
-        if not isinstance(built, str):
-            raise TypeError("built should be a string")
-        if built not in ['37', '38']:
-            raise ValueError("built should be either '37' or '38'")        
-        if not input_path.exists():
-            raise FileNotFoundError("input_path does not exist")
-        if not output_path.exists():
-            raise FileNotFoundError("output_path does not exist")
-        if not high_ld_file.is_file():
-            logger.info(f"High LD file not found at {high_ld_file}")
-            logger.info('High LD file will be fetched from the package')
-            
-            ld_fetcher = FetcherLDRegions(build=built)
-            ld_fetcher.get_ld_regions()
-
-            if ld_fetcher.ld_regions is None:
-                raise FileNotFoundError("Could not fetch LD regions file.")
-                
-            high_ld_file = ld_fetcher.ld_regions
-            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
-
-        self.input_path = input_path
-        self.input_name = input_name
-        self.output_path= output_path
-        self.high_ld_regions = high_ld_file
-        self.recompute_pca = recompute_pca
-        self.built = built
-
-        self.files_to_keep= []
-
-        self.results_dir = self.output_path / 'umap_results' 
-        self.results_dir.mkdir(parents=True, exist_ok=True)
-
-        self.plots_dir = self.results_dir / 'plots'
-        self.plots_dir.mkdir(parents=True, exist_ok=True)
-
-        pass
-
-    def ld_pruning(self, maf: float = 0.001, geno: float = 0.1, mind: float = 0.2, hwe: float = 5e-8, ind_pair: list = [50, 5, 0.2]) -> None:
-        """
-        Perform Linkage Disequilibrium (LD) pruning on genetic data using PLINK.
-        This method filters SNPs based on specified thresholds for various quality control metrics
-        and performs LD-based pruning to remove highly correlated variants.
-        
-        Parameters
-        ----------
-        maf : float, default=0.001
-            Minor allele frequency threshold. Variants with MAF below this value are removed.
-            Must be between 0 and 0.5.
-        geno : float, default=0.1
-            Maximum per-SNP missing rate. Variants with missing rate above this are removed.
-            Must be between 0 and 1.
-        mind : float, default=0.2
-            Maximum per-individual missing rate. Samples with missing rate above this are removed.
-            Must be between 0 and 1. Recommended range is 0.02 to 0.1.
-        hwe : float, default=5e-8
-            Hardy-Weinberg equilibrium exact test p-value threshold.
-            Variants with p-value below this are removed. Must be between 0 and 1.
-        ind_pair : list, default=[50, 5, 0.2]
-            Parameters for pairwise LD pruning: [window size, step size, r² threshold].
+            If ind_pair is not a list.
+        TypeError
+            If first two elements of ind_pair are not integers.
+        TypeError
+            If third element of ind_pair is not a float.
         
         Returns
         -------
         None
-            Creates pruned PLINK binary files in the results directory.
         
         Notes
         -----
-        - Skips processing if recompute_pca is False
-        - Uses multithreading with optimal thread count based on system CPU
-        - Generates intermediate files: .prune.in and .prune.out
-        - Creates final LD-pruned dataset with '-LDpruned' suffix
-        
-        Raises
-        ------
-        TypeError
-            If input parameters are not of type float
-        ValueError
-            If input parameters are outside their valid ranges
-        UserWarning
-            If mind parameter is outside recommended range
+        - Uses PLINK's `--indep-pairwise` command for pruning.
+        - Excludes high LD regions specified in `self.high_ld_regions`.
+        - Creates pruned datasets for both study and reference data.
+        - Updates `self.pruned_reference` and `self.pruned_study` with paths to pruned files.
+        - Uses all available CPU threads except 2 for processing.
         """
 
-        if not self.recompute_pca:
-            logger.info(f"`recompuite_pca` is set to {self.recompute_pca}. LD pruning will be skipped.")
-            logger.info("LD pruning already performed. Skipping this step.")
-            return
-
-        # Check type of maf
-        if not isinstance(maf, float):
-             raise TypeError("maf should be of type float.")
-
-        # Check type of geno
-        if not isinstance(geno, float):
-            raise TypeError("geno should be of type float.")
-
-        # Check type of mind
-        if not isinstance(mind, float):
-            raise TypeError("mind should be of type float.")
+        if not isinstance(ind_pair, list):
+            raise TypeError("ind_pair should be a list")
         
-        # Check type of hwe
-        if not isinstance(hwe, float):
-            raise TypeError("hwe should be of type float.")
+        if not isinstance(ind_pair[0], int) or not isinstance(ind_pair[1], int):
+            raise TypeError("The first two elements in ind_pair values should be integers (windows size and step size)")
         
-        # Check if maf is in range
-        if maf <= 0.0 or maf >= 0.5:
-            raise ValueError("maf should be between 0 and 0.5")
+        if not isinstance(ind_pair[2], float):
+            raise TypeError("The third element in ind_pair should be a float (r^2 threshold)")
         
-        # Check if geno is in range
-        if geno <= 0 or geno >= 1:
-            raise ValueError("geno should be between 0 and 1")
-        
-        # Check if mind is in range
-        if mind < 0 or mind > 1:
-            raise ValueError("mind should be between 0 and 1")
-        
-        # Check if mind is around typical values
-        if mind <= 0.02 and mind >= 0.1:
-            warnings.warn(f"The 'mind' value {mind} is outside the recommended range of 0.02 to 0.1.", UserWarning)
+        logger.info("STEP: LD-based pruning of study and reference data")
 
-        # Check if hwe is in range
-        if hwe < 0 or hwe > 1:
-            raise ValueError("hwe should be between 0 and 1")
+        max_threads = get_optimal_threads()
 
-        logger.info("Executing LD pruning with the following parameters:")
-        logger.info(f"LD pruning parameters: maf={maf}, geno={geno}, mind={mind}, hwe={hwe}, ind_pair={ind_pair}")
+        # Execute PLINK2 command: generates prune.in and prune.out files from study data
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--maf', str(maf),
+            '--geno', str(geno),
+            '--mind', str(mind),
+            '--hwe', str(hwe),
+            '--exclude', 'range', str(self.high_ld_regions),
+            '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
+            '--threads', str(max_threads),
+            '--out', str(self.output_path / self.input_name)
+        ])
 
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = max(1, cpu_count - 2)
-        else:
-            # Dynamically calculate fallback as half of available cores or default to 2
-            max_threads = max(1, (psutil.cpu_count(logical=True) or 2) // 2)
+        # Execute PLINK2 command: prune study data and creates a filtered binary file
+        run_plink2([
+            '--bfile', str(self.input_path / self.input_name),
+            '--extract', str((self.output_path / self.input_name).with_suffix('.prune.in')),
+            '--threads', str(max_threads),
+            '--maf', str(maf),
+            '--geno', str(geno),
+            '--mind', str(mind),
+            '--hwe', str(hwe),
+            '--make-bed',
+            '--out', str(self.output_path / (self.input_name + '-pruned'))
+        ])
 
-        # Get the virtual memory details
-        memory_info = psutil.virtual_memory()
-        available_memory_mb = memory_info.available / (1024 * 1024)
-        memory = round(2*available_memory_mb/3,0)
-
-        logger.info(f"Using {max_threads} threads for PLINK commands")
-        logger.info(f"Available memory: {available_memory_mb:.2f} MB, using {memory} MB for PLINK commands")
-
-        # generates prune.in and prune.out files
-        plink_cmd1 = f"plink --bfile {self.input_path / self.input_name} --maf {maf} --geno {geno} --mind {mind} --hwe {hwe} --exclude {self.high_ld_regions} --range --indep-pairwise {ind_pair[0]} {ind_pair[1]} {ind_pair[2]} --threads {max_threads} --memory {memory} --out {self.results_dir / self.input_name}"
-
-        # prune and creates a filtered binary file
-        plink_cmd2 = f"plink --bfile {self.input_path / self.input_name} --keep-allele-order --extract {self.results_dir / (self.input_name+'.prune.in')} --make-bed --threads {max_threads} --memory {memory} --out {self.results_dir / (self.input_name+'-LDpruned')}"
-
-        # execute plink command
-        cmds = [plink_cmd1, plink_cmd2]
-        for cmd in cmds:
-            shell_do(cmd, log=True)
+        self.pruned_data = self.output_path / (self.input_name+'-pruned')
 
         return
 
-    def compute_pcas(self, pca: int = 10) -> None:
+    def execute_pca(self, pca: int = 20, maf: float = 0.01) -> None:
         """
-        Computes Principal Component Analysis (PCA) using PLINK.
+        Perform Principal Component Analysis (PCA) on the genetic data using PLINK.
 
-        This method performs PCA on the LD-pruned dataset using PLINK's --pca command.
-        The analysis generates eigenvectors and eigenvalues that can be used for
-        population structure analysis and visualization.
+        This method executes PCA on the merged genetic data file, calculating the specified
+        number of principal components. It automatically determines the optimal number of
+        threads and memory allocation based on system resources.
 
         Parameters
         ----------
         pca : int, default=10
-            Number of principal components to compute. Should be a positive integer.
-            Values below 3 will trigger a warning as they may be insufficient for 
-            meaningful analysis.
+            Number of principal components to calculate.
+            Must be a positive integer.
+        maf : float, default=0.01
+            Minor allele frequency threshold for filtering variants.
+            Must be between 0 and 0.5.
 
         Returns
         -------
         None
-            Results are written to disk in the results directory with the input_name prefix.
 
         Raises
         ------
         TypeError
-            If pca parameter is not an integer.
+            If pca is not an integer or maf is not a float
         ValueError
-            If pca parameter is not positive.
+            If pca is not positive or maf is not between 0 and 0.5
 
         Notes
         -----
-        - If recompute_pca is False, the method will skip PCA computation
-        - Uses PLINK's --pca command on the LD-pruned dataset
-        - Output files are saved in the results directory specified during initialization
+        The method creates two output files:
+        - {output_name}-pca.eigenvec: Contains the eigenvectors (PC loadings)
+        - {output_name}-pca.eigenval: Contains the eigenvalues
+
+        The results are stored in self.einvectors and self.eigenvalues attributes.
         """
 
-        if not self.recompute_pca:
-            logger.info(f"`recompuite_pca` is set to {self.recompute_pca}. PCA will be skipped.")
-            logger.info("PCA already performed. Skipping this step.")
-            return
-
-        # Check type of pca
         if not isinstance(pca, int):
-            raise TypeError("pca should be of type int.")
+            raise TypeError("pca should be an integer")
         if pca <= 0:
-            raise ValueError("pca should be a positive integer.")
-        if pca <= 3:
-            warnings.warn(f"The 'pca' value {pca} is low. Consider increasing it for better results.", UserWarning)
+            raise ValueError("pca should be a positive integer")
+        if not isinstance(maf, float):
+            raise TypeError("maf should be a float")
+        if maf < 0 or maf > 0.5:
+            raise ValueError("maf should be a float between 0 and 0.5")
 
-        logger.info("Executing PCA with the following parameters:")
-        logger.info(f"PCA parameters: pca={pca}")
+        logger.info("STEP: Performing principal component decomposition")
 
-        # runs pca analysis
-        plink_cmd1 = f"plink --bfile {self.results_dir / (self.input_name+'-LDpruned')} --keep-allele-order --out {self.results_dir / self.input_name} --pca {pca}"
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
 
-        shell_do(plink_cmd1, log=True)
+        # Execute PLINK2 command: generate PCA for reference data
+        run_plink2([
+            '--bfile', str(self.pruned_data),
+            '--maf', str(maf),
+            '--out', str(self.output_path / (self.input_name + '-pca')),
+            '--pca', str(pca),
+            '--memory', str(int(memory)),
+            '--threads', str(max_threads)
+        ])
+
+        self.eigenvectors = self.output_path / (self.input_name+'-pca.eigenvec')
+        self.eigenvalues = self.output_path / (self.input_name+'-pca.eigenval')
 
         return
     
-    def generate_plots(self, color_hue_file: Optional[Path] = None, case_control_markers: bool = True, n_neighbors: list = [5], min_dist: list = [0.5], metric: list = ['euclidean'], random_state: Optional[int] = None, format: str = 'pdf', umap_kwargs: dict = dict()) -> None:
+    def execute_pcareduction_pipeline(self, maf: float = 0.001, geno: float = 0.1, mind: float = 0.2, hwe: float = 5e-8, ind_pair:list = [50, 5, 0.2], pca: int = 20, case_control_markers: bool = True) -> None:
         """
-        Generate UMAP plots with different parameter combinations.
-        This method generates UMAP (Uniform Manifold Approximation and Projection) plots using various 
-        combinations of parameters. It can incorporate color coding based on metadata and case-control markers.
+        Execute the full preparation pipeline: LD pruning followed by PCA.
+
+        This method sequentially performs LD pruning on the genetic data and then
+        computes principal components using PCA. It combines the functionalities of
+        `execute_ld_pruning` and `execute_pca` methods.
+
+        Parameters
+        ----------
+        ind_pair : list
+            A list containing three elements for LD pruning:
+            - ind_pair[0] (int): Window size in SNPs
+            - ind_pair[1] (int): Number of SNPs to shift the window at each step
+            - ind_pair[2] (float): r² threshold for pruning
+        pca : int, default=20
+            Number of principal components to calculate.
+            Must be a positive integer.
+        maf : float, default=0.01
+            Minor allele frequency threshold for filtering variants.
+            Must be between 0 and 0.5
+        Returns
+        -------
+        None
+        """
+
+        self.execute_ld_pruning(maf=maf, geno=geno, mind=mind, hwe=hwe, ind_pair=ind_pair)
+        self.execute_pca(pca=pca, maf=maf)
+
+        plot_pca_2d = Plot2D(
+            output_dir=self.output_path
+        )
+        if self.generate_plot:
+
+            df_eigenvec = pd.read_csv(
+                self.eigenvectors,
+                sep=r'\s+',
+                engine='python')
+            
+            # Map eigenvector columns to Plot2D expected format
+            # Rename #FID to ID1 and IID to ID2 for compatibility with Plot2D
+            df_eigenvec = df_eigenvec.rename(columns={'#FID': 'ID1', 'IID': 'ID2'})
+            
+            plot_pca_2d.prepare_metadata(
+                case_control_markers=case_control_markers,
+                fam_file= self.input_path / (self.input_name + '.fam')
+            )
+
+            plot_pca_2d.generate_plot(
+                data=df_eigenvec,
+                x_col='PC1',
+                y_col='PC2',
+                plot_name='pca_2d_plot',
+                xlabel='Principal Component 1',
+                ylabel='Principal Component 2',
+                title='PCA 2D Projection',
+            )
+
+        logger.info("Preparation pipeline completed successfully.")
+
+        return
+
+class UMAPReduction:
+    """
+    Class for performing UMAP dimensionality reduction on PCA eigenvectors.
+    
+    This class handles UMAP transformation of high-dimensional PCA data into
+    2D space for visualization. Use Plot2D class for generating plots.
+    """
+
+    def __init__(self, eigenvector: Path, output_path: Path) -> None:
+        """
+        Initialize UMAPReduction object.
+        
+        Parameters
+        ----------
+        eigenvector : Path
+            Path to the eigenvector file (.eigenvec) from PCA analysis
+        output_path : Path
+            Path to the directory where results will be saved
+
+        Raises
+        ------
+        TypeError
+            If input types are incorrect
+        FileNotFoundError
+            If eigenvector file or output_path do not exist
+        
+        Notes
+        -----
+        Creates 'umap_results' directory in the output path.
+        """
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(eigenvector, Path):
+            raise TypeError("eigenvector should be a Path object")
+        if not eigenvector.exists():
+            raise FileNotFoundError("eigenvector file does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+
+        self.eigenvector = eigenvector
+        self.output_path = output_path
+
+        self.results_dir = self.output_path / 'umap_results' 
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Cache for eigenvector data to avoid repeated file loading
+        self._eigenvec_cache: Optional[pd.DataFrame] = None
+    
+    def _load_eigenvectors(self) -> pd.DataFrame:
+        """
+        Load eigenvector data from file with caching.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns ['ID1', 'ID2', 'pca_1', 'pca_2', ...]
+        
+        Raises
+        ------
+        FileNotFoundError
+            If eigenvector file does not exist
+        """
+        if self._eigenvec_cache is not None:
+            return self._eigenvec_cache.copy()
+        
+        eigenvec_file = self.eigenvector
+        
+        if not eigenvec_file.exists():
+            raise FileNotFoundError(f"Eigenvector file not found: {eigenvec_file}")
+        
+        df_eigenvec = pd.read_csv(
+            eigenvec_file, 
+            sep=r'\s+',
+            engine='python'
+        )
+        logger.info(f"Eigenvector file loaded from {eigenvec_file}")
+        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
+        
+        # Validate eigenvector file format
+        if df_eigenvec.shape[1] < 3:
+            raise ValueError(
+                f"Invalid eigenvector file format. Expected at least 3 columns "
+                f"(ID1, ID2, PC1), but found {df_eigenvec.shape[1]} columns. "
+                f"This suggests the PCA step may have failed or produced invalid output. "
+                f"Please check the PCA preparation step and ensure it completed successfully."
+            )
+        
+        # Rename columns
+        num_pc = df_eigenvec.shape[1] - 2
+        new_cols = [f"pca_{k}" for k in range(1, num_pc + 1)]
+        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
+        
+        self._eigenvec_cache = df_eigenvec
+        return df_eigenvec.copy()
+    
+    def fit_transform(self,
+                     n_neighbors: int = 15,
+                     min_dist: float = 0.1,
+                     metric: str = 'euclidean',
+                     random_state: Optional[int] = None,
+                     n_components: int = 2,
+                     umap_kwargs: Optional[dict] = None) -> pd.DataFrame:
+        """
+        Perform UMAP dimensionality reduction on PCA eigenvectors.
+        
+        Parameters
+        ----------
+        n_neighbors : int, default=15
+            Number of neighbors for UMAP manifold approximation. Must be positive.
+        min_dist : float, default=0.1
+            Minimum distance between points in low-dimensional space. Must be non-negative.
+        metric : str, default='euclidean'
+            Distance metric for UMAP (e.g., 'euclidean', 'cosine', 'manhattan')
+        random_state : int, optional
+            Random seed for reproducibility. Must be non-negative.
+        n_components : int, default=2
+            Number of dimensions in the output
+        umap_kwargs : dict, optional
+            Additional keyword arguments to pass to UMAP constructor.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns ['ID1', 'ID2', 'umap_1', 'umap_2', ...]
+        
+        Raises
+        ------
+        TypeError
+            If parameters are not of correct type
+        ValueError
+            If parameter values are invalid
+        """
+        # Validate parameters
+        if not isinstance(n_neighbors, int):
+            raise TypeError("n_neighbors should be an integer")
+        if n_neighbors <= 0:
+            raise ValueError("n_neighbors should be a positive integer")
+        if not isinstance(min_dist, float):
+            raise TypeError("min_dist should be a float")
+        if min_dist < 0:
+            raise ValueError("min_dist should be a non-negative float")
+        if not isinstance(metric, str):
+            raise TypeError("metric should be a string")
+        if random_state is not None:
+            if not isinstance(random_state, int):
+                raise TypeError("random_state should be an integer")
+            if random_state < 0:
+                raise ValueError("random_state should be a non-negative integer")
+        if not isinstance(n_components, int):
+            raise TypeError("n_components should be an integer")
+        if n_components <= 0:
+            raise ValueError("n_components should be a positive integer")
+        if umap_kwargs is None:
+            umap_kwargs = {}
+        if not isinstance(umap_kwargs, dict):
+            raise TypeError("umap_kwargs should be a dictionary")
+        
+        logger.info(f"Performing UMAP reduction")
+        logger.info(f"Parameters: n_neighbors={n_neighbors}, min_dist={min_dist}, metric={metric}")
+        
+        # Load eigenvector data
+        df_eigenvec = self._load_eigenvectors()
+        
+        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
+        pca_cols = [col for col in df_eigenvec.columns if col.startswith('pca_')]
+        df_vals = df_eigenvec[pca_cols].to_numpy()
+        
+        # Instantiate UMAP
+        reducer = umap.UMAP(
+            n_components=n_components,
+            n_neighbors=n_neighbors,
+            min_dist=min_dist,
+            metric=metric,
+            random_state=random_state,
+            **umap_kwargs
+        )
+        
+        # Perform UMAP transformation
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            
+            umap_proj = reducer.fit_transform(df_vals)
+            
+            if w:
+                for warning in w:
+                    logger.warning(f"UMAP warning: {warning.message}")
+        
+        # Create result DataFrame
+        umap_cols = [f"umap_{k}" for k in range(1, n_components + 1)]
+        df_umap = pd.DataFrame(data=umap_proj, columns=umap_cols)
+        df_result = pd.concat([df_ids.reset_index(drop=True), df_umap], axis=1)
+        
+        logger.info(f"UMAP reduction completed: {df_result.shape[0]} samples, {n_components} dimensions")
+        
+        return df_result
+
+
+class TSNEReduction:
+    """
+    Class for performing t-SNE dimensionality reduction on PCA eigenvectors.
+    
+    This class handles t-SNE transformation of high-dimensional PCA data into
+    2D or 3D space for visualization. Use Plot2D class for generating plots.
+    """
+
+    def __init__(self, eigenvector: Path, output_path: Path) -> None:
+        """
+        Initialize TSNEReduction object.
+        
+        Parameters
+        ----------
+        eigenvector : Path
+            Path to the eigenvector file (.eigenvec) from PCA analysis
+        output_path : Path
+            Path to the directory where results will be saved
+
+        Raises
+        ------
+        TypeError
+            If input types are incorrect
+        FileNotFoundError
+            If eigenvector file or output_path do not exist
+        
+        Notes
+        -----
+        Creates 'tsne_results' directory in the output path.
+        """
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(eigenvector, Path):
+            raise TypeError("eigenvector should be a Path object")
+        if not eigenvector.exists():
+            raise FileNotFoundError("eigenvector file does not exist")
+        if not output_path.exists():
+            raise FileNotFoundError("output_path does not exist")
+
+        self.eigenvector = eigenvector
+        self.output_path = output_path
+
+        self.results_dir = self.output_path / 'tsne_results' 
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Cache for eigenvector data to avoid repeated file loading
+        self._eigenvec_cache: Optional[pd.DataFrame] = None
+    
+    def _load_eigenvectors(self) -> pd.DataFrame:
+        """
+        Load eigenvector data from file with caching.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns ['ID1', 'ID2', 'pca_1', 'pca_2', ...]
+        
+        Raises
+        ------
+        FileNotFoundError
+            If eigenvector file does not exist
+        """
+        if self._eigenvec_cache is not None:
+            return self._eigenvec_cache.copy()
+        
+        eigenvec_file = self.eigenvector
+        
+        if not eigenvec_file.exists():
+            raise FileNotFoundError(f"Eigenvector file not found: {eigenvec_file}")
+        
+        df_eigenvec = pd.read_csv(
+            eigenvec_file, 
+            sep=r'\s+',
+            engine='python'
+        )
+        logger.info(f"Eigenvector file loaded from {eigenvec_file}")
+        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
+        
+        # Validate eigenvector file format
+        if df_eigenvec.shape[1] < 3:
+            raise ValueError(
+                f"Invalid eigenvector file format. Expected at least 3 columns "
+                f"(ID1, ID2, PC1), but found {df_eigenvec.shape[1]} columns. "
+                f"This suggests the PCA step may have failed or produced invalid output. "
+                f"Please check the PCA preparation step and ensure it completed successfully."
+            )
+        
+        # Rename columns
+        num_pc = df_eigenvec.shape[1] - 2
+        new_cols = [f"pca_{k}" for k in range(1, num_pc + 1)]
+        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
+        
+        self._eigenvec_cache = df_eigenvec
+        return df_eigenvec.copy()
+    
+    def fit_transform(self,
+                     n_components: int = 2,
+                     perplexity: float = 30.0,
+                     learning_rate: float = 200.0,
+                     n_iter: int = 1000,
+                     metric: str = 'euclidean',
+                     random_state: Optional[int] = None,
+                     early_exaggeration: float = 12.0,
+                     init: Literal['pca', 'random'] = 'pca',
+                     tsne_kwargs: Optional[dict] = None) -> pd.DataFrame:
+        """
+        Perform t-SNE dimensionality reduction on PCA eigenvectors.
+        
+        Parameters
+        ----------
+        n_components : int, default=2
+            Number of dimensions in the output (typically 2 or 3)
+        perplexity : float, default=30.0
+            Related to number of nearest neighbors. Should be between 5 and 50.
+            Larger datasets require larger perplexity.
+        learning_rate : float, default=200.0
+            Learning rate for t-SNE optimization. Usually between 10.0 and 1000.0.
+        n_iter : int, default=1000
+            Maximum number of iterations for optimization
+        metric : str, default='euclidean'
+            Distance metric to use ('euclidean', 'manhattan', 'cosine', etc.)
+        random_state : int, optional
+            Random seed for reproducibility. Must be non-negative.
+        early_exaggeration : float, default=12.0
+            Controls how tight natural clusters are in the original space
+        init : str, default='pca'
+            Initialization method ('pca' or 'random')
+        tsne_kwargs : dict, optional
+            Additional keyword arguments to pass to TSNE constructor.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns ['ID1', 'ID2', 'tsne_1', 'tsne_2', ...]
+        
+        Raises
+        ------
+        TypeError
+            If parameters are not of correct type
+        ValueError
+            If parameter values are invalid
+        
+        Notes
+        -----
+        t-SNE is computationally expensive. For large datasets (>10,000 samples),
+        consider using perplexity between 30-50 and reducing n_iter if needed.
+        """
+        # Validate parameters
+        if not isinstance(n_components, int):
+            raise TypeError("n_components should be an integer")
+        if n_components <= 0:
+            raise ValueError("n_components should be a positive integer")
+        if not isinstance(perplexity, (int, float)):
+            raise TypeError("perplexity should be a number")
+        if perplexity <= 0:
+            raise ValueError("perplexity should be positive")
+        if not isinstance(learning_rate, (int, float)):
+            raise TypeError("learning_rate should be a number")
+        if learning_rate <= 0:
+            raise ValueError("learning_rate should be positive")
+        if not isinstance(n_iter, int):
+            raise TypeError("n_iter should be an integer")
+        if n_iter <= 0:
+            raise ValueError("n_iter should be a positive integer")
+        if not isinstance(metric, str):
+            raise TypeError("metric should be a string")
+        if random_state is not None:
+            if not isinstance(random_state, int):
+                raise TypeError("random_state should be an integer")
+            if random_state < 0:
+                raise ValueError("random_state should be a non-negative integer")
+        if not isinstance(early_exaggeration, (int, float)):
+            raise TypeError("early_exaggeration should be a number")
+        if early_exaggeration <= 0:
+            raise ValueError("early_exaggeration should be positive")
+        if init not in ['pca', 'random']:
+            raise ValueError("init should be either 'pca' or 'random'")
+        if tsne_kwargs is None:
+            tsne_kwargs = {}
+        if not isinstance(tsne_kwargs, dict):
+            raise TypeError("tsne_kwargs should be a dictionary")
+        
+        logger.info(f"Performing t-SNE reduction")
+        logger.info(f"Parameters: n_components={n_components}, perplexity={perplexity}, learning_rate={learning_rate}")
+        
+        # Load eigenvector data
+        df_eigenvec = self._load_eigenvectors()
+        
+        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
+        pca_cols = [col for col in df_eigenvec.columns if col.startswith('pca_')]
+        df_vals = df_eigenvec[pca_cols].to_numpy()
+        
+        # Instantiate t-SNE
+        reducer = TSNE(
+            n_components=n_components,
+            perplexity=perplexity,
+            learning_rate=learning_rate,
+            n_iter=n_iter,
+            metric=metric,
+            random_state=random_state,
+            early_exaggeration=early_exaggeration,
+            init=init,
+            verbose=1,  # Show progress
+            **tsne_kwargs
+        )
+        
+        # Perform t-SNE transformation
+        logger.info(f"Starting t-SNE optimization (this may take several minutes)...")
+        
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            
+            tsne_proj = reducer.fit_transform(df_vals)
+            
+            if w:
+                for warning in w:
+                    logger.warning(f"t-SNE warning: {warning.message}")
+        
+        # Create result DataFrame
+        tsne_cols = [f"tsne_{k}" for k in range(1, n_components + 1)]
+        df_tsne = pd.DataFrame(data=tsne_proj, columns=tsne_cols)
+        df_result = pd.concat([df_ids.reset_index(drop=True), df_tsne], axis=1)
+        
+        logger.info(f"t-SNE reduction completed: {df_result.shape[0]} samples, {n_components} dimensions")
+        
+        return df_result
+
+
+class Plot2D:
+    """
+    Class for generating 2D scatter plots with metadata integration.
+    
+    This class handles the preparation of metadata (color hue files, case-control markers)
+    and generates publication-quality 2D scatter plots for dimensionality reduction results.
+    """
+    
+    def __init__(self, output_dir: Path) -> None:
+        """
+        Initialize Plot2D object.
+        
+        Parameters
+        ----------
+        output_dir : Path
+            Directory where plots will be saved
+        
+        Raises
+        ------
+        TypeError
+            If output_dir is not a Path object
+        FileNotFoundError
+            If output_dir does not exist
+        """
+        if not isinstance(output_dir, Path):
+            raise TypeError("output_dir should be a Path object")
+        if not output_dir.exists():
+            raise FileNotFoundError(f"output_dir does not exist: {output_dir}")
+        
+        self.output_dir = output_dir
+        self.metadata: Optional[pd.DataFrame] = None
+    
+    def prepare_metadata(self, 
+                        color_hue_file: Optional[Path] = None,
+                        case_control_markers: bool = False,
+                        fam_file: Optional[Path] = None) -> Optional[pd.DataFrame]:
+        """
+        Prepare metadata DataFrame from color hue file and/or case-control markers.
         
         Parameters
         ----------
         color_hue_file : Path, optional
-            Path to a tab-separated file containing color hue information. The file should have at least 3 columns,
-            where the first two are ID1 and ID2, and the third column contains the values for color coding.
-            Default is None.
-        case_control_markers : bool, optional
-            Whether to include case-control markers in the plots. If True, reads from the .fam file.
-            Default is True. If color_hue_file is not provided, the difference between case and control will be used as hue.
-        n_neighbors : list of int, optional
-            List of values for the n_neighbors parameter in UMAP. Each value must be positive.
-            Default is [5].
-        min_dist : list of float, optional
-            List of values for the min_dist parameter in UMAP. Each value must be non-negative.
-            Default is [0.5].
-        metric : list of str, optional
-            List of distance metrics to use in UMAP.
-            Default is ['euclidean'].
-        random_state : int, optional
-            Random seed for reproducibility. Must be non-negative.
-            Default is None.
-        format : str, optional
-            Format of the output plot files. Supported formats are 'pdf', 'png', 'jpeg', etc.
-        umap_kwargs : dict, optional
-            Additional keyword arguments to pass to the UMAP constructor.
-            Default is an empty dictionary.
+            Path to tab-separated file with metadata for coloring. Must have at least
+            3 columns: ID1, ID2, and a metadata column.
+        case_control_markers : bool, default=False
+            Whether to load case-control labels from .fam file
+        fam_file : Path, optional
+            Path to .fam file containing case-control information. Required if
+            case_control_markers is True.
         
         Returns
         -------
-        None
-            Saves UMAP plots as pdf files (by default but can be modified) and parameters as a CSV file in the results directory.
+        pd.DataFrame
+            Metadata DataFrame with columns ['ID1', 'ID2', ...] or None if no metadata
+        
+        Raises
+        ------
+        FileNotFoundError
+            If specified files don't exist
+        TypeError
+            If parameters are of incorrect type
+        """
+        df_color_hue = None
+        df_fam = None
+        
+        # Validate inputs
+        if color_hue_file is not None:
+            if not isinstance(color_hue_file, Path):
+                raise TypeError("color_hue_file should be a Path object")
+            if not color_hue_file.is_file():
+                raise FileNotFoundError(f"color_hue_file not found at {color_hue_file}")
+        
+        if not isinstance(case_control_markers, bool):
+            raise TypeError("case_control_markers should be a boolean")
+        
+        if case_control_markers and fam_file is None:
+            raise ValueError("fam_file must be provided when case_control_markers is True")
+        
+        # Load color hue file if provided
+        if color_hue_file is not None:
+            df_color_hue = pd.read_csv(color_hue_file, sep='\t')
+            logger.info(f"Color hue file loaded from {color_hue_file}")
+            logger.info(f"Column '{df_color_hue.columns[2]}' will be used for color hue")
+            df_color_hue.columns = ["ID1", "ID2", df_color_hue.columns[2]]
+            logger.info(f"Color hue file has {df_color_hue.shape[0]} rows and {df_color_hue.shape[1]} columns")
+        
+        # Load case-control markers if requested
+        if case_control_markers and fam_file is not None:
+            if not isinstance(fam_file, Path):
+                raise TypeError("fam_file should be a Path object")
+            if not fam_file.exists():
+                raise FileNotFoundError(f".fam file not found at {fam_file}")
+            
+            df_fam = pd.read_csv(fam_file, sep=r'\s+', engine='python')
+            logger.info(f"Case-control labels loaded from {fam_file}")
+            
+            df_fam.columns = ["ID1", "ID2", "F_ID", "M_ID", "Sex", "Phenotype"]
+            recode = {1: 'Control', 2: 'Patient'}
+            df_fam["Phenotype"] = df_fam["Phenotype"].map(recode)
+            df_fam = df_fam[['ID1', 'ID2', 'Phenotype']].copy()
+            logger.info(f"Case-control markers has {df_fam.shape[0]} rows and {df_fam.shape[1]} columns")
+        
+        # Merge or return appropriate DataFrame
+        if df_color_hue is not None and df_fam is not None:
+            self.metadata = df_color_hue.merge(df_fam, on=['ID1', 'ID2'], how='inner')
+            logger.info(f"Color hue file merged with case-control markers")
+            logger.info(f"Merged metadata has {self.metadata.shape[0]} rows and {self.metadata.shape[1]} columns")
+        elif df_color_hue is not None:
+            self.metadata = df_color_hue
+            logger.info(f"Using color hue file as metadata")
+        elif df_fam is not None:
+            self.metadata = df_fam
+            logger.info(f"Using case-control markers as metadata")
+        else:
+            self.metadata = None
+            logger.info(f"No metadata provided")
+        
+        return self.metadata
+    
+    def generate_plot(self,
+                     data: pd.DataFrame,
+                     x_col: str,
+                     y_col: str,
+                     plot_name: str,
+                     hue_col: Optional[str] = None,
+                     style_col: Optional[str] = None,
+                     title: Optional[str] = None,
+                     xlabel: Optional[str] = None,
+                     ylabel: Optional[str] = None,
+                     figsize: tuple = (5, 5),
+                     dpi: int = 500,
+                     format: str = 'pdf',
+                     marker: str = '.',
+                     marker_size: int = 10,
+                     alpha: float = 0.5,
+                     equal_aspect: bool = True,
+                     legend_params: Optional[dict] = None) -> Path:
+        """
+        Generate a 2D scatter plot with optional metadata coloring and styling.
+        
+        Parameters
+        ----------
+        data : pd.DataFrame
+            DataFrame containing the 2D coordinates and IDs (must have 'ID1', 'ID2' columns)
+        x_col : str
+            Column name for x-axis values
+        y_col : str
+            Column name for y-axis values
+        plot_name : str
+            Name of the output plot file
+        hue_col : str, optional
+            Column name for point coloring. If None and metadata exists, uses third column
+            or 'Phenotype' if available.
+        style_col : str, optional
+            Column name for point styling (different markers)
+        title : str, optional
+            Plot title
+        xlabel : str, optional
+            X-axis label. If None, uses x_col.
+        ylabel : str, optional
+            Y-axis label. If None, uses y_col.
+        figsize : tuple, default=(5, 5)
+            Figure size in inches (width, height)
+        dpi : int, default=500
+            Resolution for saving the plot
+        format : str, default='pdf'
+            Output format ('pdf', 'png', 'jpeg', 'svg')
+        marker : str, default='.'
+            Marker style for scatter plot
+        marker_size : int, default=10
+            Size of markers
+        alpha : float, default=0.5
+            Transparency of markers (0-1)
+        equal_aspect : bool, default=True
+            Whether to set equal aspect ratio
+        legend_params : dict, optional
+            Parameters for legend customization (bbox_to_anchor, ncols, fontsize, etc.)
+        
+        Returns
+        -------
+        Path
+            Path to the saved plot file
+        
+        Raises
+        ------
+        ValueError
+            If required columns are missing or hue_col not found
+        TypeError
+            If parameters are of incorrect type
+        """
+        # Validate inputs
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError("data should be a pandas DataFrame")
+        if 'ID1' not in data.columns or 'ID2' not in data.columns:
+            raise ValueError("data must contain 'ID1' and 'ID2' columns")
+        if x_col not in data.columns:
+            raise ValueError(f"Column '{x_col}' not found in data")
+        if y_col not in data.columns:
+            raise ValueError(f"Column '{y_col}' not found in data")
+        if format not in ['pdf', 'png', 'jpeg', 'svg']:
+            raise ValueError("format should be one of 'pdf', 'png', 'jpeg', or 'svg'")
+        
+        # Merge with metadata if available
+        if self.metadata is not None:
+            df_plot = data.merge(self.metadata, on=['ID1', 'ID2'], how='inner')
+            logger.info(f"Data merged with metadata: {df_plot.shape[0]} samples")
+            
+            # Auto-determine hue_col if not specified
+            if hue_col is None:
+                if 'Phenotype' in df_plot.columns:
+                    hue_col = 'Phenotype'
+                elif self.metadata.shape[1] > 2:
+                    hue_col = self.metadata.columns[2]
+        else:
+            df_plot = data.copy()
+            logger.info(f"No metadata to merge. Plotting {df_plot.shape[0]} samples")
+        
+        # Validate hue_col if specified
+        if hue_col is not None and hue_col not in df_plot.columns:
+            raise ValueError(f"hue_col '{hue_col}' not found in data")
+        
+        # Validate style_col if specified
+        if style_col is not None and style_col not in df_plot.columns:
+            raise ValueError(f"style_col '{style_col}' not found in data")
+        
+        logger.info(f"Generating 2D plot: {plot_name}")
+        logger.info(f"Plot dimensions: {x_col} vs {y_col}")
+        
+        # Create plot
+        sns.set_context(font_scale=0.9)
+        fig, ax = plt.subplots(figsize=figsize)
+        
+        # Prepare scatter plot kwargs
+        scatter_kwargs = {
+            'data': df_plot,
+            'x': x_col,
+            'y': y_col,
+            'hue': hue_col,
+            'marker': marker,
+            's': marker_size,
+            'alpha': alpha,
+            'ax': ax
+        }
+        
+        if style_col is not None:
+            scatter_kwargs['style'] = style_col
+        
+        # Generate scatter plot
+        sns.scatterplot(**scatter_kwargs)
+        
+        # Configure legend
+        if self.metadata is not None and ax.get_legend() is not None:
+            if legend_params is None:
+                legend_params = {
+                    'bbox_to_anchor': (0., 1.02, 1., .102),
+                    'loc': 'lower left',
+                    'ncols': 3,
+                    'mode': 'expand',
+                    'borderaxespad': 0.,
+                    'fontsize': 7,
+                    'markerscale': 2
+                }
+            plt.legend(**legend_params)
+        
+        # Set labels and title
+        ax.set_xlabel(xlabel if xlabel else x_col, fontsize=7)
+        ax.set_ylabel(ylabel if ylabel else y_col, fontsize=7)
+        if title:
+            ax.set_title(title, fontsize=9)
+        
+        # Set tick label size
+        ax.tick_params(axis='both', labelsize=7)
+        
+        # Set aspect ratio
+        if equal_aspect:
+            ax.set_aspect('equal', adjustable='datalim')
+        
+        plt.tight_layout()
+        
+        # Save plot
+        output_path = self.output_dir / plot_name
+        fig.savefig(output_path, dpi=dpi)
+        plt.close(fig)
+        
+        logger.info(f"Plot saved to {output_path}")
+        
+        return output_path
+
+
+class Plot3D:
+    pass
+
+
+class DimensionalityReductionPipeline:
+    """
+    Pipeline for running PCA preparation and dimensionality reduction workflows.
+    
+    This class orchestrates the complete workflow from raw genetic data to
+    dimensionality reduction visualizations, including:
+    1. PCA preparation (LD pruning + PCA)
+    2. Optional UMAP reduction
+    3. Optional t-SNE reduction
+    4. Automated plotting with metadata
+    """
+    
+    def __init__(self, 
+                 input_path: Path,
+                 input_name: str,
+                 output_path: Path,
+                 build: str = '38',
+                 high_ld_regions: Optional[Path] = None) -> None:
+        """
+        Initialize the dimensionality reduction pipeline.
+        
+        Parameters
+        ----------
+        input_path : Path
+            Path to directory containing input genetic data files (.bed/.bim/.fam)
+        input_name : str
+            Base name of input files (without extension)
+        output_path : Path
+            Path to directory where all results will be saved
+        build : str, default='38'
+            Genome build version ('37' or '38')
+        high_ld_regions : Path, optional
+            Path to file containing high LD regions. If None, will be fetched automatically.
         
         Raises
         ------
         TypeError
-            If input parameters are not of the correct type.
-        ValueError
-            If input parameters have invalid values.
+            If input types are incorrect
         FileNotFoundError
-            If color_hue_file is specified but not found.
-        
-        Notes
-        -----
-        The method creates a grid of all possible parameter combinations and generates a UMAP plot for each.
-        Parameters for each plot are saved in 'plots_parameters.csv'.
+            If input_path or output_path don't exist
+        ValueError
+            If build is not '37' or '38'
         """
-
-
-        # Check type of n_neighbors
-        if not isinstance(n_neighbors, list):
-            raise TypeError("n_neighbors should be of type list.")
-        if not all(isinstance(i, int) for i in n_neighbors):
-            raise TypeError("n_neighbors should be a list of integers.")
-        if not all(i > 0 for i in n_neighbors):
-            raise ValueError("n_neighbors should be a list of positive integers.")
-        if len(n_neighbors) == 0:
-            raise ValueError("n_neighbors should not be an empty list.")
+        if not isinstance(input_path, Path):
+            raise TypeError("input_path should be a Path object")
+        if not isinstance(output_path, Path):
+            raise TypeError("output_path should be a Path object")
+        if not isinstance(input_name, str):
+            raise TypeError("input_name should be a string")
+        if not input_path.exists():
+            raise FileNotFoundError(f"input_path does not exist: {input_path}")
+        if not output_path.exists():
+            raise FileNotFoundError(f"output_path does not exist: {output_path}")
+        if build not in ['37', '38']:
+            raise ValueError("build should be either '37' or '38'")
         
-        # Check type of min_dist
-        if not isinstance(min_dist, list):
-            raise TypeError("min_dist should be of type list.")
-        if not all(isinstance(i, float) for i in min_dist):
-            raise TypeError("min_dist should be a list of floats.")
-        if not all(i >= 0 for i in min_dist):
-            raise ValueError("min_dist should be a list of non-negative floats.")
-        if len(min_dist) == 0:
-            raise ValueError("min_dist should not be an empty list.")
+        self.input_path = input_path
+        self.input_name = input_name
+        self.output_path = output_path
+        self.build = build
+        self.high_ld_regions = high_ld_regions
         
-        # Check type of metric
-        if not isinstance(metric, list):
-            raise TypeError("metric should be of type list.")
-        if not all(isinstance(i, str) for i in metric):
-            raise TypeError("metric should be a list of strings.")
-        if len(metric) == 0:
-            raise ValueError("metric should not be an empty list.")
+        # Create main results directory
+        self.results_dir = self.output_path / 'dimensionality_reduction_results'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
         
-        # Check type of random_state
-        if random_state is not None:
-            if not isinstance(random_state, int):
-                raise TypeError("random_state should be of type int.")
-            if random_state < 0:
-                raise ValueError("random_state should be a non-negative integer.")
-            
-        # Check if color_hue_file is a file
-        if color_hue_file is not None:
-            if not isinstance(color_hue_file, Path):
-                raise TypeError("color_hue_file should be a Path object.")
-            if not color_hue_file.is_file():
-                raise FileNotFoundError(f"color_hue_file not found at {color_hue_file}")
+        # Initialize components
+        self.pca_preparator: Optional[PCAReduction] = None
+        self.umap_reducer: Optional[UMAPReduction] = None
+        self.tsne_reducer: Optional[TSNEReduction] = None
+        self.plotter: Optional[Plot2D] = None
         
-        # Check if case_control_markers is a boolean
-        if not isinstance(case_control_markers, bool):
-            raise TypeError("case_control_markers should be of type bool.")
+        # Store results
+        self.eigenvector_file: Optional[Path] = None
+        self.eigenvalue_file: Optional[Path] = None
+        self.umap_results: Optional[pd.DataFrame] = None
+        self.tsne_results: Optional[pd.DataFrame] = None
         
-        if format not in ['pdf', 'png', 'jpeg', 'svg']:
-            raise ValueError("format should be one of 'pdf', 'png', 'svg', or 'jpeg'.")
-        if not isinstance(umap_kwargs, dict):
-            raise TypeError("umap_kwargs should be a dictionary.")
-
-        logger.info("Generating UMAP plots with the following parameters:")
-        logger.info(f"UMAP parameters: n_neighbors={n_neighbors}, min_dist={min_dist}, metric={metric}")
-        logger.info(f"Random state: {random_state}")
-        logger.info(f"Color hue file: {color_hue_file}")
-        logger.info(f"Case control markers: {case_control_markers}")
-
-        # generate a parameter grid
-        params_dict = {
-            'n_neighbors': n_neighbors,
-            'min_dist'   : min_dist,
-            'metric'     : metric
-        }
-        param_grid = ParameterGrid(params_dict)
-
-        if color_hue_file is not None:
-
-            if color_hue_file.is_file():
-            # load color hue file
-                df_color_hue = pd.read_csv(
-                    color_hue_file,
-                    sep='\t',
-                )
-                logger.info(f"Color hue file loaded from {color_hue_file}")
-                logger.info(f"Column {df_color_hue.columns[2]} will be used for color hue")
-                df_color_hue.columns = ["ID1", "ID2", df_color_hue.columns[2]]
-                logger.info(f"Color hue file has {df_color_hue.shape[0]} rows and {df_color_hue.shape[1]} columns")
-                hue_col = df_color_hue.columns[2]
-            else:
-                raise FileNotFoundError(f"color_hue_file not found at {color_hue_file}")
-        else:
-            hue_col = None
-
-        if case_control_markers:
-            # load case control markers
-            df_fam = pd.read_csv(
-                self.input_path / (self.input_name+'.fam'),
-                sep=r'\s+',
-                engine='python'
-            )
-            logger.info(f"Case-control labels loaded from {self.input_path / (self.input_name+'.fam')}")
-            
-            df_fam.columns = ["ID1", "ID2", "F_ID", "M_ID", "Sex", "Phenotype"]
-            recode = {1:'Control', 2:'Patient'}
-            df_fam["Phenotype"] = df_fam["Phenotype"].map(recode)
-            df_fam = df_fam[['ID1', 'ID2', 'Phenotype']].copy()
-            logger.info(f"Case-control markers file has {df_fam.shape[0]} rows and {df_fam.shape[1]} columns")
-
-        if color_hue_file is not None and case_control_markers:
-            # merge color hue file with case control markers
-            df_metadata = df_color_hue.merge(
-                df_fam,
-                on=['ID1', 'ID2'],
-                how='inner'
-            )
-            logger.info(f"Color hue file merged with case control markers file")
-            logger.info(f"Merged file has {df_metadata.shape[0]} rows and {df_metadata.shape[1]} columns")
-        elif color_hue_file is not None:
-            df_metadata = df_color_hue.copy()
-            logger.info(f"Color hue file used as metadata")
-        elif case_control_markers:
-            df_metadata = df_fam.copy()
-            logger.info(f"Case control markers file used as metadata")
-        else:
-            df_metadata = None
-            logger.info(f"No metadata file provided")
-
-        count=1
-
-        # create a dataframe to store parameters
-        df_params = pd.DataFrame(
-            columns=['n_neighbors', 'min_dist', 'metric', 'warnings']
-        )
-
-        for params in param_grid:
-
-            # generate umap plot for data that passed QC
-            warnings = self._umap_plots(
-                plot_name   =f"umap_2d_{count}.{format}",
-                n_neighbors =params['n_neighbors'],
-                min_dist    =params['min_dist'],
-                metric      =params['metric'],
-                random_state=random_state,
-                df_metadata =df_metadata,
-                hue_col     =hue_col,
-                umap_kwargs=umap_kwargs
-            )
-
-            self.files_to_keep.append(f"umap_2d_{count}.jpeg")
-
-            df_params.loc[count, 'n_neighbors']= params['n_neighbors']
-            df_params.loc[count, 'min_dist']   = params['min_dist']
-            df_params.loc[count, 'metric']     = params['metric']
-            df_params.loc[count, 'warnings']   = warnings
-
-            count +=1
-
-        # save parameters to a csv file
-        df_params.to_csv(
-            os.path.join(self.results_dir, 'plots_parameters.csv'),
-            index=True,
-            sep='\t'
-        )
-
-        self.files_to_keep.append('plots_parameters.csv')
-
-        # generate PCA plot for comparison
-        self._pca_plot(
-            df_metadata = df_metadata, 
-            plot_dir = self.plots_dir,
-            plot_name= f'pca_plot.{format}',
-            hue_col = hue_col
-        )
-
-        return
+        logger.info(f"Pipeline initialized for {input_name}")
+        logger.info(f"Results will be saved to {self.results_dir}")
     
-    def _umap_plots(self, plot_name: str, n_neighbors: int, min_dist: float, metric: str, random_state: Optional[int] = None, df_metadata: Optional[pd.DataFrame] = None, hue_col: Optional[str] = None, umap_kwargs: dict = dict()) -> list:
+    def run_pca_preparation(self,
+                           maf: float = 0.001,
+                           geno: float = 0.1,
+                           mind: float = 0.2,
+                           hwe: float = 5e-8,
+                           ind_pair: list = [50, 5, 0.2],
+                           pca: int = 20,
+                           case_control_markers: bool = False) -> Path:
         """
-        Generate and save UMAP (Uniform Manifold Approximation and Projection) plots from PCA data.
-        This method reads eigenvector data from a file, performs UMAP dimensionality reduction,
-        and creates a 2D scatter plot with optional metadata coloring/styling.
+        Run PCA preparation: LD pruning and principal component analysis.
         
         Parameters
         ----------
-        plot_name : str
-            Name of the output plot file
-        n_neighbors : int
-            Number of neighbors to consider for manifold approximation
-        min_dist : float
-            Minimum distance between points in the low dimensional representation
-        metric : str
-            Distance metric to use for UMAP calculation
-        random_state : int, optional
-            Random seed for reproducibility
-        df_metadata : pd.DataFrame, optional
-            DataFrame containing metadata to merge with the eigenvector data
-        hue_col : str, optional
-            Column name in metadata to use for point coloring
-            Additional keyword arguments to pass to UMAP
-        umap_kwargs : dict, optional
-            Additional keyword arguments to pass to UMAP constructor
-
+        maf : float, default=0.001
+            Minor allele frequency threshold
+        geno : float, default=0.1
+            Genotype missingness threshold
+        mind : float, default=0.2
+            Sample missingness threshold
+        hwe : float, default=5e-8
+            Hardy-Weinberg equilibrium p-value threshold
+        ind_pair : list, default=[50, 5, 0.2]
+            LD pruning parameters: [window_size, step_size, r2_threshold]
+        pca : int, default=20
+            Number of principal components to calculate
+        
         Returns
         -------
-        list or None
-            List of warning messages if any were generated during execution, None otherwise
+        Path
+            Path to the generated eigenvector file
         
         Notes
         -----
-        The method expects an eigenvector file in the results directory with the naming pattern
-        {input_name}.eigenvec. The plot will be saved in the plots directory with the provided
-        plot_name.
-        If metadata is provided and contains a 'Phenotype' column, it will be used for styling
-        points unless hue_col is specified.
+        This step is required before running UMAP or t-SNE reductions.
         """
-
-        # load .eigenvec file
-        df_eigenvec = pd.read_csv(
-            self.results_dir / (self.input_name+'.eigenvec'),
-            header=None,
-            sep=' '
-        )
-        logger.info(f"Eigenvector file loaded from {self.results_dir / (self.input_name+'.eigenvec')}")
-        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
-
-        # rename columns
-        num_pc = df_eigenvec.shape[1]-2
-        new_cols = [f"pca_{k}" for k in range(1,num_pc+1)]
-        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
-
-        df_ids = df_eigenvec[['ID1', 'ID2']].copy()
-        df_vals= df_eigenvec[new_cols].to_numpy()
-
-        if df_metadata is not None:
-            # merge metadata with eigenvector data
-            df_ids = df_ids.merge(
-                df_metadata,
-                on=['ID1', 'ID2'],
-                how='inner'
-            )
-            logger.info(f"Metadata file merged with eigenvector file")
-            logger.info(f"Merged file has {df_ids.shape[0]} rows and {df_ids.shape[1]} columns")
-
-            if 'Phenotype' in df_ids.columns:
-                style_col = 'Phenotype'
-            else:
-                style_col = None
-            
-            if style_col and hue_col is None:
-                hue_col, style_col = style_col, None
-
-        del df_eigenvec
-
-        # instantiate umap class
-        D2_redux = umap.UMAP(
-            n_components=2,
-            n_neighbors =n_neighbors,
-            min_dist    =min_dist,
-            metric      =metric,
-            random_state=random_state,
-            **umap_kwargs
-        )
-
-        with warnings.catch_warnings(record=True) as w:
-
-            warnings.simplefilter("always")
-            
-            # generates umap projection
-            umap_2D_proj = D2_redux.fit_transform(df_vals)
-
-            df_2D = pd.concat([df_ids, pd.DataFrame(data=umap_2D_proj, columns=['umap1', 'umap2'])], axis=1)
-
-            del df_vals
-
-            # generates and saves a 2D scatter plot
-            # size given in inches
-            sns.set_context(font_scale=0.9)
-            fig, ax = plt.subplots(figsize=(5,5))
-
-            scatter_kwargs = {}
-            if style_col is not None:
-                scatter_kwargs['style'] = style_col
-                
-            scatter_plot= sns.scatterplot(
-                data=df_2D, 
-                x='umap1', 
-                y='umap2', 
-                hue=hue_col,
-                marker='.',
-                s=10,
-                alpha=0.5,
-                ax=ax,
-                **scatter_kwargs
-            )
-            if df_metadata is not None:
-                plt.legend(
-                    bbox_to_anchor=(0., 1.02, 1., .102), 
-                    loc='lower left',
-                    ncols=3, 
-                    mode="expand", 
-                    borderaxespad=0.,
-                    fontsize=7,
-                    markerscale=2
-                )
-                
-            # Set tick label size
-            ax.tick_params(axis='both', labelsize=7)
-
-            # Set axis label and size
-            ax.set_xlabel('UMAP1', fontsize=7)
-            ax.set_ylabel('UMAP2', fontsize=7)
-            ax.set_aspect('equal', adjustable='datalim')
-
-            plt.tight_layout()
-
-            fig.savefig(self.plots_dir / plot_name, dpi=500)
-            plt.close(fig)
-
-
-            warning = [warn.message.args[0] for warn in w] # type: ignore
-            return warning
+        logger.info("=" * 80)
+        logger.info("STEP 1: PCA Preparation")
+        logger.info("=" * 80)
         
-    def _pca_plot(self, df_metadata: Optional[pd.DataFrame] = None, hue_col: Optional[str] = None, plot_dir: Path = Path(), plot_name: str = 'pca_plot.svg') -> None:
-
-        if not plot_dir.exists():
-            logger.info('STEP: Generating PCA plots: `plot_dir` does not exist.')
-            logger.info(f'STEP: Generating PCA plots: pca plots will be saved in {self.output_path}')
-            plot_dir = self.output_path
-
-        df_eigenvec = pd.read_csv(
-            self.results_dir / (self.input_name+'.eigenvec'),
-            header=None,
-            sep=' '
+        # Initialize PCA preparator
+        self.pca_preparator = PCAReduction(
+            input_path=self.input_path,
+            input_name=self.input_name,
+            output_path=self.results_dir,
+            build=self.build,
+            high_ld_regions=self.high_ld_regions
         )
-        logger.info(f"Eigenvector file loaded from {self.results_dir / (self.input_name+'.eigenvec')}")
-        logger.info(f"Eigenvector file has {df_eigenvec.shape[0]} rows and {df_eigenvec.shape[1]} columns")
-
-        # load .eigenval file and calculate variance explained by the first two PCs
-        df_eigenval = pd.read_csv(
-            self.results_dir / (self.input_name+'.eigenval'),
-            header=None,
-            sep   =r"\s+",
-            engine='python'
+        
+        # Run the preparation pipeline
+        self.pca_preparator.execute_pcareduction_pipeline(
+            maf=maf,
+            geno=geno,
+            mind=mind,
+            hwe=hwe,
+            ind_pair=ind_pair,
+            pca=pca,
+            case_control_markers=case_control_markers
         )
-
-        total_variance = df_eigenval[0].sum()
-        pc1_var = df_eigenval[0][0]
-        pc2_var = df_eigenval[0][1]
-
-        pc1_var_perc = round((pc1_var / total_variance) * 100, 2)
-        pc2_var_perc = round((pc2_var / total_variance) * 100, 2)
-
-        # rename columns
-        num_pc = df_eigenvec.shape[1]-2
-        new_cols = [f"pc_{k}" for k in range(1,num_pc+1)]
-        df_eigenvec.columns = ['ID1', 'ID2'] + new_cols
-
-        if df_metadata is not None:
-            # merge metadata with eigenvector data
-            df = df_eigenvec.merge(
-                df_metadata,
-                on=['ID1', 'ID2'],
-                how='inner'
+        
+        # Store eigenvector and eigenvalue file paths
+        self.eigenvector_file = self.pca_preparator.eigenvectors
+        self.eigenvalue_file = self.pca_preparator.eigenvalues
+        
+        logger.info(f"PCA preparation completed")
+        logger.info(f"Eigenvector file: {self.eigenvector_file}")
+        logger.info(f"Eigenvalue file: {self.eigenvalue_file}")
+        
+        return self.eigenvector_file
+    
+    def run_umap(self,
+                 n_neighbors: int = 15,
+                 min_dist: float = 0.1,
+                 metric: str = 'euclidean',
+                 random_state: Optional[int] = None,
+                 n_components: int = 2,
+                 umap_kwargs: Optional[dict] = None) -> pd.DataFrame:
+        """
+        Run UMAP dimensionality reduction.
+        
+        Parameters
+        ----------
+        n_neighbors : int, default=15
+            Number of neighbors for UMAP
+        min_dist : float, default=0.1
+            Minimum distance between points
+        metric : str, default='euclidean'
+            Distance metric
+        random_state : int, optional
+            Random seed for reproducibility
+        n_components : int, default=2
+            Number of output dimensions
+        umap_kwargs : dict, optional
+            Additional UMAP parameters
+        
+        Returns
+        -------
+        pd.DataFrame
+            UMAP results with columns ['ID1', 'ID2', 'umap_1', 'umap_2', ...]
+        
+        Raises
+        ------
+        RuntimeError
+            If PCA preparation hasn't been run yet
+        """
+        if self.eigenvector_file is None:
+            raise RuntimeError("Must run PCA preparation before UMAP. Call run_pca_preparation() first.")
+        
+        logger.info("=" * 80)
+        logger.info("STEP 2: UMAP Reduction")
+        logger.info("=" * 80)
+        
+        # Initialize UMAP reducer
+        self.umap_reducer = UMAPReduction(
+            eigenvector=self.eigenvector_file,
+            output_path=self.results_dir
+        )
+        
+        # Run UMAP
+        self.umap_results = self.umap_reducer.fit_transform(
+            n_neighbors=n_neighbors,
+            min_dist=min_dist,
+            metric=metric,
+            random_state=random_state,
+            n_components=n_components,
+            umap_kwargs=umap_kwargs
+        )
+        
+        # Save results
+        output_file = self.results_dir / 'umap_results' / 'umap_coordinates.tsv'
+        self.umap_results.to_csv(output_file, sep='\t', index=False)
+        logger.info(f"UMAP results saved to {output_file}")
+        
+        return self.umap_results
+    
+    def run_tsne(self,
+                 n_components: int = 2,
+                 perplexity: float = 30.0,
+                 learning_rate: float = 200.0,
+                 n_iter: int = 1000,
+                 metric: str = 'euclidean',
+                 random_state: Optional[int] = None,
+                 early_exaggeration: float = 12.0,
+                 init: Literal['pca', 'random'] = 'pca',
+                 tsne_kwargs: Optional[dict] = None) -> pd.DataFrame:
+        """
+        Run t-SNE dimensionality reduction.
+        
+        Parameters
+        ----------
+        n_components : int, default=2
+            Number of output dimensions
+        perplexity : float, default=30.0
+            t-SNE perplexity parameter
+        learning_rate : float, default=200.0
+            Learning rate for optimization
+        n_iter : int, default=1000
+            Number of optimization iterations
+        metric : str, default='euclidean'
+            Distance metric
+        random_state : int, optional
+            Random seed for reproducibility
+        early_exaggeration : float, default=12.0
+            Early exaggeration parameter
+        init : {'pca', 'random'}, default='pca'
+            Initialization method
+        tsne_kwargs : dict, optional
+            Additional t-SNE parameters
+        
+        Returns
+        -------
+        pd.DataFrame
+            t-SNE results with columns ['ID1', 'ID2', 'tsne_1', 'tsne_2', ...]
+        
+        Raises
+        ------
+        RuntimeError
+            If PCA preparation hasn't been run yet
+        """
+        if self.eigenvector_file is None:
+            raise RuntimeError("Must run PCA preparation before t-SNE. Call run_pca_preparation() first.")
+        
+        logger.info("=" * 80)
+        logger.info("STEP 3: t-SNE Reduction")
+        logger.info("=" * 80)
+        
+        # Initialize t-SNE reducer
+        self.tsne_reducer = TSNEReduction(
+            eigenvector=self.eigenvector_file,
+            output_path=self.results_dir
+        )
+        
+        # Run t-SNE
+        self.tsne_results = self.tsne_reducer.fit_transform(
+            n_components=n_components,
+            perplexity=perplexity,
+            learning_rate=learning_rate,
+            n_iter=n_iter,
+            metric=metric,
+            random_state=random_state,
+            early_exaggeration=early_exaggeration,
+            init=init,
+            tsne_kwargs=tsne_kwargs
+        )
+        
+        # Save results
+        output_file = self.results_dir / 'tsne_results' / 'tsne_coordinates.tsv'
+        self.tsne_results.to_csv(output_file, sep='\t', index=False)
+        logger.info(f"t-SNE results saved to {output_file}")
+        
+        return self.tsne_results
+    
+    def generate_plots(self,
+                      color_hue_file: Optional[Path] = None,
+                      case_control_markers: bool = False,
+                      fam_file: Optional[Path] = None,
+                      plot_format: str = 'pdf',
+                      dpi: int = 500,
+                      figsize: tuple = (5, 5),) -> dict:
+        """
+        Generate plots for all completed reductions.
+        
+        Parameters
+        ----------
+        color_hue_file : Path, optional
+            Path to metadata file for coloring
+        case_control_markers : bool, default=False
+            Whether to use case-control markers
+        fam_file : Path, optional
+            Path to .fam file (required if case_control_markers=True)
+        plot_format : str, default='pdf'
+            Output format ('pdf', 'png', 'jpeg', 'svg')
+        dpi : int, default=500
+            Resolution for plots
+        figsize : tuple, default=(5, 5)
+            Figure size in inches
+        include_pca : bool, default=True
+            Whether to generate PCA plots
+        
+        Returns
+        -------
+        dict
+            Dictionary mapping method names to plot file paths
+        
+        Raises
+        ------
+        RuntimeError
+            If no reductions have been run
+        """
+        has_pca = hasattr(self, 'eigenvector_file') and self.eigenvector_file is not None and self.eigenvector_file.exists()
+        if self.umap_results is None and self.tsne_results is None and not has_pca:
+            raise RuntimeError("No reductions have been run. Run PCA preparation and/or UMAP/t-SNE first.")
+        
+        logger.info("=" * 80)
+        logger.info("STEP 4: Generating Plots")
+        logger.info("=" * 80)
+        
+        # Create plots directory
+        plots_dir = self.results_dir / 'plots'
+        plots_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize plotter
+        self.plotter = Plot2D(output_dir=plots_dir)
+        
+        # Prepare metadata once
+        self.plotter.prepare_metadata(
+            color_hue_file=color_hue_file,
+            case_control_markers=case_control_markers,
+            fam_file=fam_file
+        )
+        
+        plot_paths = {}
+        
+        # Generate UMAP plot
+        if self.umap_results is not None:
+            logger.info("Generating UMAP plot...")
+            umap_path = self.plotter.generate_plot(
+                data=self.umap_results,
+                x_col='umap_1',
+                y_col='umap_2',
+                plot_name=f'umap_plot.{plot_format}',
+                xlabel='UMAP 1',
+                ylabel='UMAP 2',
+                figsize=figsize,
+                dpi=dpi,
+                format=plot_format
             )
-            logger.info(f"Metadata file merged with eigenvector file")
-            logger.info(f"Merged file has {df.shape[0]} rows and {df.shape[1]} columns")
-
-            if hue_col is not None:
-                if hue_col in df.columns:
-                    logger.info(f"Using column '{hue_col}' for coloring the PCA plot")
-                else:
-                    raise ValueError(f"Column '{hue_col}' not found in metadata file")
-            else:
-                hue_col = df_metadata.columns[2] if df_metadata.shape[1] > 2 else None
-
+            plot_paths['umap'] = umap_path
+        
+        # Generate t-SNE plot
+        if self.tsne_results is not None:
+            logger.info("Generating t-SNE plot...")
+            tsne_path = self.plotter.generate_plot(
+                data=self.tsne_results,
+                x_col='tsne_1',
+                y_col='tsne_2',
+                plot_name=f'tsne_plot.{plot_format}',
+                xlabel='t-SNE 1',
+                ylabel='t-SNE 2',
+                figsize=figsize,
+                dpi=dpi,
+                format=plot_format
+            )
+            plot_paths['tsne'] = tsne_path
+        
+        logger.info("All plots generated successfully")
+        return plot_paths
+    
+    def run_full_pipeline(self,
+                         # PCA parameters
+                         pca_params: Optional[dict] = None,
+                         force_pca_recompute: bool = False,
+                         # UMAP parameters
+                         run_umap: bool = True,
+                         umap_params: Optional[dict] = None,
+                         # t-SNE parameters
+                         run_tsne: bool = True,
+                         tsne_params: Optional[dict] = None,
+                         # Plotting parameters
+                         color_hue_file: Optional[Path] = None,
+                         case_control_markers: bool = False,
+                         fam_file: Optional[Path] = None,
+                         plot_format: str = 'pdf',
+                         dpi: int = 500,
+                         include_pca: bool = True) -> dict:
+        """
+        Run the complete dimensionality reduction pipeline.
+        
+        Parameters
+        ----------
+        pca_params : dict, optional
+            Parameters for PCA preparation (maf, geno, mind, hwe, ind_pair, pca)
+        force_pca_recompute : bool, default=False
+            If True, recompute PCA even if files already exist. If False, skip
+            PCA computation if eigenvector and eigenvalue files are found.
+        run_umap : bool, default=True
+            Whether to run UMAP reduction
+        umap_params : dict, optional
+            Parameters for UMAP (n_neighbors, min_dist, metric, random_state, etc.)
+        run_tsne : bool, default=True
+            Whether to run t-SNE reduction
+        tsne_params : dict, optional
+            Parameters for t-SNE (perplexity, learning_rate, n_iter, etc.)
+        color_hue_file : Path, optional
+            Metadata file for plot coloring
+        case_control_markers : bool, default=False
+            Whether to use case-control markers in plots
+        fam_file : Path, optional
+            Path to .fam file. If not provided, will automatically look for
+            {input_name}.fam in the input_path directory
+        plot_format : str, default='pdf'
+            Output format for plots
+        dpi : int, default=500
+            Resolution for plots
+        include_pca : bool, default=True
+            Whether to generate PCA plots
+        
+        Returns
+        -------
+        dict
+            Results summary with file paths and metadata
+        
+        Examples
+        --------
+        >>> pipeline = DimensionalityReductionPipeline(
+        ...     input_path=Path('data'),
+        ...     input_name='mydata',
+        ...     output_path=Path('results')
+        ... )
+        >>> results = pipeline.run_full_pipeline(
+        ...     pca_params={'pca': 20, 'maf': 0.01},
+        ...     force_pca_recompute=False,  # Skip PCA if files exist
+        ...     umap_params={'n_neighbors': 15, 'random_state': 42},
+        ...     tsne_params={'perplexity': 30, 'random_state': 42},
+        ...     color_hue_file=Path('metadata.tsv')
+        ... )
+        """
+        logger.info("=" * 80)
+        logger.info("STARTING FULL DIMENSIONALITY REDUCTION PIPELINE")
+        logger.info("=" * 80)
+        
+        # Set default parameters
+        pca_params = pca_params or {}
+        umap_params = umap_params or {}
+        tsne_params = tsne_params or {}
+        
+        results = {
+            'input': self.input_name,
+            'output_dir': str(self.results_dir),
+            'steps_completed': [],
+            'files': {}
+        }
+        
+        # Step 1: PCA Preparation (always required)
+        expected_eigenvec = self.results_dir / f"{self.input_name}-pca.eigenvec"
+        expected_eigenval = self.results_dir / f"{self.input_name}-pca.eigenval"
+        
+        if not force_pca_recompute and expected_eigenvec.exists() and expected_eigenval.exists():
+            logger.info("PCA files already exist, skipping PCA preparation")
+            logger.info(f"Using existing eigenvector file: {expected_eigenvec}")
+            logger.info(f"Using existing eigenvalue file: {expected_eigenval}")
+            self.eigenvector_file = expected_eigenvec
+            self.eigenvalue_file = expected_eigenval
+            eigenvec_path = expected_eigenvec
         else:
-            df = df_eigenvec.copy()
-            logger.info(f"No metadata file provided. Using eigenvector file only.")
-            logger.info(f"Eigenvector file has {df.shape[0]} rows and {df.shape[1]} columns")
-
-        logger.info(f"Generating PCA plot with {df.shape[0]} samples and {df.shape[1]} features")
-        logger.info(f"Variance explained by PC1: {pc1_var_perc}%, PC2: {pc2_var_perc}%")
-        logger.info(f"df columns: {df.columns.tolist()}")
-
-        # generates a 2D scatter plot
-        fig, ax = plt.subplots(figsize=(10,10))
-        sns.scatterplot(data=df, x='pc_1', y='pc_2', hue=hue_col, ax=ax, marker='.', s=70)
-        ax.set_aspect('equal', adjustable='datalim')
-        plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
-        plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
-        fig.savefig(plot_dir / f'2D-aspect-equal-{plot_name}', dpi=400)
-
-        fig.clf()
-
-        return
-
-
-class TSNEReduction:
-    pass
-
-class Plot2D:
-    pass
-
-class Plot3D:
-    pass
+            if force_pca_recompute:
+                logger.info("Force recompute enabled, running PCA preparation")
+            else:
+                logger.info("PCA files not found, running PCA preparation")
+            # Add case_control_markers to pca_params if not already present
+            pca_params_with_cc = pca_params.copy()
+            if 'case_control_markers' not in pca_params_with_cc:
+                pca_params_with_cc['case_control_markers'] = case_control_markers
+            eigenvec_path = self.run_pca_preparation(**pca_params_with_cc)
+            
+        results['steps_completed'].append('pca_preparation')
+        results['files']['eigenvector'] = str(eigenvec_path)
+        results['files']['eigenvalue'] = str(self.eigenvalue_file)
+        
+        # Step 2: UMAP (optional)
+        if run_umap:
+            self.run_umap(**umap_params)
+            results['steps_completed'].append('umap')
+            results['files']['umap_coordinates'] = str(
+                self.results_dir / 'umap_results' / 'umap_coordinates.tsv'
+            )
+        
+        # Step 3: t-SNE (optional)
+        if run_tsne:
+            self.run_tsne(**tsne_params)
+            results['steps_completed'].append('tsne')
+            results['files']['tsne_coordinates'] = str(
+                self.results_dir / 'tsne_results' / 'tsne_coordinates.tsv'
+            )
+        
+        # Step 4: Generate plots
+        has_pca = hasattr(self, 'eigenvector_file') and self.eigenvector_file is not None
+        if run_umap or run_tsne or (include_pca and has_pca):
+            # Auto-detect fam file from input path if not provided
+            if fam_file is None:
+                potential_fam_file = self.input_path / f"{self.input_name}.fam"
+                if potential_fam_file.exists():
+                    fam_file = potential_fam_file
+                    logger.info(f"Auto-detected fam file: {fam_file}")
+                elif case_control_markers:
+                    logger.warning("case_control_markers=True but no fam file found. Plots will be generated without case-control markers.")
+            
+            plot_paths = self.generate_plots(
+                color_hue_file=color_hue_file,
+                case_control_markers=case_control_markers,
+                fam_file=fam_file,
+                plot_format=plot_format,
+                dpi=dpi
+            )
+            results['steps_completed'].append('plotting')
+            results['files']['plots'] = {k: str(v) for k, v in plot_paths.items()}
+        
+        logger.info("=" * 80)
+        logger.info("PIPELINE COMPLETED SUCCESSFULLY")
+        logger.info("=" * 80)
+        logger.info(f"Steps completed: {', '.join(results['steps_completed'])}")
+        logger.info(f"Results saved to: {self.results_dir}")
+        
+        return results
