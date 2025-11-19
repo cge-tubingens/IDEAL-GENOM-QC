@@ -5,7 +5,7 @@ import re
 import importlib
 import logging
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pathlib import Path
 
 
@@ -50,14 +50,19 @@ class PipelineExecutor:
         """Execute all pipeline steps sequentially."""
         pipeline_steps = self.config['pipeline']['steps']
         
+        # Filter enabled steps and validate dependencies
+        enabled_steps = self._filter_enabled_steps(pipeline_steps)
+        self._validate_step_dependencies(enabled_steps)
+        
         self.logger.info(f"Starting pipeline: {self.pipeline_name}")
         self.logger.info(f"Output directory: {self.base_output_dir}")
         self.logger.info(f"Total steps: {len(pipeline_steps)}")
+        self.logger.info(f"Enabled steps: {len(enabled_steps)}")
         
-        for i, step_config in enumerate(pipeline_steps, 1):
+        for i, step_config in enumerate(enabled_steps, 1):
             step_name = step_config['name']
             self.logger.info(f"\n{'='*60}")
-            self.logger.info(f"Step {i}/{len(pipeline_steps)}: {step_name}")
+            self.logger.info(f"Step {i}/{len(enabled_steps)}: {step_name}")
             self.logger.info(f"{'='*60}")
             
             try:
@@ -246,6 +251,100 @@ class PipelineExecutor:
         
         raise ValueError(f"Unknown reference: {reference}")
     
+    def _filter_enabled_steps(self, pipeline_steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Filter pipeline steps to include only enabled ones.
+        
+        Parameters
+        ----------
+        pipeline_steps : list
+            List of all pipeline step configurations
+            
+        Returns
+        -------
+        list
+            List of enabled pipeline steps
+        """
+        enabled_steps = []
+        
+        for step in pipeline_steps:
+            # Default to enabled if not specified
+            if step.get('enabled', True):
+                enabled_steps.append(step)
+            else:
+                self.logger.info(f"Skipping disabled step: {step['name']}")
+        
+        return enabled_steps
+    
+    def _validate_step_dependencies(self, enabled_steps: List[Dict[str, Any]]) -> None:
+        """
+        Validate step dependencies and issue warnings for potential issues.
+        
+        Parameters
+        ----------
+        enabled_steps : list
+            List of enabled pipeline steps
+        """
+        enabled_step_names = {step['name'] for step in enabled_steps}
+        
+        # Define step dependencies for genomic QC workflow
+        dependencies = {
+            'variant_qc': ['sample_qc'],
+            'ancestry_qc': ['sample_qc'],  
+            'population_analysis': []  # Can run standalone or after any QC step
+        }
+        
+        # Check for missing dependencies and issue warnings
+        for step in enabled_steps:
+            step_name = step['name']
+            
+            if step_name in dependencies:
+                missing_deps = []
+                for dep in dependencies[step_name]:
+                    if dep not in enabled_step_names:
+                        missing_deps.append(dep)
+                
+                if missing_deps:
+                    self.logger.warning(
+                        f"⚠️  Step '{step_name}' is enabled but recommended dependency "
+                        f"step(s) {missing_deps} are disabled. "
+                        f"This may cause issues if input data is not properly preprocessed."
+                    )
+        
+        # Check for proper step ordering
+        self._validate_step_ordering(enabled_steps)
+    
+    def _validate_step_ordering(self, enabled_steps: List[Dict[str, Any]]) -> None:
+        """
+        Validate that steps are in proper execution order.
+        
+        Parameters
+        ----------
+        enabled_steps : list
+            List of enabled pipeline steps
+        """
+        # Define preferred step order
+        preferred_order = ['sample_qc', 'ancestry_qc', 'variant_qc', 'population_analysis']
+        
+        # Get positions of enabled steps in preferred order
+        step_positions = {}
+        for step in enabled_steps:
+            step_name = step['name']
+            if step_name in preferred_order:
+                step_positions[step_name] = preferred_order.index(step_name)
+        
+        # Check if steps are in correct order
+        if len(step_positions) > 1:
+            current_order = [step['name'] for step in enabled_steps if step['name'] in preferred_order]
+            sorted_order = sorted(current_order, key=lambda x: preferred_order.index(x))
+            
+            if current_order != sorted_order:
+                self.logger.warning(
+                    f"⚠️  Steps may be out of optimal order. "
+                    f"Current: {current_order}, Recommended: {sorted_order}. "
+                    f"This may cause issues with step dependencies."
+                )
+
     def _setup_logging(self) -> logging.Logger:
         """
         Setup logging for the pipeline.
@@ -320,3 +419,34 @@ class PipelineExecutor:
             )
         
         return getattr(step_instance, attribute)
+    
+    def get_pipeline_summary(self) -> Dict[str, Any]:
+        """
+        Get a summary of the pipeline configuration and status.
+        
+        Returns
+        -------
+        dict
+            Pipeline summary including enabled steps, dependencies, and configuration
+        """
+        pipeline_steps = self.config['pipeline']['steps']
+        enabled_steps = self._filter_enabled_steps(pipeline_steps)
+        
+        summary = {
+            'pipeline_name': self.pipeline_name,
+            'base_output_dir': self.base_output_dir,
+            'total_steps': len(pipeline_steps),
+            'enabled_steps': len(enabled_steps),
+            'steps': []
+        }
+        
+        for step in enabled_steps:
+            step_info = {
+                'name': step['name'],
+                'module': step['module'],
+                'class': step['class'],
+                'enabled': step.get('enabled', True)
+            }
+            summary['steps'].append(step_info)
+        
+        return summary
