@@ -21,7 +21,7 @@ pipeline:
         input_name: "input_dataset"
         output_path: "${base_output_dir}/01_sample_qc"
         output_name: "sample_qc_filtered"
-        high_ld_file: "/path/to/high_ld_regions.txt"
+        high_ld_regions_file: "/path/to/high_ld_regions.txt"
         build: "38"
       execute_params:
         # Sample QC parameters
@@ -47,7 +47,7 @@ pipeline:
         input_name: "${steps.sample_qc.output_name}"
         output_path: "${base_output_dir}/02_ancestry_qc"
         output_name: "ancestry_qc_filtered"
-        high_ld_regions: "/path/to/high_ld_regions.txt"
+        high_ld_regions_file: "/path/to/high_ld_regions.txt"
         reference_files:
           bed: "/path/to/1000genomes/reference.bed"
           bim: "/path/to/1000genomes/reference.bim"
