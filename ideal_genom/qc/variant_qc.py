@@ -331,7 +331,7 @@ class VariantQC:
             '--hwe', str(hwe), 'midp',
             '--geno', str(geno),
             '--make-bed',
-            '--out', str(self.clean_dir / (self.output_name+'-variantQCed'))
+            '--out', str(self.clean_dir / (self.output_name))
         ])
 
         return
