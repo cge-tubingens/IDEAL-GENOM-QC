@@ -385,9 +385,6 @@ class PipelineExecutor:
         logging.Logger
             Configured logger instance
         """
-        log_dir = os.path.join(self.base_output_dir, 'pipeline_logs')
-        os.makedirs(log_dir, exist_ok=True)
-        
         # Create logger
         pipeline_logger = logging.getLogger(f'ideal_genom.pipeline.{self.pipeline_name}')
         pipeline_logger.setLevel(logging.DEBUG)
@@ -396,24 +393,29 @@ class PipelineExecutor:
         if pipeline_logger.handlers:
             return pipeline_logger
         
-        # File handler
-        log_file = os.path.join(log_dir, f'{self.pipeline_name}.log')
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.DEBUG)
-        
-        # Console handler
+        # Console handler (always available)
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
         
+        # File handler (only if not dry run)
+        if not self.dry_run:
+            log_dir = os.path.join(self.base_output_dir, 'pipeline_logs')
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, f'{self.pipeline_name}.log')
+            file_handler = logging.FileHandler(log_file)
+            file_handler.setLevel(logging.DEBUG)
         # Formatter
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
         
-        pipeline_logger.addHandler(file_handler)
+        # Add file handler only if not dry run
+        if not self.dry_run:
+            file_handler.setFormatter(formatter)
+            pipeline_logger.addHandler(file_handler)
+        
+        console_handler.setFormatter(formatter)
         pipeline_logger.addHandler(console_handler)
         
         return pipeline_logger
