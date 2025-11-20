@@ -1594,11 +1594,17 @@ class DimensionalityReductionPipeline:
                 logger.info("Force recompute enabled, running PCA preparation")
             else:
                 logger.info("PCA files not found, running PCA preparation")
-            # Add case_control_markers to pca_params if not already present
-            pca_params_with_cc = pca_params.copy()
-            if 'case_control_markers' not in pca_params_with_cc:
-                pca_params_with_cc['case_control_markers'] = case_control_markers
-            eigenvec_path = self.execute_pca_preparation(**pca_params_with_cc)
+            # Extract individual PCA parameters from pca_params dictionary
+            pca_kwargs = {
+                'maf': pca_params.get('maf', 0.001),
+                'geno': pca_params.get('geno', 0.1),
+                'mind': pca_params.get('mind', 0.2),
+                'hwe': pca_params.get('hwe', 5e-8),
+                'ind_pair': pca_params.get('ind_pair', [50, 5, 0.2]),
+                'pca': pca_params.get('pca', 20),
+                'case_control_markers': case_control_markers
+            }
+            eigenvec_path = self.execute_pca_preparation(**pca_kwargs)
             
         results['steps_completed'].append('pca_preparation')
         results['files']['eigenvector'] = str(eigenvec_path)
@@ -1682,11 +1688,17 @@ class DimensionalityReductionPipeline:
                 logger.info("Force recompute enabled, running PCA preparation")
             else:
                 logger.info("PCA files not found, running PCA preparation")
-            # Add case_control_markers to pca_params if not already present
-            pca_params_with_cc = pca_params.copy()
-            if 'case_control_markers' not in pca_params_with_cc:
-                pca_params_with_cc['case_control_markers'] = case_control_markers
-            self.execute_pca_preparation(**pca_params_with_cc)
+            # Extract individual PCA parameters from pca_params dictionary
+            pca_kwargs = {
+                'maf': pca_params.get('maf', 0.001),
+                'geno': pca_params.get('geno', 0.1),
+                'mind': pca_params.get('mind', 0.2),
+                'hwe': pca_params.get('hwe', 5e-8),
+                'ind_pair': pca_params.get('ind_pair', [50, 5, 0.2]),
+                'pca': pca_params.get('pca', 20),
+                'case_control_markers': case_control_markers
+            }
+            self.execute_pca_preparation(**pca_kwargs)
         
         # Now run the parameter grid
         return self.execute_parameter_grid(
