@@ -42,4 +42,4 @@ requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project.scripts]
-ideal_genom = "ideal_genom.__main__:main"
+ideal-genom = "ideal_genom.__main__:main"
