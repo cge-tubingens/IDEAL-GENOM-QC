@@ -1020,7 +1020,8 @@ class DimensionalityReductionPipeline:
                  input_name: str,
                  output_path: Path,
                  build: str = '38',
-                 high_ld_regions: Optional[Path] = None) -> None:
+                 high_ld_regions_file: Optional[Path] = None,
+                 generate_plot: bool = True) -> None:
         """
         Initialize the dimensionality reduction pipeline.
         
@@ -1034,8 +1035,10 @@ class DimensionalityReductionPipeline:
             Path to directory where all results will be saved
         build : str, default='38'
             Genome build version ('37' or '38')
-        high_ld_regions : Path, optional
+        high_ld_regions_file : Path, optional
             Path to file containing high LD regions. If None, will be fetched automatically.
+        generate_plot : bool, default=True
+            Whether to generate plots automatically
         
         Raises
         ------
@@ -1063,7 +1066,8 @@ class DimensionalityReductionPipeline:
         self.input_name = input_name
         self.output_path = output_path
         self.build = build
-        self.high_ld_regions = high_ld_regions
+        self.high_ld_regions = high_ld_regions_file
+        self.generate_plot = generate_plot
         
         # Create main results directory
         self.results_dir = self.output_path / 'dimensionality_reduction_results'
