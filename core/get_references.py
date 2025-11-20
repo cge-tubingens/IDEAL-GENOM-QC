@@ -237,7 +237,14 @@ class Fetcher1000Genome:
             self.bed_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bed')
             self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bim')
             self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.fam')
-            self.psam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
+            
+            # Rename psam file to match the final naming convention
+            original_psam = self.destination / "all_phase3.psam"
+            final_psam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
+            if original_psam.exists():
+                self.psam_file = original_psam.rename(final_psam)
+            else:
+                self.psam_file = final_psam
 
             return self.destination / f'1kG_phase3_GRCh{self.build}'
         
@@ -288,6 +295,14 @@ class Fetcher1000Genome:
                 '--out', str(self.destination / f'1kG_phase3_GRCh{self.build}')
             ])
             logger.info("Final conversion step completed successfully.")
+
+            # Rename psam file to match the final naming convention
+            original_psam = self.destination / "all_phase3.psam"
+            final_psam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
+            if original_psam.exists():
+                self.psam_file = original_psam.rename(final_psam)
+            else:
+                self.psam_file = final_psam
             
             # Verify final files were created successfully
             if not self._check_if_binaries_exist():
@@ -308,13 +323,6 @@ class Fetcher1000Genome:
         self.bim_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.bim')
         self.fam_file = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.fam')
 
-        # Rename psam file to match the final naming convention
-        original_psam = self.destination / "all_phase3.psam"
-        final_psam = (self.destination / f'1kG_phase3_GRCh{self.build}').with_suffix('.psam')
-        if original_psam.exists():
-            self.psam_file = original_psam.rename(final_psam)
-        else:
-            self.psam_file = final_psam
 
         return self.destination / f'1kG_phase3_GRCh{self.build}'
     
