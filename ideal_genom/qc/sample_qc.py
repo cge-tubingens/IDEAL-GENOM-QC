@@ -1139,7 +1139,7 @@ class SampleQC:
             '--bfile', str(self.input_path / binary_name),
             '--remove', str(fail_samples_file),
             '--make-bed',
-            '--out', str(self.clean_dir / (self.output_name + '-clean-samples'))
+            '--out', str(self.clean_dir / (self.output_name))
         ])
 
         return
