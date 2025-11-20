@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class SampleQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, build: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, build: str = '38') -> None:
         
         """
         Initialize SampleQC class for quality control of genetic data.
@@ -44,7 +44,7 @@ class SampleQC:
             Directory path where output files will be saved
         output_name : str
             Base name for output files (without extension)
-        high_ld_file : Path
+        high_ld_regions_file : Path
             Path to file containing high LD regions. If not found, will be fetched from package
         built : str, optional
             Genome build version, either '37' or '38' (default='38')
@@ -80,8 +80,8 @@ class SampleQC:
             raise TypeError("input_path and output_path should be of type Path")
         if not isinstance(input_name, str) or not isinstance(output_name, str):
             raise TypeError("input_name and output_name should be of type str")
-        if not isinstance(high_ld_file, Path):
-            raise TypeError("high_ld_file should be of type Path")
+        if not isinstance(high_ld_regions_file, Path):
+            raise TypeError("high_ld_regions_file should be of type Path")
         
         if not isinstance(build, str):
             raise TypeError("built should be of type str")
@@ -97,8 +97,8 @@ class SampleQC:
         if not (input_path / f"{input_name}.bim").exists():
             raise FileNotFoundError(".bim file not found")
         
-        if not high_ld_file.is_file():
-            logger.info(f"High LD file not found at {high_ld_file}")
+        if not high_ld_regions_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_regions_file}")
             logger.info('High LD file will be fetched from the package')
             
             ld_fetcher = FetcherLDRegions(build=build)
@@ -109,14 +109,14 @@ class SampleQC:
                 raise ValueError("Failed to fetch high LD regions file")
             logger.info(f"High LD file fetched from the package and saved at {ld_regions}")
         else:
-            logger.info(f"High LD file found at {high_ld_file}")
-            ld_regions = high_ld_file
+            logger.info(f"High LD file found at {high_ld_regions_file}")
+            ld_regions = high_ld_regions_file
         
         self.input_path  = Path(input_path)
         self.output_path = Path(output_path)
         self.input_name  = input_name
         self.output_name = output_name
-        self.high_ld_file = ld_regions
+        self.high_ld_regions_file = ld_regions
 
         self.renamed_snps = False
         self.hh_to_missing= False
@@ -321,7 +321,7 @@ class SampleQC:
         # Exclude complex regions
         run_plink2([
             '--bfile', str(self.input_path / ld_input),
-            '--exclude', str(self.high_ld_file),
+            '--exclude', str(self.high_ld_regions_file),
             '--memory', str(memory),
             '--threads', str(max_threads),
             '--make-bed',
