@@ -3,8 +3,8 @@
 # Enable/disable steps as needed for your specific workflow
 
 pipeline:
-  name: "ideal_genom_qc"
-  base_output_dir: "/path/to/output/directory"
+  name: "ideal_genom_test"
+  base_output_dir: "path/to/output/directory"
   
   # Pipeline steps - enable/disable by including/excluding from this list
   # Steps will be executed in the order specified here
@@ -17,10 +17,10 @@ pipeline:
       module: "ideal_genom.qc.sample_qc"
       class: "SampleQC"
       init_params:
-        input_path: "/path/to/input/data"
+        input_path: "path/to/input/directory"
         input_name: "input_dataset"
-        output_path: "${base_output_dir}/01_sample_qc"
-        output_name: "sample_qc_filtered"
+        output_path: "${base_output_dir}"
+        output_name: "input_dataset_sampleQCed"
         high_ld_regions_file: "/path/to/high_ld_regions.txt"
         build: "38"
       execute_params:
@@ -39,14 +39,14 @@ pipeline:
     # Step 2: Ancestry Quality Control
     # Merges with reference populations and performs ancestry inference
     - name: "ancestry_qc"
-      enabled: true
+      enabled: false
       module: "ideal_genom.qc.ancestry_qc"
-      class: "ReferenceGenomicMerger"  # Note: May need to be updated based on actual class
+      class: "AncestryQC"  # Note: May need to be updated based on actual class
       init_params:
-        input_path: "${steps.sample_qc.output_path}"
+        input_path: "${steps.sample_qc.clean_dir}"
         input_name: "${steps.sample_qc.output_name}"
-        output_path: "${base_output_dir}/02_ancestry_qc"
-        output_name: "ancestry_qc_filtered"
+        output_path: "${base_output_dir}"
+        output_name: "input_dataset_ancestryQCed"
         high_ld_regions_file: "/path/to/high_ld_regions.txt"
         reference_files:
           bed: "/path/to/1000genomes/reference.bed"
@@ -60,8 +60,9 @@ pipeline:
         maf: 0.01                  # MAF threshold for PCA variants
         ref_threshold: 4           # SD threshold for reference outliers
         stu_threshold: 4           # SD threshold for study outliers
-        reference_pop: "EUR"       # Reference population (EUR, AFR, AMR, EAS, SAS)
+        reference_pop: "SAS"       # Reference population (EUR, AFR, AMR, EAS, SAS)
         num_pcs: 10               # Number of PCs for ancestry assignment
+        distance_metric: "infinity"
 
     # Step 3: Variant Quality Control
     # Performs variant-level QC including HWE, missing data, MAF filtering
@@ -70,40 +71,60 @@ pipeline:
       module: "ideal_genom.qc.variant_qc"
       class: "VariantQC"
       init_params:
-        input_path: "${steps.ancestry_qc.output_path}"
+        input_path: #"${steps.ancestry_qc.clean_dir}"
         input_name: "${steps.ancestry_qc.output_name}"
-        output_path: "${base_output_dir}/03_variant_qc"
-        output_name: "variant_qc_filtered"
+        output_path: "${base_output_dir}"
+        output_name: "input_dataset_variantQCed"
       execute_params:
         # Variant QC parameters
-        geno: 0.02                # Missing data threshold per variant
+        miss_data_rate: 0.2
+        diff_genotype_rate: 1.0e-5
+        geno: 0.1                # Missing data threshold per variant
         maf: 0.001                # Minor allele frequency threshold
-        hwe: 1e-6                 # Hardy-Weinberg equilibrium p-value
+        hwe: 5.0e-8                 # Hardy-Weinberg equilibrium p-value
         chr_y: 24                 # Y chromosome identifier
 
     # Step 4: Population Analysis / Dimensionality Reduction
     # Performs PCA, UMAP, and other population structure analyses
-    - name: "population_analysis"
+    - name: "dimensionality_reduction"
       enabled: true
       module: "ideal_genom.population.projection"
-      class: "PCAReduction"
+      class: "DimensionalityReductionPipeline"
       init_params:
-        input_path: "${steps.variant_qc.output_path}"
+        input_path: "${steps.variant_qc.clean_dir}"
         input_name: "${steps.variant_qc.output_name}"
-        output_path: "${base_output_dir}/04_population_analysis"
-        output_name: "population_analysis"
+        output_path: "${base_output_dir}"
         build: "38"
-        high_ld_regions: "/path/to/high_ld_regions.txt"
+        high_ld_regions_file: "/path/to/high_ld_regions.txt"
         generate_plot: true
       execute_params:
-        # Population analysis parameters
-        pca_components: 10        # Number of PCA components
-        umap_n_neighbors: 15      # UMAP n_neighbors parameter
-        umap_min_dist: 0.1       # UMAP min_dist parameter
-        umap_n_components: 2     # UMAP output dimensions
-        tsne_perplexity: 30      # t-SNE perplexity parameter
-        plot_format: "png"        # Plot output format
-        dpi: 600                 # Plot resolution
+        # PCA parameters
+        pca_params:
+          pca: 10                    # Number of PCA components
+        force_pca_recompute: false
+        
+        # UMAP parameters  
+        run_umap: true
+        umap_params:
+          n_neighbors: 15            # UMAP n_neighbors parameter
+          min_dist: 0.1              # UMAP min_dist parameter
+          n_components: 2            # UMAP output dimensions
+        
+        # t-SNE parameters
+        run_tsne: true
+        tsne_params:
+          perplexity: 30             # t-SNE perplexity parameter
+        
+        # Plotting parameters
+        case_control_markers: true
+        plot_format: "png"           # Plot output format
+        dpi: 600                     # Plot resolution
+        include_pca: true
+        
+        # Grid-specific parameters
+        save_all_coordinates: true
+        generate_all_plots: true
+        grid_summary: true
 
 # Global settings
 settings:
