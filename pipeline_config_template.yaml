@@ -141,9 +141,14 @@ settings:
   
   # File management
   files:
-    keep_intermediate: true    # Preserve intermediate files
+    keep_intermediate: true    # Preserve intermediate files (set to false to enable automatic cleanup)
     compress_outputs: false    # Compress output files
     overwrite_existing: false  # Overwrite existing output files
+    
+    # Note: When keep_intermediate is false, cleanup runs automatically after each step:
+    # - sample_qc: Removes intermediate .bed/.bim/.fam, .vmiss/.smiss/.nosex/.sexcheck/.het/.genome,
+    #              .prune.in/.prune.out, .king.* files, and *-hh-missing/*-renamed files
+    # - variant_qc: Removes intermediate .bed/.bim/.fam, .vmiss/.smiss/.nosex/.missing/.hwe files
 
 # Alternative workflow examples:
 # 
