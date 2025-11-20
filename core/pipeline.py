@@ -157,6 +157,9 @@ class PipelineExecutor:
         # Store the instance for reference by subsequent steps
         self.steps[step_name] = pipeline_instance
         
+        # Perform cleanup if configured
+        self._perform_cleanup(step_name, pipeline_instance)
+        
         self.logger.info(f"Step output stored as: steps.{step_name}")
     
     def _instantiate_step(self, step_config: Dict[str, Any]) -> None:
@@ -233,6 +236,73 @@ class PipelineExecutor:
         self.logger.info(f"Executing {execute_method_name}")
         self.logger.debug(f"Execute params: {execute_params}")
         execute_method(execute_params)
+        
+        # Perform cleanup if configured
+        self._perform_cleanup(step_name, pipeline_instance)
+    
+    def _perform_cleanup(self, step_name: str, pipeline_instance: Any) -> None:
+        """
+        Perform cleanup of intermediate files for Sample QC and Variant QC steps.
+        
+        Parameters
+        ----------
+        step_name : str
+            Name of the pipeline step
+        pipeline_instance : Any
+            Instance of the pipeline class that was executed
+        """
+        # Check if cleanup is disabled globally
+        keep_intermediate = self.config.get('settings', {}).get('files', {}).get('keep_intermediate', True)
+        
+        if keep_intermediate:
+            self.logger.debug(f"Skipping cleanup for {step_name} - keep_intermediate is True")
+            return
+        
+        # Only handle sample_qc and variant_qc steps
+        if step_name not in ['sample_qc', 'variant_qc']:
+            self.logger.debug(f"No cleanup configured for step: {step_name}")
+            return
+        
+        try:
+            if step_name == 'sample_qc':
+                self._cleanup_sample_qc(pipeline_instance)
+            elif step_name == 'variant_qc':
+                self._cleanup_variant_qc(pipeline_instance)
+                
+            self.logger.info(f"✓ Cleanup completed for {step_name}")
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️  Cleanup failed for {step_name}: {e}")
+            # Don't fail the pipeline for cleanup issues
+    
+    def _cleanup_sample_qc(self, pipeline_instance: Any) -> None:
+        """Cleanup intermediate files for Sample QC step."""
+        from ideal_genom.qc.sample_qc import SampleQCCleanUp
+        
+        # Get required paths from pipeline instance
+        if not hasattr(pipeline_instance, 'output_path') or not hasattr(pipeline_instance, 'input_path'):
+            self.logger.warning("SampleQC instance missing required paths for cleanup")
+            return
+        
+        self.logger.info("🧹 Running Sample QC cleanup...")
+        cleanup = SampleQCCleanUp(
+            output_path=pipeline_instance.output_path,
+            input_path=pipeline_instance.input_path
+        )
+        cleanup.clean_all()
+    
+    def _cleanup_variant_qc(self, pipeline_instance: Any) -> None:
+        """Cleanup intermediate files for Variant QC step.""" 
+        from ideal_genom.qc.variant_qc import VariantQCCleanUp
+        
+        # Get required paths from pipeline instance
+        if not hasattr(pipeline_instance, 'output_path'):
+            self.logger.warning("VariantQC instance missing output_path for cleanup")
+            return
+        
+        self.logger.info("🧹 Running Variant QC cleanup...")
+        cleanup = VariantQCCleanUp(output_path=pipeline_instance.output_path)
+        cleanup.clean_results_files()
     
     
     def _resolve_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
