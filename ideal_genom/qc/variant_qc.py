@@ -213,7 +213,7 @@ class VariantQC:
 
         return
     
-    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5, hwe_threshold: float = 5e-8) -> pd.DataFrame:
+    def get_fail_variants(self, marker_call_rate_thres: float = 0.2, case_controls_thres: float = 1e-5) -> pd.DataFrame:
         """
         Identify and consolidate failing variants based on multiple quality control criteria.
         This method combines the results of three QC checks:
