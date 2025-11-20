@@ -243,7 +243,11 @@ class VariantQC:
         - Results are also written to a tab-separated file 'fail_markers.txt'
         - Variants failing multiple criteria are only counted once in the final output file
         """
-        
+
+        if not isinstance(marker_call_rate_thres, float):
+            raise TypeError("marker_call_rate_thres should be of type float.")
+        if not isinstance(case_controls_thres, float):
+            raise TypeError("case_controls_thres should be of type float.")
 
         # ==========================================================================================================
         #                                             MARKERS WITH MISSING DATA 
@@ -311,6 +315,12 @@ class VariantQC:
         """
 
         logger.info("Removing markers failing quality control...")
+        if not isinstance(maf, float):
+            raise TypeError("maf should be of type float.")
+        if not isinstance(geno, float):
+            raise TypeError("geno should be of type float.")
+        if not isinstance(hwe, float):
+            raise TypeError("hwe should be of type float.") 
 
         # create cleaned binary files
         run_plink([
