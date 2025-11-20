@@ -110,7 +110,7 @@ def validate_step(step: Dict[str, Any], index: int) -> None:
     
     # Validate init_params
     init_params = step['init_params']
-    required_init = ['input_path', 'input_name', 'output_path', 'output_name']
+    required_init = ['input_path', 'input_name', 'output_path']
     
     for param in required_init:
         if param not in init_params:
