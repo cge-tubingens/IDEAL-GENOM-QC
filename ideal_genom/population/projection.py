@@ -48,10 +48,10 @@ class PCAReduction:
         if high_ld_regions is not None:
             if not isinstance(high_ld_regions, Path):
                 raise TypeError("high_ld_regions should be a Path object")
-            if not high_ld_regions.is_file():
-                raise FileNotFoundError("high_ld_regions file does not exist")
+#            if not high_ld_regions.is_file():
+#                raise FileNotFoundError("high_ld_regions file does not exist")
         
-        if high_ld_regions is None:
+        if high_ld_regions is None or (not high_ld_regions.exists()):
             logger.info(f"High LD file not provided.")
             logger.info('High LD file will be fetched from the package')
             
