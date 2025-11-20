@@ -8,6 +8,9 @@ import logging
 from typing import Optional, Literal
 
 import pandas as pd
+# Set matplotlib to use non-interactive backend before importing pyplot
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.manifold import TSNE
