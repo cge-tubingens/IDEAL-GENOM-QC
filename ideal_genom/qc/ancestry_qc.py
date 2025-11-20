@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions: Path, reference_files: dict, build: str = '38') -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, reference_files: dict, build: str = '38') -> None:
         """
         Initialize ReferenceGenomicMerger class.
         
@@ -35,7 +35,7 @@ class ReferenceGenomicMerger:
             Path to directory for output files
         output_name : str
             Name for output files without extension
-        high_ld_regions : Path
+        high_ld_regions_file : Path
             Path to file containing high LD regions to exclude
         reference_files : dict
             Dictionary containing paths to reference population files
@@ -75,8 +75,8 @@ class ReferenceGenomicMerger:
             raise TypeError("input_path should be a Path object")
         if not isinstance(output_path, Path):
             raise TypeError("output_path should be a Path object")
-        if not isinstance(high_ld_regions, Path):
-            raise TypeError("high_ld_regions should be a Path object")
+        if not isinstance(high_ld_regions_file, Path):
+            raise TypeError("high_ld_regions_file should be a Path object")
         if not isinstance(reference_files, dict):
             raise TypeError("reference_files should be a dictionary")
         if not isinstance(input_name, str):
@@ -92,15 +92,32 @@ class ReferenceGenomicMerger:
             raise FileNotFoundError(f"input_path does not exist: {input_path}")
         if not output_path.exists():
             raise FileNotFoundError(f"output_path does not exist: {output_path}")
-        if not high_ld_regions.exists():
-            raise FileNotFoundError(f"high_ld_regions does not exist: {high_ld_regions}")
+        if not high_ld_regions_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_regions_file}")
+            logger.info('High LD file will be fetched from the package')
+            
+            ld_fetcher = FetcherLDRegions(build=build)
+            ld_fetcher.get_ld_regions()
+
+            ld_regions = ld_fetcher.ld_regions
+            if ld_regions is None:
+                raise ValueError("Failed to fetch high LD regions file")
+            logger.info(f"High LD file fetched from the package and saved at {ld_regions}")
+        else:
+            logger.info(f"High LD file found at {high_ld_regions_file}")
+            ld_regions = high_ld_regions_file
 
         self.input_path: Path = input_path
         self.input_name: str = input_name
         self.output_path: Path = output_path
         self.output_name: str = output_name
-        self.high_ld_regions: Path = high_ld_regions
-        self.reference_files: dict = reference_files
+        self.build: str = build
+        self.high_ld_regions_file: Path = ld_regions
+        # Convert reference_files values to Path objects if they are strings
+        self.reference_files: dict = {k: Path(v) if isinstance(v, str) else v for k, v in reference_files.items()}
+        
+        # Validate that all reference files exist
+        self._validate_reference_files()
 
         self.reference_AC_GT_filtered: Optional[Path] = None
         self.study_AC_GT_filtered: Optional[Path] = None
@@ -258,7 +275,7 @@ class ReferenceGenomicMerger:
         Notes
         -----
         - Uses PLINK's `--indep-pairwise` command for pruning.
-        - Excludes high LD regions specified in `self.high_ld_regions`.
+        - Excludes high LD regions specified in `self.high_ld_regions_file`.
         - Creates pruned datasets for both study and reference data.
         - Updates `self.pruned_reference` and `self.pruned_study` with paths to pruned files.
         - Uses all available CPU threads except 2 for processing.
@@ -281,7 +298,7 @@ class ReferenceGenomicMerger:
         # Execute PLINK2 command: generates prune.in and prune.out files from study data
         run_plink2([
             '--bfile', str(self.study_AC_GT_filtered),
-            '--exclude', 'range', str(self.high_ld_regions),
+            '--exclude', 'range', str(self.high_ld_regions_file),
             '--keep-allele-order',
             '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
             '--threads', str(max_threads),
@@ -1278,7 +1295,7 @@ class GenomicOutlierAnalyzer:
             '--allow-no-sex',
             '--remove', str(self.ancestry_fails),
             '--make-bed',
-            '--out', str(output_dir / (self.output_name + '-ancestry-cleaned'))
+            '--out', str(output_dir / (self.output_name))
         ])
 
         return
@@ -1600,7 +1617,7 @@ class GenomicOutlierAnalyzer:
 
 class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, build: str = '38', rename_snps: bool = False) -> None:
+    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, build: str = '38', rename_snps: bool = False) -> None:
         """
         Initialize AncestryQC class.
         This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
@@ -1616,7 +1633,7 @@ class AncestryQC:
             Path to directory where output files will be saved
         output_name: str 
             Base name for output files
-        high_ld_file: Path 
+        high_ld_regions_file: Path 
             Path to file containing high LD regions to exclude
         reference_files: dict (optional) 
             Dictionary with paths to reference files. Must contain 'bim', 'bed', 'fam' and 'psam' keys. 
@@ -1648,8 +1665,8 @@ class AncestryQC:
             raise TypeError("input_path should be a Path object")
         if not isinstance(output_path, Path):
             raise TypeError("output_path should be a Path object")
-        if not isinstance(high_ld_file, Path):
-            raise TypeError("high_ld_regions should be a Path object")
+        if not isinstance(high_ld_regions_file, Path):
+            raise TypeError("high_ld_regions_file should be a Path object")
         if not isinstance(reference_files, dict):
             raise TypeError("reference_files should be a dictionary")
         if not isinstance(input_name, str): 
@@ -1669,8 +1686,8 @@ class AncestryQC:
             raise FileNotFoundError("input_path does not exist")
         if not output_path.exists():
             raise FileNotFoundError("output_path does not exist")
-        if not high_ld_file.is_file():
-            logger.info(f"High LD file not found at {high_ld_file}")
+        if not high_ld_regions_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_regions_file}")
             logger.info('High LD file will be fetched from the package')
             
             ld_fetcher = FetcherLDRegions(build=build)
@@ -1679,15 +1696,19 @@ class AncestryQC:
             ld_regions = ld_fetcher.ld_regions
             if ld_regions is None:
                 raise ValueError("Failed to fetch high LD regions file")
-            high_ld_file = ld_regions
-            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
+            high_ld_regions_file = ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_regions_file}")
         
         self.input_path = input_path
         self.input_name = input_name
         self.output_path= output_path
         self.output_name= output_name
-        self.reference_files = reference_files
-        self.high_ld_regions = high_ld_file
+        # Convert reference_files values to Path objects if they are strings
+        if reference_files:
+            self.reference_files = {k: Path(v) if isinstance(v, str) else v for k, v in reference_files.items()}
+        else:
+            self.reference_files = reference_files
+        self.high_ld_regions_file = high_ld_regions_file
         self.recompute_merge = recompute_merge
         self.build = build
         self.rename_snps = rename_snps
@@ -1706,6 +1727,9 @@ class AncestryQC:
                 'fam': fetcher.fam_file,
                 'psam': fetcher.psam_file
             }
+        
+        # Validate that all reference files exist (whether user-provided or fetched)
+        self._validate_reference_files()
 
         self.eigenvalues: Optional[Path] = None
         self.einvectors: Optional[Path] = None
@@ -1724,8 +1748,8 @@ class AncestryQC:
         self.fail_samples_dir = self.results_dir / 'fail_samples'
         self.fail_samples_dir.mkdir(parents=True, exist_ok=True)
 
-        self.clean_files = self.results_dir / 'clean_files'
-        self.clean_files.mkdir(parents=True, exist_ok=True)
+        self.clean_dir = self.results_dir / 'clean_files'
+        self.clean_dir.mkdir(parents=True, exist_ok=True)
 
         pass
 
@@ -1774,7 +1798,7 @@ class AncestryQC:
             input_name= self.input_name,
             output_path= self.merging_dir, 
             output_name= self.output_name,
-            high_ld_regions =self.high_ld_regions, 
+            high_ld_regions_file =self.high_ld_regions_file, 
             reference_files = self.reference_files,
             build= self.build
         )
@@ -1990,16 +2014,16 @@ class AncestryQC:
             fails_dir    =self.fail_samples_dir,
             distance_metric=distance_metric
         )
-        goa.execute_drop_ancestry_outliers(output_dir=self.clean_files)
+        goa.execute_drop_ancestry_outliers(output_dir=self.clean_dir)
 
-        self.eigenvectors = goa.eigenvectors
-        self.eigenvalues   = goa.eigenvalues
-        self.population_tags = goa.population_tags
-        self.ancestry_fails  = goa.ancestry_fails
+        self.eigenvectors   = goa.eigenvectors
+        self.eigenvalues    = goa.eigenvalues
+        self.population_tags= goa.population_tags
+        self.ancestry_fails = goa.ancestry_fails
 
         return
 
-    def execute_ancestry_pipeline(self, ancestry_params: dict) -> None:
+    def execute_ancestry_qc_pipeline(self, ancestry_params: dict) -> None:
         """
         Execute complete ancestry QC pipeline.
         
