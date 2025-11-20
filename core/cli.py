@@ -110,7 +110,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         logger.info(f"Loading configuration from: {config_file}")
         
         # Create and configure pipeline executor
-        executor = PipelineExecutor(config)
+        executor = PipelineExecutor(config, dry_run=args.dry_run)
         
         # Show pipeline summary if requested
         if args.dry_run:
@@ -169,7 +169,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
         config = load_config(str(config_file))
         
         # Create executor to validate pipeline configuration
-        executor = PipelineExecutor(config)
+        executor = PipelineExecutor(config, dry_run=True)
         summary = executor.get_pipeline_summary()
         
         print("✓ Configuration file is valid")
