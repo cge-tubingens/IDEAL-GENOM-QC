@@ -1805,6 +1805,116 @@ class AncestryQC:
 
         return
     
+    def _validate_reference_files(self) -> None:
+        """
+        Validate that all reference files exist and have correct extensions.
+        If validation fails, automatically fetch 1000 Genomes reference files.
+        
+        Raises
+        ------
+        ValueError
+            If reference_files dictionary is empty or missing required keys after fetching
+        FileNotFoundError
+            If any of the reference files do not exist after fetching
+        ValueError
+            If files don't have expected extensions after fetching
+        
+        Notes
+        -----
+        Expected reference files: 'bed', 'bim', 'fam' (and optionally 'psam')
+        If user-provided files are invalid, automatically downloads and sets up 1000 Genomes reference files
+        """
+        try:
+            # First try to validate user-provided reference files
+            self._validate_user_reference_files()
+            logger.info("User-provided reference files validation successful")
+        except (ValueError, FileNotFoundError, TypeError) as e:
+            logger.warning(f"User-provided reference files validation failed: {e}")
+            logger.info(f"Automatically fetching 1000 Genomes reference files for build {self.build}")
+            
+            # Import here to avoid circular imports
+            from core.get_references import Fetcher1000Genome
+            
+            # Fetch 1000 Genomes reference files
+            fetcher = Fetcher1000Genome(build=self.build)
+            fetcher.get_1000genomes()
+            fetcher.get_1000genomes_binaries()
+
+            # Update reference_files with fetched files
+            self.reference_files = {
+                'bim': fetcher.bim_file,
+                'bed': fetcher.bed_file,
+                'fam': fetcher.fam_file,
+                'psam': fetcher.psam_file
+            }
+            
+            logger.info("Successfully fetched and set 1000 Genomes reference files")
+            
+            # Validate the fetched files to ensure they're properly set up
+            try:
+                self._validate_user_reference_files()
+                logger.info("Fetched reference files validation successful")
+            except Exception as fetch_error:
+                raise RuntimeError(f"Failed to fetch valid reference files: {fetch_error}")
+    
+    def _validate_user_reference_files(self) -> None:
+        """
+        Validate user-provided reference files without automatic fetching.
+        
+        Raises
+        ------
+        ValueError
+            If reference_files dictionary is empty or missing required keys
+        FileNotFoundError
+            If any of the reference files do not exist
+        TypeError
+            If reference file paths are not Path objects
+        ValueError
+            If files don't have expected extensions
+        """
+        if not self.reference_files:
+            raise ValueError("reference_files dictionary cannot be empty")
+        
+        # Required reference file types
+        required_files = {'bed', 'bim', 'fam'}
+        optional_files = {'psam'}
+        
+        # Check if all required files are present
+        missing_files = required_files - set(self.reference_files.keys())
+        if missing_files:
+            raise ValueError(f"Missing required reference files: {missing_files}")
+        
+        # Expected file extensions
+        expected_extensions = {
+            'bed': '.bed',
+            'bim': '.bim', 
+            'fam': '.fam',
+            'psam': '.psam'
+        }
+        
+        # Validate each reference file
+        for file_type, file_path in self.reference_files.items():
+            if file_type not in (required_files | optional_files):
+                logger.warning(f"Unknown reference file type '{file_type}', skipping validation")
+                continue
+                
+            if not isinstance(file_path, Path):
+                raise TypeError(f"Reference file '{file_type}' must be a Path object, got {type(file_path)}")
+            
+            # Check if file exists
+            if not file_path.exists():
+                raise FileNotFoundError(f"Reference {file_type} file does not exist: {file_path}")
+            
+            # Check if it's a file (not a directory)
+            if not file_path.is_file():
+                raise ValueError(f"Reference {file_type} path is not a file: {file_path}")
+            
+            # Check file extension
+            if file_type in expected_extensions:
+                expected_ext = expected_extensions[file_type]
+                if not file_path.name.endswith(expected_ext):
+                    logger.warning(f"Reference {file_type} file doesn't have expected extension '{expected_ext}': {file_path}")
+
     def execute_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4, distance_metric: Union[str, float] = 'infinity') -> None:
         """
         Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.
