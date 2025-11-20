@@ -16,12 +16,19 @@ from typing import Optional
 try:
     from core.config import load_config, ConfigurationError
     from core.pipeline import PipelineExecutor
+    # Try to get version from package
+    try:
+        from importlib.metadata import version
+        __version__ = version("ideal-genom")
+    except Exception:
+        __version__ = "0.2.0"  # fallback version
 except ImportError:
     # For direct execution from package root
     import sys
     sys.path.append('.')
     from core.config import load_config, ConfigurationError
     from core.pipeline import PipelineExecutor
+    __version__ = "0.2.0"  # fallback version
 
 
 def setup_logging(level: str = "INFO") -> None:
@@ -260,7 +267,7 @@ https://ideal-genom-qc.readthedocs.io/
     parser.add_argument(
         '--version', 
         action='version', 
-        version='%(prog)s 1.0.0'
+        version=f'%(prog)s {__version__}'
     )
     
     parser.add_argument(
