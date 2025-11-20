@@ -368,6 +368,10 @@ class VariantQC:
         'missing_data_female' showing the distribution of missing data rates for each sex.
         """
    
+        if not isinstance(threshold, float):
+            raise TypeError("threshold should be of type float.")
+        if not isinstance(filename_male, Path) or not isinstance(filename_female, Path):
+            raise TypeError("filename_male and filename_female should be of type Path.")
 
         # load .vmiss file for male subjects
         df_males = pd.read_csv(
@@ -416,6 +420,11 @@ class VariantQC:
                           below the specified threshold. The DataFrame has two columns:
                           'SNP' and 'Failure', where 'Failure' is set to 'Different genotype call rate'.
         """
+
+        if not isinstance(threshold, float):
+            raise TypeError("threshold should be of type float.")
+        if not isinstance(filename, Path):
+            raise TypeError("filename should be of type Path.")
 
         # load .missing file
         df_diffmiss = pd.read_csv(
