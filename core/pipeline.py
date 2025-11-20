@@ -62,6 +62,21 @@ class PipelineExecutor:
         self.logger.info(f"Total steps: {len(pipeline_steps)}")
         self.logger.info(f"Enabled steps: {len(enabled_steps)}")
         
+        # First pass: Instantiate ALL classes (enabled and disabled) for reference resolution
+        self.logger.info(f"\nInstantiating all pipeline classes for reference resolution...")
+        for step_config in pipeline_steps:
+            step_name = step_config['name']
+            is_enabled = step_config.get('enabled', True)
+            
+            if not is_enabled:
+                self.logger.info(f"Instantiating disabled step for references: {step_name}")
+                try:
+                    self._instantiate_step(step_config)
+                except Exception as e:
+                    self.logger.warning(f"⚠️  Failed to instantiate disabled step '{step_name}': {e}")
+                    # Continue anyway - this step won't be available for references
+        
+        # Second pass: Execute only enabled steps
         for i, step_config in enumerate(enabled_steps, 1):
             step_name = step_config['name']
             self.logger.info(f"\n{'='*60}")
@@ -69,7 +84,12 @@ class PipelineExecutor:
             self.logger.info(f"{'='*60}")
             
             try:
-                self._execute_step(step_config)
+                # If already instantiated (from first pass), just execute
+                if step_name in self.steps:
+                    self._execute_existing_step(step_config)
+                else:
+                    # Instantiate and execute
+                    self._execute_step(step_config)
                 self.logger.info(f"✓ Completed step: {step_name}")
             except Exception as e:
                 self.logger.error(f"✗ Failed step: {step_name}")
@@ -138,6 +158,82 @@ class PipelineExecutor:
         self.steps[step_name] = pipeline_instance
         
         self.logger.info(f"Step output stored as: steps.{step_name}")
+    
+    def _instantiate_step(self, step_config: Dict[str, Any]) -> None:
+        """
+        Instantiate a pipeline step class without executing it.
+        Used for disabled steps to enable reference resolution.
+        
+        Parameters
+        ----------
+        step_config : dict
+            Configuration for the step to instantiate
+        """
+        step_name = step_config['name']
+        
+        # Import the class dynamically
+        module_path = step_config['module']
+        class_name = step_config['class']
+        
+        self.logger.debug(f"Loading {class_name} from {module_path} (instantiate only)")
+        
+        try:
+            module = importlib.import_module(module_path)
+            pipeline_class = getattr(module, class_name)
+        except (ImportError, AttributeError) as e:
+            raise ImportError(
+                f"Failed to import {class_name} from {module_path}: {str(e)}"
+            )
+        
+        # Resolve parameters (handle ${...} references)
+        init_params = self._resolve_params(step_config['init_params'])
+        
+        # Convert string paths to Path objects for parameters ending with '_path'
+        init_params = self._convert_paths_to_path_objects(init_params)
+        
+        self.logger.debug(f"Instantiating {class_name} (disabled step)")
+        self.logger.debug(f"Init params: {init_params}")
+        
+        # Instantiate the sub-pipeline class
+        pipeline_instance = pipeline_class(**init_params)
+        
+        # Store the instance for reference by subsequent steps
+        self.steps[step_name] = pipeline_instance
+        
+        self.logger.debug(f"Disabled step instantiated and stored as: steps.{step_name}")
+    
+    def _execute_existing_step(self, step_config: Dict[str, Any]) -> None:
+        """
+        Execute a step that has already been instantiated.
+        
+        Parameters
+        ----------
+        step_config : dict
+            Configuration for the step to execute
+        """
+        step_name = step_config['name']
+        
+        # Get the already instantiated pipeline object
+        pipeline_instance = self.steps[step_name]
+        
+        # Resolve execute parameters
+        execute_params = self._resolve_params(step_config.get('execute_params', {}))
+        execute_params = self._convert_paths_to_path_objects(execute_params)
+        
+        # Determine the execute method name
+        execute_method_name = f'execute_{step_name}_pipeline'
+        
+        if not hasattr(pipeline_instance, execute_method_name):
+            raise AttributeError(
+                f"{pipeline_instance.__class__.__name__} does not have method '{execute_method_name}'"
+            )
+        
+        execute_method = getattr(pipeline_instance, execute_method_name)
+        
+        self.logger.info(f"Executing {execute_method_name}")
+        self.logger.debug(f"Execute params: {execute_params}")
+        execute_method(execute_params)
+    
     
     def _resolve_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -317,6 +413,7 @@ class PipelineExecutor:
             List of enabled pipeline steps
         """
         enabled_step_names = {step['name'] for step in enabled_steps}
+        all_step_names = {step['name'] for step in self.config['pipeline']['steps']}
         
         # Define step dependencies for genomic QC workflow
         dependencies = {
@@ -331,16 +428,26 @@ class PipelineExecutor:
             
             if step_name in dependencies:
                 missing_deps = []
+                unavailable_deps = []
+                
                 for dep in dependencies[step_name]:
                     if dep not in enabled_step_names:
                         missing_deps.append(dep)
+                        if dep not in all_step_names:
+                            unavailable_deps.append(dep)
                 
                 if missing_deps:
-                    self.logger.warning(
-                        f"⚠️  Step '{step_name}' is enabled but recommended dependency "
-                        f"step(s) {missing_deps} are disabled. "
-                        f"This may cause issues if input data is not properly preprocessed."
-                    )
+                    if unavailable_deps:
+                        self.logger.warning(
+                            f"⚠️  Step '{step_name}' is enabled but dependency "
+                            f"step(s) {unavailable_deps} are not defined in configuration."
+                        )
+                    else:
+                        self.logger.info(
+                            f"ℹ️  Step '{step_name}' is enabled but dependency "
+                            f"step(s) {missing_deps} are disabled. "
+                            f"Disabled steps will be instantiated for reference resolution."
+                        )
         
         # Check for proper step ordering
         self._validate_step_ordering(enabled_steps)
