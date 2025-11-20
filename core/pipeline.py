@@ -254,14 +254,20 @@ class PipelineExecutor:
         # Check if cleanup is disabled globally
         keep_intermediate = self.config.get('settings', {}).get('files', {}).get('keep_intermediate', True)
         
+        self.logger.info(f"🔍 Cleanup check for {step_name}:")
+        self.logger.info(f"   - keep_intermediate setting: {keep_intermediate}")
+        self.logger.info(f"   - Config path: settings.files.keep_intermediate")
+        
         if keep_intermediate:
-            self.logger.debug(f"Skipping cleanup for {step_name} - keep_intermediate is True")
+            self.logger.info(f"⏭️  Skipping cleanup for {step_name} - keep_intermediate is True")
             return
         
         # Only handle sample_qc and variant_qc steps
         if step_name not in ['sample_qc', 'variant_qc']:
-            self.logger.debug(f"No cleanup configured for step: {step_name}")
+            self.logger.info(f"⏭️  No cleanup configured for step: {step_name}")
             return
+        
+        self.logger.info(f"🧹 Initiating cleanup for {step_name}...")
         
         try:
             if step_name == 'sample_qc':
@@ -269,7 +275,7 @@ class PipelineExecutor:
             elif step_name == 'variant_qc':
                 self._cleanup_variant_qc(pipeline_instance)
                 
-            self.logger.info(f"✓ Cleanup completed for {step_name}")
+            self.logger.info(f"✅ Cleanup completed for {step_name}")
             
         except Exception as e:
             self.logger.warning(f"⚠️  Cleanup failed for {step_name}: {e}")
@@ -281,13 +287,20 @@ class PipelineExecutor:
         
         # Get required paths from pipeline instance
         if not hasattr(pipeline_instance, 'output_path') or not hasattr(pipeline_instance, 'input_path'):
-            self.logger.warning("SampleQC instance missing required paths for cleanup")
+            self.logger.warning("❌ SampleQC instance missing required paths for cleanup")
+            self.logger.warning(f"   Available attributes: {[attr for attr in dir(pipeline_instance) if not attr.startswith('_')]}")
             return
         
-        self.logger.info("🧹 Running Sample QC cleanup...")
+        output_path = pipeline_instance.output_path
+        input_path = pipeline_instance.input_path
+        
+        self.logger.info(f"🧹 Running Sample QC cleanup...")
+        self.logger.info(f"   - Output path: {output_path}")
+        self.logger.info(f"   - Input path: {input_path}")
+        
         cleanup = SampleQCCleanUp(
-            output_path=pipeline_instance.output_path,
-            input_path=pipeline_instance.input_path
+            output_path=output_path,
+            input_path=input_path
         )
         cleanup.clean_all()
     
@@ -297,11 +310,16 @@ class PipelineExecutor:
         
         # Get required paths from pipeline instance
         if not hasattr(pipeline_instance, 'output_path'):
-            self.logger.warning("VariantQC instance missing output_path for cleanup")
+            self.logger.warning("❌ VariantQC instance missing output_path for cleanup")
+            self.logger.warning(f"   Available attributes: {[attr for attr in dir(pipeline_instance) if not attr.startswith('_')]}")
             return
         
-        self.logger.info("🧹 Running Variant QC cleanup...")
-        cleanup = VariantQCCleanUp(output_path=pipeline_instance.output_path)
+        output_path = pipeline_instance.output_path
+        
+        self.logger.info(f"🧹 Running Variant QC cleanup...")
+        self.logger.info(f"   - Output path: {output_path}")
+        
+        cleanup = VariantQCCleanUp(output_path=output_path)
         cleanup.clean_results_files()
     
     
