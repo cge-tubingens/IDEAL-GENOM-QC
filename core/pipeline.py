@@ -109,6 +109,10 @@ class PipelineExecutor:
         init_params = self._resolve_params(step_config['init_params'])
         execute_params = self._resolve_params(step_config.get('execute_params', {}))
         
+        # Convert string paths to Path objects for parameters ending with '_path'
+        init_params = self._convert_paths_to_path_objects(init_params)
+        execute_params = self._convert_paths_to_path_objects(execute_params)
+        
         self.logger.info(f"Initializing {class_name}")
         self.logger.debug(f"Init params: {init_params}")
         self.logger.debug(f"Execute params: {execute_params}")
@@ -253,6 +257,30 @@ class PipelineExecutor:
             return obj
         
         raise ValueError(f"Unknown reference: {reference}")
+    
+    def _convert_paths_to_path_objects(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Convert string parameters ending with '_path' or '_file' to Path objects.
+        
+        Parameters
+        ----------
+        params : dict
+            Parameters dictionary potentially containing path strings
+            
+        Returns
+        -------
+        dict
+            Parameters with path strings converted to Path objects
+        """
+        converted = {}
+        
+        for key, value in params.items():
+            if (key.endswith('_path') or key.endswith('_file')) and isinstance(value, str):
+                converted[key] = Path(value)
+            else:
+                converted[key] = value
+        
+        return converted
     
     def _filter_enabled_steps(self, pipeline_steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
