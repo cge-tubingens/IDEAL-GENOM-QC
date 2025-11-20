@@ -4,10 +4,9 @@ import os
 import re
 import importlib
 import logging
-
-from typing import Dict, Any, Optional, List
 from pathlib import Path
 
+from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class PipelineExecutor:
         Base output directory for all pipeline steps
     """
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], dry_run: bool = False):
         """
         Initialize pipeline executor.
         
@@ -34,14 +33,18 @@ class PipelineExecutor:
         ----------
         config : dict
             Pipeline configuration dictionary (from config.load_config)
+        dry_run : bool
+            If True, skip directory creation and actual execution
         """
         self.config = config
         self.steps = {}  # Store instantiated sub-pipeline objects
         self.base_output_dir = config['pipeline']['base_output_dir']
         self.pipeline_name = config['pipeline']['name']
+        self.dry_run = dry_run
         
-        # Create base output directory
-        os.makedirs(self.base_output_dir, exist_ok=True)
+        # Create base output directory (skip if dry run)
+        if not dry_run:
+            os.makedirs(self.base_output_dir, exist_ok=True)
         
         # Setup logging
         self.logger = self._setup_logging()
