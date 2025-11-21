@@ -2094,7 +2094,7 @@ class AncestryQC:
 
         return
     
-class ReportAncestryCheck:
+class AncestryQCReport:
 
     def __init__(self, output_path: Path,  einvectors: Path,  eigenvalues: Path, ancestry_fails: Path, population_tags: Path) -> None:
         """
