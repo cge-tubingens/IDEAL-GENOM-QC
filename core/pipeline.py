@@ -157,6 +157,9 @@ class PipelineExecutor:
         # Store the instance for reference by subsequent steps
         self.steps[step_name] = pipeline_instance
         
+        # Generate reports if configured
+        self._generate_reports(step_name, pipeline_instance)
+        
         # Perform cleanup if configured
         self._perform_cleanup(step_name, pipeline_instance)
         
@@ -236,9 +239,14 @@ class PipelineExecutor:
         self.logger.info(f"Executing {execute_method_name}")
         self.logger.debug(f"Execute params: {execute_params}")
         execute_method(execute_params)
+
+        # Generate reports if configured
+        self._generate_reports(step_name, pipeline_instance)
         
         # Perform cleanup if configured
         self._perform_cleanup(step_name, pipeline_instance)
+
+        return
     
     def _perform_cleanup(self, step_name: str, pipeline_instance: Any) -> None:
         """
@@ -291,7 +299,7 @@ class PipelineExecutor:
             self.logger.warning(f"   Available attributes: {[attr for attr in dir(pipeline_instance) if not attr.startswith('_')]}")
             return
         
-        output_path = pipeline_instance.output_path
+        output_path = pipeline_instance.results_dir
         input_path = pipeline_instance.input_path
         
         self.logger.info(f"🧹 Running Sample QC cleanup...")
@@ -314,13 +322,268 @@ class PipelineExecutor:
             self.logger.warning(f"   Available attributes: {[attr for attr in dir(pipeline_instance) if not attr.startswith('_')]}")
             return
         
-        output_path = pipeline_instance.output_path
+        output_path = pipeline_instance.results_dir
         
         self.logger.info(f"🧹 Running Variant QC cleanup...")
         self.logger.info(f"   - Output path: {output_path}")
         
         cleanup = VariantQCCleanUp(output_path=output_path)
-        cleanup.clean_results_files()
+        cleanup.clean_all()
+    
+    def _generate_reports(self, step_name: str, pipeline_instance: Any) -> None:
+        """
+        Generate visualization reports for completed QC steps.
+        
+        Parameters
+        ----------
+        step_name : str
+            Name of the pipeline step
+        pipeline_instance : Any
+            Instance of the pipeline class that was executed
+        """
+        # Check if report generation is enabled globally
+        generate_reports = self.config.get('settings', {}).get('reports', {}).get('generate_reports', True)
+        
+        self.logger.info(f"📊 Report check for {step_name}:")
+        self.logger.info(f"   - generate_reports setting: {generate_reports}")
+        
+        if not generate_reports:
+            self.logger.info(f"⏭️  Skipping report generation for {step_name} - generate_reports is False")
+            return
+        
+        # Only handle sample_qc, ancestry_qc, and variant_qc steps
+        if step_name not in ['sample_qc', 'ancestry_qc', 'variant_qc']:
+            self.logger.info(f"⏭️  No report generation configured for step: {step_name}")
+            return
+        
+        self.logger.info(f"📊 Generating reports for {step_name}...")
+        
+        try:
+            if step_name == 'sample_qc':
+                self._generate_sample_qc_report(pipeline_instance)
+            elif step_name == 'ancestry_qc':
+                self._generate_ancestry_qc_report(pipeline_instance)
+            elif step_name == 'variant_qc':
+                self._generate_variant_qc_report(pipeline_instance)
+                
+            self.logger.info(f"✅ Report generation completed for {step_name}")
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️  Report generation failed for {step_name}: {e}")
+            # Don't fail the pipeline for report generation issues
+    
+    def _generate_sample_qc_report(self, pipeline_instance: Any) -> None:
+        """Generate visualization reports for Sample QC step."""
+        from ideal_genom.qc.sample_qc import SampleQCReport
+        
+        # Check for required attributes
+        required_attrs = ['results_dir']
+        if not all(hasattr(pipeline_instance, attr) for attr in required_attrs):
+            self.logger.warning("❌ SampleQC instance missing required attributes for report generation")
+            self.logger.warning(f"   Available attributes: {[attr for attr in dir(pipeline_instance) if not attr.startswith('_')]}")
+            return
+        
+        plots_dir = pipeline_instance.results_dir / 'plots'
+        plots_dir.mkdir(exist_ok=True)
+        
+        self.logger.info(f"📊 Generating Sample QC reports...")
+        self.logger.info(f"   - Plots directory: {plots_dir}")
+        
+        # Create report instance
+        report = SampleQCReport(output_path=plots_dir)
+        
+        # Get file paths from sample_qc instance
+        call_rate_smiss = getattr(pipeline_instance, 'call_rate_miss', None)
+        sexcheck_miss = getattr(pipeline_instance, 'sexcheck_miss', None)
+        xchr_miss = getattr(pipeline_instance, 'xchr_miss', None)
+        maf_greater_het = getattr(pipeline_instance, 'maf_greater_het', None)
+        maf_less_het = getattr(pipeline_instance, 'maf_less_het', None)
+        maf_greater_smiss = getattr(pipeline_instance, 'maf_greater_smiss', None)
+        maf_less_smiss = getattr(pipeline_instance, 'maf_less_smiss', None)
+        genome = getattr(pipeline_instance, 'genome', None)
+        
+        # Check if required files exist
+        required_files = {
+            'call_rate_smiss': call_rate_smiss,
+            'sexcheck_miss': sexcheck_miss, 
+            'xchr_miss': xchr_miss,
+            'maf_greater_het': maf_greater_het,
+            'maf_less_het': maf_less_het,
+            'maf_greater_smiss': maf_greater_smiss,
+            'maf_less_smiss': maf_less_smiss
+        }
+        
+        missing_files = []
+        for name, file_path in required_files.items():
+            if file_path is None:
+                missing_files.append(f"{name} (not set)")
+            elif not file_path.exists():
+                missing_files.append(f"{name} ({file_path})")
+        
+        if missing_files:
+            self.logger.warning(f"❌ Sample QC report: Missing required files: {missing_files}")
+            return
+        
+        # Get step configuration for parameters
+        step_config = self.config.get('sample_qc', {})
+        call_rate_thres = step_config.get('call_rate_thres', 0.02)
+        std_deviation_het = step_config.get('std_deviation_het', 3)
+        maf_het = step_config.get('maf_het', 0.01)
+        ibd_threshold = step_config.get('ibd_threshold', None)
+        generate_ibd_report = genome is not None and genome.exists() if genome else False
+        
+        try:
+            # Type assertion since we've already validated these files exist
+            assert call_rate_smiss is not None and call_rate_smiss.exists()
+            assert sexcheck_miss is not None and sexcheck_miss.exists()
+            assert xchr_miss is not None and xchr_miss.exists()
+            assert maf_greater_het is not None and maf_greater_het.exists()
+            assert maf_less_het is not None and maf_less_het.exists()
+            assert maf_greater_smiss is not None and maf_greater_smiss.exists()
+            assert maf_less_smiss is not None and maf_less_smiss.exists()
+            
+            # Generate the report
+            report.report_sample_qc(
+                call_rate_smiss=call_rate_smiss,
+                sexcheck_miss=sexcheck_miss,
+                xchr_miss=xchr_miss,
+                maf_greater_het=maf_greater_het,
+                maf_less_het=maf_less_het,
+                maf_greater_smiss=maf_greater_smiss,
+                maf_less_smiss=maf_less_smiss,
+                genome=genome,
+                generate_ibd_report=generate_ibd_report,
+                call_rate_thres=call_rate_thres,
+                std_deviation_het=std_deviation_het,
+                maf_het=maf_het,
+                ibd_threshold=ibd_threshold
+            )
+            
+            self.logger.info(f"✅ Sample QC reports generated successfully in {plots_dir}")
+            
+        except Exception as e:
+            self.logger.error(f"❌ Failed to generate Sample QC report: {e}")
+            self.logger.debug(f"Sample QC report error details", exc_info=True)
+    
+    def _generate_ancestry_qc_report(self, pipeline_instance: Any) -> None:
+        """Generate visualization reports for Ancestry QC step."""
+        from ideal_genom.qc.ancestry_qc import AncestryQCReport
+        
+        # Check for required attributes  
+        required_attrs = ['results_dir', 'eigenvectors', 'eigenvalues', 'ancestry_fails', 'population_tags']
+        missing_attrs = [attr for attr in required_attrs if not hasattr(pipeline_instance, attr)]
+        
+        if missing_attrs:
+            self.logger.warning(f"❌ AncestryQC instance missing required attributes: {missing_attrs}")
+            return
+        
+        # Ensure all file paths exist
+        file_attrs = ['eigenvectors', 'eigenvalues', 'ancestry_fails', 'population_tags']
+        missing_files = []
+        for attr in file_attrs:
+            file_path = getattr(pipeline_instance, attr)
+            if file_path is None or not file_path.exists():
+                missing_files.append(attr)
+        
+        if missing_files:
+            self.logger.warning(f"❌ AncestryQC missing or invalid file paths: {missing_files}")
+            return
+        
+        plots_dir = pipeline_instance.results_dir / 'plots'
+        plots_dir.mkdir(exist_ok=True)
+        
+        self.logger.info(f"📊 Generating Ancestry QC reports...")
+        self.logger.info(f"   - Plots directory: {plots_dir}")
+        
+        # Create report instance
+        report = AncestryQCReport(
+            output_path=plots_dir,
+            einvectors=pipeline_instance.eigenvectors,
+            eigenvalues=pipeline_instance.eigenvalues,
+            ancestry_fails=pipeline_instance.ancestry_fails,
+            population_tags=pipeline_instance.population_tags
+        )
+        
+        # Generate comprehensive ancestry QC report
+        # Get reference population from config or use default
+        ref_pop = self.config.get('pipeline', {}).get('steps', [])
+        ancestry_step = next((step for step in ref_pop if step.get('name') == 'ancestry_qc'), {})
+        reference_pop = ancestry_step.get('execute_params', {}).get('reference_pop', 'EUR')
+        
+        # Get plot format from config
+        plot_format = self.config.get('settings', {}).get('reports', {}).get('plot_format', 'png')
+        
+        report.report_ancestry_qc(
+            reference_pop=reference_pop,
+            aspect_ratio='equal',
+            format=plot_format
+        )
+    
+    def _generate_variant_qc_report(self, pipeline_instance: Any) -> None:
+        """Generate visualization reports for Variant QC step.""" 
+        from ideal_genom.qc.variant_qc import VariantQCReport
+        
+        # Check for required attributes
+        required_attrs = ['results_dir']
+        if not all(hasattr(pipeline_instance, attr) for attr in required_attrs):
+            self.logger.warning("❌ VariantQC instance missing required attributes for report generation")
+            return
+        
+        plots_dir = pipeline_instance.results_dir / 'plots'
+        plots_dir.mkdir(exist_ok=True)
+        
+        self.logger.info(f"📊 Generating Variant QC reports...")
+        self.logger.info(f"   - Plots directory: {plots_dir}")
+        
+        # Create report instance  
+        report = VariantQCReport(output_path=plots_dir)
+        
+        # Get file paths from variant_qc instance  
+        males_missing_data = getattr(pipeline_instance, 'males_missing_data', None)
+        females_missing_data = getattr(pipeline_instance, 'females_missing_data', None)
+        
+        # Check if required files exist
+        required_files = {
+            'males_missing_data': males_missing_data,
+            'females_missing_data': females_missing_data
+        }
+        
+        missing_files = []
+        for name, file_path in required_files.items():
+            if file_path is None:
+                missing_files.append(f"{name} (not set)")
+            elif not file_path.exists():
+                missing_files.append(f"{name} ({file_path})")
+        
+        if missing_files:
+            self.logger.warning(f"❌ Variant QC report: Missing required files: {missing_files}")
+            return
+        
+        # Get step configuration for parameters
+        step_config = self.config.get('variant_qc', {})
+        y_axis_cap = step_config.get('y_axis_cap', 100)
+        missing_data_threshold = step_config.get('missing_data_threshold', 0.1)
+        
+        try:
+            # Type assertion since we've already validated these files exist
+            assert males_missing_data is not None and males_missing_data.exists()
+            assert females_missing_data is not None and females_missing_data.exists()
+            
+            # Generate the report
+            report.report_variant_qc(
+                missing_data_rate_male=males_missing_data,
+                missing_data_rate_female=females_missing_data,
+                y_axis_cap=y_axis_cap,
+                missing_data_threshold=missing_data_threshold
+            )
+            
+            self.logger.info(f"✅ Variant QC reports generated successfully in {plots_dir}")
+            
+        except Exception as e:
+            self.logger.error(f"❌ Failed to generate Variant QC report: {e}")
+            self.logger.debug(f"Variant QC report error details", exc_info=True)
+        self.logger.info("📊 Variant QC report generation requires specific file detection")
+        self.logger.info("📊 Report framework ready - implement file detection for full automation")
     
     
     def _resolve_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
