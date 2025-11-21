@@ -702,7 +702,7 @@ class VariantQCCleanUp:
     def __init__(self, output_path: Path) -> None:
         self.output_path = output_path
 
-    def clean_results_files(self) -> None:
+    def clean_all(self) -> None:
 
         """Remove intermediate files from output directory.
 
