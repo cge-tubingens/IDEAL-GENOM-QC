@@ -149,6 +149,16 @@ settings:
     # - sample_qc: Removes intermediate .bed/.bim/.fam, .vmiss/.smiss/.nosex/.sexcheck/.het/.genome,
     #              .prune.in/.prune.out, .king.* files, and *-hh-missing/*-renamed files
     # - variant_qc: Removes intermediate .bed/.bim/.fam, .vmiss/.smiss/.nosex/.missing/.hwe files
+  
+  # Report generation
+  reports:
+    generate_reports: true     # Generate visualization reports after each QC step
+    plot_format: "png"         # Format for plots: "png", "svg", "pdf"
+    
+    # Note: When generate_reports is true, plots and reports are generated after each step:
+    # - sample_qc: Call rate, sex check, heterozygosity, and IBD analysis plots
+    # - ancestry_qc: PCA plots with and without outliers, scree plots, variance explained
+    # - variant_qc: Missing data, HWE, MAF distribution plots
 
 # Alternative workflow examples:
 # 
