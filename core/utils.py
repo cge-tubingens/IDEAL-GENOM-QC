@@ -13,7 +13,6 @@ from collections.abc import Generator as GeneratorABC
 
 logger = logging.getLogger(__name__)
 
-
 def get_optimal_threads(reserve: int = 2, default: int = 10, max_threads: Optional[int] = None) -> int:
     """
     Calculate optimal thread count for genomic analysis operations.
@@ -87,7 +86,6 @@ def get_optimal_threads(reserve: int = 2, default: int = 10, max_threads: Option
     
     logger.debug(f"Calculated optimal threads: {optimal} (CPU: {cpu_count}, reserve: {reserve})")
     return optimal
-
 
 def get_available_memory(
     fraction: float = 2/3, 
@@ -179,7 +177,6 @@ def get_available_memory(
         logger.error(f"Failed to get memory information: {e}")
         raise RuntimeError(f"Could not determine available memory: {e}")
 
-
 def count_file_lines(file_path: Path) -> int:
     """
     Count lines in a file efficiently.
@@ -214,7 +211,6 @@ def count_file_lines(file_path: Path) -> int:
     
     with open(file_path, 'r') as f:
         return sum(1 for _ in f)
-
 
 def validate_input_file(file_path: Path, extensions: Optional[List[str]] = None) -> Path:
     """
@@ -286,7 +282,6 @@ def validate_input_file(file_path: Path, extensions: Optional[List[str]] = None)
     
     return file_path
 
-
 def validate_file_path(file_path: Path, must_exist: bool = True, must_be_file: bool = True) -> Path:
     """
     Generic file path validation with flexible requirements.
@@ -347,7 +342,6 @@ def validate_file_path(file_path: Path, must_exist: bool = True, must_be_file: b
     
     return file_path
 
-
 def validate_output_dir(output_dir: Path, create: bool = True) -> Path:
     """
     Validate and optionally create output directory.
@@ -386,7 +380,6 @@ def validate_output_dir(output_dir: Path, create: bool = True) -> Path:
         raise NotADirectoryError(f"Path exists but is not a directory: {output_dir}")
     
     return output_dir
-
 
 def format_memory_size(bytes_size: int) -> str:
     """

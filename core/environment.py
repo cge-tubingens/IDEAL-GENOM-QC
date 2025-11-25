@@ -23,7 +23,6 @@ class EnvironmentError(Exception):
     """Raised when required software is not available."""
     pass
 
-
 def check_software_installed(software: str) -> bool:
     """
     Check if a software tool is installed and available in PATH.
@@ -39,7 +38,6 @@ def check_software_installed(software: str) -> bool:
         True if software is installed, False otherwise
     """
     return shutil.which(software) is not None
-
 
 def get_software_version(
     software: str,
@@ -77,7 +75,6 @@ def get_software_version(
         pass
     
     return None
-
 
 def verify_software(
     software: str,
@@ -130,7 +127,6 @@ def verify_software(
         version=version
     )
 
-
 def verify_plink_installation() -> Tuple[bool, bool]:
     """
     Verify PLINK installation and check for both PLINK 1.9 and PLINK2.
@@ -159,7 +155,6 @@ def verify_plink_installation() -> Tuple[bool, bool]:
             logger.info(f"  Version: {version}")
     
     return plink_installed, plink2_installed
-
 
 def verify_genomic_environment(
     required_tools: Optional[List[str]] = None,
@@ -239,7 +234,6 @@ def verify_genomic_environment(
     
     return results
 
-
 def check_plink_versions() -> Tuple[Optional[str], Optional[str]]:
     """
     Check versions of both PLINK 1.9 and PLINK2.
@@ -253,7 +247,6 @@ def check_plink_versions() -> Tuple[Optional[str], Optional[str]]:
     plink2_version = get_software_version('plink2', '--version')
     
     return plink_version, plink2_version
-
 
 # Quick verification function for use in pipelines
 def quick_verify(tools: Optional[List[str]] = None) -> None:
