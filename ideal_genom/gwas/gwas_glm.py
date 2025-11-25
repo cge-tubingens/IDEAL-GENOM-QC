@@ -2,14 +2,22 @@
 
 It includes methods for association analysis, obtaining top hits, and annotating SNPs with gene information.
 """
+import logging
 import os
 
 import pandas as pd
 
-from ideal_genom.Helpers import shell_do
-from ideal_genom.annotations import annotate_snp
+from core.executor import run_plink2, run_gcta
+from core.utils import get_available_memory, get_optimal_threads
+from ideal_genom.utilities.annotations import annotate_snp
 
 from typing import Optional
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 class GWASfixed:
 
@@ -79,15 +87,13 @@ class GWASfixed:
         self.recompute   = recompute
 
         # create results folder
-        self.results_dir = os.path.join(output_path, 'gwas_fixed')
+        self.results_dir = os.path.join(output_path, 'gwas_glm')
         if not os.path.exists(self.results_dir):
             os.mkdir(self.results_dir)
 
-        print("\033[1;32mAnalysis of GWAS data using a fixed model initialized.\033[0m")
-
         pass
 
-    def fixed_model_association_analysis(self, maf: float = 0.01, mind: float = 0.1, hwe: float = 5e-6, ci: float = 0.95) -> dict:
+    def glm_association_analysis(self, maf: float = 0.01, mind: float = 0.1, hwe: float = 5e-6, ci: float = 0.95) -> None:
         """Perform fixed model association analysis using PLINK2.
         
         This method performs a fixed model association analysis on genomic data using PLINK2. 
@@ -126,7 +132,7 @@ class GWASfixed:
         results_dir= self.results_dir
         recompute  = self.recompute
 
-        step = "association_analysis"
+        logger.info("Starting association analysis with GLM.")
 
         # Check type of maf
         if not isinstance(maf, float):
@@ -164,37 +170,29 @@ class GWASfixed:
         if not os.path.exists(os.path.join(input_path, input_name+'.eigenvec')):
             raise FileNotFoundError(f"PCA file was not found: {os.path.join(input_path, input_name+'.eigenvec')}")
 
-        # compute the number of threads to use
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2  # use all available cores
-        else:
-            max_threads = 10
+        threads = get_optimal_threads()
+        memory = get_available_memory()
 
         if recompute:
 
             # plink2 command to perform association analysis
-            plink2_cmd = f"plink2 --bfile {os.path.join(input_path, input_name)} --adjust --ci {ci} --maf {maf} --mind {mind} --hwe {hwe} --covar {os.path.join(input_path, input_name+'.eigenvec')} --glm hide-covar omit-ref sex cols=+a1freq,+beta --out {os.path.join(results_dir, output_name+'_glm')} --threads {max_threads}"
+            run_plink2([
+                '--bfile', os.path.join(input_path, input_name),
+                '--adjust',
+                '--ci', str(ci),
+                '--maf', str(maf),
+                '--mind', str(mind),
+                '--hwe', str(hwe),
+                '--covar', os.path.join(input_path, input_name + '.eigenvec'),
+                '--glm', 'hide-covar', 'omit-ref', 'sex', 'cols=+a1freq,+beta',
+                '--out', os.path.join(results_dir, output_name + '_glm'),
+                '--threads', str(threads),
+                '--memory', str(memory)
+            ])
 
-            # execute plink command
-            shell_do(plink2_cmd, log=True)
+        return
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def get_top_hits(self, maf: float = 0.01) -> dict:
+    def get_top_hits(self, maf: float = 0.01) -> None:
         
         """Get the top hits from the GWAS results.
 
@@ -238,14 +236,9 @@ class GWASfixed:
         if maf < 0 or maf > 0.5:
             raise ValueError("maf should be between 0 and 0.5")
 
-        step = "get_top_hits"
+        logger.info("Getting top hits from GWAS results.")
 
-        # compute the number of threads to use
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        threads = get_optimal_threads()
 
         # load results of association analysis and rename columns according GCTA requirements
         df = pd.read_csv(os.path.join(results_dir, output_name+'_glm.PHENO1.glm.logistic.hybrid'), sep="\t")
@@ -280,28 +273,19 @@ class GWASfixed:
         del df
 
         if recompute:
-            # gcta command
-            gcta_cmd = f"gcta64 --bfile {os.path.join(input_path, input_name)} --maf {maf} --cojo-slct --cojo-file {os.path.join(results_dir, 'cojo_file.ma')}   --out {os.path.join(results_dir, input_name, '-cojo')} --thread-num {max_threads}"
+            # gcta command for conditional analysis
+            run_gcta([
+                '--bfile', os.path.join(input_path, input_name),
+                '--maf', str(maf),
+                '--cojo-slct',
+                '--cojo-file', os.path.join(results_dir, 'cojo_file.ma'),
+                '--out', os.path.join(results_dir, input_name + '-cojo'),
+                '--thread-num', str(threads)
+            ])
 
-            # execute gcta command
-            shell_do(gcta_cmd, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def annotate_top_hits(self, gtf_path: Optional[str] = None, build: str = '38', anno_source: str = "ensembl") -> dict:
+    def annotate_top_hits(self, gtf_path: Optional[str] = None, build: str = '38', anno_source: str = "ensembl") -> None:
         """Annotate top SNP hits from COJO analysis with gene information.
         
         This method reads the COJO joint analysis results, extracts the top SNPs, 
@@ -338,13 +322,13 @@ class GWASfixed:
 
         results_dir = self.results_dir
 
-        step = "annotate_hits"
+        logger.info("Starting annotation of top hits.")
 
         # load the data
         if os.path.exists(os.path.join(results_dir, 'cojo_file.jma.cojo')):
             df_hits = pd.read_csv(os.path.join(results_dir, 'cojo_file.jma.cojo'), sep="\t")
         else:
-            FileExistsError("File cojo_file.jma not found in the results directory.")
+            raise FileNotFoundError("File cojo_file.jma.cojo not found in the results directory.")
 
         df_hits = df_hits[['Chr', 'SNP', 'bp']].copy()
 
@@ -359,18 +343,7 @@ class GWASfixed:
             ).rename(columns={"GENE":"GENENAME"})
 
         df_hits.to_csv(os.path.join(results_dir, 'top_hits_annotated.tsv'), sep="\t", index=False)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
         
-        return out_dict
+        logger.info("Top hits annotation completed and saved.")
+        
+        return
