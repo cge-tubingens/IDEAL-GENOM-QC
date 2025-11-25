@@ -2,11 +2,12 @@
 
 It includes methods for association analysis, obtaining top hits, and annotating SNPs with gene information.
 """
-import os
+from pathlib import Path
 import pandas as pd
 
-from ideal_genom.Helpers import shell_do
-from ideal_genom.annotations import annotate_snp
+from core.executor import run_gcta
+from core.utils import get_optimal_threads
+from ideal_genom.utilities.annotations import annotate_snp
 
 from typing import Optional
 
@@ -42,16 +43,11 @@ class GWASrandom:
         If input_name or output_name are not strings, or if recompute is not a boolean.
     """
 
-    def __init__(self, input_path:str, input_name:str, output_path:str, output_name:str, recompute:bool = True) -> None:
+    def __init__(self, input_path:Path, input_name:str, output_path:Path, output_name:str, recompute:bool = True) -> None:
 
        # check if paths are set
         if input_path is None or output_path is None:
             raise ValueError("Values for input_path, output_path and dependables_path must be set upon initialization.")
-        
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f"Input path does not exist: {input_path}")
-        if not os.path.exists(output_path):
-            raise FileNotFoundError(f"Output path does not exist: {output_path}")
         
         # check if input_name and output_name are set
         if input_name is None or output_name is None:
@@ -60,15 +56,20 @@ class GWASrandom:
             raise TypeError("input_name and output_name should be of type str.")
         
         # check existence of PLINK files
-        if not os.path.exists(os.path.join(input_path, input_name+'.bed')):
-            raise FileNotFoundError(f"PLINK bed file was not found: {os.path.join(input_path, input_name+'.bed')}")
-        if not os.path.exists(os.path.join(input_path, input_name+'.bim')):
-            raise FileNotFoundError(f"PLINK bim file was not found: {os.path.join(input_path, input_name+'.bim')}")
-        if not os.path.exists(os.path.join(input_path, input_name+'.fam')):
-            raise FileNotFoundError(f"PLINK fam file was not found: {os.path.join(input_path, input_name+'.fam')}")
+        if not (input_path / f'{input_name}.bed').exists():
+            raise FileNotFoundError(f"PLINK bed file was not found: {(input_path / f'{input_name}.bed')}")
+        if not (input_path / f'{input_name}.bim').exists():
+            raise FileNotFoundError(f"PLINK bim file was not found: {(input_path / f'{input_name}.bim')}")
+        if not (input_path / f'{input_name}.fam').exists():
+            raise FileNotFoundError(f"PLINK fam file was not found: {(input_path / f'{input_name}.fam')}")
         
         if not isinstance(recompute, bool):
             raise TypeError("recompute should be of type bool.")
+        
+        if not input_path.exists():
+            raise FileNotFoundError(f"Input path does not exist: {input_path}")
+        if not output_path.exists():
+            raise FileNotFoundError(f"Output path does not exist: {output_path}")
 
         self.input_path  = input_path
         self.output_path = output_path
@@ -77,15 +78,15 @@ class GWASrandom:
         self.recompute   = recompute
 
         # create results folder
-        self.results_dir = os.path.join(output_path, 'gwas_random')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+        self.results_dir = output_path / 'gwas_random'
+        if not self.results_dir.exists():
+            self.results_dir.mkdir(parents=True)
 
         print("\033[1;32mAnalysis of GWAS data using a random effect model initialized.\033[0m")
 
         pass
 
-    def prepare_aux_files(self) -> dict:
+    def prepare_aux_files(self) -> None:
         
         """Prepares auxiliary files for GWAS analysis by processing phenotype and sex data.
         
@@ -105,9 +106,9 @@ class GWASrandom:
         step = "prepare_aux_files"
 
         df_fam = pd.read_csv(
-            os.path.join(input_path, input_name+'.fam'), 
+            input_path / f'{input_name}.fam',
             sep   =r'\s+',
-            engine='python', 
+            engine='python',
             header=None
         )
 
@@ -117,9 +118,9 @@ class GWASrandom:
         df_pheno[5] = df_pheno[5]-1
 
         df_pheno.to_csv(
-            os.path.join(results_dir, input_name+'_pheno.phen'), 
-            sep   ='\t', 
-            header=False, 
+            results_dir / f'{input_name}_pheno.phen',
+            sep   ='\t',
+            header=False,
             index =False
         )
 
@@ -127,28 +128,15 @@ class GWASrandom:
         df_sex = df_fam[[0,1,4]].copy()
 
         df_sex.to_csv(
-            os.path.join(results_dir, input_name+'_sex.covar'), 
-            sep   ='\t', 
-            header=False, 
+            results_dir / f'{input_name}_sex.covar',
+            sep   ='\t',
+            header=False,
             index =False
         )
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'python_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def compute_grm(self, max_threads: Optional[int] = None) -> dict:
+    def compute_grm(self, max_threads: Optional[int] = None) -> None:
         
         """Compute the Genetic Relationship Matrix (GRM) using GCTA software.
 
@@ -179,40 +167,28 @@ class GWASrandom:
         step = "compute_grm"
 
         # compute the number of threads to use
-        cpu_count = os.cpu_count()
-        if max_threads is None:
-            if cpu_count is not None:
-                max_threads = cpu_count-2
-            else:
-                max_threads = 10
+        threads = max_threads or get_optimal_threads()
 
         if recompute:
-            # gcta commands
-            gcta_cmd1 = f"gcta64 --bfile {os.path.join(input_path, input_name+'-pruned')} --make-grm --thread-num {max_threads} --out {os.path.join(results_dir, input_name+'_grm')}"
+                # gcta commands as lists
+                gcta_args1 = [
+                    '--bfile', str(input_path / f'{input_name}-pruned'),
+                    '--make-grm',
+                    '--thread-num', str(threads),
+                    '--out', str(results_dir / f'{input_name}_grm')
+                ]
+                gcta_args2 = [
+                    '--grm', str(results_dir / f'{input_name}_grm'),
+                    '--make-bK-sparse', '0.05',
+                    '--out', str(results_dir / f'{input_name}_sparse')
+                ]
 
-            gcta_cmd2 = f"gcta64 --grm {os.path.join(results_dir, input_name+'_grm')} --make-bK-sparse 0.05 --out {os.path.join(results_dir, input_name+'_sparse')}"
-
-            # run gcta commands
-            cmds = [gcta_cmd1, gcta_cmd2]
-            for cmd in cmds:
-                shell_do(cmd, log=True)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'gcta_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+                # run gcta commands
+                run_gcta(gcta_args1)
+                run_gcta(gcta_args2)
+        return
     
-    def run_gwas_glmm(self, maf: float = 0.01) -> dict:
+    def run_gwas_glmm(self, maf: float = 0.01) -> None:
         
         """Runs a Genome-Wide Association Study (GWAS) using a generalized linear mixed model (GLMMM).
 
@@ -246,46 +222,39 @@ class GWASrandom:
         if maf < 0 or maf > 1:
             raise ValueError("maf should be between 0 and 1.")
 
-        step = "run_gwas_random"
+        
 
         # compute the number of threads to use
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        threads = get_optimal_threads()
 
-        if not os.path.exists(os.path.join(results_dir, input_name+'_sparse.grm.id')):
+        if not (results_dir / f'{input_name}_sparse.grm.id').exists():
             raise FileExistsError(f"File {input_name+'_sparse.grm.id'} is not in the results directory.")
-        if not os.path.exists(os.path.join(results_dir, input_name+'_sparse.grm.sp')):
+        if not (results_dir / f'{input_name}_sparse.grm.sp').exists():
             raise FileExistsError(f"File {input_name+'_sparse.grm.id'} is not in the results directory.")
-        if not os.path.exists(os.path.join(results_dir, input_name+'_sex.covar')):
+        if not (results_dir / f'{input_name}_sex.covar').exists():
             raise FileExistsError(f"File {input_name+'sex.covar'} is not in the results directory.")
-        if not os.path.exists(os.path.join(results_dir, input_name+'_pheno.phen')):
+        if not (results_dir / f'{input_name}_pheno.phen').exists():
             raise FileExistsError(f"File {input_name+'_pheno.phen'} is not in the results directory.")
 
         # gcta command
-        gcta_cmd = f"gcta64 --bfile {os.path.join(input_path, input_name)} --fastGWA-mlm-binary --maf {maf} --grm-sparse {os.path.join(results_dir, input_name+'_sparse')} --qcovar {os.path.join(input_path, input_name+'.eigenvec')} --covar {os.path.join(results_dir, input_name+'_sex.covar')} --pheno {os.path.join(results_dir, input_name+'_pheno.phen')} --out {os.path.join(results_dir, output_name+'_assocSparseCovar_pca_sex-mlm-binary')} --thread-num {max_threads}"
+        gcta_args = [
+            '--bfile', str(input_path / input_name),
+            '--fastGWA-mlm-binary',
+            '--maf', str(maf),
+            '--grm-sparse', str(results_dir / f'{input_name}_sparse'),
+            '--qcovar', str(input_path / f'{input_name}.eigenvec'),
+            '--covar', str(results_dir / f'{input_name}_sex.covar'),
+            '--pheno', str(results_dir / f'{input_name}_pheno.phen'),
+            '--out', str(results_dir / f'{output_name}_assocSparseCovar_pca_sex-mlm-binary'),
+            '--thread-num', str(threads)
+        ]
 
         # run gcta command
-        shell_do(gcta_cmd, log=True)
+        run_gcta(gcta_args)
 
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'gcta_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
+        return
     
-    def get_top_hits(self, maf: float = 0.01) -> dict:
+    def get_top_hits(self, maf: float = 0.01) -> None:
         
         """Get the top hits from the GWAS results.
 
@@ -325,14 +294,10 @@ class GWASrandom:
         step = "get_top_hits"
 
         # compute the number of threads to use
-        cpu_count = os.cpu_count()
-        if cpu_count is not None:
-            max_threads = cpu_count-2
-        else:
-            max_threads = 10
+        threads = get_optimal_threads()
 
         # load results of association analysis and rename columns according to GCTA requirements
-        df = pd.read_csv(os.path.join(results_dir, output_name+'_assocSparseCovar_pca_sex-mlm-binary.fastGWA'), sep="\t")
+        df = pd.read_csv(results_dir / f'{output_name}_assocSparseCovar_pca_sex-mlm-binary.fastGWA', sep="\t")
         rename = {
             'CHR'     :'CHR',	
             'SNP'     :'SNP',
@@ -354,33 +319,27 @@ class GWASrandom:
         # prepare .ma file
         df = df[['SNP', 'A1', 'A2', 'freq', 'b', 'se', 'p', 'N']].copy()
 
-        df.to_csv(os.path.join(results_dir, 'cojo_file.ma'), sep="\t", index=False)
+        df.to_csv(results_dir / 'cojo_file.ma', sep="\t", index=False)
 
         del df
 
         if recompute:
-            # gcta command
-            gcta_cmd = f"gcta64 --bfile {os.path.join(input_path, input_name)} --maf {maf} --cojo-slct --cojo-file {os.path.join(results_dir, 'cojo_file.ma')}   --out {os.path.join(results_dir, output_name+'_assocSparseCovar_pca_sex-mlm-binary-cojo')} --thread-num {max_threads}"
+            # gcta command as list
+            gcta_args = [
+                '--bfile', str(input_path / input_name),
+                '--maf', str(maf),
+                '--cojo-slct',
+                '--cojo-file', str(results_dir / 'cojo_file.ma'),
+                '--out', str(results_dir / f'{output_name}_assocSparseCovar_pca_sex-mlm-binary-cojo'),
+                '--thread-num', str(threads)
+            ]
 
             # execute gcta command
-            shell_do(gcta_cmd, log=True)
+            run_gcta(gcta_args)
 
-        # report
-        process_complete = True
+        return
 
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
-
-        return out_dict
-
-    def annotate_top_hits(self, gtf_path: Optional[str] = None, build: str = '38', anno_source: str = 'ensembl') -> dict:
+    def annotate_top_hits(self, gtf_path: Optional[str] = None, build: str = '38', anno_source: str = 'ensembl') -> None:
         """Annotate top genetic hits from GWAS analysis with gene information.
         
         This method loads top hits from COJO analysis results, annotates them with gene information
@@ -420,39 +379,24 @@ class GWASrandom:
         step = "annotate_hits"
 
         # load the data
-        cojo_file_path = os.path.join(results_dir, output_name+'_assocSparseCovar_pca_sex-mlm-binary-cojo.jma.cojo')
+        cojo_file_path = results_dir / f'{output_name}_assocSparseCovar_pca_sex-mlm-binary-cojo.jma.cojo'
 
         # check if .jma file exists
-        if os.path.exists(cojo_file_path):
+        if cojo_file_path.exists():
             df_hits = pd.read_csv(cojo_file_path, sep="\t")
+            df_hits = df_hits[['Chr', 'SNP', 'bp']].copy()
+            if not df_hits.empty:
+                df_hits = annotate_snp(
+                    df_hits,
+                    chrom  ='Chr',
+                    pos    ='bp',
+                    build  =build,
+                    source =anno_source,
+                    gtf_path=gtf_path # type: ignore
+                ).rename(columns={"GENE":"GENENAME"})
+            df_hits.to_csv(results_dir / 'top_hits_annotated.tsv', sep="\t", index=False)
         else:
-            FileExistsError("File cojo_file.jma not found in the results directory.")
+            raise FileExistsError("File cojo_file.jma not found in the results directory.")
 
-        df_hits = df_hits[['Chr', 'SNP', 'bp']].copy()
-
-        if (df_hits.empty is not True):
-            df_hits = annotate_snp(
-                df_hits,
-                chrom  ='Chr',
-                pos    ='bp',
-                build  =build,
-                source =anno_source,
-                gtf_path=gtf_path # type: ignore
-            ).rename(columns={"GENE":"GENENAME"})
-
-        df_hits.to_csv(os.path.join(results_dir, 'top_hits_annotated.tsv'), sep="\t", index=False)
-
-        # report
-        process_complete = True
-
-        outfiles_dict = {
-            'plink_out': results_dir
-        }
-
-        out_dict = {
-            'pass': process_complete,
-            'step': step,
-            'output': outfiles_dict
-        }
         
-        return out_dict
+        return
