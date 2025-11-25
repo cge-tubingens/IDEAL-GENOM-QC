@@ -1,31 +1,36 @@
-"""Class designed to run preparatory steps before conducting Genomic-Wide Association Studies (GWAS).
+"""Class for preparatory steps before GWAS.
 
-This class handles the pruning of high linkage disequilibrium (LD) regions and performs Principal Component Analysis (PCA) on the pruned data.
-It uses PLINK software for the pruning and PCA operations, ensuring that the input data is in the correct format and that necessary files are present.
-It also manages the fetching of high LD regions if they are not provided, using the FetcherLDRegions class from the ideal_genom package.
-It is designed to be flexible with parameters such as missing rate, minor allele frequency, and number of principal components to compute.
-It also allows for memory and thread management during the execution of PLINK
+This class handles the pruning of high linkage disequilibrium (LD) regions
+and performs Principal Component Analysis (PCA) on the pruned data.
+It uses PLINK software for the pruning and PCA operations, ensuring that
+the input data is in the correct format and that necessary files are present.
+It also manages the fetching of high LD regions if they are not provided,
+using the FetcherLDRegions class from the ideal_genom package.
+It is designed to be flexible with parameters such as missing rate,
+minor allele frequency, and number of principal components to compute.
+It also allows for memory and thread management during PLINK execution.
 """
 import logging
-
+from pathlib import Path
+from typing import Optional
 
 from core.get_references import FetcherLDRegions
 from core.executor import run_plink2
 from core.utils import get_available_memory, get_optimal_threads
 
-from pathlib import Path
-from typing import Optional
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 class Preparatory:
     """A class for preprocessing genomic data in preparation for analysis.
-    
+
     This class handles the preparatory steps needed for genomic data analysis,
-    including input validation, LD (Linkage Disequilibrium) pruning, and 
+    including input validation, LD (Linkage Disequilibrium) pruning, and
     PCA (Principal Component Analysis) decomposition.
-    
+
     Attributes
     ----------
     input_path : str or Path
@@ -51,7 +56,7 @@ class Preparatory:
     FileNotFoundError
         If the specified input_path or output_path does not exist, or if the required PLINK files (.bed, .bim, .fam) are not found,
         or if the high LD file is not found and cannot be fetched.
-    
+
     Notes
     -----
     This class uses PLINK software for genomic data processing operations.
@@ -61,35 +66,46 @@ class Preparatory:
     The class assumes that PLINK is installed and available in the system PATH.
     """
 
-    def __init__(self, input_path: str | Path, input_name: str, output_path: str | Path, output_name: str, high_ld_file: str | Path, build: str = '38') -> None:
-        
+    def __init__(self, input_path: str | Path, input_name: str,
+                 output_path: str | Path, output_name: str,
+                 high_ld_file: str | Path, build: str = '38') -> None:
+
         # check if paths are set
         if input_path is None or output_path is None:
-            raise ValueError("Values for input_path and output_path must be set upon initialization.")
-        
-        if not isinstance(input_path, (str, Path)) or not isinstance(output_path, (str, Path)):
-            raise TypeError("input_path and output_path should be of type str or Path.")
-        
-        input_path  = Path(input_path)
+            raise ValueError(
+                "Values for input_path and output_path must be set upon initialization."
+            )
+
+        if (not isinstance(input_path, (str, Path)) or
+                not isinstance(output_path, (str, Path))):
+            raise TypeError(
+                "input_path and output_path should be of type str or Path."
+            )
+
+        input_path = Path(input_path)
         output_path = Path(output_path)
         high_ld_file = Path(high_ld_file)
-        
+
         if not input_path.exists() or not input_path.is_dir():
-            raise FileNotFoundError(f"Input directory path does not exist: {input_path}")
+            raise FileNotFoundError(
+                f"Input directory path does not exist: {input_path}"
+            )
         if not output_path.exists() or not output_path.is_dir():
-            raise FileNotFoundError(f"Output path does not exist: {output_path}")
-        
+            raise FileNotFoundError(
+                f"Output path does not exist: {output_path}"
+            )
+
         # check if input_name and output_name are set
         if input_name is None or output_name is None:
             raise ValueError("Values for input_name and output_name must be set upon initialization.")
         if not isinstance(input_name, str) or not isinstance(output_name, str):
             raise TypeError("input_name and output_name should be of type str.")
-        
+
         if not isinstance(build, str):
             raise TypeError("built should be of type str.")
         if build not in ['38', '37']:
             raise ValueError("built should be either '38' or '37'.")
-        
+
         # check existence of PLINK files
         if not (input_path / f"{input_name}.bed").exists():
             raise FileNotFoundError(f"PLINK bed file was not found: {input_path / f'{input_name}.bed'}")
@@ -100,40 +116,43 @@ class Preparatory:
         if not high_ld_file.is_file():
             logger.info(f"High LD file not found at {high_ld_file}")
             logger.info('High LD file will be fetched from the package')
-            
+
             ld_fetcher = FetcherLDRegions(build=build)
             ld_fetcher.get_ld_regions()
 
             if ld_fetcher.ld_regions is None:
                 raise FileNotFoundError("Could not fetch high LD regions file")
-                
+
             high_ld_file = ld_fetcher.ld_regions
             logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
 
-        self.input_path  = input_path
+        self.input_path = input_path
         self.output_path = output_path
-        self.input_name  = input_name
+        self.input_name = input_name
         self.output_name = output_name
-        self.build       = build
+        self.build = build
         self.high_ld_file = high_ld_file
 
         # create results folder
         self.results_dir = self.output_path / 'preparatory'
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
-        pass
-    def execute_ld_prunning(self, mind: float = 0.2, maf: float = 0.01, geno: float = 0.1, hwe: float = 5e-6, ind_pair: list = [50, 5, 0.2], memory: Optional[int] = None, threads: Optional[int] = None) -> None:
+    def execute_ld_prunning(self, mind: float = 0.2, maf: float = 0.01,
+                           geno: float = 0.1, hwe: float = 5e-6,
+                           ind_pair: list = [50, 5, 0.2],
+                           memory: Optional[int] = None,
+                           threads: Optional[int] = None) -> None:
         """Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
 
         This method performs LD pruning in two steps:
         1. Excludes high LD regions and identifies independent SNPs
         2. Extracts the identified independent SNPs
-        
+
         Parameters
         ----------
         mind : float, optional (default=0.2)
             Missing rate per individual threshold. Excludes individuals with missing rate higher than threshold.
-        maf : float, optional (default=0.01) 
+        maf : float, optional (default=0.01)
             Minor allele frequency threshold. Must be between 0 and 0.5.
         geno : float, optional (default=0.1)
             Missing rate per SNP threshold. Must be between 0 and 1.
@@ -143,12 +162,12 @@ class Preparatory:
             Parameters for pairwise pruning: [window size(variants), step size(variants), r^2 threshold]
         memory : int, optional (default=None)
             Memory in MB to allocate. If None, uses 2/3 of available system memory.
-        
+
         Returns
         -------
         None
             The results are saved to disk and the pruned file path is stored in self.pruned_file
-        
+
         Raises
         ------
         TypeError
@@ -157,41 +176,41 @@ class Preparatory:
             If maf is not between 0 and 0.5
             If geno is not between 0 and 1
             If hwe is not between 0 and 1
-        
+
         Notes
         -----
         Uses PLINK software for the pruning operations.
         Operates on chromosomes 1-22 only.
         Automatically determines optimal thread count based on system CPU cores.
         """
-        
+
         if not isinstance(mind, float):
             raise TypeError("mind should be of type float.")
 
         # Check type of maf
         if not isinstance(maf, float):
-             raise TypeError("maf should be of type float.")
+            raise TypeError("maf should be of type float.")
 
         # Check type of geno
         if not isinstance(geno, float):
             raise TypeError("geno should be of type float.")
-        
+
         # Check type of hwe
         if not isinstance(hwe, float):
             raise TypeError("hwe should be of type float.")
-        
+
         # Check if maf is in range
         if maf < 0 or maf > 0.5:
             raise ValueError("maf should be between 0 and 0.5")
-        
+
         # Check if geno is in range
         if geno < 0 or geno > 1:
             raise ValueError("geno should be between 0 and 1")
-        
+
         # Check if hwe is in range
         if hwe < 0 or hwe > 1:
             raise ValueError("hwe should be between 0 and 1")
-        
+
         logger.info("STEP: LD pruning")
 
         # compute the number of threads to use
@@ -234,8 +253,10 @@ class Preparatory:
         self.pruned_file = self.input_path / (self.input_name+'-pruned')
 
         return
-    
-    def execute_pc_decomposition(self, pca: int = 10, threads: Optional[int] = None, memory: Optional[int] = None) -> None:
+
+    def execute_pc_decomposition(self, pca: int = 10,
+                                 threads: Optional[int] = None,
+                                 memory: Optional[int] = None) -> None:
         """Execute PCA decomposition on pruned PLINK binary files.
 
         This method performs Principal Component Analysis (PCA) on the pruned genotype data
@@ -302,8 +323,13 @@ class Preparatory:
         run_plink2(plink_args)
 
         return
-    
-    def execute_preparatory_pipeline(self, mind: float = 0.2, maf: float = 0.01, geno: float = 0.1, hwe: float = 5e-6, ind_pair: list = [50, 5, 0.2], pca: int = 10, memory: Optional[int] = None, threads: Optional[int] = None) -> None:
+
+    def execute_preparatory_pipeline(self, mind: float = 0.2, maf: float = 0.01,
+                                     geno: float = 0.1, hwe: float = 5e-6,
+                                     ind_pair: list = [50, 5, 0.2],
+                                     pca: int = 10,
+                                     memory: Optional[int] = None,
+                                     threads: Optional[int] = None) -> None:
         """Execute the full preparatory pipeline including LD pruning and PCA decomposition.
 
         This method combines the LD pruning and PCA decomposition steps into a single
@@ -326,7 +352,7 @@ class Preparatory:
             Number of principal components to compute during PCA decomposition.
         memory : int, optional (default=None)
             Memory in MB to allocate for PLINK operations.
-        
+
         Returns
         -------
         None
@@ -335,8 +361,8 @@ class Preparatory:
         -----
         This method sequentially calls `execute_ld_prunning` and `execute_pc_decomposition`.
         """
-        
+
         self.execute_ld_prunning(mind=mind, maf=maf, geno=geno, hwe=hwe, ind_pair=ind_pair, memory=memory, threads=threads)
         self.execute_pc_decomposition(pca=pca, memory=memory, threads=threads)
-        
+
         return
