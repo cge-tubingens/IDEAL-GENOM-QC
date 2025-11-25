@@ -1,14 +1,18 @@
 
+"""Module for converting VCF files to PLINK binary format.
+
+This module provides the GetPLINK class for converting post-imputation VCF files
+to PLINK binary format for downstream genomic analysis. The conversion process
+handles resource management, file validation, and supports both initial conversion
+and family information updates.
+"""
+
 import logging
-import os
-import subprocess
-import psutil
 
 from pathlib import Path
 from typing import Optional
-from typing import Optional
 
-from core.utils import validate_input_file
+from core.utils import validate_input_file, get_optimal_threads, get_available_memory
 from core.executor import run_plink2
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -113,23 +117,12 @@ class GetPLINK:
             If the plink2 command execution fails.
         """
 
-        if threads is None:
-            cpu_count = os.cpu_count()
-            if cpu_count is not None:
-                threads = max(1, cpu_count - 2)  # Ensure at least 1 thread
-            else:
-                threads = 10
-
-        if memory is None:
-            # get virtual memory details
-            memory_info = psutil.virtual_memory()
-            available_memory_mb = memory_info.available / (1024 * 1024)
-            memory = int(round(2*available_memory_mb/3,0))
+        threads = threads or get_optimal_threads()
+        memory = memory or get_available_memory()
 
         if double_id:
             # plink2 command
-            plink2_cmd = [
-                "plink2",
+            plink2_args = [
                 "--vcf", (self.input_path / self.input_name).as_posix(),
                 "--snps-only", "just-acgt", "--double-id",
                 "--make-bed",
@@ -139,8 +132,7 @@ class GetPLINK:
             ]
         else:
             # plink2 command
-            plink2_cmd = [
-                "plink2",
+            plink2_args = [
                 "--vcf", (self.input_path / self.input_name).as_posix(),
                 "--snps-only", "just-acgt",
                 "--make-bed",
@@ -151,14 +143,14 @@ class GetPLINK:
 
         # execute plink2 command
         try:
-            run_plink2(plink2_cmd)
+            run_plink2(plink2_args)
             print(f"PLINK2 command executed successfully. Output files saved with prefix: {self.output_name}-nosex")
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             print(f"Error running PLINK2: {e}")
 
         pass
 
-    def update_fam(self, for_fam_update_file: Path, threads: Optional[int] = None) -> None:
+    def update_fam(self, for_fam_update_file: Path, threads: Optional[int] = None, memory: Optional[int] = None) -> None:
         """Add family information to the PLINK .fam file.
 
         This method reads a family information file and updates the PLINK .fam file
@@ -192,22 +184,52 @@ class GetPLINK:
 
         logger.info(f"Updating family information in {self.output_name}-nosex.fam with {for_fam_update_file}")
    
-        if threads is None:
-            cpu_count = os.cpu_count()
-            if cpu_count is not None:
-                threads = max(1, cpu_count - 2)  # Ensure at least 1 thread
-            else:
-                threads = 10
+        threads = threads or get_optimal_threads()
+        memory = memory or get_available_memory()
         
         # PLINK2 command
-        run_plink2([
-            "plink2",
+        plink2_args = [
             "--bfile", (self.analysis_ready / (self.output_name + "-nosex")).as_posix(),
             "--make-bed",
             "--out", (self.analysis_ready / self.output_name).as_posix(),
             "--fam", fam_file.as_posix(),
-            "--threads", str(threads)
-        ])
+            "--threads", str(threads),
+            "--memory", str(memory)
+        ]
+        try:
+            run_plink2(plink2_args)
+            logger.info(f"Family information updated successfully. Output files saved with prefix: {self.output_name}")
+        except Exception as e:
+            logger.error(f"Error updating family information with PLINK2: {e}")
 
         pass
+
+    def execute_plink_conversion_pipeline(self, double_id: bool = True, for_fam_update_file: Optional[Path] = None, threads: Optional[int] = None, memory: Optional[int] =None) -> None:
+        """Execute the full PLINK conversion pipeline: VCF to PLINK binary and optional family info update.
+
+        This method orchestrates the conversion of a VCF file to PLINK binary format
+        and optionally updates the .fam file with family information.
+
+        Parameters
+        ----------
+        double_id : bool, optional
+            Whether to use the --double-id flag in plink2 command. Defaults to True.
+        for_fam_update_file : Path, optional
+            Path to the family information file for updating the .fam file. If None, no update is performed.
+        threads : int, optional
+            Number of CPU threads to use. If None, defaults to (available CPU cores - 2) or 10 if CPU count can't be determined.
+        memory : int, optional
+            Memory allocation in MB for plink2. If None, defaults to approximately 2/3 of available system memory.
+
+        Returns
+        -------
+        None
+        """
+
+        self.convert_vcf_to_plink(double_id=double_id, threads=threads, memory=memory)
+
+        if for_fam_update_file:
+            self.update_fam(for_fam_update_file=for_fam_update_file, threads=threads, memory=memory)
+
+        return
     
