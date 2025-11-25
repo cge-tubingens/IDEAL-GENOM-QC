@@ -216,6 +216,138 @@ def count_file_lines(file_path: Path) -> int:
         return sum(1 for _ in f)
 
 
+def validate_input_file(file_path: Path, extensions: Optional[List[str]] = None) -> Path:
+    """
+    Validate that a file exists and optionally check its extension.
+    
+    Validates file existence and optionally ensures the file has one of the 
+    specified extensions. Useful for genomic data files that must have specific
+    formats (e.g., .vcf, .bim, .fam).
+    
+    Parameters
+    ----------
+    file_path : Path
+        Path to the file to validate
+    extensions : List[str], optional
+        List of valid file extensions (including the dot, e.g., ['.vcf', '.vcf.gz']).
+        If None, no extension validation is performed.
+        
+    Returns
+    -------
+    Path
+        Validated file path
+        
+    Raises
+    ------
+    TypeError
+        If file_path is not a Path object
+    FileNotFoundError
+        If the file does not exist
+    IsADirectoryError
+        If the path points to a directory instead of a file
+    ValueError
+        If the file extension is not in the allowed extensions list
+        
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> vcf_file = validate_input_file(Path('data.vcf'), ['.vcf', '.vcf.gz'])
+    >>> any_file = validate_input_file(Path('output.txt'))  # No extension check
+    """
+    if not isinstance(file_path, Path):
+        raise TypeError(f"file_path must be a Path object, got {type(file_path)}")
+    
+    if not file_path.exists():
+        raise FileNotFoundError(f"Input file does not exist: {file_path}")
+    
+    if not file_path.is_file():
+        raise IsADirectoryError(f"Path is not a file: {file_path}")
+    
+    # Validate extension if specified
+    if extensions is not None:
+        if not isinstance(extensions, (list, tuple)):
+            raise TypeError("extensions must be a list or tuple of strings")
+        
+        # Check if any of the allowed extensions match
+        file_extension = ''.join(file_path.suffixes)  # Handles .vcf.gz, .tar.gz, etc.
+        
+        # Also check just the last suffix for single extensions
+        single_extension = file_path.suffix
+        
+        valid_extension = (file_extension in extensions or 
+                          single_extension in extensions or
+                          str(file_path).endswith(tuple(extensions)))
+        
+        if not valid_extension:
+            raise ValueError(
+                f"File '{file_path}' has invalid extension. "
+                f"Expected one of {extensions}, got '{file_extension}' or '{single_extension}'"
+            )
+    
+    return file_path
+
+
+def validate_file_path(file_path: Path, must_exist: bool = True, must_be_file: bool = True) -> Path:
+    """
+    Generic file path validation with flexible requirements.
+    
+    Provides flexible validation for file paths with configurable requirements.
+    Useful when you need different validation rules for different scenarios
+    (e.g., input files that must exist vs. output files that may not exist yet).
+    
+    Parameters
+    ----------
+    file_path : Path
+        Path to validate
+    must_exist : bool, default=True
+        If True, the path must already exist
+    must_be_file : bool, default=True
+        If True, the path must be a file (not a directory).
+        Only checked if must_exist=True and the path exists.
+        
+    Returns
+    -------
+    Path
+        Validated file path
+        
+    Raises
+    ------
+    TypeError
+        If file_path is not a Path object
+    FileNotFoundError
+        If must_exist=True and the path does not exist
+    IsADirectoryError
+        If must_be_file=True and the path is a directory
+        
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> # Validate existing input file
+    >>> input_file = validate_file_path(Path('input.txt'))
+    >>> 
+    >>> # Validate output file path (may not exist yet)
+    >>> output_file = validate_file_path(Path('output.txt'), must_exist=False)
+    >>> 
+    >>> # Validate path that could be file or directory
+    >>> path = validate_file_path(Path('data'), must_be_file=False)
+    """
+    if not isinstance(file_path, Path):
+        raise TypeError(f"file_path must be a Path object, got {type(file_path)}")
+    
+    # Check existence requirement
+    if must_exist and not file_path.exists():
+        raise FileNotFoundError(f"Path does not exist: {file_path}")
+    
+    # Check file type requirement (only if path exists)
+    if file_path.exists() and must_be_file and not file_path.is_file():
+        if file_path.is_dir():
+            raise IsADirectoryError(f"Path is a directory, expected a file: {file_path}")
+        else:
+            raise ValueError(f"Path exists but is neither a file nor directory: {file_path}")
+    
+    return file_path
+
+
 def validate_output_dir(output_dir: Path, create: bool = True) -> Path:
     """
     Validate and optionally create output directory.
