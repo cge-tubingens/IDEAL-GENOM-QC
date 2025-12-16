@@ -687,10 +687,23 @@ class PipelineExecutor:
             attr_path = parts[2:]
             
             if step_name not in self.steps:
-                raise ValueError(
-                    f"Step '{step_name}' not found. "
-                    f"Available steps: {list(self.steps.keys())}"
-                )
+                # Check if step exists in config but hasn't been processed yet
+                all_step_names = [s['name'] for s in self.config['pipeline']['steps']]
+                if step_name in all_step_names:
+                    raise ValueError(
+                        f"Step '{step_name}' referenced but not yet instantiated. "
+                        f"This may indicate the step is disabled or comes later in the pipeline. "
+                        f"Available steps: {list(self.steps.keys())}"
+                    )
+                else:
+                    raise ValueError(
+                        f"Step '{step_name}' not found in pipeline configuration. "
+                        f"The current step references '${{{reference}}}' but '{step_name}' "
+                        f"is not defined in your YAML configuration file. "
+                        f"Available steps in config: {all_step_names}. "
+                        f"Please either add the '{step_name}' step to your configuration "
+                        f"or update the reference to use an available step."
+                    )
             
             # Navigate through nested attributes
             obj = self.steps[step_name]
