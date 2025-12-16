@@ -413,3 +413,93 @@ class GWASrandom:
 
         
         return
+
+    def execute_gwasrandom_pipeline(self, maf: float = 0.01, max_threads: Optional[int] = None,
+                                   gtf_path: Optional[str] = None, build: str = '38', 
+                                   anno_source: str = 'ensembl') -> None:
+        """Execute the complete GWAS random effects pipeline.
+
+        This method orchestrates the full GWAS analysis workflow using a generalized linear
+        mixed model (GLMM). It sequentially executes all necessary steps: preparing auxiliary
+        files, computing the genetic relationship matrix (GRM), running the GWAS analysis,
+        extracting top hits, and annotating them with gene information.
+
+        Parameters
+        ----------
+        maf : float, optional (default=0.01)
+            Minor allele frequency threshold for filtering SNPs. Must be between 0 and 1.
+        max_threads : int, optional (default=None)
+            Maximum number of threads to use for GRM computation. If None, uses optimal
+            thread count based on available CPU cores.
+        gtf_path : Optional[str], optional (default=None)
+            Path to the GTF file for custom annotation. If None, uses default annotation resources.
+        build : str, optional (default='38')
+            Genome build version to use for annotation ('38' for GRCh38, '37' for GRCh37).
+        anno_source : str, optional (default='ensembl')
+            Source of annotations to use (e.g., 'ensembl', 'refseq').
+
+        Returns
+        -------
+        None
+            Results are saved to the results directory specified during initialization.
+
+        Raises
+        ------
+        TypeError
+            If maf is not of type float.
+        ValueError
+            If maf is not between 0 and 1.
+        FileExistsError
+            If required intermediate files are not found during the pipeline execution.
+
+        Notes
+        -----
+        This method sequentially calls:
+        1. prepare_aux_files() - Prepares phenotype and covariate files
+        2. compute_grm() - Computes the genetic relationship matrix
+        3. run_gwas_glmm() - Performs the GWAS analysis
+        4. get_top_hits() - Extracts top significant hits
+        5. annotate_top_hits() - Annotates hits with gene information
+
+        Examples
+        --------
+        >>> gwas = GWASrandom(input_path='data/', input_name='genotypes',
+        ...                   output_path='results/', output_name='gwas_results')
+        >>> gwas.execute_gwasrandom_pipeline(maf=0.05, build='38')
+        """
+
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info("\033[1;34mStarting GWAS Random Effects (GLMM) Pipeline\033[0m")
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+
+        # Step 1: Prepare auxiliary files
+        logger.info("\033[1;33m[1/5] Preparing auxiliary files (phenotype and covariates)...\033[0m")
+        self.prepare_aux_files()
+        logger.info("\033[1;32m✓ Auxiliary files prepared successfully\033[0m\n")
+
+        # Step 2: Compute GRM
+        logger.info("\033[1;33m[2/5] Computing genetic relationship matrix (GRM)...\033[0m")
+        self.compute_grm(max_threads=max_threads)
+        logger.info("\033[1;32m✓ GRM computation completed\033[0m\n")
+
+        # Step 3: Run GWAS with GLMM
+        logger.info("\033[1;33m[3/5] Running GWAS analysis with GLMM...\033[0m")
+        self.run_gwas_glmm(maf=maf)
+        logger.info("\033[1;32m✓ GWAS analysis completed\033[0m\n")
+
+        # Step 4: Extract top hits
+        logger.info("\033[1;33m[4/5] Extracting top hits from GWAS results...\033[0m")
+        self.get_top_hits(maf=maf)
+        logger.info("\033[1;32m✓ Top hits extracted\033[0m\n")
+
+        # Step 5: Annotate top hits
+        logger.info("\033[1;33m[5/5] Annotating top hits with gene information...\033[0m")
+        self.annotate_top_hits(gtf_path=gtf_path, build=build, anno_source=anno_source)
+        logger.info("\033[1;32m✓ Annotation completed\033[0m\n")
+
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info("\033[1;32m✓ GWAS Random Effects Pipeline Completed Successfully!\033[0m")
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info(f"\033[1mResults saved to: {self.results_dir}\033[0m\n")
+
+        return
