@@ -3,15 +3,14 @@
 It includes methods for association analysis, obtaining top hits, and annotating SNPs with gene information.
 """
 import logging
-import os
+from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 
 from ..core.executor import run_plink2, run_gcta
 from ..core.utils import get_available_memory, get_optimal_threads
 from ideal_genom.utilities.annotations import annotate_snp
-
-from typing import Optional
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,9 +26,9 @@ class GWASfixed:
 
     Attributes
     ----------
-    input_path : str
+    input_path : Path
         Path to the input directory.
-    output_path : str 
+    output_path : Path
         Path to the output directory.
     input_name : str 
         Base name of the input PLINK files.
@@ -37,7 +36,7 @@ class GWASfixed:
         Base name for the output files.
     recompute : bool 
         Flag indicating whether to recompute the analysis.
-    results_dir : str 
+    results_dir : Path
         Directory where the results will be saved.
         
     Raises
@@ -52,15 +51,21 @@ class GWASfixed:
         If input_name or output_name are not strings, or if recompute is not a boolean.
     """
 
-    def __init__(self, input_path: str, input_name: str, output_path: str, output_name: str, recompute: bool = True) -> None:
+    def __init__(self, input_path: str | Path, input_name: str, output_path: str | Path, output_name: str, recompute: bool = True) -> None:
     
         # check if paths are set
         if input_path is None or output_path is None:
-            raise ValueError("Values for input_path, output_path and dependables_path must be set upon initialization.")
+            raise ValueError("Values for input_path and output_path must be set upon initialization.")
         
-        if not os.path.exists(input_path):
+        if not isinstance(input_path, (str, Path)) or not isinstance(output_path, (str, Path)):
+            raise TypeError("input_path and output_path should be of type str or Path.")
+        
+        input_path = Path(input_path)
+        output_path = Path(output_path)
+        
+        if not input_path.exists() or not input_path.is_dir():
             raise FileNotFoundError(f"Input path does not exist: {input_path}")
-        if not os.path.exists(output_path):
+        if not output_path.exists() or not output_path.is_dir():
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
         
         # check if input_name and output_name are set
@@ -70,12 +75,12 @@ class GWASfixed:
             raise TypeError("input_name and output_name should be of type str.")
         
         # check existence of PLINK files
-        if not os.path.exists(os.path.join(input_path, input_name+'.bed')):
-            raise FileNotFoundError(f"PLINK bed file was not found: {os.path.join(input_path, input_name+'.bed')}")
-        if not os.path.exists(os.path.join(input_path, input_name+'.bim')):
-            raise FileNotFoundError(f"PLINK bim file was not found: {os.path.join(input_path, input_name+'.bim')}")
-        if not os.path.exists(os.path.join(input_path, input_name+'.fam')):
-            raise FileNotFoundError(f"PLINK fam file was not found: {os.path.join(input_path, input_name+'.fam')}")
+        if not (input_path / f'{input_name}.bed').exists():
+            raise FileNotFoundError(f"PLINK bed file was not found: {input_path / f'{input_name}.bed'}")
+        if not (input_path / f'{input_name}.bim').exists():
+            raise FileNotFoundError(f"PLINK bim file was not found: {input_path / f'{input_name}.bim'}")
+        if not (input_path / f'{input_name}.fam').exists():
+            raise FileNotFoundError(f"PLINK fam file was not found: {input_path / f'{input_name}.fam'}")
         
         if not isinstance(recompute, bool):
             raise TypeError("recompute should be of type bool.")
@@ -87,11 +92,10 @@ class GWASfixed:
         self.recompute   = recompute
 
         # create results folder
-        self.results_dir = os.path.join(output_path, 'gwas_glm')
-        if not os.path.exists(self.results_dir):
-            os.mkdir(self.results_dir)
+        self.results_dir = output_path / 'gwas_glm'
+        self.results_dir.mkdir(parents=True, exist_ok=True)
 
-        pass
+        logger.info("\033[1;32mGWAS fixed effects (GLM) analysis initialized.\033[0m")
 
     def glm_association_analysis(self, maf: float = 0.01, mind: float = 0.1, hwe: float = 5e-6, ci: float = 0.95) -> None:
         """Perform fixed model association analysis using PLINK2.
