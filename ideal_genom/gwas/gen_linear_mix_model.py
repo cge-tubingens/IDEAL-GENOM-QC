@@ -2,7 +2,10 @@
 
 It includes methods for association analysis, obtaining top hits, and annotating SNPs with gene information.
 """
+import logging
 from pathlib import Path
+from typing import Optional
+
 import pandas as pd
 
 from ..core.executor import run_gcta
@@ -47,11 +50,17 @@ class GWASrandom:
         If input_name or output_name are not strings, or if recompute is not a boolean.
     """
 
-    def __init__(self, input_path:Path, input_name:str, output_path:Path, output_name:str, recompute:bool = True) -> None:
+    def __init__(self, input_path: str | Path, input_name: str, output_path: str | Path, output_name: str, recompute: bool = True) -> None:
 
-       # check if paths are set
+        # check if paths are set
         if input_path is None or output_path is None:
-            raise ValueError("Values for input_path, output_path and dependables_path must be set upon initialization.")
+            raise ValueError("Values for input_path and output_path must be set upon initialization.")
+        
+        if not isinstance(input_path, (str, Path)) or not isinstance(output_path, (str, Path)):
+            raise TypeError("input_path and output_path should be of type str or Path.")
+        
+        input_path = Path(input_path)
+        output_path = Path(output_path)
         
         # check if input_name and output_name are set
         if input_name is None or output_name is None:
