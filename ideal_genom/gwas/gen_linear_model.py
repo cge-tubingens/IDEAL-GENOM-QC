@@ -171,8 +171,8 @@ class GWASfixed:
             raise ValueError("ci should be between 0 and 1")
         
         # check if the PCA file exists
-        if not os.path.exists(os.path.join(input_path, input_name+'.eigenvec')):
-            raise FileNotFoundError(f"PCA file was not found: {os.path.join(input_path, input_name+'.eigenvec')}")
+        if not (input_path / f'{input_name}.eigenvec').exists():
+            raise FileNotFoundError(f"PCA file was not found: {input_path / f'{input_name}.eigenvec'}")
 
         threads = get_optimal_threads()
         memory = get_available_memory()
@@ -181,18 +181,20 @@ class GWASfixed:
 
             # plink2 command to perform association analysis
             run_plink2([
-                '--bfile', os.path.join(input_path, input_name),
+                '--bfile', str(input_path / input_name),
                 '--adjust',
                 '--ci', str(ci),
                 '--maf', str(maf),
                 '--mind', str(mind),
                 '--hwe', str(hwe),
-                '--covar', os.path.join(input_path, input_name + '.eigenvec'),
+                '--covar', str(input_path / f'{input_name}.eigenvec'),
                 '--glm', 'hide-covar', 'omit-ref', 'sex', 'cols=+a1freq,+beta',
-                '--out', os.path.join(results_dir, output_name + '_glm'),
+                '--out', str(results_dir / f'{output_name}_glm'),
                 '--threads', str(threads),
                 '--memory', str(memory)
             ])
+
+        logger.info("Association analysis with GLM completed.")
 
         return
 
