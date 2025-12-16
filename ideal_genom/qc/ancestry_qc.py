@@ -909,7 +909,7 @@ class ReferenceGenomicMerger:
             logger.info(f"Automatically fetching 1000 Genomes reference files for build {self.build}")
             
             # Import here to avoid circular imports
-            from core.get_references import Fetcher1000Genome
+            from ..core.get_references import Fetcher1000Genome
             
             # Fetch 1000 Genomes reference files
             fetcher = Fetcher1000Genome(build=self.build)
@@ -1857,7 +1857,7 @@ class AncestryQC:
             logger.info(f"Automatically fetching 1000 Genomes reference files for build {self.build}")
             
             # Import here to avoid circular imports
-            from core.get_references import Fetcher1000Genome
+            from ..core.get_references import Fetcher1000Genome
             
             # Fetch 1000 Genomes reference files
             fetcher = Fetcher1000Genome(build=self.build)
