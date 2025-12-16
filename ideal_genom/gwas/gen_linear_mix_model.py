@@ -1,4 +1,4 @@
-"""This module provides a class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Mixed Model (GLMM) with PLINK2. 
+"""This module provides a class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Mixed Model (GLMM) with GCTA. 
 
 It includes methods for association analysis, obtaining top hits, and annotating SNPs with gene information.
 """
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class GWASrandom:
 
-    """Class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Mixed Model (GLM) with PLINK2.
+    """Class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Mixed Model (GLM) with GCTA.
 
     This class provides methods to perform association analysis, obtain top hits, and annotate SNPs with gene information.
         
@@ -79,9 +79,9 @@ class GWASrandom:
         if not isinstance(recompute, bool):
             raise TypeError("recompute should be of type bool.")
         
-        if not input_path.exists():
+        if not input_path.exists() or not input_path.is_dir():
             raise FileNotFoundError(f"Input path does not exist: {input_path}")
-        if not output_path.exists():
+        if not output_path.exists() or not output_path.is_dir():
             raise FileNotFoundError(f"Output path does not exist: {output_path}")
 
         self.input_path  = input_path
@@ -92,8 +92,7 @@ class GWASrandom:
 
         # create results folder
         self.results_dir = output_path / 'gwas_random'
-        if not self.results_dir.exists():
-            self.results_dir.mkdir(parents=True)
+        self.results_dir.mkdir(parents=True, exist_ok=True)
 
         print("\033[1;32mAnalysis of GWAS data using a random effect model initialized.\033[0m")
 
