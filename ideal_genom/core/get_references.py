@@ -12,8 +12,8 @@ from typing import Optional
 from gtfparse import read_gtf
 from bs4 import BeautifulSoup, Tag
 
-from core.executor import run_plink2
-from core.utils import get_available_memory, get_optimal_threads
+from .executor import run_plink2
+from .utils import get_available_memory, get_optimal_threads
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

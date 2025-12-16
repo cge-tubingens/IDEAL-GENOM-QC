@@ -12,22 +12,15 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-# Handle imports for both package and direct execution
+# Package imports
+from .config import load_config, ConfigurationError
+from .pipeline import PipelineExecutor
+
+# Try to get version from package
 try:
-    from core.config import load_config, ConfigurationError
-    from core.pipeline import PipelineExecutor
-    # Try to get version from package
-    try:
-        from importlib.metadata import version
-        __version__ = version("ideal-genom")
-    except Exception:
-        __version__ = "0.2.0"  # fallback version
-except ImportError:
-    # For direct execution from package root
-    import sys
-    sys.path.append('.')
-    from core.config import load_config, ConfigurationError
-    from core.pipeline import PipelineExecutor
+    from importlib.metadata import version
+    __version__ = version("ideal-genom")
+except Exception:
     __version__ = "0.2.0"  # fallback version
 
 

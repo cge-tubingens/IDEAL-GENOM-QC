@@ -3,13 +3,8 @@
 import os
 import psutil
 import logging
-import contextlib
-import tempfile
-import shutil
-import weakref
 from pathlib import Path
-from typing import Optional, Union, List, Set, Generator, Iterator, Any, IO
-from collections.abc import Generator as GeneratorABC
+from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
