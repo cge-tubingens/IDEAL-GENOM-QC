@@ -393,7 +393,7 @@ class FilterVariants(ParallelTaskRunner):
         if not isinstance(self.output_prefix, str):
             raise TypeError(f"prefix should be of type str, got {type(self.output_prefix)}")
 
-        self._file_collector('unzipped-*dose.vcf.gz')
+        self._file_collector('unzipped-*.vcf.gz')
 
         self._run_task(
             self.filter_variants,
