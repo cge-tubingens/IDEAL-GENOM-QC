@@ -333,14 +333,15 @@ class GWASfixed:
         logger.info("Starting annotation of top hits.")
 
         # load the data
-        if os.path.exists(os.path.join(results_dir, 'cojo_file.jma.cojo')):
-            df_hits = pd.read_csv(os.path.join(results_dir, 'cojo_file.jma.cojo'), sep="\t")
+        cojo_file_path = results_dir / 'cojo_file.jma.cojo'
+        if cojo_file_path.exists():
+            df_hits = pd.read_csv(cojo_file_path, sep="\t")
         else:
-            raise FileNotFoundError("File cojo_file.jma.cojo not found in the results directory.")
+            raise FileNotFoundError(f"File cojo_file.jma.cojo not found in the results directory: {results_dir}")
 
         df_hits = df_hits[['Chr', 'SNP', 'bp']].copy()
 
-        if (df_hits.empty is not True):
+        if not df_hits.empty:
             df_hits = annotate_snp(
                 df_hits,
                 chrom  ='Chr',
@@ -350,7 +351,7 @@ class GWASfixed:
                 gtf_path=gtf_path # type: ignore
             ).rename(columns={"GENE":"GENENAME"})
 
-        df_hits.to_csv(os.path.join(results_dir, 'top_hits_annotated.tsv'), sep="\t", index=False)
+        df_hits.to_csv(results_dir / 'top_hits_annotated.tsv', sep="\t", index=False)
         
         logger.info("Top hits annotation completed and saved.")
         
