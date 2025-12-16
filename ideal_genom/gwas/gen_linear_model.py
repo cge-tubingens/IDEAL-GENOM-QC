@@ -247,7 +247,7 @@ class GWASfixed:
         threads = get_optimal_threads()
 
         # load results of association analysis and rename columns according GCTA requirements
-        df = pd.read_csv(os.path.join(results_dir, output_name+'_glm.PHENO1.glm.logistic.hybrid'), sep="\t")
+        df = pd.read_csv(results_dir / f'{output_name}_glm.PHENO1.glm.logistic.hybrid', sep="\t")
         rename = {
             '#CHROM'          : 'CHR',	
             'POS'             : 'POS',	
@@ -274,20 +274,22 @@ class GWASfixed:
         # prepare .ma file
         df = df[['SNP', 'A1', 'A2', 'freq', 'b', 'se', 'p', 'N']].copy()
 
-        df.to_csv(os.path.join(results_dir, 'cojo_file.ma'), sep="\t", index=False)
+        df.to_csv(results_dir / 'cojo_file.ma', sep="\t", index=False)
 
         del df
 
         if recompute:
             # gcta command for conditional analysis
             run_gcta([
-                '--bfile', os.path.join(input_path, input_name),
+                '--bfile', str(input_path / input_name),
                 '--maf', str(maf),
                 '--cojo-slct',
-                '--cojo-file', os.path.join(results_dir, 'cojo_file.ma'),
-                '--out', os.path.join(results_dir, input_name + '-cojo'),
+                '--cojo-file', str(results_dir / 'cojo_file.ma'),
+                '--out', str(results_dir / f'{output_name}-cojo'),
                 '--thread-num', str(threads)
             ])
+
+        logger.info("Top hits extraction completed.")
 
         return
     
