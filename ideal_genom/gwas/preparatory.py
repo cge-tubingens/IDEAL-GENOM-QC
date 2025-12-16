@@ -14,9 +14,9 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from core.get_references import FetcherLDRegions
-from core.executor import run_plink2
-from core.utils import get_available_memory, get_optimal_threads
+from ..core.get_references import FetcherLDRegions
+from ..core.executor import run_plink2
+from ..core.utils import get_available_memory, get_optimal_threads
 
 logging.basicConfig(
     level=logging.INFO,

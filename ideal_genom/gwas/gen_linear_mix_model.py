@@ -5,8 +5,8 @@ It includes methods for association analysis, obtaining top hits, and annotating
 from pathlib import Path
 import pandas as pd
 
-from core.executor import run_gcta
-from core.utils import get_optimal_threads
+from ..core.executor import run_gcta
+from ..core.utils import get_optimal_threads
 from ideal_genom.utilities.annotations import annotate_snp
 
 from typing import Optional

@@ -7,8 +7,8 @@ import os
 
 import pandas as pd
 
-from core.executor import run_plink2, run_gcta
-from core.utils import get_available_memory, get_optimal_threads
+from ..core.executor import run_plink2, run_gcta
+from ..core.utils import get_available_memory, get_optimal_threads
 from ideal_genom.utilities.annotations import annotate_snp
 
 from typing import Optional
