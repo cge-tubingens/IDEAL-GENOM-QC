@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Union, Literal, Optional
 from scipy.spatial import distance as dist
 
-from core.executor import run_plink, run_plink2
-from core.utils import get_optimal_threads, get_available_memory, count_file_lines
-from core.get_references import Fetcher1000Genome, FetcherLDRegions
+from ..core.executor import run_plink, run_plink2
+from ..core.utils import get_optimal_threads, get_available_memory, count_file_lines
+from ..core.get_references import Fetcher1000Genome, FetcherLDRegions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

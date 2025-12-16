@@ -17,9 +17,9 @@ from sklearn.manifold import TSNE
 
 from pathlib import Path
 
-from core.executor import run_plink2
-from core.utils import get_optimal_threads, get_available_memory
-from core.get_references import FetcherLDRegions
+from ..core.executor import run_plink2
+from ..core.utils import get_optimal_threads, get_available_memory
+from ..core.get_references import FetcherLDRegions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

@@ -17,7 +17,7 @@ from pyensembl import Genome
 
 from gtfparse import read_gtf
 
-from core.get_references import Ensembl38Fetcher, Ensembl37Fetcher, RefSeqFetcher
+from ..core.get_references import Ensembl38Fetcher, Ensembl37Fetcher, RefSeqFetcher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", force=True)
 logger = logging.getLogger(__name__)

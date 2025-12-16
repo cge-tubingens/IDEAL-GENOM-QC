@@ -12,8 +12,8 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from core.utils import validate_input_file, get_optimal_threads, get_available_memory
-from core.executor import run_plink2
+from ..core.utils import validate_input_file, get_optimal_threads, get_available_memory
+from ..core.executor import run_plink2
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

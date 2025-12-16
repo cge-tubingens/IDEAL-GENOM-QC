@@ -21,9 +21,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from typing import Optional
 
-from core.get_references import AssemblyReferenceFetcher
-from core.utils import validate_input_file, validate_file_path, get_optimal_threads
-from core.executor import run_bcftools
+from ..core.get_references import AssemblyReferenceFetcher
+from ..core.utils import validate_input_file, validate_file_path, get_optimal_threads
+from ..core.executor import run_bcftools
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
