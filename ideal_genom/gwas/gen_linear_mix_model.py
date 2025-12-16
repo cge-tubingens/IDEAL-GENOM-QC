@@ -97,8 +97,6 @@ class GWASrandom:
 
         print("\033[1;32mAnalysis of GWAS data using a random effect model initialized.\033[0m")
 
-        pass
-
     def prepare_aux_files(self) -> None:
         
         """Prepares auxiliary files for GWAS analysis by processing phenotype and sex data.
@@ -176,8 +174,6 @@ class GWASrandom:
         input_path = self.input_path
         input_name = self.input_name
         recompute  = self.recompute
-
-        step = "compute_grm"
 
         # compute the number of threads to use
         threads = max_threads or get_optimal_threads()
@@ -303,8 +299,6 @@ class GWASrandom:
             raise TypeError("maf should be of type float.")
         if maf < 0 or maf > 0.5:
             raise ValueError("maf should be between 0 and 1.")
-
-        step = "get_top_hits"
 
         # compute the number of threads to use
         threads = get_optimal_threads()
