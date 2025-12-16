@@ -9,7 +9,11 @@ from ..core.executor import run_gcta
 from ..core.utils import get_optimal_threads
 from ideal_genom.utilities.annotations import annotate_snp
 
-from typing import Optional
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class GWASrandom:
