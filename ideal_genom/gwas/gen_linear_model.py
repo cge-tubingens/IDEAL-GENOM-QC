@@ -356,3 +356,87 @@ class GWASfixed:
         logger.info("Top hits annotation completed and saved.")
         
         return
+
+    def execute_gwasfixed_pipeline(self, maf: float = 0.01, mind: float = 0.1, 
+                                  hwe: float = 5e-6, ci: float = 0.95,
+                                  gtf_path: Optional[str] = None, build: str = '38', 
+                                  anno_source: str = 'ensembl') -> None:
+        """Execute the complete GWAS fixed effects pipeline.
+
+        This method orchestrates the full GWAS analysis workflow using a generalized linear
+        model (GLM). It sequentially executes all necessary steps: performing the association
+        analysis, extracting top hits, and annotating them with gene information.
+
+        Parameters
+        ----------
+        maf : float, optional (default=0.01)
+            Minor allele frequency threshold for filtering SNPs. Must be between 0 and 0.5.
+        mind : float, optional (default=0.1)
+            Individual missingness threshold. Must be between 0 and 1.
+        hwe : float, optional (default=5e-6)
+            Hardy-Weinberg equilibrium threshold. Must be between 0 and 1.
+        ci : float, optional (default=0.95)
+            Confidence interval threshold. Must be between 0 and 1.
+        gtf_path : Optional[str], optional (default=None)
+            Path to the GTF file for custom annotation. If None, uses default annotation resources.
+        build : str, optional (default='38')
+            Genome build version to use for annotation ('38' for GRCh38, '37' for GRCh37).
+        anno_source : str, optional (default='ensembl')
+            Source of annotations to use (e.g., 'ensembl', 'refseq').
+
+        Returns
+        -------
+        None
+            Results are saved to the results directory specified during initialization.
+
+        Raises
+        ------
+        TypeError
+            If any of the numeric parameters are not of the correct type.
+        ValueError
+            If any of the parameters are out of their respective valid ranges.
+        FileNotFoundError
+            If required input files (e.g., PCA file) are not found.
+
+        Notes
+        -----
+        This method sequentially calls:
+        1. glm_association_analysis() - Performs the GLM-based GWAS analysis
+        2. get_top_hits() - Extracts top significant hits using conditional analysis
+        3. annotate_top_hits() - Annotates hits with gene information
+
+        The pipeline expects that preparatory steps (LD pruning and PCA) have already been
+        performed, as it requires the existence of .eigenvec files.
+
+        Examples
+        --------
+        >>> gwas = GWASfixed(input_path='data/', input_name='genotypes',
+        ...                  output_path='results/', output_name='gwas_results')
+        >>> gwas.execute_gwasfixed_pipeline(maf=0.05, hwe=1e-6, build='38')
+        """
+
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info("\033[1;34mStarting GWAS Fixed Effects (GLM) Pipeline\033[0m")
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+
+        # Step 1: Run association analysis with GLM
+        logger.info("\033[1;33m[1/3] Running GLM association analysis...\033[0m")
+        self.glm_association_analysis(maf=maf, mind=mind, hwe=hwe, ci=ci)
+        logger.info("\033[1;32m✓ Association analysis completed\033[0m\n")
+
+        # Step 2: Extract top hits
+        logger.info("\033[1;33m[2/3] Extracting top hits from GWAS results...\033[0m")
+        self.get_top_hits(maf=maf)
+        logger.info("\033[1;32m✓ Top hits extracted\033[0m\n")
+
+        # Step 3: Annotate top hits
+        logger.info("\033[1;33m[3/3] Annotating top hits with gene information...\033[0m")
+        self.annotate_top_hits(gtf_path=gtf_path, build=build, anno_source=anno_source)
+        logger.info("\033[1;32m✓ Annotation completed\033[0m\n")
+
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info("\033[1;32m✓ GWAS Fixed Effects Pipeline Completed Successfully!\033[0m")
+        logger.info("\033[1;34m" + "="*80 + "\033[0m")
+        logger.info(f"\033[1mResults saved to: {self.results_dir}\033[0m\n")
+
+        return
