@@ -1480,6 +1480,7 @@ class SampleQCReport:
         plt.tight_layout()
         plt.savefig(plots_dir / f"call_rate_{threshold}_histogram.{format}", dpi=400)
         plt.show(block=False)
+        plt.close()
 
         fig2, axes2 = plt.subplots(1, 3, figsize=(15, 5), sharey=False)
 
@@ -1534,6 +1535,7 @@ class SampleQCReport:
         plt.tight_layout()
         plt.savefig(plots_dir / f"call_rate_{threshold}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
+        plt.close()
 
         return
     
@@ -1663,6 +1665,7 @@ class SampleQCReport:
         plt.tight_layout()
         plt.savefig(plots_dir / f'sex_check.{format}', dpi=400)
         plt.show(block=False)
+        plt.close()
 
         return
     
@@ -1793,6 +1796,7 @@ class SampleQCReport:
             plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_histogram.{format}", dpi=400)
         
         plt.show(block=False)
+        plt.close()
 
         df_het['Deviated'] = 'Not Excluded'
         df_het.loc[mask_plus, 'Deviated'] = f'{std_deviation_het}xSD Excluded'
@@ -1826,6 +1830,7 @@ class SampleQCReport:
         else:
             plt.savefig(plots_dir / f"heterozygosity_rate_less_{maf}_scatterplot.{format}", dpi=400)
         plt.show(block=False)
+        plt.close()
 
         return
 
@@ -1908,6 +1913,7 @@ class SampleQCReport:
         plt.tight_layout()
         plt.savefig(self.output_path / 'ibd_pihat_distribution.png', dpi=600)
         plt.show(block=False)
+        plt.close()
        
         return 
 
