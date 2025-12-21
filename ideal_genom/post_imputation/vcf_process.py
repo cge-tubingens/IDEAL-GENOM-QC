@@ -653,6 +653,8 @@ class ReferenceNormalizeVCF(ParallelTaskRunner):
 
             elif self.build == '38':
 
+                logger.info("Downloading GRCh38 reference genome...")
+
                 assemb38 = AssemblyReferenceFetcher(
                         base_url='https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/',
                         build='38',
