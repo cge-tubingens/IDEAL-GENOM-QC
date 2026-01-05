@@ -629,6 +629,10 @@ class ReferenceNormalizeVCF(ParallelTaskRunner):
         ------
         TypeError 
             If output_prefix is not a string.
+        ValueError
+            If build is not '37' or '38'.
+        FileNotFoundError
+            If the reference file could not be found or downloaded.
         
         Notes
         -----
@@ -638,9 +642,14 @@ class ReferenceNormalizeVCF(ParallelTaskRunner):
         if not isinstance(self.output_prefix, str):
             raise TypeError(f"prefix should be of type str, got {type(self.output_prefix)}")
         
-        if not self.reference_file or not self.reference_file.exists():
-            if self.build == '37':
+        logger.info("Checking for reference genome...")
+        logger.info(f"Using build: {self.build}")
+        logger.info(f"Reference file: {self.reference_file}")
+        
+        if self.reference_file is None or not isinstance(self.reference_file, Path) or not self.reference_file.exists():
 
+            if self.build == '37':
+                logger.info("Downloading GRCh37 reference genome...")
                 assemb37 = AssemblyReferenceFetcher(
                         base_url='https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/',
                         build='37',
@@ -652,9 +661,7 @@ class ReferenceNormalizeVCF(ParallelTaskRunner):
                 self.reference_file = assemb37.file_path
 
             elif self.build == '38':
-
                 logger.info("Downloading GRCh38 reference genome...")
-
                 assemb38 = AssemblyReferenceFetcher(
                         base_url='https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/',
                         build='38',
@@ -664,6 +671,12 @@ class ReferenceNormalizeVCF(ParallelTaskRunner):
                 assemb38.download_reference_file()
                 assemb38.unzip_reference_file()
                 self.reference_file = assemb38.file_path
+            
+            else:
+                raise ValueError(f"Invalid build '{self.build}'. Must be '37' or '38'.")
+        
+        if not self.reference_file or not self.reference_file.exists():
+            raise FileNotFoundError(f"Reference file could not be found or downloaded: {self.reference_file}")
 
         self._file_collector('uncompressed-*dose.vcf.gz')
 
@@ -1101,7 +1114,7 @@ class ProcessVCF:
         reference_normalizer = ReferenceNormalizeVCF(
             input_path =self.process_vcf,
             output_path=self.process_vcf,
-            build      =build,
+            build      =str(build),
             reference_file=ref_genome
         )
         reference_normalizer.execute_task()
