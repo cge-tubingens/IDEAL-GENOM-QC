@@ -169,6 +169,9 @@ class GetPLINK:
         """
         if not for_fam_update_file:
             raise ValueError("for_fam_update_file must be provided")
+        
+        if isinstance(for_fam_update_file, str):
+            for_fam_update_file = Path(for_fam_update_file)
 
         if not isinstance(for_fam_update_file, Path):
             raise TypeError(f"for_fam_update_file should be of type Path, got {type(for_fam_update_file)}")
