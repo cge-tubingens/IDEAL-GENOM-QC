@@ -357,10 +357,7 @@ class GWASfixed:
         
         return
 
-    def execute_gwasfixed_pipeline(self, maf: float = 0.01, mind: float = 0.1, 
-                                  hwe: float = 5e-6, ci: float = 0.95,
-                                  gtf_path: Optional[str] = None, build: str = '38', 
-                                  anno_source: str = 'ensembl') -> None:
+    def execute_gwasfixed_pipeline(self, glm_params: dict) -> None:
         """Execute the complete GWAS fixed effects pipeline.
 
         This method orchestrates the full GWAS analysis workflow using a generalized linear
@@ -414,6 +411,14 @@ class GWASfixed:
         ...                  output_path='results/', output_name='gwas_results')
         >>> gwas.execute_gwasfixed_pipeline(maf=0.05, hwe=1e-6, build='38')
         """
+
+        maf = glm_params.get('maf', 0.01)
+        mind = glm_params.get('mind', 0.1)
+        hwe = glm_params.get('hwe', 5e-6)
+        ci = glm_params.get('ci', 0.95)
+        gtf_path = glm_params.get('gtf_path', None)
+        build = glm_params.get('build', '38')
+        anno_source = glm_params.get('anno_source', 'ensembl')
 
         logger.info("\033[1;34m" + "="*80 + "\033[0m")
         logger.info("\033[1;34mStarting GWAS Fixed Effects (GLM) Pipeline\033[0m")
