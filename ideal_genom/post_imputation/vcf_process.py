@@ -1243,7 +1243,7 @@ class ProcessVCF:
 
         return
 
-    def execute_process_vcf_pipeline(self, password: Optional[str] = None, r2_threshold: float = 0.3, build: str = '38', ref_genome: Optional[Path] = None, ref_annotation: Optional[Path] = None, output_name: str = 'final_output.vcf.gz', max_threads: Optional[int] = None) -> None:
+    def execute_process_vcf_pipeline(self, process_vcf_params: dict) -> None:
         """Execute the full VCF processing pipeline.
 
         This method runs the complete sequence of VCF processing steps:
@@ -1271,6 +1271,19 @@ class ProcessVCF:
         -------
         None
         """
+
+        password       = process_vcf_params.get('password', None)
+        r2_threshold   = process_vcf_params.get('r2_threshold', 0.3)
+        build          = process_vcf_params.get('build', '38')
+        ref_genome     = process_vcf_params.get('ref_genome', None)
+        ref_annotation = process_vcf_params.get('ref_annotation', None)
+        output_name    = process_vcf_params.get('output_name', 'final_output.vcf.gz')
+        max_threads    = process_vcf_params.get('max_threads', None)
+
+        if not isinstance(r2_threshold, float):
+            raise TypeError(f"r2_threshold should be of type float, got {type(r2_threshold)}")
+        if not isinstance(output_name, str):
+            raise TypeError(f"output_name should be of type str, got {type(output_name)}")
 
         self.execute_unzip(password=password)
         self.execute_filter(r2_threshold=r2_threshold)
