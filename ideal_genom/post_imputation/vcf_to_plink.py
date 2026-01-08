@@ -204,7 +204,7 @@ class GetPLINK:
 
         pass
 
-    def execute_plink_conversion_pipeline(self, double_id: bool = True, for_fam_update_file: Optional[Path] = None, threads: Optional[int] = None, memory: Optional[int] =None) -> None:
+    def execute_plink_conversion_pipeline(self, plink_params: dict) -> None:
         """Execute the full PLINK conversion pipeline: VCF to PLINK binary and optional family info update.
 
         This method orchestrates the conversion of a VCF file to PLINK binary format
@@ -225,6 +225,11 @@ class GetPLINK:
         -------
         None
         """
+
+        double_id = plink_params.get('double_id', True)
+        for_fam_update_file = plink_params.get('for_fam_update_file', None)
+        threads = plink_params.get('threads', None)
+        memory = plink_params.get('memory', None)
 
         self.convert_vcf_to_plink(double_id=double_id, threads=threads, memory=memory)
 
