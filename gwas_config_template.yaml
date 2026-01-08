@@ -1,0 +1,81 @@
+# IDEAL-GENOM GWAS Pipeline Configuration Template
+# This template is designed for GWAS workflows including post-imputation VCF processing
+# Enable/disable steps as needed for your specific workflow
+
+pipeline:
+  name: "ideal_genom_gwas"
+  base_output_dir: "path/to/output/directory"
+  
+  # Pipeline steps - enable/disable by including/excluding from this list
+  # Steps will be executed in the order specified here
+  steps:
+    
+    # Step 1: Post-Imputation VCF Processing
+    # Processes imputed VCF files: unzip, filter, normalize, annotate, concatenate
+    - name: "process_vcf"
+      enabled: true
+      module: "ideal_genom.post_imputation.vcf_process"
+      class: "ProcessVCF"
+      init_params:
+        input_path: "/path/to/imputed/vcf/files"
+        output_path: "${base_output_dir}"
+      execute_params:
+        # VCF processing parameters
+        password: null              # Password for protected zip files (if applicable)
+        r2_threshold: 0.3          # R² threshold for filtering variants by imputation quality
+        build: "38"                # Genome build version (38 or 37)
+        ref_genome: null           # Path to custom reference genome (optional, auto-downloaded if null)
+        ref_annotation: null       # Path to reference annotation VCF for variant ID annotation
+        output_name: "processed_imputed_data.vcf.gz"  # Name of final concatenated output file
+        max_threads: null          # Maximum threads for concatenation (null for auto-detect)
+
+    # Step 2: VCF to PLINK Conversion
+    # Converts processed VCF files to PLINK binary format (.bed/.bim/.fam)
+    - name: "plink_conversion"
+      enabled: true
+      module: "ideal_genom.post_imputation.vcf_to_plink"
+      class: "GetPLINK"
+      init_params:
+        input_path: "${steps.process_vcf.output_path}"
+        input_name: "${steps.process_vcf.concatenated_file}"
+        output_path: "${base_output_dir}"
+        output_name: "imputed_data_plink"
+      execute_params:
+        # PLINK conversion parameters
+        double_id: true            # Use --double-id flag (sets FID and IID to sample ID)
+        for_fam_update_file: null  # Path to family information file for .fam update (optional)
+        threads: null              # Number of threads (null for auto-detect)
+        memory: null               # Memory allocation in MB (null for auto-detect)
+
+# Global settings
+settings:
+  # Logging configuration
+  logging:
+    level: "INFO"              # DEBUG, INFO, WARNING, ERROR
+    file_logging: true         # Enable file logging
+    console_logging: true      # Enable console logging
+  
+  # Resource management
+  resources:
+    max_memory: null           # Maximum memory usage (null for auto-detect)
+    max_threads: null          # Maximum threads (null for auto-detect)
+  
+  # File management
+  files:
+    keep_intermediate: true    # Preserve intermediate files (set to false to enable automatic cleanup)
+    compress_outputs: false    # Compress output files
+    overwrite_existing: false  # Overwrite existing output files
+    
+    # Note: When keep_intermediate is false, intermediate files in process_vcf/ subdirectory are removed
+  
+  # Report generation
+  reports:
+    generate_reports: false    # Generate visualization reports after each step
+    plot_format: "png"         # Format for plots: "png", "svg", "pdf"
+
+# Workflow examples:
+# 
+# For post-imputation VCF processing:
+# This template processes imputed VCF files through unzipping, filtering by R² score,
+# normalization, reference normalization, optional annotation, and concatenation into
+# a single output VCF file ready for downstream analysis or conversion to PLINK format.
