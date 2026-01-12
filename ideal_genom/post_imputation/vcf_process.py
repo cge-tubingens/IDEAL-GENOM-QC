@@ -989,13 +989,16 @@ class ProcessVCF:
       for storing intermediate files during processing.
     - This class is designed to handle multiple sequential steps in VCF file processing,
       such as unzipping, filtering, normalizing, and annotating.
+    - Unlike other pipeline classes, this class processes multiple files in a directory
+      rather than a single named input file, so input_name and output_name parameters
+      are optional and not used if provided.
 
     Note
     ----
     This class requires bcftools to be installed and available in the system path.
     """
 
-    def __init__(self, input_path: Path, output_path: Path) -> None:
+    def __init__(self, input_path: Path, output_path: Path, input_name: Optional[str] = None, output_name: Optional[str] = None) -> None:
         
         if not isinstance(input_path, Path):
             raise TypeError(f"input_path should be of type Path, got {type(input_path)}")
