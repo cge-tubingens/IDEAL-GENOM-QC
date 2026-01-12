@@ -1287,6 +1287,10 @@ class ProcessVCF:
             raise TypeError(f"r2_threshold should be of type float, got {type(r2_threshold)}")
         if not isinstance(output_name, str):
             raise TypeError(f"output_name should be of type str, got {type(output_name)}")
+        if not isinstance(ref_annotation, (type(None), Path, str)):
+            raise TypeError(f"ref_annotation should be of type Path or None, got {type(ref_annotation)}")
+        if isinstance(ref_annotation, str):
+            ref_annotation = Path(ref_annotation)
 
         self.execute_unzip(password=password)
         self.execute_filter(r2_threshold=r2_threshold)
