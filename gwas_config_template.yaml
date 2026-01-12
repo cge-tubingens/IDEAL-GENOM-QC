@@ -4,7 +4,7 @@
 
 pipeline:
   name: "ideal_genom_gwas"
-  base_output_dir: "path/to/output/directory"
+  base_output_dir: "/media/luis/LaCie/imputed_variants_replicationset_luxgiant/output"
   
   # Pipeline steps - enable/disable by including/excluding from this list
   # Steps will be executed in the order specified here
@@ -17,15 +17,17 @@ pipeline:
       module: "ideal_genom.post_imputation.vcf_process"
       class: "ProcessVCF"
       init_params:
-        input_path: "/path/to/imputed/vcf/files"
+        input_path: "/media/luis/LaCie/imputed_variants_replicationset_luxgiant/"
         output_path: "${base_output_dir}"
+        input_name: "placeholder"
+        output_name: "placeholder"
       execute_params:
         # VCF processing parameters
         password: null              # Password for protected zip files (if applicable)
         r2_threshold: 0.3          # R² threshold for filtering variants by imputation quality
         build: "38"                # Genome build version (38 or 37)
         ref_genome: null           # Path to custom reference genome (optional, auto-downloaded if null)
-        ref_annotation: null       # Path to reference annotation VCF for variant ID annotation
+        ref_annotation: '/media/luis/LaCie/15_01_25/GRCh38.dbSNP156_chr.vcf.gz' # Path to reference annotation VCF for variant ID annotation
         output_name: "processed_imputed_data.vcf.gz"  # Name of final concatenated output file
         max_threads: null          # Maximum threads for concatenation (null for auto-detect)
 
@@ -43,7 +45,7 @@ pipeline:
       execute_params:
         # PLINK conversion parameters
         double_id: true            # Use --double-id flag (sets FID and IID to sample ID)
-        for_fam_update_file: null  # Path to family information file for .fam update (optional)
+        for_fam_update_file: '/media/luis/LaCie/imputed_variants_replicationset_luxgiant/luxgiant_valdata_variantQCed.fam'  # Path to family information file for .fam update (optional)
         threads: null              # Number of threads (null for auto-detect)
         memory: null               # Memory allocation in MB (null for auto-detect)
 
