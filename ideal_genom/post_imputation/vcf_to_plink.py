@@ -341,6 +341,7 @@ class GetPLINK:
             logger.info("Retaining initial PLINK files with '-nosex' suffix.")
 
         self.execute_rename_snpid()
+        self.execute_intermediate_cleanup()
 
         return
     
