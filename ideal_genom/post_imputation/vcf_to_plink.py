@@ -210,7 +210,97 @@ class GetPLINK:
         except Exception as e:
             logger.error(f"Error updating family information with PLINK2: {e}")
 
+        self.updated_fam = self.analysis_ready / (self.output_name + '-updated')
+
         pass
+
+    def execute_intermediate_cleanup(self) -> None:
+        """Cleans up intermediate files generated during the PLINK conversion process.
+
+        This method removes temporary files such as the initial .bed, .bim, and .fam files
+        created during the conversion from VCF to PLINK binary format.
+
+        Returns
+        -------
+        None
+        """
+        import os
+
+        intermediate_files = [
+            self.analysis_ready / (self.output_name + "-nosex.bed"),
+            self.analysis_ready / (self.output_name + "-nosex.bim"),
+            self.analysis_ready / (self.output_name + "-nosex.fam"),
+        ]
+
+        for file_path in intermediate_files:
+            try:
+                if file_path.exists():
+                    os.remove(file_path)
+                    logger.info(f"Removed intermediate file: {file_path}")
+            except Exception as e:
+                logger.error(f"Error removing intermediate file {file_path}: {e}")
+
+        return
+    
+    def execute_rename_snpid(self, rename: bool = True) -> None:
+        
+        """
+        Executes the SNP ID renaming process using PLINK2.
+        This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
+        The renaming is performed using PLINK2's --set-all-var-ids parameter.
+
+        Parameter:
+        ----------
+        rename (bool, optional): Flag to control whether SNP renaming should be performed. 
+            Defaults to True.
+
+        Returns:
+        --------
+            None
+
+        Raises:
+        -------
+            TypeError: If rename parameter is not a boolean.
+
+        Notes:
+        ------
+            - The renamed files will be saved with '-renamed' suffix
+            - Thread count is optimized based on available CPU cores
+            - The new SNP ID format will be: chromosome:position:allele1:allele2
+            - Sets self.renamed_snps to True if renaming is performed
+        """
+
+        if not isinstance(rename, bool):
+            raise TypeError("rename must be a boolean")
+
+        if not rename:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
+            return
+        else:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
+            self.renamed_snps = True
+
+        max_threads = get_optimal_threads()
+        memory = get_available_memory()
+
+        plink2_args = [
+            '--bfile', str(self.updated_fam),
+            '--set-all-var-ids', '@:#:$r:$a',
+            '--threads', str(max_threads),
+            '--memory', str(memory),
+            '--make-bed',
+            '--out', str(self.analysis_ready / (self.output_name ))
+        ]
+
+        self._get_id_links()
+
+        # Execute PLINK2 command
+        run_plink2(plink2_args)
+
+        self.renamed_snps = str(self.input_path / (self.output_name ))
+
+        return
+
 
     def execute_plink_conversion_pipeline(self, plink_params: dict) -> None:
         """Execute the full PLINK conversion pipeline: VCF to PLINK binary and optional family info update.
