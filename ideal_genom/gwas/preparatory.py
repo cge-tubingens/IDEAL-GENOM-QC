@@ -17,6 +17,7 @@ from typing import Optional
 from ..core.get_references import FetcherLDRegions
 from ..core.executor import run_plink2
 from ..core.utils import get_available_memory, get_optimal_threads
+import pandas as pd
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,9 +67,12 @@ class Preparatory:
     The class assumes that PLINK is installed and available in the system PATH.
     """
 
-    def __init__(self, input_path: str | Path, input_name: str,
-                 output_path: str | Path, output_name: str,
-                 high_ld_file: str | Path, build: str = '38') -> None:
+    def __init__(self, input_path: str | Path, 
+                 input_name: str,
+                 output_path: str | Path, 
+                 output_name: str,
+                 high_ld_regions_file: str | Path, 
+                 build: str = '38') -> None:
 
         # check if paths are set
         if input_path is None or output_path is None:
@@ -84,7 +88,7 @@ class Preparatory:
 
         input_path = Path(input_path)
         output_path = Path(output_path)
-        high_ld_file = Path(high_ld_file)
+        high_ld_regions_file = Path(high_ld_regions_file)
 
         if not input_path.exists() or not input_path.is_dir():
             raise FileNotFoundError(
@@ -113,8 +117,8 @@ class Preparatory:
             raise FileNotFoundError(f"PLINK bim file was not found: {input_path / f'{input_name}.bim'}")
         if not (input_path / f"{input_name}.fam").exists():
             raise FileNotFoundError(f"PLINK fam file was not found: {input_path / f'{input_name}.fam'}")
-        if not high_ld_file.is_file():
-            logger.info(f"High LD file not found at {high_ld_file}")
+        if not high_ld_regions_file.is_file():
+            logger.info(f"High LD file not found at {high_ld_regions_file}")
             logger.info('High LD file will be fetched from the package')
 
             ld_fetcher = FetcherLDRegions(build=build)
