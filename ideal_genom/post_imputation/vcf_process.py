@@ -1316,6 +1316,8 @@ class ProcessVCF:
         self.execute_index()
         if ref_annotation:
             self.execute_annotate(ref_annotation=ref_annotation)
-        self.execute_concatenate(output_name=output_name, max_threads=max_threads)
+        self.execute_concatenate(output_name=self.output_name, max_threads=max_threads)
+
+        self.excute_intermediate_cleanup()
 
         return
