@@ -1300,13 +1300,10 @@ class ProcessVCF:
         build          = process_vcf_params.get('build', '38')
         ref_genome     = process_vcf_params.get('ref_genome', None)
         ref_annotation = process_vcf_params.get('ref_annotation', None)
-        output_name    = process_vcf_params.get('output_name', 'final_output.vcf.gz')
         max_threads    = process_vcf_params.get('max_threads', None)
 
         if not isinstance(r2_threshold, float):
             raise TypeError(f"r2_threshold should be of type float, got {type(r2_threshold)}")
-        if not isinstance(output_name, str):
-            raise TypeError(f"output_name should be of type str, got {type(output_name)}")
         if not isinstance(ref_annotation, (type(None), Path, str)):
             raise TypeError(f"ref_annotation should be of type Path or None, got {type(ref_annotation)}")
         if isinstance(ref_annotation, str):
