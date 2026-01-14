@@ -314,7 +314,7 @@ class Preparatory:
 
         # plink2 command to perform PCA decomposition
         plink_args = [
-            '--bfile', str(self.input_path / (self.input_name+'-pruned')),
+            '--bfile', str(self.pruned_file),
             '--pca', str(pca),
             '--threads', str(threads),
             '--memory', str(memory),
