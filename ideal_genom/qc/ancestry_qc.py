@@ -2306,7 +2306,7 @@ class AncestryQCReport:
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
         fig.tight_layout()
-        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}', format=format, dpi=400)
+        fig.savefig(plot_dir / f'2D-aspect-{aspect_ratio}-{plot_name}.{format}', format=format, dpi=400)
 
         fig.clf()
         plt.close()
@@ -2318,7 +2318,7 @@ class AncestryQCReport:
         plt.xlabel(f'PC_1 ({pc1_var_perc}%)')
         plt.ylabel(f'PC_2 ({pc2_var_perc}%)')
         fig3.tight_layout()
-        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}', format=format, dpi=400)
+        fig3.savefig(plot_dir / f'2D-zoom-aspect-{aspect_ratio}-{plot_name}.{format}', format=format, dpi=400)
 
         # generates a 3D scatter plot
         fig2= plt.figure()
@@ -2334,7 +2334,7 @@ class AncestryQCReport:
             )
 
         ax.legend()
-        plt.savefig(plot_dir / f'3D-{plot_name}', format=format, dpi=400)
+        plt.savefig(plot_dir / f'3D-{plot_name}.{format}', format=format, dpi=400)
         plt.close()
 
         return
