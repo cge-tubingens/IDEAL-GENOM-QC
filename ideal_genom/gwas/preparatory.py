@@ -244,7 +244,7 @@ class Preparatory:
             '--bfile', str(self.results_dir / (self.output_name+'-prunning')),
             '--extract', str(prune_in_file),
             '--make-bed',
-            '--out', str(self.input_path / (self.input_name+'-pruned')),
+            '--out', str(self.results_dir / (self.input_name+'-pruned')),
             '--threads', str(threads)
         ]
 
@@ -252,7 +252,7 @@ class Preparatory:
         run_plink2(plink_args1)
         run_plink2(plink_args2)
 
-        self.pruned_file = self.input_path / (self.input_name+'-pruned')
+        self.pruned_file = self.results_dir / (self.input_name+'-pruned')
 
         return
 
