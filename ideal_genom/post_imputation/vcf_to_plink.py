@@ -199,7 +199,7 @@ class GetPLINK:
         plink2_args = [
             "--bfile", (self.analysis_ready / (self.output_name + "-nosex")).as_posix(),
             "--make-bed",
-            "--out", (self.analysis_ready / self.output_name).as_posix(),
+            "--out", (self.analysis_ready / (self.output_name + '-updated')).as_posix(),
             "--fam", fam_file.as_posix(),
             "--threads", str(threads),
             "--memory", str(memory)
