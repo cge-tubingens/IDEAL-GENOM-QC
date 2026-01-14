@@ -240,6 +240,11 @@ class GetPLINK:
 
         if for_fam_update_file:
             self.update_fam(for_fam_update_file=for_fam_update_file, threads=threads, memory=memory)
+        else:
+            logger.info("No family update file provided; skipping .fam update step.")
+            logger.info("Retaining initial PLINK files with '-nosex' suffix.")
+
+        self.execute_rename_snpid()
 
         return
     
