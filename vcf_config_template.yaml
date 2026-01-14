@@ -13,14 +13,14 @@ pipeline:
     # Step 1: Post-Imputation VCF Processing
     # Processes imputed VCF files: unzip, filter, normalize, annotate, concatenate
     - name: "process_vcf"
-      enabled: true
+      enabled: false
       module: "ideal_genom.post_imputation.vcf_process"
       class: "ProcessVCF"
       init_params:
         input_path: "/media/luis/LaCie/imputed_variants_replicationset_luxgiant/"
         output_path: "${base_output_dir}"
         input_name: "placeholder"
-        output_name: "placeholder"
+        output_name: "processed_imputed_data.vcf.gz"
       execute_params:
         # VCF processing parameters
         password: null              # Password for protected zip files (if applicable)
@@ -28,7 +28,6 @@ pipeline:
         build: "38"                # Genome build version (38 or 37)
         ref_genome: null           # Path to custom reference genome (optional, auto-downloaded if null)
         ref_annotation: '/media/luis/LaCie/15_01_25/GRCh38.dbSNP156_chr.vcf.gz' # Path to reference annotation VCF for variant ID annotation
-        output_name: "processed_imputed_data.vcf.gz"  # Name of final concatenated output file
         max_threads: null          # Maximum threads for concatenation (null for auto-detect)
 
     # Step 2: VCF to PLINK Conversion
