@@ -358,14 +358,14 @@ class Preparatory:
         -----
         This method sequentially calls `execute_ld_prunning` and `execute_pc_decomposition`.
         """
-        mind = preparatory_params.get('mind', 0.2)
-        maf = preparatory_params.get('maf', 0.01)
-        geno = preparatory_params.get('geno', 0.1)
-        hwe = preparatory_params.get('hwe', 5e-6)
+        mind     = preparatory_params.get('mind', 0.2)
+        maf      = preparatory_params.get('maf', 0.01)
+        geno     = preparatory_params.get('geno', 0.1)
+        hwe      = preparatory_params.get('hwe', 5e-6)
         ind_pair = preparatory_params.get('ind_pair', [50, 5, 0.2])
-        pca = preparatory_params.get('pca', 10)
-        memory = preparatory_params.get('memory', None)
-        threads = preparatory_params.get('threads', None)
+        pca      = preparatory_params.get('pca', 10)
+        memory   = preparatory_params.get('memory', None)
+        threads  = preparatory_params.get('threads', None)
 
         self.execute_ld_prunning(mind=mind, maf=maf, geno=geno, hwe=hwe, ind_pair=ind_pair, memory=memory, threads=threads)
         self.execute_pc_decomposition(pca=pca, memory=memory, threads=threads)
