@@ -1247,6 +1247,25 @@ class ProcessVCF:
 
         return
 
+    def excute_intermediate_cleanup(self) -> None:
+        """Cleans up intermediate files in the process_vcf directory.
+
+        This method removes all files in the process_vcf directory to free up space
+        after processing is complete.
+
+        Returns
+        -------
+        None
+        """
+
+        for item in self.process_vcf.iterdir():
+            if item.is_file():
+                item.unlink()
+
+        self.process_vcf.rmdir()
+        
+        return
+
     def execute_process_vcf_pipeline(self, process_vcf_params: dict) -> None:
         """Execute the full VCF processing pipeline.
 
