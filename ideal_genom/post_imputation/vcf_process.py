@@ -998,7 +998,7 @@ class ProcessVCF:
     This class requires bcftools to be installed and available in the system path.
     """
 
-    def __init__(self, input_path: Path, output_path: Path, input_name: Optional[str] = None, output_name: Optional[str] = None) -> None:
+    def __init__(self, input_path: Path, output_path: Path, input_name: Optional[str] = None, output_name: str = 'concatenated.vcf.gz') -> None:
         
         if not isinstance(input_path, Path):
             raise TypeError(f"input_path should be of type Path, got {type(input_path)}")
@@ -1015,11 +1015,12 @@ class ProcessVCF:
         
         self.input_path = input_path
         self.output_path= output_path
+        self.output_name=output_name
 
         self.process_vcf = self.output_path / 'process_vcf'
         self.process_vcf.mkdir(parents=True, exist_ok=True)
 
-        self.concatenated_file = None
+        self.concatenated_file =self.output_path / self.output_name
 
         pass
 
