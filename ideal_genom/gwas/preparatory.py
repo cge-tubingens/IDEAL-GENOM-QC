@@ -231,7 +231,6 @@ class Preparatory:
             '--hwe', str(hwe),
             '--exclude', str(self.high_ld_file),
             '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
-            '--keep-allele-order',
             '--threads', str(threads),
             '--memory', str(memory),
             '--make-bed',
@@ -244,7 +243,6 @@ class Preparatory:
         plink_args2 = [
             '--bfile', str(self.results_dir / (self.output_name+'-prunning')),
             '--extract', str(prune_in_file),
-            '--keep-allele-order',
             '--make-bed',
             '--out', str(self.input_path / (self.input_name+'-pruned')),
             '--threads', str(threads)
