@@ -231,10 +231,10 @@ class GetPLINK:
         None
         """
 
-        double_id = plink_params.get('double_id', True)
+        double_id           = plink_params.get('double_id', True)
         for_fam_update_file = plink_params.get('for_fam_update_file', None)
-        threads = plink_params.get('threads', None)
-        memory = plink_params.get('memory', None)
+        threads             = plink_params.get('threads', None)
+        memory              = plink_params.get('memory', None)
 
         self.convert_vcf_to_plink(double_id=double_id, threads=threads, memory=memory)
 
