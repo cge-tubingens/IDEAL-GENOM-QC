@@ -87,6 +87,9 @@ class GetPLINK:
 
         self.analysis_ready = self.input_path / 'analysis_ready'
         self.analysis_ready.mkdir(parents=True, exist_ok=True)
+
+        self.updated_fam = None
+        self.renamed_snps = None
         
         pass
 
