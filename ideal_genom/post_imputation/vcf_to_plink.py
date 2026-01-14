@@ -230,6 +230,9 @@ class GetPLINK:
             self.analysis_ready / (self.output_name + "-nosex.bed"),
             self.analysis_ready / (self.output_name + "-nosex.bim"),
             self.analysis_ready / (self.output_name + "-nosex.fam"),
+            self.analysis_ready / (self.output_name + "-updated.bed"),
+            self.analysis_ready / (self.output_name + "-updated.bim"),
+            self.analysis_ready / (self.output_name + "-updated.fam"),
         ]
 
         for file_path in intermediate_files:
