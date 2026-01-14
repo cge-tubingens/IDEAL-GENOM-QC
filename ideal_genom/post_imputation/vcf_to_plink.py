@@ -12,6 +12,8 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import pandas as pd
+
 from ..core.utils import validate_input_file, get_optimal_threads, get_available_memory
 from ..core.executor import run_plink2
 
@@ -240,4 +242,36 @@ class GetPLINK:
             self.update_fam(for_fam_update_file=for_fam_update_file, threads=threads, memory=memory)
 
         return
+    
+    def _get_id_links(self)->None:
+
+        """Generates a mapping of original SNP IDs to renamed SNP IDs.
+
+        This private method reads the BIM file of the input PLINK dataset and
+        creates a mapping of original SNP IDs to a new format based on chromosome,
+        position, and alleles. The new SNP ID format is 'chr:pos:a1:a2'.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        The mapping is stored in the `snp_id_map` attribute as a dictionary.
+        """
+        if self.updated_fam is None:
+            raise ValueError("Updated fam file not found. Please run update_fam() before generating SNP ID links.")
+        
+        bim_file = self.updated_fam.with_suffix('.bim')
+        chunk_size = 1000000  # Number of lines to read at a time
+
+        df_links = pd.DataFrame()
+
+        for chunk in pd.read_csv(bim_file, sep='\t', header=None, chunksize=chunk_size):
+            # BIM columns: chrom, snp, cm, pos, a1, a2
+            chunk['new_snp_id'] = chunk[0].astype(str) + ':' + chunk[3].astype(str) + ':' + chunk[4].astype(str) + ':' + chunk[5].astype(str)
+            df_links = pd.concat([df_links, chunk[[1, 'new_snp_id']]], ignore_index=True)
+
+        df_links.columns = ['original_snp_id', 'renamed_snp_id']
+        df_links.to_csv(self.analysis_ready / f"{self.output_name}_snp_id_links.tsv", sep='\t', index=False)
     
