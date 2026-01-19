@@ -307,6 +307,8 @@ class Preparatory:
         threads = threads or get_optimal_threads()
         memory = memory or get_available_memory()
 
+        if self.pruned_file is None:
+            raise ValueError("Pruned file path is not set. Please run LD pruning before PCA decomposition.")
         if not self.pruned_file.with_suffix('.bed').exists():
             raise FileNotFoundError(f"bed file with pruned data was not found: {self.pruned_file.with_suffix('.bed')}")
         if not self.pruned_file.with_suffix('.bim').exists():
