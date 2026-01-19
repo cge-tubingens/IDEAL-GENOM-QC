@@ -7,11 +7,11 @@ This module provides classes for performing GWAS analysis using different models
 """
 
 from ideal_genom.gwas.preparatory import Preparatory
-from ideal_genom.gwas.gen_linear_model import GWASfixed
-from ideal_genom.gwas.gen_linear_mix_model import GWASrandom
+from ideal_genom.gwas.gen_linear_model import GWAS_GLM
+from ideal_genom.gwas.gen_linear_mix_model import GWAS_GLMM
 
 __all__ = [
     'Preparatory',
-    'GWASfixed',
-    'GWASrandom',
+    'GWAS_GLM',
+    'GWAS_GLMM',
 ]
