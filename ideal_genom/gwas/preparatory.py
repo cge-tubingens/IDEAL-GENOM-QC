@@ -140,6 +140,8 @@ class Preparatory:
         # create results folder
         self.results_dir = self.output_path / 'preparatory'
         self.results_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.pruned_file = self.results_dir / (self.input_name+'-pruned')
 
     def execute_ld_prunning(self, mind: float = 0.2, maf: float = 0.01,
                            geno: float = 0.1, hwe: float = 5e-6,
