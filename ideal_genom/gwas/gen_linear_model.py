@@ -333,12 +333,11 @@ class GWAS_GLM:
         logger.info("Starting annotation of top hits.")
 
         # load the data
-        cojo_file_path = results_dir / 'cojo_file.jma.cojo'
+        cojo_file_path = results_dir / (self.output_name + '-cojo.jma.cojo')
         if cojo_file_path.exists():
             df_hits = pd.read_csv(cojo_file_path, sep="\t")
         else:
-            raise FileNotFoundError(f"File cojo_file.jma.cojo not found in the results directory: {results_dir}")
-
+            raise FileNotFoundError(f"File {self.output_name}-cojo.jma.cojo not found in the results directory: {results_dir}")
         df_hits = df_hits[['Chr', 'SNP', 'bp']].copy()
 
         if not df_hits.empty:
