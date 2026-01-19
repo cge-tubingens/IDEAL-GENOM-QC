@@ -64,6 +64,32 @@ pipeline:
         build: "38"                # Genome build version: "38" or "37"
         anno_source: "ensembl"     # Annotation source: "ensembl" or "refseq"
 
+    # Step 3: GWAS Generalized Linear Mixed Model (GLMM)
+    # Performs random effects GWAS analysis using GLMM with genetic relationship matrix
+    # Includes auxiliary file preparation, GRM computation, association analysis, top hits extraction, and gene annotation
+    - name: "gwas_glmm"
+      enabled: false
+      module: "ideal_genom.gwas.gen_linear_mix_model"
+      class: "GWAS_GLMM"
+      init_params:
+        input_path: "${steps.preparatory.input_path}"      # Directory with PLINK files and PCA results
+        input_name: "${steps.preparatory.input_name}"      # Base name of input PLINK files (must have .eigenvec file)
+        output_path: "${base_output_dir}"                  # Output directory for GWAS results
+        output_name: "gwas_glmm_results"                   # Base name for output files
+        recompute: true                                    # Set to false to skip recomputation if results exist
+      execute_params:
+        # GLMM analysis parameters
+        maf: 0.01                  # Minor allele frequency threshold (must be between 0 and 1)
+        
+        # GRM computation parameters
+        pruned_file: "${steps.preparatory.pruned_file}"    # Path to pruned PLINK files from preparatory step (without extension)
+        max_threads: null          # Maximum threads for GRM computation (null for auto-detect)
+        
+        # Annotation parameters
+        gtf_path: null             # Path to custom GTF file for annotation (null for default)
+        build: "38"                # Genome build version: "38" or "37"
+        anno_source: "ensembl"     # Annotation source: "ensembl" or "refseq"
+
 # Global settings
 settings:
   # Logging configuration
