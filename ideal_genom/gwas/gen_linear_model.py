@@ -356,7 +356,7 @@ class GWAS_GLM:
         
         return
 
-    def execute_gwasfixed_pipeline(self, glm_params: dict) -> None:
+    def execute_gwas_glm_pipeline(self, glm_params: dict) -> None:
         """Execute the complete GWAS fixed effects pipeline.
 
         This method orchestrates the full GWAS analysis workflow using a generalized linear
