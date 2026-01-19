@@ -130,11 +130,11 @@ class Preparatory:
             high_ld_file = ld_fetcher.ld_regions
             logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
 
-        self.input_path = input_path
-        self.output_path = output_path
-        self.input_name = input_name
-        self.output_name = output_name
-        self.build = build
+        self.input_path   = input_path
+        self.output_path  = output_path
+        self.input_name   = input_name
+        self.output_name  = output_name
+        self.build        = build
         self.high_ld_file = high_ld_file
 
         # create results folder
