@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class GWASfixed:
+class GWAS_GLM:
 
     """Class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Model (GLM) with PLINK2.
 
