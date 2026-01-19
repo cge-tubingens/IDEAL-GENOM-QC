@@ -1,0 +1,123 @@
+# IDEAL-GENOM GWAS Configuration Template
+# This template configures the GWAS preparatory pipeline
+# including LD pruning and PCA decomposition steps
+
+pipeline:
+  name: "gwas"
+  base_output_dir: "/media/luis/LaCie/imputed_variants_replicationset_luxgiant/output"
+  
+  # Pipeline steps - enable/disable by including/excluding from this list
+  # Steps will be executed in the order specified here
+  steps:
+    
+    # Step 1: GWAS Preparatory Analysis
+    # Performs LD pruning and PCA decomposition on genetic data
+    # This step prepares the data for downstream GWAS analysis
+    - name: "preparatory"
+      enabled: true
+      module: "ideal_genom.gwas.preparatory"
+      class: "Preparatory"
+      init_params:
+        input_path: '/media/luis/LaCie/imputed_variants_replicationset_luxgiant/output/analysis_ready/'     # Directory containing PLINK files (.bed, .bim, .fam)
+        input_name: 'imputed_data_plink'             # Base name of input PLINK files (without extension)
+        output_path: "${base_output_dir}"         # Output directory for results
+        output_name: "gwas_prep"                  # Base name for output files
+        high_ld_regions_file: "path/to/high_ld_regions.txt"  # Path to high LD regions file (auto-fetched if not found)
+        build: "38"                               # Genome build version: "38" or "37"
+      execute_params:
+        # LD Pruning parameters
+        mind: 0.1                  # Missing rate per individual threshold (excludes individuals above this threshold)
+        maf: 0.01                  # Minor allele frequency threshold (must be between 0 and 0.5)
+        geno: 0.1                  # Missing rate per SNP threshold (must be between 0 and 1)
+        hwe: 5.0e-6                # Hardy-Weinberg equilibrium p-value threshold (must be between 0 and 1)
+        ind_pair: [50, 5, 0.2]     # Pairwise LD pruning: [window_size(variants), step_size(variants), r²_threshold]
+        
+        # PCA decomposition parameters
+        pca: 10                    # Number of principal components to compute (must be > 0)
+        
+        # Resource management (optional - auto-detected if null)
+        memory: null               # Memory allocation in MB (null for auto-detect: uses 2/3 of available memory)
+        threads: null              # Number of threads (null for auto-detect: uses available cores - 2)
+
+    # Step 2: GWAS Generalized Linear Model (GLM)
+    # Performs fixed effects GWAS analysis using GLM
+    # Includes association analysis, top hits extraction, and gene annotation
+    - name: "gwas_glm"
+      enabled: true
+      module: "ideal_genom.gwas.gen_linear_model"
+      class: "GWAS_GLM"
+      init_params:
+        input_path: "${steps.preparatory.input_path}"      # Directory with PLINK files and PCA results
+        input_name: "${steps.preparatory.input_name}"      # Base name of input PLINK files (must have .eigenvec file)
+        output_path: "${base_output_dir}"                  # Output directory for GWAS results
+        output_name: "gwas_glm_results"                    # Base name for output files
+        recompute: true                                    # Set to false to skip recomputation if results exist
+      execute_params:
+        # GLM association analysis parameters
+        maf: 0.01                  # Minor allele frequency threshold (must be between 0 and 0.5)
+        mind: 0.1                  # Individual missingness threshold (must be between 0 and 1)
+        hwe: 5.0e-6                # Hardy-Weinberg equilibrium p-value threshold (must be between 0 and 1)
+        ci: 0.95                   # Confidence interval (must be between 0 and 1, exclusive)
+        
+        # Annotation parameters
+        gtf_path: null             # Path to custom GTF file for annotation (null for default)
+        build: "38"                # Genome build version: "38" or "37"
+        anno_source: "ensembl"     # Annotation source: "ensembl" or "refseq"
+
+# Global settings
+settings:
+  # Logging configuration
+  logging:
+    level: "INFO"              # DEBUG, INFO, WARNING, ERROR
+    file_logging: true         # Enable file logging
+    console_logging: true      # Enable console logging
+  
+  # Resource management
+  resources:
+    max_memory: null           # Maximum memory usage in MB (null for auto-detect)
+    max_threads: null          # Maximum threads (null for auto-detect)
+  
+  # File management
+  files:
+    keep_intermediate: true    # Preserve intermediate files (set to false to enable automatic cleanup)
+    compress_outputs: false    # Compress output files
+    overwrite_existing: false  # Overwrite existing output files
+  
+  # Report generation
+  reports:
+    generate_reports: false    # Generate visualization reports after each step
+    plot_format: "png"         # Format for plots: "png", "svg", "pdf"
+
+# Pipeline workflow:
+# 
+# GWAS Pipeline:
+# 1. Preparatory Step: 
+#    - LD Pruning: Removes high LD regions, filters variants by MAF, missing rate, and HWE,
+#      then performs pairwise LD pruning to identify independent SNPs
+#    - PCA Decomposition: Performs Principal Component Analysis on the pruned data to 
+#      identify population structure and potential stratification
+#
+# 2. GWAS GLM (Generalized Linear Model):
+#    - Association Analysis: Performs fixed effects GWAS using GLM with PCA covariates
+#    - Top Hits Extraction: Uses GCTA conditional and joint analysis (COJO) to identify
+#      independent genome-wide significant SNPs
+#    - Gene Annotation: Annotates top hits with gene information from Ensembl or RefSeq
+#
+# Output files:
+# Preparatory:
+# - preparatory/gwas_prep-prunning.{bed,bim,fam,log,prune.in,prune.out}
+# - preparatory/input_dataset-pruned.{bed,bim,fam,log}
+# - input_dataset.{eigenvec,eigenval}
+#
+# GWAS GLM:
+# - gwas_glm/gwas_glm_results_glm.PHENO1.glm.logistic.hybrid (full results)
+# - gwas_glm/gwas_glm_results_glm.PHENO1.glm.logistic.hybrid.adjusted (adjusted p-values)
+# - gwas_glm/cojo_file.ma (prepared for COJO analysis)
+# - gwas_glm/gwas_glm_results-cojo.jma.cojo (independent top hits)
+# - gwas_glm/top_hits_annotated.tsv (annotated top hits with gene information)
+#
+# Notes:
+# - PLINK2 and GCTA software must be installed and available in system PATH
+# - Preparatory operations are restricted to chromosomes 1-22
+# - If high_ld_regions_file is not found, it will be automatically fetched based on build version
+# - GWAS GLM requires .eigenvec file from preparatory step (PCA results)
