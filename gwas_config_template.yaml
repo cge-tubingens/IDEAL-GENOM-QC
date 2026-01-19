@@ -129,6 +129,14 @@ settings:
 #      independent genome-wide significant SNPs
 #    - Gene Annotation: Annotates top hits with gene information from Ensembl or RefSeq
 #
+# 3. GWAS GLMM (Generalized Linear Mixed Model):
+#    - Auxiliary Files: Prepares phenotype and sex covariate files
+#    - GRM Computation: Computes genetic relationship matrix and sparse GRM
+#    - Association Analysis: Performs random effects GWAS using fastGWA-mlm-binary with PCA and sex covariates
+#    - Top Hits Extraction: Uses GCTA conditional and joint analysis (COJO) to identify
+#      independent genome-wide significant SNPs
+#    - Gene Annotation: Annotates top hits with gene information from Ensembl or RefSeq
+#
 # Output files:
 # Preparatory:
 # - preparatory/gwas_prep-prunning.{bed,bim,fam,log,prune.in,prune.out}
@@ -142,8 +150,20 @@ settings:
 # - gwas_glm/gwas_glm_results-cojo.jma.cojo (independent top hits)
 # - gwas_glm/top_hits_annotated.tsv (annotated top hits with gene information)
 #
+# GWAS GLMM:
+# - gwas_glmm/input_dataset_pheno.phen (phenotype file)
+# - gwas_glmm/input_dataset_sex.covar (sex covariate file)
+# - gwas_glmm/input_dataset_grm.{grm.bin,grm.id,grm.N.bin} (genetic relationship matrix)
+# - gwas_glmm/input_dataset_sparse.{grm.sp,grm.id} (sparse GRM)
+# - gwas_glmm/gwas_glmm_results_assocSparseCovar_pca_sex-mlm-binary.fastGWA (full results)
+# - gwas_glmm/cojo_file.ma (prepared for COJO analysis)
+# - gwas_glmm/gwas_glmm_results_assocSparseCovar_pca_sex-mlm-binary-cojo.jma.cojo (independent top hits)
+# - gwas_glmm/top_hits_annotated.tsv (annotated top hits with gene information)
+#
 # Notes:
 # - PLINK2 and GCTA software must be installed and available in system PATH
 # - Preparatory operations are restricted to chromosomes 1-22
 # - If high_ld_regions_file is not found, it will be automatically fetched based on build version
 # - GWAS GLM requires .eigenvec file from preparatory step (PCA results)
+# - GWAS GLMM requires pruned files from preparatory step for GRM computation
+# - GLMM is computationally more intensive than GLM but accounts for population structure and cryptic relatedness
