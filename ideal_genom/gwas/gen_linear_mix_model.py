@@ -91,7 +91,7 @@ class GWAS_GLMM:
         self.recompute   = recompute
 
         # create results folder
-        self.results_dir = output_path / 'gwas_random'
+        self.results_dir = output_path / 'gwas_glmm'
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
         print("\033[1;32mAnalysis of GWAS data using a random effect model initialized.\033[0m")
@@ -146,7 +146,7 @@ class GWAS_GLMM:
 
         return
     
-    def compute_grm(self, max_threads: Optional[int] = None) -> None:
+    def compute_grm(self, pruned_file: Path, max_threads: Optional[int] = None) -> None:
         
         """Compute the Genetic Relationship Matrix (GRM) using GCTA software.
 
@@ -176,11 +176,18 @@ class GWAS_GLMM:
 
         # compute the number of threads to use
         threads = max_threads or get_optimal_threads()
+        
+        if not pruned_file.with_suffix('.bed').exists():
+            raise FileNotFoundError(f"bed file with pruned data was not found: {pruned_file.with_suffix('.bed')}")
+        if not pruned_file.with_suffix('.bim').exists():
+            raise FileNotFoundError(f"bim file with pruned data was not found: {pruned_file.with_suffix('.bim')}")
+        if not pruned_file.with_suffix('.fam').exists():
+            raise FileNotFoundError(f"fam file with pruned data was not found: {pruned_file.with_suffix('.fam')}")
 
         if recompute:
                 # gcta commands as lists
                 gcta_args1 = [
-                    '--bfile', str(input_path / f'{input_name}-pruned'),
+                    '--bfile', str(pruned_file),
                     '--make-grm',
                     '--thread-num', str(threads),
                     '--out', str(results_dir / f'{input_name}_grm')
