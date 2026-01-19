@@ -466,6 +466,19 @@ class GWAS_GLMM:
         >>> gwas.execute_gwasrandom_pipeline(maf=0.05, build='38')
         """
 
+        maf         = glmm_params.get("maf", 0.01)
+        build       = glmm_params.get("build", '38')
+        anno_source = glmm_params.get("anno_source", 'ensembl')
+        gtf_path    = glmm_params.get("gtf_path", None)
+        max_threads = glmm_params.get("max_threads", None)
+        pruned_file = glmm_params.get("pruned_file")
+
+        if isinstance(pruned_file, str):
+            pruned_file = Path(pruned_file)
+        if not isinstance(pruned_file, Path):
+            raise TypeError("pruned_file should be of type Path.")
+
+
         logger.info("\033[1;34m" + "="*80 + "\033[0m")
         logger.info("\033[1;34mStarting GWAS Random Effects (GLMM) Pipeline\033[0m")
         logger.info("\033[1;34m" + "="*80 + "\033[0m")
