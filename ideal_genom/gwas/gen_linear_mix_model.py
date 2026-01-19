@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class GWASrandom:
+class GWAS_GLMM:
 
     """Class for performing Genome-Wide Association Studies (GWAS) using a Generalized Linear Mixed Model (GLM) with GCTA.
 
@@ -407,9 +407,7 @@ class GWASrandom:
         
         return
 
-    def execute_gwasrandom_pipeline(self, maf: float = 0.01, max_threads: Optional[int] = None,
-                                   gtf_path: Optional[str] = None, build: str = '38', 
-                                   anno_source: str = 'ensembl') -> None:
+    def execute_gwas_glmm_pipeline(self, glmm_params: dict) -> None:
         """Execute the complete GWAS random effects pipeline.
 
         This method orchestrates the full GWAS analysis workflow using a generalized linear
