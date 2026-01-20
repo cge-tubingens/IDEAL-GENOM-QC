@@ -1254,6 +1254,7 @@ class SampleQCReport:
             maf_less_smiss: Path,
             genome: Optional[Path]= None,
             generate_ibd_report: bool = False,
+            f_coeff_thresholds: list = [0.2, 0.8],
             call_rate_thres: float = 0.2, 
             std_deviation_het: float=3, 
             maf_het: float=0.01, 
@@ -1342,7 +1343,8 @@ class SampleQCReport:
         self.report_sex_check(
             sex_check_filename =sexcheck_miss, 
             xchr_imiss_filename=xchr_miss,
-            plots_dir          =self.output_path
+            plots_dir          =self.output_path,
+            f_coeff_thresholds=f_coeff_thresholds
         )
 
         logger.info('Sex check report done')

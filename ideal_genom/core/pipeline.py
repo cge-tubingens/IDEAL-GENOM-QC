@@ -428,6 +428,7 @@ class PipelineExecutor:
         step_config = self.config.get('sample_qc', {})
         call_rate_thres = step_config.get('call_rate_thres', 0.02)
         std_deviation_het = step_config.get('std_deviation_het', 3)
+        f_coeff_threshold = step_config.get('sex_check', [0.2, 0.8])
         maf_het = step_config.get('maf_het', 0.01)
         ibd_threshold = step_config.get('ibd_threshold', None)
         generate_ibd_report = genome is not None and genome.exists() if genome else False
@@ -453,6 +454,7 @@ class PipelineExecutor:
                 maf_less_smiss=maf_less_smiss,
                 genome=genome,
                 generate_ibd_report=generate_ibd_report,
+                f_coeff_thresholds=f_coeff_threshold,
                 call_rate_thres=call_rate_thres,
                 std_deviation_het=std_deviation_het,
                 maf_het=maf_het,
