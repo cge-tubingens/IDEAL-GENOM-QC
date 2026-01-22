@@ -118,8 +118,7 @@ class SampleQC:
         self.output_name = output_name
         self.high_ld_regions_file = ld_regions
 
-        self.renamed_snps = False
-        self.hh_to_missing= False
+        self.processed_files = None
         self.pruned_file = None
 
         # create results folder
@@ -138,16 +137,22 @@ class SampleQC:
         self.plots_dir = self.results_dir / 'plots'
         self.plots_dir.mkdir(parents=True, exist_ok=True)
 
-    def execute_rename_snpid(self, rename: bool = True) -> None:
+    def execute_preprocessing(self, rename: bool = True, hh_to_missing: bool = True) -> None:
         
         """
-        Executes the SNP ID renaming process using PLINK2.
+        Executes the SNP ID renaming process and/or Convert haploid genotypes to missing valuesusing PLINK2.
+        
         This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
         The renaming is performed using PLINK2's --set-all-var-ids parameter.
+        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
+        missing values in the genotype data. This is often useful for quality control 
+        of genetic data, particularly for variants on sex chromosomes.
         
-        Parameter:
+        Parameters:
         ----------
         rename (bool, optional): Flag to control whether SNP renaming should be performed. 
+            Defaults to True.
+        hh_to_missing (bool, optional): Flag to control whether haploid genotypes should be converted to missing values.
             Defaults to True.
 
         Returns:
@@ -157,6 +162,7 @@ class SampleQC:
         Raises:
         -------
             TypeError: If rename parameter is not a boolean.
+            TypeError: If hh_to_missing parameter is not a boolean.
 
         Notes:
         ------
@@ -168,89 +174,124 @@ class SampleQC:
 
         if not isinstance(rename, bool):
             raise TypeError("rename must be a boolean")
+        if not isinstance(hh_to_missing, bool):
+            raise TypeError("hh_to_missing must be a boolean")
         
-        if not rename:
-            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
-            return
-        else:
-            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
-            self.renamed_snps = True
-
         max_threads = get_optimal_threads()
         memory = get_available_memory()
-
-        # Execute PLINK2 command
-        run_plink2([
+        
+        if not rename and not hh_to_missing:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
+            return
+        elif rename and not hh_to_missing:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
+            
+            plink2_cmd = [
             '--bfile', str(self.input_path / self.input_name),
             '--set-all-var-ids', '@:#:$r:$a',
             '--threads', str(max_threads),
             '--memory', str(memory),
             '--make-bed',
-            '--out', str(self.input_path / (self.input_name + '-renamed'))
-        ])
+            '--out', str(self.input_path / (self.input_name + '-processed'))
+            ]
 
-        return
-    
-    def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
-
-        """
-        Convert haploid genotypes to missing values in PLINK binary files.
-        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
-        missing values in the genotype data. This is often useful for quality control 
-        of genetic data, particularly for variants on sex chromosomes.
-        
-        Parameters
-        ----------
-        hh_to_missing : bool, default=True
-            If True, converts haploid genotypes to missing values.
-            If False, skips the conversion step.
-        
-        Returns
-        -------
-        None
-        
-        Raises
-        ------
-        TypeError
-            If hh_to_missing is not a boolean value.
-        
-        Notes
-        -----
-        The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
-        new files with suffix '-hh-missing'. The input files are determined based on whether
-        SNPs have been previously renamed (checks self.renamed_snps).
-        """
-
-        if not isinstance(hh_to_missing, bool):
-            raise TypeError("hh_to_missing must be a boolean")
-        
-        if not hh_to_missing:
-            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
-            return
-        else:
+        elif not rename and hh_to_missing:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Skipping renaming of SNPs in the study data")
             logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
-            self.hh_to_missing = True
-        
-        logger.info("STEP: Convert haploid genotypes to missing values")
-
-        # Dynamically set the input file name based on whether SNPs are renamed
-        input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
-
-        max_threads = get_optimal_threads()
-        memory = get_available_memory()
-
-        # Execute PLINK2 command: convert haploid genotypes to missing
-        run_plink2([
-            '--bfile', str(self.input_path / input_file),
+            
+            plink2_cmd = [
+            '--bfile', str(self.input_path / self.input_name),
             '--set-invalid-haploid-missing',
-            '--make-bed',
             '--threads', str(max_threads),
             '--memory', str(memory),
-            '--out', str(self.input_path / (self.input_name + '-hh-missing'))
-        ])
+            '--make-bed',
+            '--out', str(self.input_path / (self.input_name + '-processed'))
+            ]
+
+        else:
+            logger.info(f"STEP: Rename SNPs. `rename` set to {rename}. Renaming SNPs in the study data to the format chr_pos_a1_a2")
+            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
+            
+            plink2_cmd = [
+            '--bfile', str(self.input_path / self.input_name),
+            '--set-all-var-ids', '@:#:$r:$a',
+            '--set-invalid-haploid-missing',
+            '--threads', str(max_threads),
+            '--memory', str(memory),
+            '--make-bed',
+            '--out', str(self.input_path / (self.input_name + '-processed'))
+            ]
+        
+
+        # Execute PLINK2 command
+        run_plink2(plink2_cmd)
+
+        self.processed_files = self.input_path / (self.input_name + '-processed')
 
         return
     
+#    def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
+#
+#        """
+#        Convert haploid genotypes to missing values in PLINK binary files.
+#        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
+#        missing values in the genotype data. This is often useful for quality control 
+#        of genetic data, particularly for variants on sex chromosomes.
+#        
+#        Parameters
+#        ----------
+#        hh_to_missing : bool, default=True
+#            If True, converts haploid genotypes to missing values.
+#            If False, skips the conversion step.
+#        
+#        Returns
+#        -------
+#        None
+#        
+#        Raises
+#        ------
+#        TypeError
+#            If hh_to_missing is not a boolean value.
+#        
+#        Notes
+#        -----
+#        The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
+#        new files with suffix '-hh-missing'. The input files are determined based on whether
+#        SNPs have been previously renamed (checks self.renamed_snps).
+#        """
+#
+#        if not isinstance(hh_to_missing, bool):
+#            raise TypeError("hh_to_missing must be a boolean")
+#        
+#        if not hh_to_missing:
+#            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
+#            return
+#        else:
+#            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
+#            self.hh_to_missing = True
+#        
+#        logger.info("STEP: Convert haploid genotypes to missing values")
+#
+#        # Dynamically set the input file name based on whether SNPs are renamed
+#        input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
+#
+#        max_threads = get_optimal_threads()
+#        memory = get_available_memory()
+#
+#        # Execute PLINK2 command: convert haploid genotypes to missing
+#        run_plink2([
+#            '--bfile', str(self.input_path / input_file),
+#            '--set-invalid-haploid-missing',
+#            '--make-bed',
+#            '--threads', str(max_threads),
+#            '--memory', str(memory),
+#            '--out', str(self.input_path / (self.input_name + '-hh-missing'))
+#        ])
+#
+#        return
+#    
     def execute_ld_pruning(self, ind_pair: list = [50, 5, 0.2]) -> None:
         """
         Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
@@ -311,10 +352,8 @@ class SampleQC:
         max_threads = get_optimal_threads()
         memory = get_available_memory()
 
-        if self.hh_to_missing:
-            ld_input = self.input_name+'-hh-missing'
-        elif self.renamed_snps:
-            ld_input = self.input_name+'-renamed'
+        if self.processed_files is not None:
+            ld_input = self.processed_files
         else:
             ld_input = self.input_name
 
@@ -734,10 +773,8 @@ class SampleQC:
 
         logger.info(f"STEP: Duplicates and relatedness check with Kinship. `kinship` set to {kinship}")
 
-        if self.hh_to_missing:
-            kinship_input = self.input_name+'-hh-missing'
-        elif self.renamed_snps:
-            kinship_input = self.input_name+'-renamed'
+        if self.processed_files is not None:
+            kinship_input = self.processed_files
         else:
             kinship_input = self.input_name
 
@@ -1120,10 +1157,8 @@ class SampleQC:
         
         logger.info("STEP: Drop samples that failed quality control checks")
 
-        if self.hh_to_missing:
-            binary_name = self.input_name+'-hh-missing'
-        elif self.renamed_snps:
-            binary_name = self.input_name+'-renamed'
+        if self.processed_files is not None:
+            binary_name = self.processed_files
         else:
             binary_name = self.input_name
 
@@ -1190,8 +1225,7 @@ class SampleQC:
         """
         
         sample_qc_steps = {
-            'rename SNPs'           : (self.execute_rename_snpid, {"rename": sample_params['rename_snp']}),
-            'hh_to_missing'         : (self.execute_haploid_to_missing, {"hh_to_missing": sample_params['hh_to_missing']}),
+            'pre-processing'        : (self.execute_preprocessing, {"rename": sample_params['rename_snp'], "hh_to_missing": sample_params['hh_to_missing']}),
             'ld_pruning'            : (self.execute_ld_pruning, {"ind_pair": sample_params['ind_pair']}),
             'miss_genotype'         : (self.execute_miss_genotype, {}),
             'sex_check'             : (self.execute_sex_check, {"sex_check": sample_params['sex_check']}),
@@ -1202,8 +1236,7 @@ class SampleQC:
         }
 
         step_description = {
-            'rename SNPs'           : 'Rename SNPs to chr:pos:ref:alt',
-            'hh_to_missing'         : 'Solve hh warnings by setting to missing',
+            'pre-processing'        : 'Rename SNPs to chr:pos:ref:alt and solve hh warnings by setting to missing',
             'ld_pruning'            : 'Perform LD pruning',
             'miss_genotype'         : 'Get samples with high missing rate',
             'sex_check'             : 'Get samples with discordant sex information',
@@ -1930,8 +1963,7 @@ class SampleQCCleanUp:
         """Remove intermediate files from input directory.
 
         This method deletes temporary files created during preprocessing steps:
-        - Files ending with 'hh-missing' (.bed, .bim, .fam)
-        - Files ending with 'renamed' (.bed, .bim, .fam)
+        - Files ending with 'processed' (.bed, .bim, .fam)
 
         Returns
         -------
@@ -1942,24 +1974,17 @@ class SampleQCCleanUp:
         Only removes files if they exist. No error is raised if files are not found.
         """
 
-        logger.info("Cleaning up hh-missing and renamed files from input directory")
+        logger.info("Cleaning up processed files from input directory")
 
         extensions = ['.bed', '.bim', '.fam']
         
-        # Remove hh-missing files
+        # Remove processed files
         for ext in extensions:
-            for file in self.input_path.glob(f'*-hh-missing{ext}'):
+            for file in self.input_path.glob(f'*-processed{ext}'):
                 if file.exists():
                     file.unlink()
                     logger.info(f"Deleted: {file}")
         
-        # Remove renamed files
-        for ext in extensions:
-            for file in self.input_path.glob(f'*-renamed{ext}'):
-                if file.exists():
-                    file.unlink()
-                    logger.info(f"Deleted: {file}")
-
         return
     
     def clean_results_files(self) -> None:
