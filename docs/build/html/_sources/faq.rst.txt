@@ -1,16 +1,17 @@
 Frequently Asked Questions
 ===========================
 
-This page answers common questions about using IDEAL-GENOM-QC. If you don't find your answer here, please check the :doc:`troubleshooting` guide or open an issue on GitHub.
+This page answers common questions about using IDEAL-GENOM. If you don't find your answer here, please check the :doc:`troubleshooting` guide or open an issue on GitHub.
 
 General Questions
 -----------------
 
-**Q: What types of genomic data does IDEAL-GENOM-QC support?**
+**Q: What types of genomic data does IDEAL-GENOM support?**
 
-A: IDEAL-GENOM-QC primarily works with human genomic data in PLINK binary format (.bed, .bim, .fam files). It supports:
+A: IDEAL-GENOM primarily works with human genomic data in PLINK binary format (.bed, .bim, .fam files) and VCF format. It supports:
 
 - SNP array data (e.g., Illumina, Affymetrix)
+- Imputed genotype data (VCF from TOPMed, Michigan Imputation Server)
 - Whole genome sequencing (WGS) data
 - Whole exome sequencing (WES) data
 - Targeted sequencing panels
@@ -19,14 +20,14 @@ The pipeline is optimized for autosomal chromosomes but can handle X and Y chrom
 
 **Q: Which genome builds are supported?**
 
-A: IDEAL-GENOM-QC supports both major human genome builds:
+A: IDEAL-GENOM supports both major human genome builds:
 
-- GRCh37/hg19 (use ``--built 37``)
-- GRCh38/hg38 (use ``--built 38``, default)
+- GRCh37/hg19 (use ``build: "37"`` in YAML config)
+- GRCh38/hg38 (use ``build: "38"`` in YAML config, recommended)
 
 Reference files and LD regions are automatically adjusted based on the build you specify.
 
-**Q: Can I use IDEAL-GENOM-QC for non-human data?**
+**Q: Can I use IDEAL-GENOM for non-human data?**
 
 A: The current version is specifically designed for human genomic data. While the underlying algorithms could theoretically work with other species, the reference panels, LD regions, and ancestry databases are human-specific.
 
@@ -38,13 +39,13 @@ Installation and Setup
 A: Different QC steps require different PLINK versions:
 
 - PLINK 1.9: Core QC operations, kinship analysis, basic statistics
-- PLINK 2.0: Advanced features, faster processing for large datasets, some specific calculations
+- PLINK 2.0: Advanced features, faster VCF processing, improved performance for large datasets
 
 Both tools complement each other and are required for the full pipeline functionality.
 
-**Q: Can I install IDEAL-GENOM-QC without admin privileges?**
+**Q: Can I install IDEAL-GENOM without admin privileges?**
 
-A: Yes! You can install IDEAL-GENOM-QC in user space:
+A: Yes! You can install IDEAL-GENOM in user space:
 
 .. code-block:: bash
 
@@ -125,14 +126,18 @@ Monitor the QC plots and logs to ensure reasonable filtering.
 
 A: Yes! Use the ``steps.json`` configuration file:
 
-.. code-block:: json
+.. code-block:: yaml
 
-    {
-        "ancestry": false,  # Skip ancestry QC
-        "sample": true,     # Run sample QC
-        "variant": true,    # Run variant QC  
-        "umap": false      # Skip UMAP plotting
-    }
+   pipeline:
+     steps:
+       - name: "sample_qc"
+         enabled: true
+       - name: "ancestry_qc"
+         enabled: false  # Skip ancestry QC
+       - name: "variant_qc"
+         enabled: true
+       - name: "umap_plot"
+         enabled: false  # Skip UMAP plotting
 
 Note that some steps depend on others (e.g., variant QC needs ancestry QC results).
 
@@ -215,18 +220,18 @@ A: Several optimization strategies:
 
 A: Memory issues can be addressed by:
 
-.. code-block:: json
+.. code-block:: yaml
 
-    {
-        "sample_qc": {
-            "ind_pair": [200, 50, 0.2],  # Larger LD windows
-            "chunk_size": 5000           # Process in smaller chunks
-        },
-        "ancestry_qc": {
-            "pca": 5,                    # Fewer PCs
-            "maf": 0.05                  # Higher MAF threshold
-        }
-    }
+   pipeline:
+     steps:
+       - name: "sample_qc"
+         run_params:
+           ind_pair: [200, 50, 0.2]  # Larger LD windows
+           chunk_size: 5000          # Process in smaller chunks
+       - name: "ancestry_qc"
+         run_params:
+           pca: 5        # Fewer PCs
+           maf: 0.05     # Higher MAF threshold
 
 Or process chromosomes separately:
 

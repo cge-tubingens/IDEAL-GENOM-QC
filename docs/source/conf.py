@@ -10,11 +10,11 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
-project = 'IDEAL-GENOM-QC'
-copyright = '2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha'
-author = 'Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha'
-release = '0.1.0'
-version = '0.1.0'
+project = 'IDEAL-GENOM'
+copyright = '2026, Luis Giraldo González, Amabel Tenghe'
+author = 'Luis Giraldo González, Amabel Tenghe'
+release = '0.2.0'
+version = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -43,6 +43,23 @@ autodoc_default_options = {
 
 autosummary_generate = True
 
+# Mock imports for modules that require heavy dependencies
+autodoc_mock_imports = [
+    'pandas',
+    'numpy',
+    'matplotlib',
+    'seaborn',
+    'scipy',
+    'umap',
+    'sklearn',
+    'bs4',
+    'yaml',
+    'psutil',
+    'tqdm',
+    'pyarrow',
+    'Levenshtein',
+]
+
 # -- Napoleon configuration --------------------------------------------------
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
@@ -68,7 +85,6 @@ html_static_path = ['_static']
 
 html_theme_options = {
     'logo_only': False,
-    'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     'vcs_pageview_mode': '',
@@ -99,6 +115,6 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'ideal-genom-qc.tex', 'IDEAL-GENOM-QC Documentation',
-     'Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha', 'manual'),
+    ('index', 'ideal-genom.tex', 'IDEAL-GENOM Documentation',
+     'Luis Giraldo González, Amabel Tenghe', 'manual'),
 ]

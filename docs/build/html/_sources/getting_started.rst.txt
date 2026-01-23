@@ -1,287 +1,653 @@
 Getting Started
 ===============
 
-This guide will help you get up and running with IDEAL-GENOM-QC quickly. We'll walk through setting up your first quality control pipeline step by step.
+This guide will help you get up and running with IDEAL-GENOM quickly. We'll walk through setting up your first genomic analysis pipeline step by step using the new YAML-based configuration system.
 
 Overview
 --------
 
-IDEAL-GENOM-QC follows a structured workflow:
+IDEAL-GENOM uses a modern, flexible pipeline system:
 
-1. **Project Setup**: Organize your data and configuration files
-2. **Configuration**: Set parameters, paths, and pipeline steps
-3. **Execution**: Run the QC pipeline
-4. **Results**: Review outputs and visualizations
+1. **Prepare Your Data**: Ensure data is in PLINK1.9 format
+2. **Generate Configuration**: Create a YAML configuration file
+3. **Customize Pipeline**: Edit configuration to match your needs
+4. **Validate Configuration**: Check for errors before running
+5. **Execute Pipeline**: Run the analysis
+6. **Review Results**: Examine outputs and visualizations
 
-Project Structure
------------------
+The New Configuration System
+-----------------------------
 
-IDEAL-GENOM-QC expects a specific folder structure:
+IDEAL-GENOM v0.2.0 introduces a **YAML-based configuration system** that replaces the previous JSON approach. Benefits include:
 
-.. code-block:: text
+- **Single File**: All settings in one place (no more separate parameters.json, paths.json, steps.json)
+- **Hierarchical Structure**: Clear organization of pipeline steps and parameters
+- **Variable Substitution**: Reference outputs from previous steps automatically
+- **Enable/Disable Steps**: Easily control which analyses to run
+- **Comments**: Built-in documentation within the config file
 
-    my_project/
-    ├── inputData/
-    │   ├── mydata.bed
-    │   ├── mydata.bim
-    │   └── mydata.fam
-    ├── outputData/
-    ├── configFiles/
-    │   ├── parameters.json
-    │   ├── paths.json
-    │   └── steps.json
-    └── dependables/
-        └── high-LD-regions.txt
+Quick Start: 5-Minute Tutorial
+-------------------------------
 
-**Folder Descriptions:**
+**1. Get a Configuration Template**
 
-- ``inputData/``: Contains your PLINK binary files (.bed, .bim, .fam)
-- ``outputData/``: Will contain all pipeline results
-- ``configFiles/``: Contains configuration files (required)
-- ``dependables/``: Optional files like custom LD regions
+Configuration templates are included in the repository under ``yaml_configs/``:
+
+.. code-block:: bash
+
+    # Clone the repository (if you haven't already)
+    git clone https://github.com/cge-tubingens/ideal-genom-qc.git
+    cd ideal-genom-qc
+    
+    # Copy the QC pipeline template
+    cp yaml_configs/qc_pipeline_config_template.yaml my_qc_pipeline.yaml
+
+Available templates:
+- ``qc_pipeline_config_template.yaml`` - Complete QC pipeline
+- ``gwas_config_template.yaml`` - GWAS analysis pipeline
+- ``vcf_config_template.yaml`` - VCF post-imputation processing
+
+**2. Edit the Configuration**
+
+Open ``my_qc_pipeline.yaml`` and update the paths to match your data:
+
+.. code-block:: yaml
+
+    pipeline:
+      name: "my_study_qc"
+      base_output_dir: "/path/to/output"
+      
+      steps:
+        - name: "sample_qc"
+          enabled: true
+          module: "ideal_genom.qc.sample_qc"
+          class: "SampleQC"
+          init_params:
+            input_path: "/path/to/your/data"
+            input_name: "mydata"
+            output_path: "${base_output_dir}"
+            output_name: "mydata_sampleQCed"
+            high_ld_regions_file: "/path/to/high_ld_regions.txt"
+            build: "38"
+
+**3. Validate Your Configuration**
+
+.. code-block:: bash
+
+    ideal-genom validate --config my_qc_pipeline.yaml
+
+**4. Run the Pipeline**
+
+.. code-block:: bash
+
+    ideal-genom run --config my_qc_pipeline.yaml
+
+That's it! The pipeline will execute all enabled steps in order.
+
+Step-by-Step Guide
+------------------
 
 Step 1: Prepare Your Data
--------------------------
+Step 1: Prepare Your Data
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ensure your genetic data is in PLINK binary format:
+IDEAL-GENOM works with PLINK1.9 binary format files:
 
-- ``.bed``: Binary genotype file
-- ``.bim``: Variant information file  
-- ``.fam``: Sample information file
+- ``.bed``: Binary genotype data
+- ``.bim``: Variant information (chromosome, position, alleles, etc.)
+- ``.fam``: Sample information (family ID, individual ID, phenotype, etc.)
 
-If your data is in a different format, convert it first:
-
-.. code-block:: bash
-
-    # Convert VCF to PLINK
-    plink --vcf mydata.vcf --make-bed --out inputData/mydata
-
-Step 2: Configuration Files
----------------------------
-
-Create three JSON configuration files in the ``configFiles/`` directory:
-
-**parameters.json** - QC Parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: json
-
-    {
-        "sample_qc": {
-            "rename_snp": true,
-            "hh_to_missing": true,
-            "use_kingship": true,
-            "ind_pair": [50, 5, 0.2],
-            "mind": 0.2,
-            "sex_check": [0.2, 0.8],
-            "maf": 0.01,
-            "het_deviation": 3,
-            "kingship": 0.354,
-            "ibd_threshold": 0.185
-        },
-        "ancestry_qc": {
-            "ind_pair": [50, 5, 0.2],
-            "pca": 10,
-            "maf": 0.01,
-            "ref_threshold": 4,
-            "stu_threshold": 4,
-            "reference_pop": "SAS",
-            "num_pcs": 10
-        },
-        "variant_qc": {
-            "chr_y": 24,
-            "miss_data_rate": 0.2,
-            "diff_genotype_rate": 1e-5,
-            "geno": 0.1,
-            "maf": 5e-8,
-            "hwe": 5e-8
-        },
-        "umap_plot": {
-            "umap_maf": 0.01,
-            "umap_mind": 0.2,
-            "umap_geno": 0.1,
-            "umap_hwe": 5e-8,
-            "umap_ind_pair": [50, 5, 0.2],
-            "umap_pca": 10,
-            "n_neighbors": [5, 10, 15],
-            "metric": ["euclidean", "chebyshev"],
-            "min_dist": [0.01, 0.1, 0.2],
-            "random_state": 42,
-            "case_control_marker": true
-        }
-    }
-
-**paths.json** - File Paths
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: json
-
-    {
-        "input_directory": "/full/path/to/my_project/inputData",
-        "input_prefix": "mydata",
-        "output_directory": "/full/path/to/my_project/outputData",
-        "output_prefix": "clean_data",
-        "high_ld_file": "/full/path/to/my_project/dependables/high-LD-regions.txt"
-    }
-
-The paths should be absolute paths to ensure proper file access. In addition, the high-LD-regions.txt is optional; if not provided (or if the path is not correct), the default file included with IDEAL-GENOM-QC will be used.
-
-**steps.json** - Pipeline Steps
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: json
-
-    {
-        "ancestry": true,
-        "sample": true,
-        "variant": true,
-        "umap": true,
-        "fst": true
-    }
-
-In the current version, all steps must be included in the JSON file, even if set to false. It is important to remark that the steps will always be executed in the following order: Sample QC, Ancestry QC, Variant QC, UMAP Plotting, and FST Calculation. Moreover, each step depends on the previous one, meaning that if a step is set to true, all preceding steps must also be set to true or, at least, the resulting files from the previous step must be available in the output folder.
-
-Step 3: Running the Pipeline
------------------------------
-
-**Command Line Interface:**
+**Convert from VCF (if needed):**
 
 .. code-block:: bash
 
-    python -m ideal_genom_qc \\
-        --path_params /path/to/configFiles/parameters.json \\
-        --file_folders /path/to/configFiles/paths.json \\
-        --steps /path/to/configFiles/steps.json \\
-        --recompute-merge true \\
-        --built 38
+    plink --vcf mydata.vcf.gz --make-bed --out mydata
 
-**Using Poetry:**
+**Data Requirements:**
+
+- Genome build: GRCh37 (hg19) or GRCh38 (hg38)
+- For ancestry QC: 1000 Genomes reference files (auto-downloaded if not provided)
+- For high LD region filtering: high-LD-regions file (included with package)
+
+Step 2: Create Your Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Option A: Use a Template (Recommended)**
+
+Copy one of the provided templates from the repository:
 
 .. code-block:: bash
 
-    poetry run python -m ideal_genom_qc \\
-        --path_params configFiles/parameters.json \\
-        --file_folders configFiles/paths.json \\
-        --steps configFiles/steps.json \\
-        --recompute-merge true \\
-        --built 38
+    # Copy the QC pipeline template
+    cp yaml_configs/qc_pipeline_config_template.yaml my_qc_pipeline.yaml
+    
+    # Or for GWAS analysis
+    cp yaml_configs/gwas_config_template.yaml my_gwas_pipeline.yaml
+    
+    # Or for VCF processing
+    cp yaml_configs/vcf_config_template.yaml my_vcf_pipeline.yaml
 
-**Python API:**
+**Option B: Start from Scratch**
 
-A shorter example using the Python API to run Sample QC:
+Create a minimal configuration file:
 
-.. code-block:: python
+.. code-block:: yaml
 
-    from ideal_genom_qc import SampleQC, AncestryQC, VariantQC
-    from pathlib import Path
+    pipeline:
+      name: "my_analysis"
+      base_output_dir: "/data/output"
+      
+      steps:
+        - name: "sample_qc"
+          enabled: true
+          module: "ideal_genom.qc.sample_qc"
+          class: "SampleQC"
+          init_params:
+            input_path: "/data/input"
+            input_name: "mydata"
+            output_path: "${base_output_dir}"
+            output_name: "mydata_sampleQCed"
+            high_ld_regions_file: "auto"  # Use built-in file
+            build: "38"
+          execute_params:
+            mind: 0.02
+            sex_check: [0.2, 0.8]
+            maf: 0.01
+            het_deviation: 3
+            kinship: 0.354
 
-    # Initialize components
-    sample_qc = SampleQC(
-        input_path=Path("inputData"),
-        input_name="mydata",
-        output_path=Path("outputData"),
-        output_name="clean_data",
-        high_ld_file=Path("dependables/high-LD-regions.txt")
-    )
+    settings:
+      logging:
+        level: "INFO"
+      resources:
+        max_memory: null  # Auto-detect
+        max_threads: null  # Auto-detect
 
-    # Run sample QC
-    sample_qc.execute_sample_qc_pipeline(
-        mind=0.2,
-        sex_check=[0.2, 0.8],
-        maf=0.01,
-        het_deviation=3
-    )
+Step 3: Understanding the Configuration Structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Step 4: Understanding Results
------------------------------
+The YAML configuration has three main sections:
 
-After running the pipeline, your ``outputData/`` folder will contain:
+**Pipeline Section**
+
+.. code-block:: yaml
+
+    pipeline:
+      name: "pipeline_name"              # Descriptive name for your analysis
+      base_output_dir: "/path/to/output" # All outputs will go here
+      steps:                             # List of analysis steps (in order)
+        - name: "step_name"
+          enabled: true                  # Set to false to skip this step
+          module: "ideal_genom.module"   # Python module path
+          class: "ClassName"             # Class to instantiate
+          init_params:                   # Parameters passed to __init__
+            # ...
+          execute_params:                # Parameters passed to execute()
+            # ...
+
+**Variable Substitution**
+
+Reference values from elsewhere in the config:
+
+.. code-block:: yaml
+
+    pipeline:
+      base_output_dir: "/data/output"
+      steps:
+        - name: "sample_qc"
+          init_params:
+            output_path: "${base_output_dir}"  # Uses /data/output
+        
+        - name: "variant_qc"
+          init_params:
+            # Use output from previous step
+            input_path: "${steps.sample_qc.clean_dir}"
+
+**Settings Section**
+
+.. code-block:: yaml
+
+    settings:
+      logging:
+        level: "INFO"                    # DEBUG, INFO, WARNING, ERROR
+        file_logging: true               # Log to file
+        console_logging: true            # Log to console
+      
+      resources:
+        max_memory: null                 # null = auto-detect (uses 2/3 available)
+        max_threads: null                # null = auto-detect (uses cores - 2)
+      
+      files:
+        keep_intermediate: true          # Keep temporary files
+        compress_outputs: false          # Compress output files
+        overwrite_existing: false        # Overwrite existing results
+
+Step 4: Configure Your Pipeline Steps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Sample QC** - Remove low-quality samples
+
+.. code-block:: yaml
+
+    - name: "sample_qc"
+      enabled: true
+      module: "ideal_genom.qc.sample_qc"
+      class: "SampleQC"
+      init_params:
+        input_path: "/data/input"
+        input_name: "mydata"
+        output_path: "${base_output_dir}"
+        output_name: "mydata_sampleQCed"
+        high_ld_regions_file: "auto"
+        build: "38"
+      execute_params:
+        rename_snp: true              # Rename SNPs to chr:pos format
+        hh_to_missing: true           # Convert homozygous haploid calls to missing
+        use_kinship: true             # Use kinship instead of IBD
+        ind_pair: [50, 5, 0.2]        # LD pruning: window, step, r² threshold
+        mind: 0.02                    # Max missing rate per individual (2%)
+        sex_check: [0.2, 0.8]         # F coefficient bounds [female_max, male_min]
+        maf: 0.01                     # Minor allele frequency threshold
+        het_deviation: 3              # Heterozygosity SD threshold
+        kinship: 0.354                # Kinship coefficient (2nd degree relatives)
+        ibd_threshold: 0.185          # IBD threshold for duplicate detection
+
+**Ancestry QC** - Detect population outliers
+
+.. code-block:: yaml
+
+    - name: "ancestry_qc"
+      enabled: true
+      module: "ideal_genom.qc.ancestry_qc"
+      class: "AncestryQC"
+      init_params:
+        input_path: "${steps.sample_qc.clean_dir}"
+        input_name: "${steps.sample_qc.output_name}"
+        output_path: "${base_output_dir}"
+        output_name: "mydata_ancestryQCed"
+        high_ld_regions_file: "auto"
+        build: "38"
+      execute_params:
+        ind_pair: [50, 5, 0.2]        # LD pruning for PCA
+        pca: 10                       # Number of PCs to compute
+        maf: 0.01                     # MAF threshold
+        ref_threshold: 4              # SD threshold for reference outliers
+        stu_threshold: 4              # SD threshold for study outliers
+        reference_pop: "EUR"          # Expected population (EUR, AFR, AMR, EAS, SAS)
+        num_pcs: 10                   # Number of PCs for ancestry assignment
+
+**Variant QC** - Remove low-quality variants
+
+.. code-block:: yaml
+
+    - name: "variant_qc"
+      enabled: true
+      module: "ideal_genom.qc.variant_qc"
+      class: "VariantQC"
+      init_params:
+        input_path: "${steps.ancestry_qc.clean_dir}"
+        input_name: "${steps.ancestry_qc.output_name}"
+        output_path: "${base_output_dir}"
+        output_name: "mydata_variantQCed"
+      execute_params:
+        miss_data_rate: 0.02          # Max missing rate across all samples
+        diff_genotype_rate: 1.0e-5    # Differential missingness p-value
+        geno: 0.02                    # Max missing rate per variant
+        maf: 0.01                     # Minor allele frequency threshold
+        hwe: 1.0e-6                   # Hardy-Weinberg equilibrium p-value
+        chr_y: 24                     # Y chromosome code (24 for hg38)
+
+Step 5: Validate Your Configuration
+Step 5: Validate Your Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before running the pipeline, validate your configuration:
+
+.. code-block:: bash
+
+    ideal-genom validate --config qc_pipeline.yaml
+
+This checks for:
+
+- File paths existence
+- Required parameters
+- Parameter value ranges
+- Module and class availability
+- Configuration syntax
+
+**Example output:**
 
 .. code-block:: text
 
-    outputData/
-    ├── ancestry_results/
-    │   ├── clean_files/
-    │   ├── fail_samples/
-    │   └── ancestryQC_plots/
-    ├── sample_qc_results/
-    │   ├── clean_files/
-    │   ├── fail_samples/
-    │   └── sampleQC_plots/
-    ├── variant_qc_results/
-    │   ├── clean_files/
-    │   ├── fail_samples/
-    │   └── variantQC_plots/
-    └── umap_plots/
+    ✓ Configuration file is valid
+    ✓ Pipeline 'my_study_qc' configured with 3/3 enabled steps
+
+Step 6: Run the Pipeline
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Basic Execution**
+
+.. code-block:: bash
+
+    ideal-genom run --config qc_pipeline.yaml
+
+**Dry Run (Preview Without Executing)**
+
+.. code-block:: bash
+
+    ideal-genom run --config qc_pipeline.yaml --dry-run
+
+**Example dry-run output:**
+
+.. code-block:: text
+
+    ============================================================
+    PIPELINE SUMMARY (DRY RUN)
+    ============================================================
+    Pipeline Name: my_study_qc
+    Output Directory: /data/output
+    Total Steps: 3
+    Enabled Steps: 3
+    
+    Enabled Steps:
+      1. sample_qc (ideal_genom.qc.sample_qc.SampleQC)
+      2. ancestry_qc (ideal_genom.qc.ancestry_qc.AncestryQC)
+      3. variant_qc (ideal_genom.qc.variant_qc.VariantQC)
+    ============================================================
+
+**Custom Logging Level**
+
+.. code-block:: bash
+
+    ideal-genom run --config qc_pipeline.yaml --log-level DEBUG
+
+Step 7: Understanding the Results
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+After pipeline execution, your output directory will contain:
+
+.. code-block:: text
+
+    /data/output/
+    ├── my_study_qc/                    # Pipeline-specific directory
+    │   ├── sample_qc/
+    │   │   ├── clean_files/            # QC-passed data
+    │   │   │   ├── mydata_sampleQCed.bed
+    │   │   │   ├── mydata_sampleQCed.bim
+    │   │   │   └── mydata_sampleQCed.fam
+    │   │   ├── fail_samples/           # Removed samples with reasons
+    │   │   │   ├── failed_mind.txt
+    │   │   │   ├── failed_sexcheck.txt
+    │   │   │   ├── failed_het.txt
+    │   │   │   └── failed_kinship.txt
+    │   │   └── plots/                  # Visualization reports
+    │   │       ├── call_rate.png
+    │   │       ├── heterozygosity.png
+    │   │       ├── sex_check.png
+    │   │       └── kinship_distribution.png
+    │   ├── ancestry_qc/
+    │   │   ├── clean_files/
+    │   │   ├── fail_samples/
+    │   │   │   └── ancestry_outliers.txt
+    │   │   └── plots/
+    │   │       ├── pca_all_samples.png
+    │   │       ├── pca_after_qc.png
+    │   │       └── scree_plot.png
+    │   └── variant_qc/
+    │       ├── clean_files/            # Final QC-passed variants
+    │       │   ├── mydata_variantQCed.bed  # Ready for GWAS!
+    │       │   ├── mydata_variantQCed.bim
+    │       │   └── mydata_variantQCed.fam
+    │       ├── fail_variants/
+    │       │   ├── failed_geno.txt
+    │       │   ├── failed_hwe.txt
+    │       │   └── failed_maf.txt
+    │       └── plots/
+    │           ├── maf_distribution.png
+    │           ├── hwe_distribution.png
+    │           └── missingness.png
+    └── pipeline.log                    # Complete execution log
 
 **Key Output Files:**
 
-- ``clean_files/``: Final cleaned PLINK files ready for GWAS
-- ``fail_samples/``: Lists of samples/variants that failed QC
-- ``*QC_plots/``: Visualization reports for each QC step
+- **clean_files/**: Final PLINK binary files ready for downstream analysis (GWAS, etc.)
+- **fail_samples/fail_variants/**: Lists of excluded samples/variants with QC failure reasons
+- **plots/**: Publication-ready visualizations for QC reporting
+- **pipeline.log**: Detailed log of all operations, parameters, and results
 
-**Quality Control Reports:**
+Using the Python API
+---------------------
 
-Each QC step generates informative plots:
+For more control, use the Python API directly:
 
-- **Sample QC**: Heterozygosity, missing data, kinship plots
-- **Ancestry QC**: PCA plots showing population structure
-- **Variant QC**: MAF, HWE, missing data distributions
-- **UMAP Plots**: Population structure visualization
-
-Example Workflow
-----------------
-
-Here's a complete example using the Python API:
+**Basic Example**
 
 .. code-block:: python
 
-    #!/usr/bin/env python3
-    from ideal_genom_qc import SampleQC, AncestryQC, VariantQC
-    from pathlib import Path
-    import json
-
-    # Load configuration
-    with open('configFiles/parameters.json') as f:
-        params = json.load(f)
-
-    # Initialize QC components
-    base_path = Path(".")
+    from ideal_genom.core.config import load_config
+    from ideal_genom.core.pipeline import PipelineExecutor
     
+    # Load configuration
+    config = load_config("qc_pipeline.yaml")
+    
+    # Create and execute pipeline
+    executor = PipelineExecutor(config)
+    executor.execute()
+
+**Advanced Example with Custom Handling**
+
+.. code-block:: python
+
+    from ideal_genom.core.config import load_config
+    from ideal_genom.core.pipeline import PipelineExecutor
+    import logging
+    
+    # Setup custom logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Load and modify configuration
+    config = load_config("qc_pipeline.yaml")
+    
+    # Create executor
+    executor = PipelineExecutor(config, dry_run=False)
+    
+    # Get pipeline summary
+    summary = executor.get_pipeline_summary()
+    print(f"Running pipeline: {summary['pipeline_name']}")
+    print(f"Enabled steps: {summary['enabled_steps']}")
+    
+    # Execute
+    try:
+        executor.execute()
+        print("✓ Pipeline completed successfully!")
+    except Exception as e:
+        print(f"✗ Pipeline failed: {e}")
+        raise
+
+**Using Individual Modules**
+
+.. code-block:: python
+
+    from ideal_genom.qc.sample_qc import SampleQC
+    from pathlib import Path
+    
+    # Initialize Sample QC
     sample_qc = SampleQC(
-        input_path=base_path / "inputData",
+        input_path=Path("/data/input"),
         input_name="mydata",
-        output_path=base_path / "outputData",
-        output_name="clean_data",
-        high_ld_file=base_path / "dependables" / "high-LD-regions.txt"
+        output_path=Path("/data/output"),
+        output_name="mydata_sampleQCed",
+        high_ld_regions_file="auto",
+        build="38"
     )
+    
+    # Run with custom parameters
+    sample_qc.execute_sample_qc_pipeline(sample_params={
+        "rename_snp": True,
+        "mind": 0.02,
+        "sex_check": [0.2, 0.8],
+        "maf": 0.01,
+        "het_deviation": 3,
+        "kinship": 0.354
+    })
+    
+    # Access results
+    print(f"Clean data saved to: {sample_qc.clean_dir}")
 
-    # Run complete QC pipeline
-    print("Running Sample QC...")
-    sample_qc.run_sample_qc(**params['sample_qc'])
+Common Workflows
+----------------
 
-    print("Running Ancestry QC...")
-    ancestry_qc = AncestryQC(
-        input_path=base_path / "outputData" / "sample_qc_results" / "clean_files",
-        input_name="clean_data_after_sample_qc",
-        output_path=base_path / "outputData",
-        output_name="clean_data",
-        built="38"
-    )
-    ancestry_qc.run_ancestry_qc(**params['ancestry_qc'])
+**Workflow 1: Complete QC Pipeline**
 
-    print("QC Pipeline completed!")
+.. code-block:: yaml
+
+    pipeline:
+      name: "full_qc"
+      base_output_dir: "/data/output"
+      steps:
+        - name: "sample_qc"
+          enabled: true
+          # ... (sample QC config)
+        - name: "ancestry_qc"
+          enabled: true
+          # ... (ancestry QC config)
+        - name: "variant_qc"
+          enabled: true
+          # ... (variant QC config)
+
+**Workflow 2: Skip Ancestry QC (Homogeneous Population)**
+
+.. code-block:: yaml
+
+    pipeline:
+      steps:
+        - name: "sample_qc"
+          enabled: true
+          # ...
+        - name: "ancestry_qc"
+          enabled: false  # Skip ancestry analysis
+        - name: "variant_qc"
+          enabled: true
+          init_params:
+            # Connect directly to sample QC output
+            input_path: "${steps.sample_qc.clean_dir}"
+            input_name: "${steps.sample_qc.output_name}"
+
+**Workflow 3: Resume from Previous Step**
+
+.. code-block:: yaml
+
+    pipeline:
+      steps:
+        - name: "sample_qc"
+          enabled: false  # Already completed
+        - name: "ancestry_qc"
+          enabled: false  # Already completed
+        - name: "variant_qc"
+          enabled: true
+          init_params:
+            # Use existing ancestry QC results
+            input_path: "/data/output/my_study/ancestry_qc/clean_files"
+            input_name: "mydata_ancestryQCed"
+
+Tips and Best Practices
+------------------------
+
+**Configuration Management**
+
+- Use descriptive pipeline names
+- Comment your configuration extensively
+- Keep configuration files in version control (git)
+- Create separate configs for different studies/populations
+
+**Resource Management**
+
+- Set ``max_memory`` and ``max_threads`` to ``null`` for auto-detection
+- For large datasets (>100K samples), consider increasing memory allocation
+- Monitor logs for memory/performance issues
+
+**Quality Control Thresholds**
+
+- Standard thresholds work for most datasets
+- For rare variant analysis, lower MAF thresholds (e.g., 0.001)
+- For array data, stricter HWE thresholds (1e-10)
+- Adjust kinship threshold based on study design (family vs. unrelated)
+
+**File Organization**
+
+- Use consistent naming conventions
+- Keep intermediate files during initial runs (``keep_intermediate: true``)
+- Enable logging to files (``file_logging: true``)
+- Generate visualization reports (``generate_reports: true``)
+
+**Debugging**
+
+- Always validate configuration before running
+- Use ``--dry-run`` to preview pipeline execution
+- Set ``--log-level DEBUG`` for detailed troubleshooting
+- Check fail_samples/fail_variants files to understand QC failures
+
+**Debugging**
+
+- Always validate configuration before running
+- Use ``--dry-run`` to preview pipeline execution
+- Set ``--log-level DEBUG`` for detailed troubleshooting
+- Check fail_samples/fail_variants files to understand QC failures
+
+Troubleshooting Common Issues
+------------------------------
+
+**Issue: "Module not found" error**
+
+.. code-block:: text
+
+    Solution: Check that the module path in your config is correct.
+    Example: "ideal_genom.qc.sample_qc" not "ideal_genom_qc.sample_qc"
+
+**Issue: "File not found" for input data**
+
+.. code-block:: text
+
+    Solution: Ensure paths are absolute or relative to execution directory.
+    Use ${base_output_dir} for variable substitution.
+
+**Issue: Pipeline runs but produces no output**
+
+.. code-block:: text
+
+    Solution: Check that steps are enabled: true in configuration.
+    Verify input files exist at specified paths.
+
+**Issue: High memory usage**
+
+.. code-block:: text
+
+    Solution: Set max_memory explicitly in settings.resources.
+    Consider splitting large datasets or increasing available RAM.
 
 Next Steps
 ----------
 
-- Explore the :doc:`examples` for more advanced usage
-- Check the :doc:`configuration` guide for parameter tuning
-- Review the API documentation for each module
-- See the :doc:`troubleshooting` guide if you encounter issues
+Now that you understand the basics:
 
-**Need Help?**
+- **Explore Examples**: See :doc:`examples` for complete workflows
+- **Understand Configuration**: Read :doc:`configuration` for all parameters
+- **Learn GWAS**: Check :doc:`gwas_pipeline` for association analysis
+- **Process VCF Files**: See :doc:`vcf_pipeline` for post-imputation workflows
+- **API Reference**: Browse module documentation for advanced usage
 
-- Check our `FAQ <faq.html>`_
-- Browse the examples in the ``notebooks/`` folder
-- Report issues on `GitHub <https://github.com/cge-tubingens/IDEAL-GENOM-QC/issues>`_
+**Additional Resources:**
+
+- Configuration templates: Clone the repository to access ``yaml_configs/`` directory
+- Example notebooks in ``notebooks/`` directory
+- :doc:`faq` for frequently asked questions
+- :doc:`troubleshooting` for detailed problem-solving
+
+**Getting Help:**
+
+- GitHub Issues: https://github.com/cge-tubingens/IDEAL-GENOM-QC/issues
+- Check logs: Review ``pipeline.log`` for detailed execution information
+- Community: Join discussions on the GitHub repository

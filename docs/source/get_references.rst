@@ -1,7 +1,9 @@
 Get References
 ==============
 
-.. automodule:: ideal_genom_qc.get_references
+Module for downloading and managing reference datasets (1000 Genomes, reference genomes, dbSNP).
+
+.. automodule:: ideal_genom.core.get_references
    :members:
    :undoc-members:
    :show-inheritance:

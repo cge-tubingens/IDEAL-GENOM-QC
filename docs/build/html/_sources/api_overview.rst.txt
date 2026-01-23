@@ -1,0 +1,151 @@
+API Overview
+============
+
+This section provides complete API documentation for all IDEAL-GENOM modules.
+
+Module Organization
+-------------------
+
+IDEAL-GENOM is organized into several functional modules:
+
+**Quality Control Modules** (``ideal_genom.qc``)
+   - :doc:`SampleQC` - Sample-level quality control
+   - :doc:`AncestryQC` - Population structure and ancestry analysis
+   - :doc:`VariantQC` - Variant-level quality control
+
+**GWAS Modules** (``ideal_genom.gwas``)
+   - :doc:`gwas_modules` - Association analysis (GLM, GLMM, preparatory steps)
+
+**VCF Processing Modules** (``ideal_genom.post_imputation``)
+   - :doc:`vcf_modules` - VCF processing and PLINK conversion
+
+**Population Modules** (``ideal_genom.population``)
+   - :doc:`PopStructure` - FST statistics and PCA projection
+
+**Core Modules** (``ideal_genom.core``)
+   - :doc:`core_modules` - Pipeline framework, configuration, CLI
+
+**Utility Modules**
+   - :doc:`Helpers` - Helper functions and annotations
+   - :doc:`get_references` - Reference data management
+
+Quick Reference
+---------------
+
+Common Imports
+^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   # QC modules
+   from ideal_genom.qc.sample_qc import SampleQC
+   from ideal_genom.qc.ancestry_qc import AncestryQC
+   from ideal_genom.qc.variant_qc import VariantQC
+   
+   # GWAS modules
+   from ideal_genom.gwas.preparatory import Preparatory
+   from ideal_genom.gwas.gen_linear_model import GWAS_GLM
+   from ideal_genom.gwas.gen_linear_mix_model import GWAS_GLMM
+   
+   # VCF processing
+   from ideal_genom.post_imputation.vcf_process import ProcessVCF
+   from ideal_genom.post_imputation.vcf_to_plink import GetPLINK
+   
+   # Population analysis
+   from ideal_genom.population.fst_stats import FstSummary
+   from ideal_genom.population.projection import PCAReduction, UMAPReduction, TSNEReduction
+   from ideal_genom.population.projection import DimensionalityReductionPipeline
+   
+   # Core framework
+   from ideal_genom.core.config import load_config
+   from ideal_genom.core.pipeline import PipelineExecutor
+
+Basic Usage Pattern
+^^^^^^^^^^^^^^^^^^^
+
+All analysis classes follow a consistent pattern:
+
+.. code-block:: python
+
+   from pathlib import Path
+   from ideal_genom.qc.sample_qc import SampleQC
+   
+   # 1. Initialize the class with input/output paths
+   qc = SampleQC(
+       input_path=Path("data/input"),
+       input_name="study_data",
+       output_path=Path("data/output"),
+       output_name="qc_clean",
+       reference_path=Path("data/1000genomes_build_38"),
+       reference_name="1kG_phase3_GRCh38",
+       built="38"
+   )
+   
+   # 2. Execute the analysis with parameters
+   qc.run_sample_qc(
+       rename_snp=True,
+       mind=0.1,
+       maf=0.01,
+       het_deviation=3,
+       use_kinship=True,
+       kinship=0.354
+   )
+   
+   # 3. Access results
+   print(f"Output files at: {qc.output_path}")
+
+Pipeline Integration
+^^^^^^^^^^^^^^^^^^^^
+
+Classes can be used directly via Python API or integrated into YAML pipeline configurations:
+
+**Python API (Direct Usage):**
+
+.. code-block:: python
+
+   # Instantiate and run directly
+   sample_qc = SampleQC(...)
+   sample_qc.run_sample_qc(...)
+
+**YAML Pipeline (Declarative Configuration):**
+
+.. code-block:: yaml
+
+   pipeline:
+     steps:
+       - name: "sample_qc"
+         module: "ideal_genom.qc.sample_qc"
+         class: "SampleQC"
+         init_params:
+           input_path: "data/input"
+           input_name: "study_data"
+         execute_params:
+           mind: 0.1
+           maf: 0.01
+
+Module Details
+--------------
+
+See individual module documentation pages for:
+
+- Complete class references with all methods
+- Parameter descriptions and valid ranges
+- Input/output file formats
+- Usage examples
+- Implementation notes
+
+Index
+-----
+
+.. toctree::
+   :maxdepth: 1
+   
+   SampleQC
+   AncestryQC
+   VariantQC
+   gwas_modules
+   vcf_modules
+   PopStructure
+   core_modules
+   Helpers
+   get_references

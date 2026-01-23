@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IDEAL-GENOM-QC Documentation &mdash; IDEAL-GENOM-QC v0.1.0</title>
+  <title>IDEAL-GENOM Documentation &mdash; IDEAL-GENOM v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=01f34227"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -33,11 +31,8 @@
           
           
           <a href="#" class="icon icon-home">
-            IDEAL-GENOM-QC
+            IDEAL-GENOM
           </a>
-              <div class="version">
-                0.1.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -53,20 +48,22 @@
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qc_pipeline.html">Quality Control Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gwas_pipeline.html">GWAS Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vcf_pipeline.html">VCF Processing Pipeline</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_overview.html">API Overview</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
         </div>
@@ -75,7 +72,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">IDEAL-GENOM-QC</a>
+          <a href="#">IDEAL-GENOM</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -83,7 +80,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">IDEAL-GENOM-QC Documentation</li>
+      <li class="breadcrumb-item active">IDEAL-GENOM Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -93,39 +90,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ideal-genom-qc-documentation">
-<h1>IDEAL-GENOM-QC Documentation<a class="headerlink" href="#ideal-genom-qc-documentation" title="Link to this heading"></a></h1>
-<a class="reference external image-reference" href="https://ideal-genom-qc.readthedocs.io/en/latest/"><img alt="Documentation Status" src="https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest" /></a>
-<a class="reference external image-reference" href="https://pypi.org/project/ideal-genom-qc/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/ideal-genom-qc.svg" /></a>
-<p><strong>IDEAL-GENOM-QC</strong> is a comprehensive Python library designed for performing automated and reproducible quality control (QC) on human genomic data, specifically tailored for case-control studies. This package serves as a sophisticated wrapper around PLINK tools, encapsulating years of research expertise from CGE Tübingen.</p>
+  <section id="ideal-genom-documentation">
+<h1>IDEAL-GENOM Documentation<a class="headerlink" href="#ideal-genom-documentation" title="Link to this heading"></a></h1>
+<a class="reference external image-reference" href="https://ideal-genom-qc.readthedocs.io/en/latest/"><img alt="Documentation Status" src="https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/ideal-genom/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/ideal-genom.svg" />
+</a>
+<p><strong>IDEAL-GENOM</strong> is a comprehensive Python package for automated, reproducible analysis of human genotype data. It provides end-to-end pipelines for genomic quality control (QC), post-imputation VCF processing, and genome-wide association studies (GWAS). The package wraps years of research expertise from CGE Tübingen, integrating PLINK 1.9/2.0, GCTA, and BCFtools with rich reporting and visualizations.</p>
+<p>Version: <strong>0.2.0</strong></p>
 <section id="key-features">
-<h2>🎯 <strong>Key Features</strong><a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<h2>🎯 Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
 <dl class="simple">
-<dt>✨ <strong>Comprehensive QC Pipeline</strong></dt><dd><ul class="simple">
-<li><p><strong>Sample QC</strong>: Automated sample quality assessment and filtering</p></li>
-<li><p><strong>Ancestry QC</strong>: Population structure analysis and outlier detection</p></li>
-<li><p><strong>Variant QC</strong>: SNP-level quality control and filtering</p></li>
-<li><p><strong>Visualization</strong>: Rich plotting capabilities for QC reporting</p></li>
+<dt><strong>Comprehensive Pipelines</strong></dt><dd><ul class="simple">
+<li><p><strong>Genomic QC</strong>: Sample QC, Ancestry QC, and Variant QC for case-control studies</p></li>
+<li><p><strong>GWAS Analysis</strong>: Generalized Linear Models (GLM) and Mixed Models (GLMM)</p></li>
+<li><p><strong>VCF Processing</strong>: Post-imputation filtering, normalization, and conversion to PLINK</p></li>
+<li><p><strong>Population Structure</strong>: FST statistics, PCA, UMAP visualization, and ancestry projection</p></li>
 </ul>
 </dd>
-<dt>🔬 <strong>Advanced Analytics</strong></dt><dd><ul class="simple">
-<li><p><strong>PCA Analysis</strong>: Principal Component Analysis for population structure</p></li>
-<li><p><strong>UMAP Plotting</strong>: Modern dimensionality reduction for data exploration</p></li>
-<li><p><strong>Kinship Analysis</strong>: Relationship detection and handling</p></li>
-<li><p><strong>Sex Check</strong>: Automated sex verification from genetic data</p></li>
+<dt><strong>Advanced Analytics</strong></dt><dd><ul class="simple">
+<li><p><strong>Sample Quality Control</strong>: Missingness, sex verification, heterozygosity, relatedness (kinship/IBD)</p></li>
+<li><p><strong>Ancestry Analysis</strong>: Population stratification detection with 1000 Genomes reference</p></li>
+<li><p><strong>Variant Filtering</strong>: Hardy-Weinberg equilibrium, MAF, genotype rate, differential missingness</p></li>
+<li><p><strong>GWAS Tools</strong>: Association testing, top-hits extraction, gene annotation (Ensembl/RefSeq)</p></li>
+<li><p><strong>Dimensionality Reduction</strong>: PCA and UMAP for population structure visualization</p></li>
 </ul>
 </dd>
-<dt>🛠️ <strong>User-Friendly Design</strong></dt><dd><ul class="simple">
-<li><p><strong>Minimal Configuration</strong>: Ready-to-use with sensible defaults</p></li>
-<li><p><strong>Flexible Parameters</strong>: Easily customizable for different studies</p></li>
-<li><p><strong>Multiple Interfaces</strong>: Command-line, Python API, and Jupyter notebooks</p></li>
-<li><p><strong>Docker Support</strong>: Containerized deployment option</p></li>
+<dt><strong>Modern Design</strong></dt><dd><ul class="simple">
+<li><p><strong>YAML Configuration</strong>: Single configuration file with clear, hierarchical structure</p></li>
+<li><p><strong>Flexible Pipeline System</strong>: Enable/disable steps, customize parameters per analysis</p></li>
+<li><p><strong>Multiple Interfaces</strong>: Command-line tool, Python API, Jupyter notebooks</p></li>
+<li><p><strong>Docker Support</strong>: Pre-configured container with all genomic tools installed</p></li>
+<li><p><strong>Automated Workflows</strong>: Pipeline executor handles dependencies and data flow</p></li>
+<li><p><strong>Rich Reporting</strong>: Publication-ready plots and comprehensive QC metrics</p></li>
 </ul>
 </dd>
-<dt>📊 <strong>Rich Reporting</strong></dt><dd><ul class="simple">
-<li><p><strong>Automated Plots</strong>: Publication-ready visualizations</p></li>
-<li><p><strong>Quality Metrics</strong>: Comprehensive QC statistics</p></li>
-<li><p><strong>Clean Data Output</strong>: PLINK-formatted results ready for GWAS</p></li>
+<dt><strong>Modern Design</strong></dt><dd><ul class="simple">
+<li><p><strong>YAML Configuration</strong>: Single configuration file with clear, hierarchical structure</p></li>
+<li><p><strong>Flexible Pipeline System</strong>: Enable/disable steps, customize parameters per analysis</p></li>
+<li><p><strong>Multiple Interfaces</strong>: Command-line tool, Python API, Jupyter notebooks</p></li>
+<li><p><strong>Docker Support</strong>: Pre-configured container with all genomic tools installed</p></li>
+<li><p><strong>Automated Workflows</strong>: Pipeline executor handles dependencies and data flow</p></li>
+<li><p><strong>Rich Reporting</strong>: Publication-ready plots and comprehensive QC metrics</p></li>
+</ul>
+</dd>
+<dt><strong>Developer Friendly</strong></dt><dd><ul class="simple">
+<li><p><strong>Reproducible</strong>: All steps, parameters, and outputs logged</p></li>
+<li><p><strong>Extensible</strong>: Modular architecture for adding custom analysis steps</p></li>
+<li><p><strong>Well Documented</strong>: Comprehensive guides, API reference, and examples</p></li>
+<li><p><strong>Type Hints</strong>: Full type annotations for better IDE support</p></li>
 </ul>
 </dd>
 </dl>
@@ -133,53 +146,70 @@
 <section id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
 <p><strong>Installation</strong></p>
-<p>Install from PyPI (recommended for stable version):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>ideal-genom-qc
-</pre></div>
-</div>
-<p>Or install the development version:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
-<span class="nb">cd</span><span class="w"> </span>IDEAL-GENOM-QC
-poetry<span class="w"> </span>install
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>ideal-genom
 </pre></div>
 </div>
 <p><strong>Basic Usage</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run the complete QC pipeline</span>
-python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span class="w"> </span>--path_params<span class="w"> </span>config/parameters.json<span class="w"> </span><span class="se">\</span>
-<span class="w">                         </span>--file_folders<span class="w"> </span>config/paths.json<span class="w"> </span><span class="se">\</span>
-<span class="w">                         </span>--steps<span class="w"> </span>config/steps.json<span class="w"> </span><span class="se">\</span>
-<span class="w">                         </span>--recompute-merge<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
-<span class="w">                         </span>--built<span class="w"> </span><span class="m">38</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate a configuration template</span>
+ideal-genom<span class="w"> </span>template<span class="w"> </span>--output<span class="w"> </span>my_pipeline.yaml
+
+<span class="c1"># Edit the configuration file to match your data</span>
+nano<span class="w"> </span>my_pipeline.yaml
+
+<span class="c1"># Validate your configuration</span>
+ideal-genom<span class="w"> </span>validate<span class="w"> </span>--config<span class="w"> </span>my_pipeline.yaml
+
+<span class="c1"># Run the pipeline</span>
+ideal-genom<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>my_pipeline.yaml
 </pre></div>
 </div>
 <p><strong>Python API</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom_qc</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleQC</span><span class="p">,</span> <span class="n">AncestryQC</span><span class="p">,</span> <span class="n">VariantQC</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.core.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineExecutor</span>
 
-<span class="c1"># Initialize sample QC</span>
-<span class="n">sample_qc</span> <span class="o">=</span> <span class="n">SampleQC</span><span class="p">(</span>
-    <span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;data/input&quot;</span><span class="p">,</span>
-    <span class="n">input_name</span><span class="o">=</span><span class="s2">&quot;mydata&quot;</span><span class="p">,</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;data/output&quot;</span><span class="p">,</span>
-    <span class="n">output_name</span><span class="o">=</span><span class="s2">&quot;clean_data&quot;</span><span class="p">,</span>
-    <span class="n">high_ld_file</span><span class="o">=</span><span class="s2">&quot;data/high_ld_regions.txt&quot;</span>
-<span class="p">)</span>
+<span class="c1"># Load configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="s2">&quot;my_pipeline.yaml&quot;</span><span class="p">)</span>
 
-<span class="c1"># Run QC pipeline</span>
-<span class="n">sample_qc</span><span class="o">.</span><span class="n">run_sample_qc</span><span class="p">()</span>
+<span class="c1"># Create and execute pipeline</span>
+<span class="n">executor</span> <span class="o">=</span> <span class="n">PipelineExecutor</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="n">executor</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
+<section id="available-pipelines">
+<h2>Available Pipelines<a class="headerlink" href="#available-pipelines" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>QC Pipeline</strong> - Quality control for case-control studies</dt><dd><ol class="arabic simple">
+<li><p>Sample QC: Individual-level quality control</p></li>
+<li><p>Ancestry QC: Population structure and outlier detection</p></li>
+<li><p>Variant QC: SNP-level quality control</p></li>
+<li><p>Population Visualization: UMAP/t-SNE plots</p></li>
+</ol>
+</dd>
+<dt><strong>GWAS Pipeline</strong> - Genome-wide association analysis</dt><dd><ol class="arabic simple">
+<li><p>Preparatory: LD pruning and PCA decomposition</p></li>
+<li><p>GLM Analysis: Fixed effects association testing</p></li>
+<li><p>GLMM Analysis: Mixed model with genetic relationship matrix</p></li>
+<li><p>Annotation: Gene mapping and functional annotation</p></li>
+</ol>
+</dd>
+<dt><strong>VCF Pipeline</strong> - Post-imputation processing</dt><dd><ol class="arabic simple">
+<li><p>VCF Processing: Filter, normalize, annotate, concatenate</p></li>
+<li><p>PLINK Conversion: Convert to PLINK binary format</p></li>
+<li><p>Quality filtering: R² threshold, multiallelic handling</p></li>
+</ol>
+</dd>
+</dl>
 </section>
 <section id="documentation-contents">
-<h1>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading"></a></h1>
+<h2>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-plink">Installing PLINK</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-ideal-genom-qc">Installing IDEAL-GENOM-QC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#docker-installation">Docker Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-external-tools">Installing External Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-ideal-genom">Installing IDEAL-GENOM</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
@@ -187,19 +217,28 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#project-structure">Project Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-1-prepare-your-data">Step 1: Prepare Your Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-2-configuration-files">Step 2: Configuration Files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-3-running-the-pipeline">Step 3: Running the Pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-4-understanding-results">Step 4: Understanding Results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#the-new-configuration-system">The New Configuration System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#quick-start-5-minute-tutorial">Quick Start: 5-Minute Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-by-step-guide">Step-by-Step Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#using-the-python-api">Using the Python API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#troubleshooting-common-issues">Troubleshooting Common Issues</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#next-steps">Next Steps</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#configuration-files-overview">Configuration Files Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#parameters-configuration">Parameters Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#paths-configuration">Paths Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#configuration-file-structure">Configuration File Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#getting-started-with-configuration">Getting Started with Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#pipeline-section">Pipeline Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#qc-pipeline-configuration">QC Pipeline Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#settings-section">Settings Section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#advanced-configuration-patterns">Advanced Configuration Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#parameter-tuning-guidelines">Parameter Tuning Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#common-configuration-examples">Common Configuration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#troubleshooting-configuration">Troubleshooting Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#see-also">See Also</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#steps-configuration">Steps Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#advanced-configuration">Advanced Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#performance-tuning">Performance Tuning</a></li>
@@ -208,10 +247,63 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#example-1-basic-case-control-study">Example 1: Basic Case-Control Study</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#example-2-multi-ethnic-population-study">Example 2: Multi-Ethnic Population Study</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-1-basic-qc-pipeline">Example 1: Basic QC Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-2-complete-gwas-workflow">Example 2: Complete GWAS Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-3-vcf-post-imputation-processing">Example 3: VCF Post-Imputation Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-5-population-structure-analysis">Example 5: Population Structure Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#python-api-examples">Python API Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#jupyter-notebook-examples">Jupyter Notebook Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#common-patterns">Common Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qc_pipeline.html">Quality Control Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#use-cases">Use Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#pipeline-components">Pipeline Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#advanced-configuration">Advanced Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#interpretation-guide">Interpretation Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#output-files">Output Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qc_pipeline.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gwas_pipeline.html">GWAS Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#pipeline-steps">Pipeline Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#complete-workflow-example">Complete Workflow Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#see-also">See Also</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwas_pipeline.html#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vcf_pipeline.html">VCF Processing Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#use-cases">Use Cases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#pipeline-steps">Pipeline Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#complete-workflow-example">Complete Workflow Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#input-data-organization">Input Data Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#quality-control-considerations">Quality Control Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#common-workflows">Common Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#output-validation">Output Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#integration-with-qc-pipeline">Integration with QC Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#see-also">See Also</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vcf_pipeline.html#external-resources">External Resources</a></li>
 </ul>
 </li>
 </ul>
@@ -219,35 +311,11 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="SampleQC.html#ideal_genom_qc.SampleQC.SampleQC"><code class="docutils literal notranslate"><span class="pre">SampleQC</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="AncestryQC.html#ideal_genom_qc.AncestryQC.ReferenceGenomicMerger"><code class="docutils literal notranslate"><span class="pre">ReferenceGenomicMerger</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="AncestryQC.html#ideal_genom_qc.AncestryQC.GenomicOutlierAnalyzer"><code class="docutils literal notranslate"><span class="pre">GenomicOutlierAnalyzer</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="AncestryQC.html#ideal_genom_qc.AncestryQC.AncestryQC"><code class="docutils literal notranslate"><span class="pre">AncestryQC</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="PopStructure.html#ideal_genom_qc.PopStructure.UMAPplot"><code class="docutils literal notranslate"><span class="pre">UMAPplot</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="PopStructure.html#ideal_genom_qc.PopStructure.FstSummary"><code class="docutils literal notranslate"><span class="pre">FstSummary</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="VariantQC.html#ideal_genom_qc.VariantQC.VariantQC"><code class="docutils literal notranslate"><span class="pre">VariantQC</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Helpers.html#ideal_genom_qc.Helpers.shell_do"><code class="docutils literal notranslate"><span class="pre">shell_do()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Helpers.html#ideal_genom_qc.Helpers.arg_parser"><code class="docutils literal notranslate"><span class="pre">arg_parser()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Helpers.html#ideal_genom_qc.Helpers.delete_temp_files"><code class="docutils literal notranslate"><span class="pre">delete_temp_files()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="Helpers.html#ideal_genom_qc.Helpers.validate_config"><code class="docutils literal notranslate"><span class="pre">validate_config()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="get_references.html#ideal_genom_qc.get_references.Fetcher1000Genome"><code class="docutils literal notranslate"><span class="pre">Fetcher1000Genome</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="get_references.html#ideal_genom_qc.get_references.FetcherLDRegions"><code class="docutils literal notranslate"><span class="pre">FetcherLDRegions</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_overview.html">API Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-organization">Module Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-details">Module Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#index">Index</a></li>
 </ul>
 </li>
 </ul>
@@ -258,8 +326,46 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 </div>
+</section>
+<section id="supported-tools">
+<h2>Supported Tools<a class="headerlink" href="#supported-tools" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM integrates the following genomic analysis tools:</p>
+<ul class="simple">
+<li><p><strong>PLINK 1.9</strong>: Classic PLINK for QC and association analysis</p></li>
+<li><p><strong>PLINK 2.0</strong>: Modern version with improved performance (AVX2 optimized)</p></li>
+<li><p><strong>GCTA</strong>: Genetic relationship matrix and mixed model analysis</p></li>
+<li><p><strong>BCFtools</strong>: VCF manipulation and quality filtering</p></li>
+</ul>
+<p>These tools are automatically used by the pipeline and must be installed separately or use the provided Docker image.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading"></a></h2>
+<p>If you use IDEAL-GENOM in your research, please cite:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@software</span><span class="p">{</span><span class="nl">ideal_genom_2026</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{IDEAL-GENOM: Comprehensive Genomic Analysis Pipeline}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Giraldo González, Luis and Tenghe, Amabel}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2026}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{0.2.0}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/cge-tubingens/ideal-genom-qc}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: <a class="reference external" href="https://ideal-genom-qc.readthedocs.io/">https://ideal-genom-qc.readthedocs.io/</a></p></li>
+<li><p><strong>Issues</strong>: <a class="reference external" href="https://github.com/cge-tubingens/cge-comrare-pipeline/issues">https://github.com/cge-tubingens/cge-comrare-pipeline/issues</a></p></li>
+<li><p><strong>Examples</strong>: See the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> page for complete workflows</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>IDEAL-GENOM is released under the MIT License. See the LICENSE file in the repository for details.</p>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
@@ -280,7 +386,7 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+    <p>&#169; Copyright 2026, Luis Giraldo González, Amabel Tenghe.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

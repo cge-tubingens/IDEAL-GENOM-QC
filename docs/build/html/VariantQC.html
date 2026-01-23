@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VariantQC &mdash; IDEAL-GENOM-QC v0.1.0</title>
+  <title>Variant QC Module &mdash; IDEAL-GENOM v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=01f34227"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Helpers" href="Helpers.html" />
-    <link rel="prev" title="Population Structure" href="PopStructure.html" /> 
+    <link rel="next" title="GWAS Modules" href="gwas_modules.html" />
+    <link rel="prev" title="Ancestry QC Module" href="AncestryQC.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -34,11 +32,8 @@
           
           
           <a href="index.html" class="icon icon-home">
-            IDEAL-GENOM-QC
+            IDEAL-GENOM
           </a>
-              <div class="version">
-                0.1.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -54,34 +49,43 @@
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qc_pipeline.html">Quality Control Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gwas_pipeline.html">GWAS Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vcf_pipeline.html">VCF Processing Pipeline</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">VariantQC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC"><code class="docutils literal notranslate"><span class="pre">VariantQC</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.__init__"><code class="docutils literal notranslate"><span class="pre">VariantQC.__init__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_missing_data_rate"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_missing_data_rate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_different_genotype_call_rate"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_different_genotype_call_rate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_hwe_test"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_hwe_test()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.get_fail_variants"><code class="docutils literal notranslate"><span class="pre">VariantQC.get_fail_variants()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.execute_drop_variants"><code class="docutils literal notranslate"><span class="pre">VariantQC.execute_drop_variants()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.report_missing_data"><code class="docutils literal notranslate"><span class="pre">VariantQC.report_missing_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.report_different_genotype_call_rate"><code class="docutils literal notranslate"><span class="pre">VariantQC.report_different_genotype_call_rate()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ideal_genom_qc.VariantQC.VariantQC.report_hwe"><code class="docutils literal notranslate"><span class="pre">VariantQC.report_hwe()</span></code></a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_overview.html">API Overview</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-organization">Module Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-details">Module Details</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="api_overview.html#index">Index</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="SampleQC.html">Sample QC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AncestryQC.html">Ancestry QC Module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Variant QC Module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-ideal_genom.qc.variant_qc">Main Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supporting-classes">Supporting Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gwas_modules.html">GWAS Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vcf_modules.html">VCF Processing Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PopStructure.html">Population Structure Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core_modules.html">Core Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Helpers.html">Utility Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
         </div>
@@ -90,7 +94,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">IDEAL-GENOM-QC</a>
+          <a href="index.html">IDEAL-GENOM</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -98,7 +102,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">VariantQC</li>
+          <li class="breadcrumb-item"><a href="api_overview.html">API Overview</a></li>
+      <li class="breadcrumb-item active">Variant QC Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/VariantQC.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -108,21 +113,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-ideal_genom_qc.VariantQC">
-<span id="variantqc"></span><h1>VariantQC<a class="headerlink" href="#module-ideal_genom_qc.VariantQC" title="Link to this heading"></a></h1>
+  <section id="variant-qc-module">
+<h1>Variant QC Module<a class="headerlink" href="#variant-qc-module" title="Link to this heading"></a></h1>
+<p>The Variant QC module performs variant-level quality control on genotype data.</p>
+<section id="module-ideal_genom.qc.variant_qc">
+<span id="main-class"></span><h2>Main Class<a class="headerlink" href="#module-ideal_genom.qc.variant_qc" title="Link to this heading"></a></h2>
 <p>Python module to perform variant quality control</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom_qc.VariantQC.</span></span><span class="sig-name descname"><span class="pre">VariantQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.variant_qc.</span></span><span class="sig-name descname"><span class="pre">VariantQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize the VariantQC class.
 This class handles quality control for genetic variants data stored in PLINK binary format
 (.bed, .bim, .fam files).</p>
 <section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>input_path: Path</dt><dd><p>Directory path containing input PLINK files</p>
 </dd>
@@ -135,7 +143,7 @@ This class handles quality control for genetic variants data stored in PLINK bin
 </dl>
 </section>
 <section id="raises">
-<h2>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h2>
+<h3>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>TypeError:</dt><dd><p>If input_path/output_path are not Path objects or if input_name/output_name are not strings</p>
 </dd>
@@ -144,7 +152,7 @@ This class handles quality control for genetic variants data stored in PLINK bin
 </dl>
 </section>
 <section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>input_path: Path</dt><dd><p>Path to input directory</p>
 </dd>
@@ -169,12 +177,12 @@ This class handles quality control for genetic variants data stored in PLINK bin
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.execute_missing_data_rate">
-<span class="sig-name descname"><span class="pre">execute_missing_data_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chr_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">24</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.execute_missing_data_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.execute_missing_data_rate" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.execute_missing_data_rate">
+<span class="sig-name descname"><span class="pre">execute_missing_data_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chr_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">24</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.execute_missing_data_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.execute_missing_data_rate" title="Link to this definition"></a></dt>
 <dd><p>Executes missing data rate analysis using PLINK for male and female subjects separately.
 This method performs two PLINK operations:
-1. Generates .lmiss and .imiss files for male subjects on chromosome Y
-2. Generates .lmiss and .imiss files for all subjects excluding chromosome Y</p>
+1. Generates .vmiss and .smiss files for male subjects on chromosome Y
+2. Generates .vmiss and .smiss files for all subjects excluding chromosome Y</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>chr_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=24</em>) – Chromosome Y number in the dataset. Must be between 0 and 26.</p>
@@ -198,8 +206,8 @@ The results are stored in self.males_missing_data and self.females_missing_data 
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.execute_different_genotype_call_rate">
-<span class="sig-name descname"><span class="pre">execute_different_genotype_call_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.execute_different_genotype_call_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.execute_different_genotype_call_rate" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.execute_different_genotype_call_rate">
+<span class="sig-name descname"><span class="pre">execute_different_genotype_call_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.execute_different_genotype_call_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.execute_different_genotype_call_rate" title="Link to this definition"></a></dt>
 <dd><p>Execute test for different genotype call rates between cases and controls using PLINK.</p>
 <p>This method performs the following operations:
 1. Calculates available memory for PLINK execution
@@ -220,35 +228,8 @@ missing rates between cases and controls
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.execute_hwe_test">
-<span class="sig-name descname"><span class="pre">execute_hwe_test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.execute_hwe_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.execute_hwe_test" title="Link to this definition"></a></dt>
-<dd><p>Execute Hardy-Weinberg Equilibrium (HWE) test using PLINK.</p>
-<p>This method performs the following steps:
-1. Calculates available memory and allocates 2/3 for the test
-2. Runs PLINK command to compute HWE test on the input binary PLINK files
-3. Saves results to a .hwe output file</p>
-<p>The HWE test is used to assess whether genotype frequencies in a population remain constant
-across generations under specific conditions.</p>
-<section id="returns">
-<h2>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
-</section>
-<section id="side-effects">
-<h2>Side effects:<a class="headerlink" href="#side-effects" title="Link to this heading"></a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><p>Creates a .hwe output file in the results directory</p></li>
-<li><p>Sets self.hwe_results to the name of the output file</p></li>
-</ul>
-</div></blockquote>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.get_fail_variants">
-<span class="sig-name descname"><span class="pre">get_fail_variants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker_call_rate_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_controls_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">male_female_y_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe_y_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.get_fail_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.get_fail_variants" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.get_fail_variants">
+<span class="sig-name descname"><span class="pre">get_fail_variants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker_call_rate_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_controls_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.get_fail_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.get_fail_variants" title="Link to this definition"></a></dt>
 <dd><p>Identify and consolidate failing variants based on multiple quality control criteria.
 This method combines the results of three QC checks:
 1. Variants with high missing data rates
@@ -280,8 +261,8 @@ This method combines the results of three QC checks:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.execute_drop_variants">
-<span class="sig-name descname"><span class="pre">execute_drop_variants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geno</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.execute_drop_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.execute_drop_variants" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.execute_drop_variants">
+<span class="sig-name descname"><span class="pre">execute_drop_variants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geno</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.execute_drop_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.execute_drop_variants" title="Link to this definition"></a></dt>
 <dd><p>Execute variant filtering based on quality control parameters using PLINK.</p>
 <p>This method removes variants that fail quality control criteria including minor allele frequency (MAF),
 genotype missingness rate, and Hardy-Weinberg equilibrium (HWE) test.</p>
@@ -307,8 +288,8 @@ with suffix ‘-variantQCed’.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.report_missing_data">
-<span class="sig-name descname"><span class="pre">report_missing_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_male</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_female</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.report_missing_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.report_missing_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.report_missing_data">
+<span class="sig-name descname"><span class="pre">report_missing_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_male</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_female</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.report_missing_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.report_missing_data" title="Link to this definition"></a></dt>
 <dd><p>Analyze and report missing data rates for male and female subjects.
 This method processes missing data information from separate files for male and female subjects,
 creates visualizations of missing data distributions, and identifies SNPs that fail the missing
@@ -337,21 +318,21 @@ with columns [‘SNP’, ‘Failure’] where ‘Failure’ indicates the failin
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.report_different_genotype_call_rate">
-<span class="sig-name descname"><span class="pre">report_different_genotype_call_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.report_different_genotype_call_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.report_different_genotype_call_rate" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.report_different_genotype_call_rate">
+<span class="sig-name descname"><span class="pre">report_different_genotype_call_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.report_different_genotype_call_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.report_different_genotype_call_rate" title="Link to this definition"></a></dt>
 <dd><p>Reports markers with different genotype call rates based on a given threshold.
 This function reads a .missing file, filters markers with a different genotype call rate
 below the specified threshold, and returns a DataFrame containing these markers.</p>
 <section id="id1">
-<h2>Parameters:<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<h3>Parameters:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>directory (str): The directory where the .missing file is located.
 filename (str): The name of the .missing file.
 threshold (float): The threshold for filtering markers based on the P-value.</p>
 </div></blockquote>
 </section>
-<section id="id2">
-<h2>Returns:<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
 <blockquote>
 <div><dl class="simple">
 <dt>pd.DataFrame: A DataFrame containing markers with different genotype call rates</dt><dd><p>below the specified threshold. The DataFrame has two columns:
@@ -363,49 +344,325 @@ threshold (float): The threshold for filtering markers based on the P-value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ideal_genom_qc.VariantQC.VariantQC.report_hwe">
-<span class="sig-name descname"><span class="pre">report_hwe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hwe_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lim_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/ideal_genom_qc/VariantQC.html#VariantQC.report_hwe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom_qc.VariantQC.VariantQC.report_hwe" title="Link to this definition"></a></dt>
-<dd><p>Generate Hardy-Weinberg Equilibrium (HWE) test report and visualization.</p>
-<p>This method reads HWE test results from a file, identifies variants that fail HWE,
-creates a histogram of -log10(P) values, and returns failed variants.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>Path</em>) – Directory path where the HWE test results file is located</p></li>
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the file containing HWE test results</p></li>
-<li><p><strong>hwe_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – P-value threshold for HWE test failure (default: 5e-8)</p></li>
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQC.execute_variant_qc_pipeline">
+<span class="sig-name descname"><span class="pre">execute_variant_qc_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQC.execute_variant_qc_pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQC.execute_variant_qc_pipeline" title="Link to this definition"></a></dt>
+<dd><p>Execute a comprehensive variant quality control pipeline.
+This method runs a series of quality control steps on genetic variants,
+including missing data analysis, genotype calling assessment, Hardy-Weinberg
+equilibrium testing, and variant filtering based on specified thresholds.
+:param variant_params: Dictionary containing quality control parameters with the following keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>‘chr-y’<span class="classifier">bool or str</span></dt><dd><p>Flag for chromosome Y analysis</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘miss_data_rate’<span class="classifier">float</span></dt><dd><p>Threshold for missing data rate filtering</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘diff_genotype_rate’<span class="classifier">float</span></dt><dd><p>Threshold for differential genotype call rate between cases/controls</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘hwe’<span class="classifier">float</span></dt><dd><p>Hardy-Weinberg equilibrium p-value threshold</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘maf’<span class="classifier">float</span></dt><dd><p>Minor allele frequency threshold for variant filtering</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>‘geno’<span class="classifier">float</span></dt><dd><p>Genotype call rate threshold for variant filtering</p>
+</dd>
+</dl>
+</li>
 </ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>This method performs quality control operations in-place and does not
+return any values.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame containing variants that failed HWE test with columns:
-- SNP: variant identifier
-- Failure: reason for failure (always ‘HWE’)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The method creates a histogram plot saved as ‘hwe-histogram’ showing the
-distribution of -log10(P) values from HWE tests.</p>
+<p>The pipeline executes the following steps in order:
+1. Missing data rate computation (sex-stratified analysis)
+2. Case/control nonrandom missingness test
+3. Hardy-Weinberg equilibrium test
+4. Identification of variants failing QC thresholds
+5. Removal of variants that failed quality control
+Each step prints a colored status message indicating the current operation
+being performed.</p>
 </dd></dl>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCReport">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.variant_qc.</span></span><span class="sig-name descname"><span class="pre">VariantQCReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCReport" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Handles visualization and reporting for variant quality control results.</p>
+<p>This class is responsible for generating plots and reports from variant QC analyses,
+following the Single Responsibility Principle by separating visualization concerns
+from the main VariantQC logic.</p>
+<section id="id2">
+<h3>Parameters:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Directory path where plots and reports will be saved</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h3>Raises:<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>TypeError:</dt><dd><p>If output_path is not a Path object</p>
+</dd>
+<dt>FileNotFoundError:</dt><dd><p>If output_path doesn’t exist</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Attributes:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Path to output directory where visualizations will be saved</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCReport.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCReport.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the VariantQCReport class.</p>
+<section id="id5">
+<h4>Parameters:<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Directory path where plots and reports will be saved</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h4>Raises:<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>TypeError:</dt><dd><p>If output_path is not a Path object</p>
+</dd>
+<dt>FileNotFoundError:</dt><dd><p>If output_path doesn’t exist</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCReport.report_variant_qc">
+<span class="sig-name descname"><span class="pre">report_variant_qc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">missing_data_rate_male</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_rate_female</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport.report_variant_qc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCReport.report_variant_qc" title="Link to this definition"></a></dt>
+<dd><p>Generate comprehensive visualization reports for variant quality control results.</p>
+<p>This method creates histogram plots for missing data rates (separated by sex) and
+Hardy-Weinberg equilibrium test results, providing visual assessment of QC metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>missing_data_rate_male</strong> (<em>Path</em>) – Path to the .vmiss file containing missing data statistics for male subjects</p></li>
+<li><p><strong>missing_data_rate_female</strong> (<em>Path</em>) – Path to the .vmiss file containing missing data statistics for female subjects</p></li>
+<li><p><strong>hwe_file</strong> (<em>Path</em>) – Path to the .hwe file containing Hardy-Weinberg equilibrium test results</p></li>
+<li><p><strong>y_axis_cap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum value for y-axis in histograms. If None, automatically determined.
+Default is 100.</p></li>
+<li><p><strong>missing_data_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold for missing data rate visualization (vertical line). Default is 0.2.</p></li>
+<li><p><strong>hwe_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – P-value threshold for Hardy-Weinberg equilibrium test (vertical line).
+Default is 5e-8.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If any of the input files don’t exist</p></li>
+<li><p><strong>pd.errors.EmptyDataError</strong> – If input files are empty or malformed</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Creates ‘missing_data_male.svg’ and ‘missing_data_female.svg’ plots</p></li>
+<li><p>Creates ‘hwe-histogram.svg’ plot</p></li>
+<li><p>All plots are saved in SVG format with 600 DPI resolution</p></li>
+<li><p>Threshold lines are displayed in red with dashed style</p></li>
+</ul>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCCleanUp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.variant_qc.</span></span><span class="sig-name descname"><span class="pre">VariantQCCleanUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCCleanUp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCCleanUp.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCCleanUp.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ideal_genom.qc.variant_qc.VariantQCCleanUp.clean_all">
+<span class="sig-name descname"><span class="pre">clean_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp.clean_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.variant_qc.VariantQCCleanUp.clean_all" title="Link to this definition"></a></dt>
+<dd><p>Remove intermediate files from output directory.</p>
+<p>This method deletes temporary files created during sample QC steps:
+- Files ending with ‘.bed’, ‘.bim’, ‘.fam’, ‘.vmiss’, ‘.smiss’, ‘.nosex’, ‘.missing’, ‘.hwe’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Only removes files if they exist. No error is raised if files are not found.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="supporting-classes">
+<h2>Supporting Classes<a class="headerlink" href="#supporting-classes" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.variant_qc.</span></span><span class="sig-name descname"><span class="pre">VariantQCReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Handles visualization and reporting for variant quality control results.</p>
+<p>This class is responsible for generating plots and reports from variant QC analyses,
+following the Single Responsibility Principle by separating visualization concerns
+from the main VariantQC logic.</p>
+<section id="id7">
+<h3>Parameters:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Directory path where plots and reports will be saved</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Raises:<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>TypeError:</dt><dd><p>If output_path is not a Path object</p>
+</dd>
+<dt>FileNotFoundError:</dt><dd><p>If output_path doesn’t exist</p>
+</dd>
+</dl>
+</section>
+<section id="id9">
+<h3>Attributes:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Path to output directory where visualizations will be saved</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Initialize the VariantQCReport class.</p>
+<section id="id11">
+<h4>Parameters:<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>output_path: Path</dt><dd><p>Directory path where plots and reports will be saved</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h4>Raises:<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>TypeError:</dt><dd><p>If output_path is not a Path object</p>
+</dd>
+<dt>FileNotFoundError:</dt><dd><p>If output_path doesn’t exist</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">report_variant_qc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">missing_data_rate_male</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_rate_female</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCReport.report_variant_qc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd><p>Generate comprehensive visualization reports for variant quality control results.</p>
+<p>This method creates histogram plots for missing data rates (separated by sex) and
+Hardy-Weinberg equilibrium test results, providing visual assessment of QC metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>missing_data_rate_male</strong> (<em>Path</em>) – Path to the .vmiss file containing missing data statistics for male subjects</p></li>
+<li><p><strong>missing_data_rate_female</strong> (<em>Path</em>) – Path to the .vmiss file containing missing data statistics for female subjects</p></li>
+<li><p><strong>hwe_file</strong> (<em>Path</em>) – Path to the .hwe file containing Hardy-Weinberg equilibrium test results</p></li>
+<li><p><strong>y_axis_cap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum value for y-axis in histograms. If None, automatically determined.
+Default is 100.</p></li>
+<li><p><strong>missing_data_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold for missing data rate visualization (vertical line). Default is 0.2.</p></li>
+<li><p><strong>hwe_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – P-value threshold for Hardy-Weinberg equilibrium test (vertical line).
+Default is 5e-8.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If any of the input files don’t exist</p></li>
+<li><p><strong>pd.errors.EmptyDataError</strong> – If input files are empty or malformed</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Creates ‘missing_data_male.svg’ and ‘missing_data_female.svg’ plots</p></li>
+<li><p>Creates ‘hwe-histogram.svg’ plot</p></li>
+<li><p>All plots are saved in SVG format with 600 DPI resolution</p></li>
+<li><p>Threshold lines are displayed in red with dashed style</p></li>
+</ul>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="id14">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.variant_qc.</span></span><span class="sig-name descname"><span class="pre">VariantQCCleanUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">clean_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/variant_qc.html#VariantQCCleanUp.clean_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd><p>Remove intermediate files from output directory.</p>
+<p>This method deletes temporary files created during sample QC steps:
+- Files ending with ‘.bed’, ‘.bim’, ‘.fam’, ‘.vmiss’, ‘.smiss’, ‘.nosex’, ‘.missing’, ‘.hwe’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Only removes files if they exist. No error is raised if files are not found.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="PopStructure.html" class="btn btn-neutral float-left" title="Population Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Helpers.html" class="btn btn-neutral float-right" title="Helpers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="AncestryQC.html" class="btn btn-neutral float-left" title="Ancestry QC Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gwas_modules.html" class="btn btn-neutral float-right" title="GWAS Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+    <p>&#169; Copyright 2026, Luis Giraldo González, Amabel Tenghe.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

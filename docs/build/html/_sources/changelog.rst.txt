@@ -1,0 +1,138 @@
+Changelog
+=========
+
+All notable changes to IDEAL-GENOM will be documented in this file.
+
+Version 0.2.0 (Current)
+-----------------------
+
+**Released:** January 2026
+
+**Major Changes:**
+
+- Complete redesign of configuration system from JSON to YAML
+- Unified pipeline framework with step-based execution
+- New command-line interface with subcommands (run, validate, template)
+- Package renamed from ideal-genom-qc to ideal-genom
+
+**New Features:**
+
+- **GWAS Pipeline**: Complete GWAS workflow with GLM and GLMM support
+- **VCF Processing**: Post-imputation VCF processing and PLINK conversion
+- **Population Analysis**: Enhanced population structure tools (PCA, UMAP, t-SNE, Fst)
+- **Pipeline Executor**: Automated pipeline execution with dependency management
+- **Configuration Validation**: Built-in YAML configuration validation
+- **Variable Substitution**: Support for dynamic variable references in configurations
+
+**Improvements:**
+
+- Enhanced error handling and logging
+- Improved memory management for large datasets
+- Parallel processing support across all modules
+- Better documentation with comprehensive examples
+- Rich reporting and visualization capabilities
+- Docker support with pre-configured environment
+
+**API Changes:**
+
+- YAML configuration replaces JSON configuration files
+- New Python API with consistent class interfaces
+- Module reorganization: ``ideal_genom.qc``, ``ideal_genom.gwas``, ``ideal_genom.post_imputation``
+- Simplified class initialization patterns
+
+**Bug Fixes:**
+
+- Fixed kinship calculation memory issues
+- Improved VCF parsing for large files
+- Corrected reference genome download paths
+- Fixed PCA projection edge cases
+
+**Dependencies:**
+
+- Python 3.11+ required (up from 3.8+)
+- PLINK 2.0 now required alongside PLINK 1.9
+- GCTA 1.95.0 or higher
+- BCFtools 1.10+ for VCF processing
+
+Version 0.1.0
+-------------
+
+**Released:** 2024
+
+**Initial Release:**
+
+- Basic QC pipeline (Sample QC, Ancestry QC, Variant QC)
+- JSON-based configuration
+- Command-line interface for basic operations
+- Integration with PLINK 1.9
+- 1000 Genomes reference panel support
+- Basic UMAP visualization
+
+Migration Guide (0.1.0 → 0.2.0)
+--------------------------------
+
+**Configuration Files:**
+
+Old (JSON):
+```json
+{
+    "sample_qc": {
+        "mind": 0.1,
+        "maf": 0.01
+    }
+}
+```
+
+New (YAML):
+```yaml
+pipeline:
+  steps:
+    - name: "sample_qc"
+      module: "ideal_genom.qc.sample_qc"
+      class: "SampleQC"
+      execute_params:
+        mind: 0.1
+        maf: 0.01
+```
+
+**Command-Line Interface:**
+
+Old:
+```bash
+python -m ideal_genom_qc \\
+    --path_params parameters.json \\
+    --file_folders paths.json \\
+    --steps steps.json
+```
+
+New:
+```bash
+ideal-genom run --config pipeline.yaml
+```
+
+**Python API:**
+
+Old:
+```python
+from ideal_genom_qc import SampleQC
+
+qc = SampleQC(...)
+qc.run(...)
+```
+
+New:
+```python
+from ideal_genom.qc.sample_qc import SampleQC
+
+qc = SampleQC(...)
+qc.execute_sample_qc_pipeline(...)
+```
+
+For detailed migration instructions, see the :doc:`getting_started` guide.
+
+Contributing
+------------
+
+We welcome contributions! Please see :doc:`contributing` for guidelines.
+
+For bug reports and feature requests, please use our `GitHub Issues <https://github.com/cge-tubingens/ideal-genom-qc/issues>`_.

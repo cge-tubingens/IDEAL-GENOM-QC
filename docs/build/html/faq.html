@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequently Asked Questions &mdash; IDEAL-GENOM-QC v0.1.0</title>
+  <title>Frequently Asked Questions &mdash; IDEAL-GENOM v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=01f34227"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,11 +32,8 @@
           
           
           <a href="index.html" class="icon icon-home">
-            IDEAL-GENOM-QC
+            IDEAL-GENOM
           </a>
-              <div class="version">
-                0.1.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -54,14 +49,15 @@
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qc_pipeline.html">Quality Control Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gwas_pipeline.html">GWAS Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vcf_pipeline.html">VCF Processing Pipeline</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="SampleQC.html">SampleQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="AncestryQC.html">AncestryQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="VariantQC.html">VariantQC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Helpers.html">Helpers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_overview.html">API Overview</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
 <ul class="current">
@@ -79,6 +75,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
         </div>
@@ -87,7 +84,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">IDEAL-GENOM-QC</a>
+          <a href="index.html">IDEAL-GENOM</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -107,26 +104,27 @@
              
   <section id="frequently-asked-questions">
 <h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Link to this heading"></a></h1>
-<p>This page answers common questions about using IDEAL-GENOM-QC. If you don’t find your answer here, please check the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting Guide</span></a> guide or open an issue on GitHub.</p>
+<p>This page answers common questions about using IDEAL-GENOM. If you don’t find your answer here, please check the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting Guide</span></a> guide or open an issue on GitHub.</p>
 <section id="general-questions">
 <h2>General Questions<a class="headerlink" href="#general-questions" title="Link to this heading"></a></h2>
-<p><strong>Q: What types of genomic data does IDEAL-GENOM-QC support?</strong></p>
-<p>A: IDEAL-GENOM-QC primarily works with human genomic data in PLINK binary format (.bed, .bim, .fam files). It supports:</p>
+<p><strong>Q: What types of genomic data does IDEAL-GENOM support?</strong></p>
+<p>A: IDEAL-GENOM primarily works with human genomic data in PLINK binary format (.bed, .bim, .fam files) and VCF format. It supports:</p>
 <ul class="simple">
 <li><p>SNP array data (e.g., Illumina, Affymetrix)</p></li>
+<li><p>Imputed genotype data (VCF from TOPMed, Michigan Imputation Server)</p></li>
 <li><p>Whole genome sequencing (WGS) data</p></li>
 <li><p>Whole exome sequencing (WES) data</p></li>
 <li><p>Targeted sequencing panels</p></li>
 </ul>
 <p>The pipeline is optimized for autosomal chromosomes but can handle X and Y chromosomes with appropriate configuration.</p>
 <p><strong>Q: Which genome builds are supported?</strong></p>
-<p>A: IDEAL-GENOM-QC supports both major human genome builds:</p>
+<p>A: IDEAL-GENOM supports both major human genome builds:</p>
 <ul class="simple">
-<li><p>GRCh37/hg19 (use <code class="docutils literal notranslate"><span class="pre">--built</span> <span class="pre">37</span></code>)</p></li>
-<li><p>GRCh38/hg38 (use <code class="docutils literal notranslate"><span class="pre">--built</span> <span class="pre">38</span></code>, default)</p></li>
+<li><p>GRCh37/hg19 (use <code class="docutils literal notranslate"><span class="pre">build:</span> <span class="pre">&quot;37&quot;</span></code> in YAML config)</p></li>
+<li><p>GRCh38/hg38 (use <code class="docutils literal notranslate"><span class="pre">build:</span> <span class="pre">&quot;38&quot;</span></code> in YAML config, recommended)</p></li>
 </ul>
 <p>Reference files and LD regions are automatically adjusted based on the build you specify.</p>
-<p><strong>Q: Can I use IDEAL-GENOM-QC for non-human data?</strong></p>
+<p><strong>Q: Can I use IDEAL-GENOM for non-human data?</strong></p>
 <p>A: The current version is specifically designed for human genomic data. While the underlying algorithms could theoretically work with other species, the reference panels, LD regions, and ancestry databases are human-specific.</p>
 </section>
 <section id="installation-and-setup">
@@ -135,11 +133,11 @@
 <p>A: Different QC steps require different PLINK versions:</p>
 <ul class="simple">
 <li><p>PLINK 1.9: Core QC operations, kinship analysis, basic statistics</p></li>
-<li><p>PLINK 2.0: Advanced features, faster processing for large datasets, some specific calculations</p></li>
+<li><p>PLINK 2.0: Advanced features, faster VCF processing, improved performance for large datasets</p></li>
 </ul>
 <p>Both tools complement each other and are required for the full pipeline functionality.</p>
-<p><strong>Q: Can I install IDEAL-GENOM-QC without admin privileges?</strong></p>
-<p>A: Yes! You can install IDEAL-GENOM-QC in user space:</p>
+<p><strong>Q: Can I install IDEAL-GENOM without admin privileges?</strong></p>
+<p>A: Yes! You can install IDEAL-GENOM in user space:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install to user directory</span>
 pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>ideal-genom-qc
 
@@ -220,12 +218,16 @@ mv<span class="w"> </span>plink<span class="w"> </span>~/local/bin/
 <p>Monitor the QC plots and logs to ensure reasonable filtering.</p>
 <p><strong>Q: Can I run only specific QC steps?</strong></p>
 <p>A: Yes! Use the <code class="docutils literal notranslate"><span class="pre">steps.json</span></code> configuration file:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;ancestry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="err">Skip</span><span class="w"> </span><span class="err">a</span><span class="kc">n</span><span class="err">ces</span><span class="kc">tr</span><span class="err">y</span><span class="w"> </span><span class="err">QC</span>
-<span class="w">    </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">     </span><span class="err">#</span><span class="w"> </span><span class="err">Ru</span><span class="kc">n</span><span class="w"> </span><span class="err">sample</span><span class="w"> </span><span class="err">QC</span>
-<span class="w">    </span><span class="nt">&quot;variant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="err">Ru</span><span class="kc">n</span><span class="w"> </span><span class="err">varia</span><span class="kc">nt</span><span class="w"> </span><span class="err">QC</span>
-<span class="w">    </span><span class="nt">&quot;umap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="err">Skip</span><span class="w"> </span><span class="err">UMAP</span><span class="w"> </span><span class="err">plo</span><span class="kc">tt</span><span class="err">i</span><span class="kc">n</span><span class="err">g</span>
-<span class="p">}</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">pipeline</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sample_qc&quot;</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ancestry_qc&quot;</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Skip ancestry QC</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;variant_qc&quot;</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;umap_plot&quot;</span>
+<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Skip UMAP plotting</span>
 </pre></div>
 </div>
 <p>Note that some steps depend on others (e.g., variant QC needs ancestry QC results).</p>
@@ -295,16 +297,16 @@ plink<span class="w"> </span>--bfile<span class="w"> </span>mydata<span class="w
 </ol>
 <p><strong>Q: I’m getting “out of memory” errors. What should I do?</strong></p>
 <p>A: Memory issues can be addressed by:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;sample_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;ind_pair&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">],</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="err">Larger</span><span class="w"> </span><span class="err">LD</span><span class="w"> </span><span class="err">wi</span><span class="kc">n</span><span class="err">dows</span>
-<span class="w">        </span><span class="nt">&quot;chunk_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span><span class="w">           </span><span class="err">#</span><span class="w"> </span><span class="err">Process</span><span class="w"> </span><span class="err">i</span><span class="kc">n</span><span class="w"> </span><span class="err">smaller</span><span class="w"> </span><span class="err">chu</span><span class="kc">n</span><span class="err">ks</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;ancestry_qc&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;pca&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="err">Fewer</span><span class="w"> </span><span class="err">PCs</span>
-<span class="w">        </span><span class="nt">&quot;maf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span><span class="w">                  </span><span class="err">#</span><span class="w"> </span><span class="err">Higher</span><span class="w"> </span><span class="err">MAF</span><span class="w"> </span><span class="kc">t</span><span class="err">hreshold</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">pipeline</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sample_qc&quot;</span>
+<span class="w">      </span><span class="nt">run_params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ind_pair</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">200</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.2</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># Larger LD windows</span>
+<span class="w">        </span><span class="nt">chunk_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w">          </span><span class="c1"># Process in smaller chunks</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ancestry_qc&quot;</span>
+<span class="w">      </span><span class="nt">run_params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">        </span><span class="c1"># Fewer PCs</span>
+<span class="w">        </span><span class="nt">maf</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">     </span><span class="c1"># Higher MAF threshold</span>
 </pre></div>
 </div>
 <p>Or process chromosomes separately:</p>
@@ -479,7 +481,7 @@ python<span class="w"> </span>-m<span class="w"> </span>ideal_genom_qc<span clas
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Luis Giraldo Gonzalez Ricardo, Amabel Tenghe, and Ashwin Ashok Kumar Sreelatha.</p>
+    <p>&#169; Copyright 2026, Luis Giraldo González, Amabel Tenghe.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

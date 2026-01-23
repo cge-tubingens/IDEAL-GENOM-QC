@@ -1,97 +1,119 @@
-.. ideal-genome-qc documentation master file, created by
-   sphinx-quickstart on Fri Apr 11 15:12:15 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. IDEAL-GENOM documentation master file
 
-IDEAL-GENOM-QC Documentation
-============================
+IDEAL-GENOM Documentation
+==========================
 
 .. image:: https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest
    :target: https://ideal-genom-qc.readthedocs.io/en/latest/
    :alt: Documentation Status
 
-.. image:: https://img.shields.io/pypi/v/ideal-genom-qc.svg
-   :target: https://pypi.org/project/ideal-genom-qc/
+.. image:: https://img.shields.io/pypi/v/ideal-genom.svg
+   :target: https://pypi.org/project/ideal-genom/
    :alt: PyPI version
 
-**IDEAL-GENOM-QC** is a comprehensive Python library designed for performing automated and reproducible quality control (QC) on human genomic data, specifically tailored for case-control studies. This package serves as a sophisticated wrapper around PLINK tools, encapsulating years of research expertise from CGE Tübingen.
+**IDEAL-GENOM** is a comprehensive Python package for automated, reproducible analysis of human genotype data. It provides end-to-end pipelines for genomic quality control (QC), post-imputation VCF processing, and genome-wide association studies (GWAS). The package wraps years of research expertise from CGE Tübingen, integrating PLINK 1.9/2.0, GCTA, and BCFtools with rich reporting and visualizations.
 
-🎯 **Key Features**
-------------------
+Version: **0.2.0**
 
-✨ **Comprehensive QC Pipeline**
-   - **Sample QC**: Automated sample quality assessment and filtering
-   - **Ancestry QC**: Population structure analysis and outlier detection
-   - **Variant QC**: SNP-level quality control and filtering
-   - **Visualization**: Rich plotting capabilities for QC reporting
+🎯 Key Features
+---------------
 
-🔬 **Advanced Analytics**
-   - **PCA Analysis**: Principal Component Analysis for population structure
-   - **UMAP Plotting**: Modern dimensionality reduction for data exploration
-   - **Kinship Analysis**: Relationship detection and handling
-   - **Sex Check**: Automated sex verification from genetic data
+**Comprehensive Pipelines**
+   - **Genomic QC**: Sample QC, Ancestry QC, and Variant QC for case-control studies
+   - **GWAS Analysis**: Generalized Linear Models (GLM) and Mixed Models (GLMM)
+   - **VCF Processing**: Post-imputation filtering, normalization, and conversion to PLINK
+   - **Population Structure**: FST statistics, PCA, UMAP visualization, and ancestry projection
 
-🛠️ **User-Friendly Design**
-   - **Minimal Configuration**: Ready-to-use with sensible defaults
-   - **Flexible Parameters**: Easily customizable for different studies
-   - **Multiple Interfaces**: Command-line, Python API, and Jupyter notebooks
-   - **Docker Support**: Containerized deployment option
+**Advanced Analytics**
+   - **Sample Quality Control**: Missingness, sex verification, heterozygosity, relatedness (kinship/IBD)
+   - **Ancestry Analysis**: Population stratification detection with 1000 Genomes reference
+   - **Variant Filtering**: Hardy-Weinberg equilibrium, MAF, genotype rate, differential missingness
+   - **GWAS Tools**: Association testing, top-hits extraction, gene annotation (Ensembl/RefSeq)
+   - **Dimensionality Reduction**: PCA and UMAP for population structure visualization
 
-📊 **Rich Reporting**
-   - **Automated Plots**: Publication-ready visualizations
-   - **Quality Metrics**: Comprehensive QC statistics
-   - **Clean Data Output**: PLINK-formatted results ready for GWAS
+**Modern Design**
+   - **YAML Configuration**: Single configuration file with clear, hierarchical structure
+   - **Flexible Pipeline System**: Enable/disable steps, customize parameters per analysis
+   - **Multiple Interfaces**: Command-line tool, Python API, Jupyter notebooks
+   - **Docker Support**: Pre-configured container with all genomic tools installed
+   - **Automated Workflows**: Pipeline executor handles dependencies and data flow
+   - **Rich Reporting**: Publication-ready plots and comprehensive QC metrics
+
+**Modern Design**
+   - **YAML Configuration**: Single configuration file with clear, hierarchical structure
+   - **Flexible Pipeline System**: Enable/disable steps, customize parameters per analysis
+   - **Multiple Interfaces**: Command-line tool, Python API, Jupyter notebooks
+   - **Docker Support**: Pre-configured container with all genomic tools installed
+   - **Automated Workflows**: Pipeline executor handles dependencies and data flow
+   - **Rich Reporting**: Publication-ready plots and comprehensive QC metrics
+
+**Developer Friendly**
+   - **Reproducible**: All steps, parameters, and outputs logged
+   - **Extensible**: Modular architecture for adding custom analysis steps
+   - **Well Documented**: Comprehensive guides, API reference, and examples
+   - **Type Hints**: Full type annotations for better IDE support
 
 Quick Start
 -----------
 
 **Installation**
 
-Install from PyPI (recommended for stable version):
-
 .. code-block:: bash
 
-    pip install ideal-genom-qc
-
-Or install the development version:
-
-.. code-block:: bash
-
-    git clone https://github.com/cge-tubingens/IDEAL-GENOM-QC.git
-    cd IDEAL-GENOM-QC
-    poetry install
+   pip install ideal-genom
 
 **Basic Usage**
 
 .. code-block:: bash
 
-    # Run the complete QC pipeline
-    python -m ideal_genom_qc --path_params config/parameters.json \
-                             --file_folders config/paths.json \
-                             --steps config/steps.json \
-                             --recompute-merge true \
-                             --built 38
+   # Generate a configuration template
+   ideal-genom template --output my_pipeline.yaml
+   
+   # Edit the configuration file to match your data
+   nano my_pipeline.yaml
+   
+   # Validate your configuration
+   ideal-genom validate --config my_pipeline.yaml
+   
+   # Run the pipeline
+   ideal-genom run --config my_pipeline.yaml
 
 **Python API**
 
 .. code-block:: python
 
-    from ideal_genom_qc import SampleQC, AncestryQC, VariantQC
-    
-    # Initialize sample QC
-    sample_qc = SampleQC(
-        input_path="data/input",
-        input_name="mydata",
-        output_path="data/output",
-        output_name="clean_data",
-        high_ld_file="data/high_ld_regions.txt"
-    )
-    
-    # Run QC pipeline
-    sample_qc.run_sample_qc()
+   from ideal_genom.core.config import load_config
+   from ideal_genom.core.pipeline import PipelineExecutor
+   
+   # Load configuration
+   config = load_config("my_pipeline.yaml")
+   
+   # Create and execute pipeline
+   executor = PipelineExecutor(config)
+   executor.execute()
+
+Available Pipelines
+-------------------
+
+**QC Pipeline** - Quality control for case-control studies
+   1. Sample QC: Individual-level quality control
+   2. Ancestry QC: Population structure and outlier detection
+   3. Variant QC: SNP-level quality control
+   4. Population Visualization: UMAP/t-SNE plots
+
+**GWAS Pipeline** - Genome-wide association analysis
+   1. Preparatory: LD pruning and PCA decomposition
+   2. GLM Analysis: Fixed effects association testing
+   3. GLMM Analysis: Mixed model with genetic relationship matrix
+   4. Annotation: Gene mapping and functional annotation
+
+**VCF Pipeline** - Post-imputation processing
+   1. VCF Processing: Filter, normalize, annotate, concatenate
+   2. PLINK Conversion: Convert to PLINK binary format
+   3. Quality filtering: R² threshold, multiallelic handling
 
 Documentation Contents
-======================
+----------------------
 
 .. toctree::
    :maxdepth: 2
@@ -101,17 +123,20 @@ Documentation Contents
    getting_started
    configuration
    examples
+   
+.. toctree::
+   :maxdepth: 2
+   :caption: Pipelines
+
+   qc_pipeline
+   gwas_pipeline
+   vcf_pipeline
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
-
-   SampleQC
-   AncestryQC
-   PopStructure
-   VariantQC
-   Helpers
-   get_references
+   
+   api_overview
 
 .. toctree::
    :maxdepth: 1
@@ -120,6 +145,46 @@ Documentation Contents
    faq
    troubleshooting
    contributing
+   changelog
+
+Supported Tools
+---------------
+
+IDEAL-GENOM integrates the following genomic analysis tools:
+
+- **PLINK 1.9**: Classic PLINK for QC and association analysis
+- **PLINK 2.0**: Modern version with improved performance (AVX2 optimized)
+- **GCTA**: Genetic relationship matrix and mixed model analysis
+- **BCFtools**: VCF manipulation and quality filtering
+
+These tools are automatically used by the pipeline and must be installed separately or use the provided Docker image.
+
+Citation
+--------
+
+If you use IDEAL-GENOM in your research, please cite:
+
+.. code-block:: bibtex
+
+   @software{ideal_genom_2026,
+     title = {IDEAL-GENOM: Comprehensive Genomic Analysis Pipeline},
+     author = {Giraldo González, Luis and Tenghe, Amabel},
+     year = {2026},
+     version = {0.2.0},
+     url = {https://github.com/cge-tubingens/ideal-genom-qc}
+   }
+
+Getting Help
+------------
+
+- **Documentation**: https://ideal-genom-qc.readthedocs.io/
+- **Issues**: https://github.com/cge-tubingens/cge-comrare-pipeline/issues
+- **Examples**: See the :doc:`examples` page for complete workflows
+
+License
+-------
+
+IDEAL-GENOM is released under the MIT License. See the LICENSE file in the repository for details.
 
 Indices and tables
 ==================
