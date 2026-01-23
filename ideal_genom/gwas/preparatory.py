@@ -127,15 +127,15 @@ class Preparatory:
             if ld_fetcher.ld_regions is None:
                 raise FileNotFoundError("Could not fetch high LD regions file")
 
-            high_ld_file = ld_fetcher.ld_regions
-            logger.info(f"High LD file fetched from the package and saved at {high_ld_file}")
+            high_ld_regions_file = ld_fetcher.ld_regions
+            logger.info(f"High LD file fetched from the package and saved at {high_ld_regions_file}")
 
         self.input_path   = input_path
         self.output_path  = output_path
         self.input_name   = input_name
         self.output_name  = output_name
         self.build        = build
-        self.high_ld_file = high_ld_file
+        self.high_ld_regions_file = high_ld_regions_file
 
         # create results folder
         self.results_dir = self.output_path / 'preparatory'
@@ -231,7 +231,7 @@ class Preparatory:
             '--maf', str(maf),
             '--geno', str(geno),
             '--hwe', str(hwe),
-            '--exclude', str(self.high_ld_file),
+            '--exclude', str(self.high_ld_regions_file),
             '--indep-pairwise', str(ind_pair[0]), str(ind_pair[1]), str(ind_pair[2]),
             '--threads', str(threads),
             '--memory', str(memory),
