@@ -6,9 +6,9 @@ import pandas as pd
 
 from pathlib import Path
 
-from ideal_genom.utilities.Helpers import shell_do
+from ..core.executor import shell_do
 from ..core.get_references import FetcherLDRegions, Fetcher1000Genome
-from ideal_genom.qc.ancestry_qc import ReferenceGenomicMerger
+from ..qc.ancestry_qc import ReferenceGenomicMerger
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
