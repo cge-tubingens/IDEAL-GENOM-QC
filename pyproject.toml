@@ -35,7 +35,7 @@ numpy = "<2"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0"
-sphinx-rtd-theme = "^2.0"
+sphinx-rtd-theme = "^3.1"
 
 [tool.poetry.scripts]
 ideal-genom = "ideal_genom.__main__:main"
