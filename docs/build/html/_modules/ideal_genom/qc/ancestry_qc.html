@@ -5,15 +5,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom.qc.ancestry_qc &mdash; IDEAL-GENOM v0.2.0</title>
+  <title>ideal_genom.qc.ancestry_qc &mdash; IDEAL-GENOM v1.0.0</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -107,19 +107,24 @@
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ReferenceGenomicMerger">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReferenceGenomicMerger</span><span class="p">:</span>
 
-<div class="viewcode-block" id="ReferenceGenomicMerger.__init__">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">high_ld_regions_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reference_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">high_ld_regions_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">reference_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize ReferenceGenomicMerger class.</span>
-<span class="sd">        </span>
-<span class="sd">        This class performs reference-study data merging for genetic data by harmonizing </span>
+
+<span class="sd">        This class performs reference-study data merging for genetic data by harmonizing</span>
 <span class="sd">        study samples with reference populations.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        input_path : Path</span>
@@ -136,7 +141,7 @@
 <span class="sd">            Dictionary containing paths to reference population files</span>
 <span class="sd">        build : str, default=&#39;38&#39;</span>
 <span class="sd">            Genome build version (&#39;37&#39; or &#39;38&#39;)</span>
-<span class="sd">        </span>
+
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        TypeError</span>
@@ -145,7 +150,7 @@
 <span class="sd">            If genome build version is not &#39;37&#39; or &#39;38&#39;</span>
 <span class="sd">        FileNotFoundError</span>
 <span class="sd">            If required input files/directories do not exist</span>
-<span class="sd">        </span>
+
 <span class="sd">        Attributes</span>
 <span class="sd">        ----------</span>
 <span class="sd">        reference_AC_GT_filtered : Path or None</span>
@@ -165,6 +170,7 @@
 <span class="sd">        reference_cleaned : Path or None</span>
 <span class="sd">            Final cleaned reference data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;input_path should be a Path object&quot;</span><span class="p">)</span>
@@ -221,11 +227,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reference_fixed_chr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reference_fixed_pos</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reference_flipped</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reference_cleaned</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_cleaned</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_rename_snpid">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_rename_snpid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_rename_snpid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute the SNP ID renaming process using PLINK2.</span>
@@ -257,11 +260,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_name</span> <span class="o">+</span> <span class="s1">&#39;-renamed&#39;</span><span class="p">))</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span>
 
-
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_filter_prob_snps">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_filter_prob_snps">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_filter_prob_snps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Filter problematic SNPs (A/T and C/G) from both study and reference data.</span>
@@ -341,11 +341,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_AC_GT_filtered</span><span class="p">)</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_ld_pruning">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_ld_pruning">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_ld_pruning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind_pair</span><span class="p">:</span><span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute linkage disequilibrium (LD) pruning on study and reference data.</span>
@@ -432,11 +429,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pruned_reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_files</span><span class="p">[</span><span class="s1">&#39;bim&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">stem</span><span class="o">+</span><span class="s1">&#39;-pruned&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pruned_study</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="o">+</span><span class="s1">&#39;-pruned&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_fix_chromosome_mismatch">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_fix_chromosome_mismatch">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_fix_chromosome_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fix chromosome mismatch between study data and reference panel.</span>
@@ -501,11 +495,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_fixed_chr</span><span class="p">)</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_fix_position_mismatch">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_fix_position_mismatch">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_fix_position_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fix position mismatches between study data and reference panel.</span>
@@ -567,11 +558,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_fixed_pos</span><span class="p">)</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_fix_allele_flip">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_fix_allele_flip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_fix_allele_flip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute the allele flipping process between study data and reference panel.</span>
@@ -632,11 +620,8 @@
             <span class="s1">&#39;--threads&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_threads</span><span class="p">),</span>
             <span class="s1">&#39;--make-bed&#39;</span><span class="p">,</span>
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_flipped</span><span class="p">)</span>
-        <span class="p">])</span></div>
+        <span class="p">])</span>
 
-
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_remove_mismatches">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_remove_mismatches">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_remove_mismatches</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove mismatched SNPs from the reference data.</span>
@@ -698,11 +683,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_cleaned</span><span class="p">)</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_merge_data">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_merge_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_merge_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Merge study and reference data using PLINK.</span>
@@ -746,8 +728,7 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_name</span> <span class="o">+</span> <span class="s1">&#39;-merged&#39;</span><span class="p">))</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_filter_non_AT_or_GC_snps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_bim</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -947,8 +928,6 @@
 
         <span class="k">return</span>
     
-<div class="viewcode-block" id="ReferenceGenomicMerger.execute_merging_pipeline">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.ReferenceGenomicMerger.execute_merging_pipeline">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_merging_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind_pair</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute complete reference-study merging pipeline.</span>
@@ -1001,8 +980,7 @@
         
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reference-Study Merging Pipeline completed successfully&quot;</span><span class="p">)</span>
         
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_reference_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1114,15 +1092,10 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">expected_ext</span><span class="p">):</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reference </span><span class="si">{</span><span class="n">file_type</span><span class="si">}</span><span class="s2"> file doesn&#39;t have expected extension &#39;</span><span class="si">{</span><span class="n">expected_ext</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> reference files&quot;</span><span class="p">)</span></div>
-
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> reference files&quot;</span><span class="p">)</span>
     
-<div class="viewcode-block" id="GenomicOutlierAnalyzer">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GenomicOutlierAnalyzer</span><span class="p">:</span>
 
-<div class="viewcode-block" id="GenomicOutlierAnalyzer.__init__">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">merged_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reference_tags</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize GenomicOutlierAnalyzer object with input and output parameters.</span>
@@ -1193,11 +1166,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ancestry_fails</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">population_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-
-<div class="viewcode-block" id="GenomicOutlierAnalyzer.execute_pca">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer.execute_pca">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">maf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform Principal Component Analysis (PCA) on the genetic data using PLINK.</span>
@@ -1263,11 +1233,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_name</span><span class="o">+</span><span class="s1">&#39;-pca.eigenvec&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_name</span><span class="o">+</span><span class="s1">&#39;-pca.eigenval&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="GenomicOutlierAnalyzer.find_ancestry_outliers">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer.find_ancestry_outliers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">find_ancestry_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">fails_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(),</span> <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Identifies ancestry outliers in the dataset based on PCA analysis.</span>
@@ -1377,11 +1344,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ancestry_fails</span> <span class="o">=</span> <span class="n">ancestry_fails</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="GenomicOutlierAnalyzer.execute_drop_ancestry_outliers">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer.execute_drop_ancestry_outliers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_drop_ancestry_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Drop ancestry outliers from the study data by removing samples identified as ancestry outliers</span>
@@ -1435,11 +1399,8 @@
             <span class="s1">&#39;--out&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_name</span><span class="p">))</span>
         <span class="p">])</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
-<div class="viewcode-block" id="GenomicOutlierAnalyzer.execute_outlier_analyzer_pipeline">
-<a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.GenomicOutlierAnalyzer.execute_outlier_analyzer_pipeline">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_outlier_analyzer_pipeline</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> 
         <span class="n">pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
@@ -1521,8 +1482,7 @@
         
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Genomic Outlier Analysis Pipeline completed successfully&quot;</span><span class="p">)</span>
         
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
     
     
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_pca_fails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">df_tags</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
@@ -1754,8 +1714,7 @@
             <span class="n">p_value</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">distances</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">cdist</span><span class="p">(</span><span class="n">X_std</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">mu</span><span class="p">)],</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;minkowski&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_value</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">distances</span></div>
-
+        <span class="k">return</span> <span class="n">distances</span>
 
 <div class="viewcode-block" id="AncestryQC">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQC">[docs]</a>
@@ -1764,8 +1723,8 @@
 <div class="viewcode-block" id="AncestryQC.__init__">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQC.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">high_ld_regions_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reference_files</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span> <span class="n">recompute_merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> <span class="n">rename_snps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize AncestryQC class.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize AncestryQC class.</span>
+<span class="sd">        </span>
 <span class="sd">        This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data</span>
 <span class="sd">        and running principal component analysis.</span>
 
@@ -1791,20 +1750,24 @@
 <span class="sd">        rename_snps: bool (optional): </span>
 <span class="sd">            Whether to rename SNPs to avoid duplicates during merge. Defaults to False.</span>
 <span class="sd">        </span>
-<span class="sd">        Raises:</span>
-<span class="sd">        -------</span>
-<span class="sd">            TypeError: If input arguments are not of expected types</span>
-<span class="sd">            ValueError: If build is not &#39;37&#39; or &#39;38&#39;</span>
-<span class="sd">            FileNotFoundError: If input_path or output_path do not exist</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If input arguments are not of expected types</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If build is not &#39;37&#39; or &#39;38&#39;</span>
+<span class="sd">        FileNotFoundError</span>
+<span class="sd">            If input_path or output_path do not exist</span>
 <span class="sd">        </span>
-<span class="sd">        Note:</span>
+<span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">            Creates the following directory structure under output_path:</span>
-<span class="sd">            - ancestry_qc_results/</span>
-<span class="sd">                - merging/</span>
-<span class="sd">                - plots/ </span>
-<span class="sd">                - fail_samples/</span>
-<span class="sd">                - clean_files/</span>
+<span class="sd">        Creates the following directory structure under output_path:</span>
+<span class="sd">        </span>
+<span class="sd">        - ancestry_qc_results/</span>
+<span class="sd">            - merging/</span>
+<span class="sd">            - plots/ </span>
+<span class="sd">            - fail_samples/</span>
+<span class="sd">            - clean_files/</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
@@ -2345,7 +2308,15 @@
 
 <div class="viewcode-block" id="AncestryQCReport.draw_pca_plot">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQCReport.draw_pca_plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">draw_pca_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;equal&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> <span class="n">exclude_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">plot_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(),</span> <span class="n">plot_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;pca_plot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;svg&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_pca_plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">aspect_ratio</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;equal&#39;</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> 
+        <span class="n">exclude_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+        <span class="n">plot_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(),</span> 
+        <span class="n">plot_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;pca_plot&#39;</span><span class="p">,</span> 
+        <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;svg&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate 2D and 3D PCA plots from eigenvector data and population tags.</span>
 <span class="sd">        This method creates two PCA visualization plots:</span>
@@ -2509,7 +2480,10 @@
     
 <div class="viewcode-block" id="AncestryQCReport.report_pca">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQCReport.report_pca">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">report_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">report_pca</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate PCA report including scree plot and variance explained analysis.</span>
 <span class="sd">        </span>
@@ -2600,7 +2574,11 @@
         <span class="k">return</span></div>
 
     
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_population_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">psam_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">study_fam_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_population_tags</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">psam_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">study_fam_path</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sets population tags for genetic data by combining information from a PSAM file and a study FAM file.</span>
 

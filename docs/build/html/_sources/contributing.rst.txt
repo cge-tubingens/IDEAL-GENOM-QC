@@ -1,5 +1,5 @@
 Contributing Guide
-=================
+==================
 
 We welcome contributions to IDEAL-GENOM-QC! This guide will help you get started with contributing to the project, whether you're fixing bugs, adding features, improving documentation, or helping with testing.
 

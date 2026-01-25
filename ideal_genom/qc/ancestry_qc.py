@@ -18,13 +18,22 @@ logger = logging.getLogger(__name__)
 
 class ReferenceGenomicMerger:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, reference_files: dict, build: str = '38') -> None:
+    def __init__(
+        self,
+        input_path: Path,
+        input_name: str,
+        output_path: Path,
+        output_name: str,
+        high_ld_regions_file: Path,
+        reference_files: dict,
+        build: str = '38'
+    ) -> None:
         """
         Initialize ReferenceGenomicMerger class.
-        
-        This class performs reference-study data merging for genetic data by harmonizing 
+
+        This class performs reference-study data merging for genetic data by harmonizing
         study samples with reference populations.
-        
+
         Parameters
         ----------
         input_path : Path
@@ -41,7 +50,7 @@ class ReferenceGenomicMerger:
             Dictionary containing paths to reference population files
         build : str, default='38'
             Genome build version ('37' or '38')
-        
+
         Raises
         ------
         TypeError
@@ -50,7 +59,7 @@ class ReferenceGenomicMerger:
             If genome build version is not '37' or '38'
         FileNotFoundError
             If required input files/directories do not exist
-        
+
         Attributes
         ----------
         reference_AC_GT_filtered : Path or None
@@ -70,6 +79,7 @@ class ReferenceGenomicMerger:
         reference_cleaned : Path or None
             Final cleaned reference data
         """
+
 
         if not isinstance(input_path, Path):
             raise TypeError("input_path should be a Path object")
@@ -1618,8 +1628,8 @@ class GenomicOutlierAnalyzer:
 class AncestryQC:
 
     def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, build: str = '38', rename_snps: bool = False) -> None:
-        """
-        Initialize AncestryQC class.
+        """Initialize AncestryQC class.
+        
         This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
         and running principal component analysis.
 
@@ -1645,20 +1655,24 @@ class AncestryQC:
         rename_snps: bool (optional): 
             Whether to rename SNPs to avoid duplicates during merge. Defaults to False.
         
-        Raises:
-        -------
-            TypeError: If input arguments are not of expected types
-            ValueError: If build is not '37' or '38'
-            FileNotFoundError: If input_path or output_path do not exist
+        Raises
+        ------
+        TypeError
+            If input arguments are not of expected types
+        ValueError
+            If build is not '37' or '38'
+        FileNotFoundError
+            If input_path or output_path do not exist
         
-        Note:
+        Notes
         -----
-            Creates the following directory structure under output_path:
-            - ancestry_qc_results/
-                - merging/
-                - plots/ 
-                - fail_samples/
-                - clean_files/
+        Creates the following directory structure under output_path:
+        
+        - ancestry_qc_results/
+            - merging/
+            - plots/ 
+            - fail_samples/
+            - clean_files/
         """
 
         if not isinstance(input_path, Path):
@@ -2178,7 +2192,15 @@ class AncestryQCReport:
 
         pass
 
-    def draw_pca_plot(self, reference_pop: str, aspect_ratio: Union[Literal['auto', 'equal'], float], exclude_outliers: bool = False, plot_dir: Path = Path(), plot_name: str = 'pca_plot', format: str = 'svg') -> None:
+    def draw_pca_plot(
+        self, 
+        reference_pop: str, 
+        aspect_ratio: Union[Literal['auto', 'equal'], float], 
+        exclude_outliers: bool = False, 
+        plot_dir: Path = Path(), 
+        plot_name: str = 'pca_plot', 
+        format: str = 'svg'
+    ) -> None:
         """
         Generate 2D and 3D PCA plots from eigenvector data and population tags.
         This method creates two PCA visualization plots:
@@ -2339,7 +2361,10 @@ class AncestryQCReport:
 
         return
     
-    def report_pca(self, threshold: float = 0.01)-> None:
+    def report_pca(
+        self, 
+        threshold: float = 0.01
+    )-> None:
         """
         Generate PCA report including scree plot and variance explained analysis.
         
@@ -2429,7 +2454,11 @@ class AncestryQCReport:
 
         return
     
-    def _set_population_tags(self, psam_path: Path, study_fam_path: Path) -> pd.DataFrame:
+    def _set_population_tags(
+        self, 
+        psam_path: Path, 
+        study_fam_path: Path
+    ) -> pd.DataFrame:
         """
         Sets population tags for genetic data by combining information from a PSAM file and a study FAM file.
 

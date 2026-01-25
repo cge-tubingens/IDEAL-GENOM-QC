@@ -73,60 +73,54 @@ Migration Guide (0.1.0 → 0.2.0)
 
 **Configuration Files:**
 
-Old (JSON):
-```json
-{
-    "sample_qc": {
-        "mind": 0.1,
-        "maf": 0.01
-    }
-}
-```
+Old (JSON)::
 
-New (YAML):
-```yaml
-pipeline:
-  steps:
-    - name: "sample_qc"
-      module: "ideal_genom.qc.sample_qc"
-      class: "SampleQC"
-      execute_params:
-        mind: 0.1
-        maf: 0.01
-```
+    {
+        "sample_qc": {
+            "mind": 0.1,
+            "maf": 0.01
+        }
+    }
+
+New (YAML)::
+
+    pipeline:
+      steps:
+        - name: "sample_qc"
+          module: "ideal_genom.qc.sample_qc"
+          class: "SampleQC"
+          execute_params:
+            mind: 0.1
+            maf: 0.01
 
 **Command-Line Interface:**
 
-Old:
-```bash
-python -m ideal_genom_qc \\
-    --path_params parameters.json \\
-    --file_folders paths.json \\
-    --steps steps.json
-```
+Old::
 
-New:
-```bash
-ideal-genom run --config pipeline.yaml
-```
+    python -m ideal_genom_qc \
+        --path_params parameters.json \
+        --file_folders paths.json \
+        --steps steps.json
+
+New::
+
+    ideal-genom run --config pipeline.yaml
 
 **Python API:**
 
-Old:
-```python
-from ideal_genom_qc import SampleQC
+Old::
 
-qc = SampleQC(...)
-qc.run(...)
-```
+    from ideal_genom_qc import SampleQC
 
-New:
-```python
-from ideal_genom.qc.sample_qc import SampleQC
+    qc = SampleQC(...)
+    qc.run(...)
 
-qc = SampleQC(...)
-qc.execute_sample_qc_pipeline(...)
-```
+New::
+
+    from ideal_genom.qc.sample_qc import SampleQC
+
+    qc = SampleQC(...)
+    qc.execute_sample_qc_pipeline(...)
 
 For detailed migration instructions, see the :doc:`getting_started` guide.
 

@@ -1,5 +1,5 @@
 Troubleshooting Guide
-====================
+=====================
 
 This guide helps you diagnose and resolve common issues when using IDEAL-GENOM-QC. Issues are organized by category for easier navigation.
 

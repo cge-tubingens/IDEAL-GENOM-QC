@@ -34,11 +34,3 @@ Executor
    :members:
    :undoc-members:
    :show-inheritance:
-
-Reference Data
---------------
-
-.. automodule:: ideal_genom.core.get_references
-   :members:
-   :undoc-members:
-   :show-inheritance:
