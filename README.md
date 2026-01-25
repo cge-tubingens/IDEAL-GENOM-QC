@@ -25,16 +25,16 @@ pip install ideal-genom
 Or clone the repository and install locally:
 
 ```bash
-git clone https://github.com/cge-tuebingen/ideal-genom-qc.git
-cd ideal-genom-qc
+git clone https://github.com/LuisGiraldo86/IDEAL-GENOM.git
+cd IDEAL-GENOM
 pip install .
 ```
 
 For Docker usage:
 
 ```bash
-docker build -t ideal-genom-qc .
-docker run -it ideal-genom-qc
+docker build -t ideal-genom .
+docker run -it ideal-genom
 ```
 
 ## Installed Genomic Tools in Docker
@@ -58,7 +58,7 @@ bcftools --help
 You can run these commands interactively by starting a shell in the container:
 
 ```bash
-docker run -it ideal-genom-qc /bin/bash
+docker run -it ideal-genom /bin/bash
 ```
 
 This ensures reproducible and ready-to-use genomic analysis workflows.

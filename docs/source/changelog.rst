@@ -3,7 +3,7 @@ Changelog
 
 All notable changes to IDEAL-GENOM will be documented in this file.
 
-Version 0.2.0 (Current)
+Version 1.0.0 (Current)
 -----------------------
 
 **Released:** January 2026
