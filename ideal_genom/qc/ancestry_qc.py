@@ -1002,10 +1002,19 @@ class ReferenceGenomicMerger:
                     logger.warning(f"Reference {file_type} file doesn't have expected extension '{expected_ext}': {file_path}")
         
         logger.info(f"Successfully validated {len(self.reference_files)} reference files")
-    
+
+
 class GenomicOutlierAnalyzer:
 
-    def __init__(self, input_path: Path, input_name: str, merged_file: Path, reference_tags: Path, output_path: Path, output_name: str) -> None:
+    def __init__(
+        self, 
+        input_path: Path, 
+        input_name: str, 
+        merged_file: Path, 
+        reference_tags: Path, 
+        output_path: Path, 
+        output_name: str
+    ) -> None:
         """
         Initialize GenomicOutlierAnalyzer object with input and output parameters.
 
@@ -1144,7 +1153,15 @@ class GenomicOutlierAnalyzer:
 
         return
     
-    def find_ancestry_outliers(self, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, fails_dir: Path = Path(), distance_metric: Union[str, float] = 'infinity') -> None:
+    def find_ancestry_outliers(
+        self, 
+        ref_threshold: float, 
+        stu_threshold: float, 
+        reference_pop: str, 
+        num_pcs: int = 2, 
+        fails_dir: Path = Path(), 
+        distance_metric: Union[str, float] = 'infinity'
+    ) -> None:
         """
         Identifies ancestry outliers in the dataset based on PCA analysis.
         This method analyzes population structure using principal component analysis (PCA) and identifies
@@ -1392,9 +1409,17 @@ class GenomicOutlierAnalyzer:
         logger.info("Genomic Outlier Analysis Pipeline completed successfully")
         
         return
-    
-    
-    def _find_pca_fails(self, output_path: Path, df_tags: pd.DataFrame, ref_threshold: float, stu_threshold: float, reference_pop: str, num_pcs: int = 2, distance_metric: Union[str, float] = 'infinity') -> Path:
+
+    def _find_pca_fails(
+        self, 
+        output_path: Path, 
+        df_tags: pd.DataFrame, 
+        ref_threshold: float, 
+        stu_threshold: float, 
+        reference_pop: str, 
+        num_pcs: int = 2, 
+        distance_metric: Union[str, float] = 'infinity'
+    ) -> Path:
         """
         Identifies ancestry outliers based on PCA results using distance-based thresholds:
         one for reference population and another for study population.
@@ -1625,9 +1650,21 @@ class GenomicOutlierAnalyzer:
 
         return distances
 
+
 class AncestryQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, reference_files: dict = dict(), recompute_merge: bool = True, build: str = '38', rename_snps: bool = False) -> None:
+    def __init__(
+        self, 
+        input_path: Path, 
+        input_name: str, 
+        output_path: Path, 
+        output_name: str, 
+        high_ld_regions_file: Path, 
+        reference_files: dict = dict(), 
+        recompute_merge: bool = True, 
+        build: str = '38', 
+        rename_snps: bool = False
+    ) -> None:
         """Initialize AncestryQC class.
         
         This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data
@@ -1953,7 +1990,16 @@ class AncestryQC:
                 if not file_path.name.endswith(expected_ext):
                     logger.warning(f"Reference {file_type} file doesn't have expected extension '{expected_ext}': {file_path}")
 
-    def execute_pca(self, ref_population: str, pca: int = 10, maf: float = 0.01, num_pca: int = 10, ref_threshold: float = 4, stu_threshold: float = 4, distance_metric: Union[str, float] = 'infinity') -> None:
+    def execute_pca(
+        self, 
+        ref_population: str, 
+        pca: int = 10, 
+        maf: float = 0.01, 
+        num_pca: int = 10, 
+        ref_threshold: float = 4, 
+        stu_threshold: float = 4, 
+        distance_metric: Union[str, float] = 'infinity'
+    ) -> None:
         """
         Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.
 
@@ -2107,10 +2153,18 @@ class AncestryQC:
         logger.info("=" * 70)
 
         return
-    
+
+
 class AncestryQCReport:
 
-    def __init__(self, output_path: Path,  einvectors: Path,  eigenvalues: Path, ancestry_fails: Path, population_tags: Path) -> None:
+    def __init__(
+        self, 
+        output_path: Path,  
+        einvectors: Path,  
+        eigenvalues: Path, 
+        ancestry_fails: Path, 
+        population_tags: Path
+    ) -> None:
         """
         Initialize ReportAncestryCheck class for generating ancestry QC reports and visualizations.
         
@@ -2361,10 +2415,7 @@ class AncestryQCReport:
 
         return
     
-    def report_pca(
-        self, 
-        threshold: float = 0.01
-    )-> None:
+    def report_pca(self, threshold: float = 0.01)-> None:
         """
         Generate PCA report including scree plot and variance explained analysis.
         
