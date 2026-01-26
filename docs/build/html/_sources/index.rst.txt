@@ -3,8 +3,8 @@
 IDEAL-GENOM Documentation
 ==========================
 
-.. image:: https://readthedocs.org/projects/ideal-genom-qc/badge/?version=latest
-   :target: https://ideal-genom-qc.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/verus-ideal-genom/badge/?version=latest
+   :target: https://verus-ideal-genom.readthedocs.io/en/latest/
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/pypi/v/ideal-genom.svg
