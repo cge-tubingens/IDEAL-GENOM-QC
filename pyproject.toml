@@ -33,6 +33,7 @@ gtfparse = ">=2.5.0,<3.0.0"
 pyensembl = ">=2.3.13,<3.0.0"
 numpy = "<2"
 textalloc = "^1.2.1"
+openpyxl = "^3.1.5"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0"
