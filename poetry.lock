@@ -3599,6 +3599,24 @@ test = ["pre-commit", "pytest (>=7.0)", "pytest-timeout"]
 typing = ["mypy (>=1.6,<2.0)", "traitlets (>=5.11.1)"]
 
 [[package]]
+name = "textalloc"
+version = "1.2.1"
+description = "Efficient Text Allocation in matplotlib using NumPy Broadcasting"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "textalloc-1.2.1-py3-none-any.whl", hash = "sha256:8dda88a151ded1531fde0660051254647a3df2a764ffc7e7bafbd44425e49f55"},
+    {file = "textalloc-1.2.1.tar.gz", hash = "sha256:297ab2bcc249521ce9a88c44a16092c040b1e53ad017f745cbd5c9a05521fb9e"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+packaging = "*"
+tqdm = {version = "*", markers = "python_version > \"3.6\""}
+
+[[package]]
 name = "threadpoolctl"
 version = "3.5.0"
 description = "threadpoolctl"
@@ -3975,4 +3993,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.13"
-content-hash = "4798065cc78dfbbb7a20731c2ac8fe599fef463721793e90d76efe204efcbd88"
+content-hash = "fc34f6b9b77afb00b8a8fc23135970721a76cb22fedc1f9bbbe970f3c22559fe"
