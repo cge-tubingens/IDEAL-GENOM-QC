@@ -13,8 +13,8 @@
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../_static/documentation_options.js?v=8d563738"></script>
-      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -1093,10 +1093,19 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reference </span><span class="si">{</span><span class="n">file_type</span><span class="si">}</span><span class="s2"> file doesn&#39;t have expected extension &#39;</span><span class="si">{</span><span class="n">expected_ext</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully validated </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> reference files&quot;</span><span class="p">)</span>
-    
+
+
 <span class="k">class</span><span class="w"> </span><span class="nc">GenomicOutlierAnalyzer</span><span class="p">:</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">merged_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reference_tags</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">merged_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">reference_tags</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize GenomicOutlierAnalyzer object with input and output parameters.</span>
 
@@ -1235,7 +1244,15 @@
 
         <span class="k">return</span>
     
-    <span class="k">def</span><span class="w"> </span><span class="nf">find_ancestry_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">fails_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(),</span> <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_ancestry_outliers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+        <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+        <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> 
+        <span class="n">fails_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(),</span> 
+        <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Identifies ancestry outliers in the dataset based on PCA analysis.</span>
 <span class="sd">        This method analyzes population structure using principal component analysis (PCA) and identifies</span>
@@ -1483,9 +1500,17 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Genomic Outlier Analysis Pipeline completed successfully&quot;</span><span class="p">)</span>
         
         <span class="k">return</span>
-    
-    
-    <span class="k">def</span><span class="w"> </span><span class="nf">_find_pca_fails</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">df_tags</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_pca_fails</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">df_tags</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> 
+        <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+        <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+        <span class="n">reference_pop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">num_pcs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> 
+        <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Identifies ancestry outliers based on PCA results using distance-based thresholds:</span>
 <span class="sd">        one for reference population and another for study population.</span>
@@ -1716,13 +1741,25 @@
 
         <span class="k">return</span> <span class="n">distances</span>
 
+
 <div class="viewcode-block" id="AncestryQC">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQC">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AncestryQC</span><span class="p">:</span>
 
 <div class="viewcode-block" id="AncestryQC.__init__">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQC.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">high_ld_regions_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reference_files</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span> <span class="n">recompute_merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> <span class="n">rename_snps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">input_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">input_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">high_ld_regions_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">reference_files</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span> 
+        <span class="n">recompute_merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+        <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> 
+        <span class="n">rename_snps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize AncestryQC class.</span>
 <span class="sd">        </span>
 <span class="sd">        This class performs ancestry quality control analysis on genetic data by merging it with 1000 Genomes reference data</span>
@@ -2054,7 +2091,16 @@
 
 <div class="viewcode-block" id="AncestryQC.execute_pca">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQC.execute_pca">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">execute_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_population</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">maf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">num_pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_pca</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">ref_population</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+        <span class="n">pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+        <span class="n">maf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> 
+        <span class="n">num_pca</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> 
+        <span class="n">ref_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> 
+        <span class="n">stu_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> 
+        <span class="n">distance_metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;infinity&#39;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs Principal Component Analysis (PCA) on genetic data and identifies ancestry outliers.</span>
 
@@ -2213,14 +2259,22 @@
         <span class="k">return</span></div>
 </div>
 
-    
+
+
 <div class="viewcode-block" id="AncestryQCReport">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQCReport">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AncestryQCReport</span><span class="p">:</span>
 
 <div class="viewcode-block" id="AncestryQCReport.__init__">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQCReport.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>  <span class="n">einvectors</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>  <span class="n">eigenvalues</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">ancestry_fails</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">population_tags</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>  
+        <span class="n">einvectors</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>  
+        <span class="n">eigenvalues</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">ancestry_fails</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+        <span class="n">population_tags</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize ReportAncestryCheck class for generating ancestry QC reports and visualizations.</span>
 <span class="sd">        </span>
@@ -2480,10 +2534,7 @@
     
 <div class="viewcode-block" id="AncestryQCReport.report_pca">
 <a class="viewcode-back" href="../../../AncestryQC.html#ideal_genom.qc.ancestry_qc.AncestryQCReport.report_pca">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">report_pca</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> 
-        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
-    <span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">report_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate PCA report including scree plot and variance explained analysis.</span>
 <span class="sd">        </span>

@@ -22,6 +22,9 @@ IDEAL-GENOM is organized into several functional modules:
 **Population Modules** (``ideal_genom.population``)
    - :doc:`PopStructure` - FST statistics and PCA projection
 
+**Visualization Modules** (``ideal_genom.visualizations``)
+   - :doc:`visualization_modules` - Manhattan, Miami, QQ, beta-beta, trumpet plots, and zoom heatmaps
+
 **Core Modules** (``ideal_genom.core``)
    - :doc:`core_modules` - Pipeline framework, configuration, CLI
 
@@ -55,6 +58,12 @@ Common Imports
    from ideal_genom.population.fst_stats import FstSummary
    from ideal_genom.population.projection import PCAReduction, UMAPReduction, TSNEReduction
    from ideal_genom.population.projection import DimensionalityReductionPipeline
+   
+   # Visualization modules
+   from ideal_genom.visualizations.manhattan_type import manhattan, miami
+   from ideal_genom.visualizations.plots import qqplot_draw, beta_beta_plot
+   from ideal_genom.visualizations.plots import trumpet_plot_binary, trumpet_plot_quantitative
+   from ideal_genom.visualizations.zoom_heatmap import create_zoom_heatmap
    
    # Core framework
    from ideal_genom.core.config import load_config
@@ -146,6 +155,7 @@ Index
    gwas_modules
    vcf_modules
    PopStructure
+   visualization_modules
    core_modules
    Helpers
    get_references

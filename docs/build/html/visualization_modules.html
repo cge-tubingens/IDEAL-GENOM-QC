@@ -1,0 +1,659 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualization Modules &mdash; IDEAL-GENOM v1.0.0</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core Modules" href="core_modules.html" />
+    <link rel="prev" title="Population Structure Modules" href="PopStructure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            IDEAL-GENOM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Pipelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qc_pipeline.html">Quality Control Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gwas_pipeline.html">GWAS Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vcf_pipeline.html">VCF Processing Pipeline</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api_overview.html">API Overview</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-organization">Module Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-details">Module Details</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="api_overview.html#index">Index</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="SampleQC.html">Sample QC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="AncestryQC.html">Ancestry QC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="VariantQC.html">Variant QC Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gwas_modules.html">GWAS Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vcf_modules.html">VCF Processing Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PopStructure.html">Population Structure Modules</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Visualization Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-overview">Module Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#manhattan-type">manhattan_type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plots">plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#zoom-heatmap">zoom_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="core_modules.html">Core Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Helpers.html">Utility Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_references.html">Get References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">IDEAL-GENOM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_overview.html">API Overview</a></li>
+      <li class="breadcrumb-item active">Visualization Modules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/visualization_modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="visualization-modules">
+<h1>Visualization Modules<a class="headerlink" href="#visualization-modules" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ideal_genom.visualizations</span></code> package provides functions for creating publication-ready plots for GWAS and genomic analysis.</p>
+<section id="module-overview">
+<h2>Module Overview<a class="headerlink" href="#module-overview" title="Link to this heading"></a></h2>
+</section>
+<section id="manhattan-type">
+<h2>manhattan_type<a class="headerlink" href="#manhattan-type" title="Link to this heading"></a></h2>
+<p>Generate Manhattan and Miami plots for genome-wide association studies (GWAS).</p>
+<p><strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">ideal_genom.visualizations.manhattan_type</span></code></p>
+<section id="features">
+<h3>Features:<a class="headerlink" href="#features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Data processing and visualization of GWAS summary statistics</p></li>
+<li><p>Annotation of SNPs with gene information from various sources</p></li>
+<li><p>Highlighting and labeling of specific SNPs of interest</p></li>
+<li><p>Support for both Manhattan (single study) and Miami (two studies) plots</p></li>
+</ul>
+</section>
+<section id="key-functions">
+<h3>Key Functions:<a class="headerlink" href="#key-functions" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="compute_relative_pos">
+<span class="sig-name descname"><span class="pre">compute_relative_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CHR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compute_relative_pos" title="Link to this definition"></a></dt>
+<dd><p>Compute the relative position of probes/SNPs across chromosomes and add a -log10(p-value) column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – Input DataFrame containing genomic data</p></li>
+<li><p><strong>chr_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for chromosome identifiers</p></li>
+<li><p><strong>pos_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for base pair positions</p></li>
+<li><p><strong>p_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with added columns for relative positions and -log10(p-values)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="manhattan">
+<span class="sig-name descname"><span class="pre">manhattan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_gwas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CHR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_snps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'manhattan.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_text_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(18,</span> <span class="pre">6)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#manhattan" title="Link to this definition"></a></dt>
+<dd><p>Generate a Manhattan plot from GWAS summary statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_gwas</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>pval_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>chr_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for chromosome</p></li>
+<li><p><strong>pos_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for base pair position</p></li>
+<li><p><strong>snp_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for SNP identifiers</p></li>
+<li><p><strong>p_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Genome-wide significance threshold</p></li>
+<li><p><strong>annotate</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>]</em>) – List of SNP IDs to annotate with gene names</p></li>
+<li><p><strong>annotation_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Source for gene annotation (‘ensembl’, ‘refseq’, or ‘both’)</p></li>
+<li><p><strong>genome_build</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Genome build version (‘37’ or ‘38’)</p></li>
+<li><p><strong>api_request</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to use API for annotation (if False, uses local GTF)</p></li>
+<li><p><strong>highlight_snps</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>]</em>) – List of SNP IDs to highlight in different color</p></li>
+<li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Transparency level for points</p></li>
+<li><p><strong>save_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for saving the plot</p></li>
+<li><p><strong>colors</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>]</em>) – Custom colors for alternating chromosomes</p></li>
+<li><p><strong>chr_text_shift</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – Shift amount for chromosome labels</p></li>
+<li><p><strong>fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Figure size (width, height) in inches</p></li>
+<li><p><strong>dpi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Resolution for saved figure</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="miami">
+<span class="sig-name descname"><span class="pre">miami</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_gwas1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_gwas2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CHR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'POS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_snps1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_snps2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'miami.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_text_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(18,</span> <span class="pre">12)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot1_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Study</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot2_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Study</span> <span class="pre">2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#miami" title="Link to this definition"></a></dt>
+<dd><p>Generate a Miami plot (back-to-back Manhattan plots) comparing two GWAS studies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_gwas1</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results for first study</p></li>
+<li><p><strong>df_gwas2</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results for second study</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>plot1_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Label for the top plot</p></li>
+<li><p><strong>plot2_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Label for the bottom plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p><em>Other parameters are the same as manhattan() function</em></p>
+</dd></dl>
+
+</section>
+<section id="usage-example">
+<h3>Usage Example:<a class="headerlink" href="#usage-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.manhattan_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">manhattan</span><span class="p">,</span> <span class="n">miami</span>
+
+<span class="c1"># Load GWAS summary statistics</span>
+<span class="n">gwas_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gwas_results.txt&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate Manhattan plot</span>
+<span class="n">manhattan</span><span class="p">(</span>
+    <span class="n">df_gwas</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">pval_col</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span>
+    <span class="n">chr_col</span><span class="o">=</span><span class="s1">&#39;CHR&#39;</span><span class="p">,</span>
+    <span class="n">pos_col</span><span class="o">=</span><span class="s1">&#39;BP&#39;</span><span class="p">,</span>
+    <span class="n">snp_col</span><span class="o">=</span><span class="s1">&#39;SNP&#39;</span><span class="p">,</span>
+    <span class="n">p_threshold</span><span class="o">=</span><span class="mf">5e-8</span><span class="p">,</span>
+    <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;rs12345&#39;</span><span class="p">,</span> <span class="s1">&#39;rs67890&#39;</span><span class="p">],</span>  <span class="c1"># Annotate specific SNPs</span>
+    <span class="n">annotation_type</span><span class="o">=</span><span class="s1">&#39;ensembl&#39;</span><span class="p">,</span>
+    <span class="n">genome_build</span><span class="o">=</span><span class="s1">&#39;38&#39;</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_manhattan.jpeg&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Generate Miami plot comparing two studies</span>
+<span class="n">gwas_df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gwas_results2.txt&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">miami</span><span class="p">(</span>
+    <span class="n">df_gwas1</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">df_gwas2</span><span class="o">=</span><span class="n">gwas_df2</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">plot1_label</span><span class="o">=</span><span class="s1">&#39;Discovery cohort&#39;</span><span class="p">,</span>
+    <span class="n">plot2_label</span><span class="o">=</span><span class="s1">&#39;Replication cohort&#39;</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_miami.jpeg&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="plots">
+<h2>plots<a class="headerlink" href="#plots" title="Link to this heading"></a></h2>
+<p>Functions for generating various plots for GWAS data analysis.</p>
+<p><strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">ideal_genom.visualizations.plots</span></code></p>
+<section id="id1">
+<h3>Features:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>QQ plots for visualizing the distribution of p-values</p></li>
+<li><p>Beta-beta scatter plots for comparing effect sizes between studies</p></li>
+<li><p>Trumpet plots for visualizing power and effect sizes</p></li>
+<li><p>Support for both binary and quantitative traits</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>Key Functions:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="qqplot_draw">
+<span class="sig-name descname"><span class="pre">qqplot_draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_gwas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lightgray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qq_plot.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qqplot_draw" title="Link to this definition"></a></dt>
+<dd><p>Create a Q-Q (Quantile-Quantile) plot from GWAS results.</p>
+<p>This function generates a Q-Q plot comparing observed vs expected -log10(p-values)
+from GWAS results, including confidence intervals and genomic inflation factor (λ).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_gwas</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results with p-values</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>lambda_val</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – Genomic inflation factor (calculated if None)</p></li>
+<li><p><strong>pval_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>conf_color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Color for confidence interval bands</p></li>
+<li><p><strong>save_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for saving the plot</p></li>
+<li><p><strong>fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Figure size (width, height) in inches</p></li>
+<li><p><strong>dpi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Resolution for saved figure</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beta_beta_plot">
+<span class="sig-name descname"><span class="pre">beta_beta_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BETA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">se_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beta_beta.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Study</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Study</span> <span class="pre">2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#beta_beta_plot" title="Link to this definition"></a></dt>
+<dd><p>Create a beta-beta scatter plot comparing effect sizes between two GWAS studies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df1</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results for first study</p></li>
+<li><p><strong>df2</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results for second study</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>beta_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for effect sizes (beta)</p></li>
+<li><p><strong>se_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for standard errors</p></li>
+<li><p><strong>snp_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for SNP identifiers</p></li>
+<li><p><strong>pval_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>p_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Significance threshold for highlighting SNPs</p></li>
+<li><p><strong>annotate</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>]</em>) – List of SNP IDs to annotate</p></li>
+<li><p><strong>annotation_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Source for gene annotation</p></li>
+<li><p><strong>genome_build</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Genome build version</p></li>
+<li><p><strong>api_request</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to use API for annotation</p></li>
+<li><p><strong>save_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for saving the plot</p></li>
+<li><p><strong>fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Figure size (width, height) in inches</p></li>
+<li><p><strong>dpi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Resolution for saved figure</p></li>
+<li><p><strong>x_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Label for x-axis</p></li>
+<li><p><strong>y_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Label for y-axis</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trumpet_plot_binary">
+<span class="sig-name descname"><span class="pre">trumpet_plot_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_gwas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BETA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">se_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MAF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_controls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prevalence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trumpet_binary.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trumpet_plot_binary" title="Link to this definition"></a></dt>
+<dd><p>Create a trumpet plot for binary traits, showing power curves and effect sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_gwas</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>beta_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for effect sizes</p></li>
+<li><p><strong>se_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for standard errors</p></li>
+<li><p><strong>snp_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for SNP identifiers</p></li>
+<li><p><strong>pval_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>p_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Significance threshold</p></li>
+<li><p><strong>annotate</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>]</em>) – List of SNP IDs to annotate</p></li>
+<li><p><strong>maf_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for minor allele frequency</p></li>
+<li><p><strong>n_cases</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Number of cases in the study</p></li>
+<li><p><strong>n_controls</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Number of controls in the study</p></li>
+<li><p><strong>prevalence</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Disease prevalence</p></li>
+<li><p><strong>alpha_val</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Significance level for power calculation</p></li>
+<li><p><strong>save_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for saving the plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trumpet_plot_quantitative">
+<span class="sig-name descname"><span class="pre">trumpet_plot_quantitative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_gwas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BETA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">se_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MAF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trumpet_quantitative.jpeg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trumpet_plot_quantitative" title="Link to this definition"></a></dt>
+<dd><p>Create a trumpet plot for quantitative traits, showing power curves and effect sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_gwas</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS results</p></li>
+<li><p><strong>plots_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory path where the plot will be saved</p></li>
+<li><p><strong>n_samples</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Total number of samples in the study</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p><em>Other parameters are the same as trumpet_plot_binary() function</em></p>
+</dd></dl>
+
+</section>
+<section id="id3">
+<h3>Usage Example:<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.plots</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">qqplot_draw</span><span class="p">,</span> <span class="n">beta_beta_plot</span><span class="p">,</span>
+    <span class="n">trumpet_plot_binary</span><span class="p">,</span> <span class="n">trumpet_plot_quantitative</span>
+<span class="p">)</span>
+
+<span class="c1"># Load GWAS results</span>
+<span class="n">gwas_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gwas_results.txt&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Generate QQ plot</span>
+<span class="n">qqplot_draw</span><span class="p">(</span>
+    <span class="n">df_gwas</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">pval_col</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_qq_plot.jpeg&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Beta-beta plot comparing two studies</span>
+<span class="n">gwas_df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gwas_results2.txt&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">beta_beta_plot</span><span class="p">(</span>
+    <span class="n">df1</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">df2</span><span class="o">=</span><span class="n">gwas_df2</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">beta_col</span><span class="o">=</span><span class="s1">&#39;BETA&#39;</span><span class="p">,</span>
+    <span class="n">se_col</span><span class="o">=</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span>
+    <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;Discovery&#39;</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;Replication&#39;</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_beta_beta.jpeg&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Trumpet plot for binary trait</span>
+<span class="n">trumpet_plot_binary</span><span class="p">(</span>
+    <span class="n">df_gwas</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">n_cases</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">n_controls</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">prevalence</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_trumpet_binary.jpeg&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Trumpet plot for quantitative trait</span>
+<span class="n">trumpet_plot_quantitative</span><span class="p">(</span>
+    <span class="n">df_gwas</span><span class="o">=</span><span class="n">gwas_df</span><span class="p">,</span>
+    <span class="n">plots_dir</span><span class="o">=</span><span class="s2">&quot;./plots&quot;</span><span class="p">,</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;my_trumpet_quant.jpeg&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="zoom-heatmap">
+<h2>zoom_heatmap<a class="headerlink" href="#zoom-heatmap" title="Link to this heading"></a></h2>
+<p>Create zoomed heatmap visualizations of SNP associations, gene annotations, and linkage disequilibrium (LD) patterns.</p>
+<p><strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">ideal_genom.visualizations.zoom_heatmap</span></code></p>
+<section id="id4">
+<h3>Features:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Filter and annotate SNP data in a genomic region</p></li>
+<li><p>Calculate LD matrices using PLINK</p></li>
+<li><p>Generate three-panel plots with:</p>
+<ol class="arabic simple">
+<li><p>Association plot with SNPs colored by functional consequences</p></li>
+<li><p>Gene track showing gene locations and orientations</p></li>
+<li><p>LD heatmap showing correlation patterns between SNPs</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="id5">
+<h3>Key Functions:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="filter_sumstats">
+<span class="sig-name descname"><span class="pre">filter_sumstats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lead_snp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10e6</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#filter_sumstats" title="Link to this definition"></a></dt>
+<dd><p>Filter GWAS summary statistics based on a lead SNP, p-value threshold and genomic region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS summary statistics</p></li>
+<li><p><strong>lead_snp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Lead SNP identifier to center the region around</p></li>
+<li><p><strong>snp_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for SNP identifiers</p></li>
+<li><p><strong>p_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>pos_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for base pair positions</p></li>
+<li><p><strong>chr_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for chromosome</p></li>
+<li><p><strong>pval_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – P-value threshold for filtering</p></li>
+<li><p><strong>radius</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Genomic radius around lead SNP (in base pairs)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered DataFrame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="compute_ld">
+<span class="sig-name descname"><span class="pre">compute_ld</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plink_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lead_snp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ld_window_kb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ld_window_snps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#compute_ld" title="Link to this definition"></a></dt>
+<dd><p>Compute linkage disequilibrium matrix for a list of SNPs using PLINK.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plink_file</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Path to PLINK binary file prefix (without .bed/.bim/.fam)</p></li>
+<li><p><strong>snp_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a>) – List of SNP IDs for LD calculation</p></li>
+<li><p><strong>output_dir</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Directory to save output files</p></li>
+<li><p><strong>lead_snp</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Lead SNP for coloring (optional)</p></li>
+<li><p><strong>ld_window_kb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – LD window size in kilobases</p></li>
+<li><p><strong>ld_window_snps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – LD window size in number of SNPs</p></li>
+<li><p><strong>threads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of threads for PLINK</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>LD matrix as DataFrame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)">pandas.DataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="create_zoom_heatmap">
+<span class="sig-name descname"><span class="pre">create_zoom_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sumstats_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plink_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lead_snp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snp_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SNP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chr_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CHR'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BETA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pval_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5e-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ld_window_kb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_build</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'38'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ensembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(14,</span> <span class="pre">12)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zoom_heatmap.png'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#create_zoom_heatmap" title="Link to this definition"></a></dt>
+<dd><p>Create a comprehensive zoom heatmap plot with association, gene track, and LD panels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sumstats_df</strong> (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0)"><em>pandas.DataFrame</em></a>) – DataFrame containing GWAS summary statistics</p></li>
+<li><p><strong>plink_file</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Path to PLINK binary file prefix</p></li>
+<li><p><strong>lead_snp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Lead SNP identifier to center the plot</p></li>
+<li><p><strong>output_dir</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Path</em><em>]</em>) – Directory to save output files</p></li>
+<li><p><strong>snp_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for SNP identifiers</p></li>
+<li><p><strong>chr_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for chromosome</p></li>
+<li><p><strong>pos_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for base pair position</p></li>
+<li><p><strong>p_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for p-values</p></li>
+<li><p><strong>beta_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for effect sizes</p></li>
+<li><p><strong>pval_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – P-value threshold for filtering</p></li>
+<li><p><strong>radius</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Genomic radius around lead SNP (in base pairs)</p></li>
+<li><p><strong>ld_window_kb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – LD window size in kilobases</p></li>
+<li><p><strong>genome_build</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Genome build version (‘37’ or ‘38’)</p></li>
+<li><p><strong>annotation_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Source for gene annotation (‘ensembl’, ‘refseq’, or ‘both’)</p></li>
+<li><p><strong>api_request</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether to use API for functional annotation</p></li>
+<li><p><strong>fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a>) – Figure size (width, height) in inches</p></li>
+<li><p><strong>dpi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Resolution for saved figure</p></li>
+<li><p><strong>threads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Number of threads for PLINK</p></li>
+<li><p><strong>save_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename for saving the plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to saved figure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="id6">
+<h3>Usage Example:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.zoom_heatmap</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_zoom_heatmap</span>
+
+<span class="c1"># Load GWAS summary statistics</span>
+<span class="n">sumstats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;gwas_results.txt&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create zoom heatmap around a lead SNP</span>
+<span class="n">create_zoom_heatmap</span><span class="p">(</span>
+    <span class="n">sumstats_df</span><span class="o">=</span><span class="n">sumstats</span><span class="p">,</span>
+    <span class="n">plink_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/genotypes&quot;</span><span class="p">),</span>  <span class="c1"># Without .bed/.bim/.fam extension</span>
+    <span class="n">lead_snp</span><span class="o">=</span><span class="s1">&#39;rs12345&#39;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./plots&quot;</span><span class="p">),</span>
+    <span class="n">snp_col</span><span class="o">=</span><span class="s1">&#39;SNP&#39;</span><span class="p">,</span>
+    <span class="n">chr_col</span><span class="o">=</span><span class="s1">&#39;CHR&#39;</span><span class="p">,</span>
+    <span class="n">pos_col</span><span class="o">=</span><span class="s1">&#39;BP&#39;</span><span class="p">,</span>
+    <span class="n">p_col</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span>
+    <span class="n">beta_col</span><span class="o">=</span><span class="s1">&#39;BETA&#39;</span><span class="p">,</span>
+    <span class="n">pval_threshold</span><span class="o">=</span><span class="mf">5e-8</span><span class="p">,</span>
+    <span class="n">radius</span><span class="o">=</span><span class="mi">500000</span><span class="p">,</span>  <span class="c1"># 500kb window</span>
+    <span class="n">genome_build</span><span class="o">=</span><span class="s1">&#39;38&#39;</span><span class="p">,</span>
+    <span class="n">annotation_type</span><span class="o">=</span><span class="s1">&#39;ensembl&#39;</span><span class="p">,</span>
+    <span class="n">api_request</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_name</span><span class="o">=</span><span class="s1">&#39;rs12345_zoom.png&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>Dependencies:</strong></dt><dd><ul class="simple">
+<li><p>matplotlib</p></li>
+<li><p>seaborn</p></li>
+<li><p>pandas</p></li>
+<li><p>numpy</p></li>
+<li><p>textalloc (for label positioning)</p></li>
+<li><p>pyensembl (for gene annotations)</p></li>
+<li><p>PLINK 1.9 or 2.0 (for LD calculations)</p></li>
+</ul>
+</dd>
+<dt><strong>Annotation Sources:</strong></dt><dd><p>All plotting functions support gene annotation from:</p>
+<ul class="simple">
+<li><p><strong>Ensembl</strong>: Via REST API or local GTF files</p></li>
+<li><p><strong>RefSeq</strong>: Via local GTF files</p></li>
+<li><p><strong>Both</strong>: Combined annotations from both sources</p></li>
+</ul>
+</dd>
+<dt><strong>Genome Builds:</strong></dt><dd><p>Supported genome builds are GRCh37/hg19 (‘37’) and GRCh38/hg38 (‘38’)</p>
+</dd>
+<dt><strong>Output Formats:</strong></dt><dd><ul class="simple">
+<li><p>JPEG format for Manhattan, Miami, QQ, beta-beta, and trumpet plots</p></li>
+<li><p>PNG format for zoom heatmaps (recommended for better quality with complex graphics)</p></li>
+<li><p>All plots are publication-ready with customizable DPI</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="gwas_modules.html"><span class="doc">GWAS Modules</span></a> - GWAS analysis modules that generate data for visualization</p></li>
+<li><p><a class="reference internal" href="Helpers.html"><span class="doc">Utility Modules</span></a> - Annotation utilities used by visualization functions</p></li>
+<li><p><a class="reference internal" href="api_overview.html"><span class="doc">API Overview</span></a> - Complete API reference</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="PopStructure.html" class="btn btn-neutral float-left" title="Population Structure Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="core_modules.html" class="btn btn-neutral float-right" title="Core Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Luis Giraldo González, Amabel Tenghe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

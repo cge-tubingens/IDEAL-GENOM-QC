@@ -14,8 +14,8 @@
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=8d563738"></script>
-      <script src="_static/doctools.js?v=9a2dae69"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -73,6 +73,7 @@
 <li class="toctree-l3"><a class="reference internal" href="gwas_modules.html">GWAS Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vcf_modules.html">VCF Processing Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="PopStructure.html">Population Structure Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization_modules.html">Visualization Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core_modules.html">Core Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Helpers.html">Utility Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_references.html">Get References</a></li>
@@ -138,6 +139,10 @@
 <li><p><a class="reference internal" href="PopStructure.html"><span class="doc">Population Structure Modules</span></a> - FST statistics and PCA projection</p></li>
 </ul>
 </dd>
+<dt><strong>Visualization Modules</strong> (<code class="docutils literal notranslate"><span class="pre">ideal_genom.visualizations</span></code>)</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="visualization_modules.html"><span class="doc">Visualization Modules</span></a> - Manhattan, Miami, QQ, beta-beta, trumpet plots, and zoom heatmaps</p></li>
+</ul>
+</dd>
 <dt><strong>Core Modules</strong> (<code class="docutils literal notranslate"><span class="pre">ideal_genom.core</span></code>)</dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="core_modules.html"><span class="doc">Core Modules</span></a> - Pipeline framework, configuration, CLI</p></li>
 </ul>
@@ -171,6 +176,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.population.fst_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">FstSummary</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.population.projection</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAReduction</span><span class="p">,</span> <span class="n">UMAPReduction</span><span class="p">,</span> <span class="n">TSNEReduction</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.population.projection</span><span class="w"> </span><span class="kn">import</span> <span class="n">DimensionalityReductionPipeline</span>
+
+<span class="c1"># Visualization modules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.manhattan_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">manhattan</span><span class="p">,</span> <span class="n">miami</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">qqplot_draw</span><span class="p">,</span> <span class="n">beta_beta_plot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">trumpet_plot_binary</span><span class="p">,</span> <span class="n">trumpet_plot_quantitative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.visualizations.zoom_heatmap</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_zoom_heatmap</span>
 
 <span class="c1"># Core framework</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ideal_genom.core.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
@@ -256,6 +267,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gwas_modules.html">GWAS Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vcf_modules.html">VCF Processing Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PopStructure.html">Population Structure Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization_modules.html">Visualization Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="core_modules.html">Core Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Helpers.html">Utility Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_references.html">Get References</a></li>
