@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom.core.get_references &mdash; IDEAL-GENOM v0.2.0</title>
+  <title>ideal_genom.core.get_references &mdash; IDEAL-GENOM v1.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -116,43 +116,34 @@
 <div class="viewcode-block" id="Fetcher1000Genome.__init__">
 <a class="viewcode-back" href="../../../get_references.html#ideal_genom.core.get_references.Fetcher1000Genome.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">build</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;38&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a reference data handler.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a reference data handler.</span>
+<span class="sd">        </span>
 <span class="sd">        This class manages reference data files from 1000 Genomes Project.</span>
 <span class="sd">        </span>
-<span class="sd">        Parameters:</span>
+<span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        destination: Path (optional) </span>
+<span class="sd">        destination : Path, optional</span>
 <span class="sd">            Path where reference files will be stored. If not provided, defaults to &#39;../data/1000genomes_build_{build}&#39;.</span>
-<span class="sd">        build: str (optional): </span>
+<span class="sd">        build : str, optional</span>
 <span class="sd">            Human genome build version. Defaults to &#39;38&#39;.</span>
 <span class="sd">        </span>
-<span class="sd">        Attributes:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        destination: Path </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        destination : Path</span>
 <span class="sd">            Directory path where reference files are stored</span>
-<span class="sd">        build: str </span>
+<span class="sd">        build : str</span>
 <span class="sd">            Human genome build version being used</span>
-<span class="sd">        pgen_file: Path </span>
+<span class="sd">        pgen_file : Path</span>
 <span class="sd">            Path to PGEN format file</span>
-<span class="sd">        pvar_file: Path </span>
-<span class="sd">            Path to PVAR format file </span>
-<span class="sd">        -----------</span>
-<span class="sd">        destination: Path </span>
-<span class="sd">            Directory path where reference files are stored</span>
-<span class="sd">        build: str </span>
-<span class="sd">            Human genome build version being used</span>
-<span class="sd">        pgen_file: Path </span>
-<span class="sd">            Path to PGEN format file</span>
-<span class="sd">        pvar_file: Path </span>
-<span class="sd">            Path to PVAR format file </span>
-<span class="sd">        psam_file: Path </span>
+<span class="sd">        pvar_file : Path</span>
+<span class="sd">            Path to PVAR format file</span>
+<span class="sd">        psam_file : Path</span>
 <span class="sd">            Path to PSAM format file</span>
-<span class="sd">        bed_file: Path </span>
+<span class="sd">        bed_file : Path</span>
 <span class="sd">            Path to BED format file</span>
-<span class="sd">        bim_file: Path </span>
-<span class="sd">            Path to BIM format file </span>
-<span class="sd">        fam_file: Path </span>
+<span class="sd">        bim_file : Path</span>
+<span class="sd">            Path to BIM format file</span>
+<span class="sd">        fam_file : Path</span>
 <span class="sd">            Path to FAM format file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -780,27 +771,29 @@
 <div class="viewcode-block" id="FetcherLDRegions.get_ld_regions">
 <a class="viewcode-back" href="../../../get_references.html#ideal_genom.core.get_references.FetcherLDRegions.get_ld_regions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_ld_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Downloads or creates high LD regions file based on genome build version.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download or create high LD regions file based on genome build version.</span>
+<span class="sd">        </span>
 <span class="sd">        This method handles the retrieval of high Linkage Disequilibrium (LD) regions for</span>
 <span class="sd">        different genome builds (37 or 38). For build 37, it downloads the regions from a</span>
 <span class="sd">        GitHub repository. For build 38, it creates the file from predefined coordinates.</span>
 <span class="sd">        </span>
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
-<span class="sd">        Path: Path to the created/downloaded LD regions file. Returns empty Path if</span>
-<span class="sd">              download fails for build 37.</span>
-<span class="sd">        </span>
-<span class="sd">        Raises:</span>
+<span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">            None explicitly, but may raise standard I/O related exceptions.</span>
+<span class="sd">        Path</span>
+<span class="sd">            Path to the created/downloaded LD regions file. Returns empty Path if</span>
+<span class="sd">            download fails for build 37.</span>
 <span class="sd">        </span>
-<span class="sd">        Notes:</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        None</span>
+<span class="sd">            Explicitly, but may raise standard I/O related exceptions.</span>
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">            - For build 37: Downloads from genepi-freiburg/gwas repository</span>
-<span class="sd">            - For build 38: Creates file from hardcoded coordinates from GWAS-pipeline</span>
-<span class="sd">            - Files are named as &#39;high-LD-regions_GRCh{build}.txt&#39;</span>
-<span class="sd">            - Creates destination directory if it doesn&#39;t exist</span>
+<span class="sd">        - For build 37: Downloads from genepi-freiburg/gwas repository</span>
+<span class="sd">        - For build 38: Creates file from hardcoded coordinates from GWAS-pipeline</span>
+<span class="sd">        - Files are named as &#39;high-LD-regions_GRCh{build}.txt&#39;</span>
+<span class="sd">        - Creates destination directory if it doesn&#39;t exist</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

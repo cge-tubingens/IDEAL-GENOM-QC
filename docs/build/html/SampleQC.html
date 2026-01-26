@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sample QC Module &mdash; IDEAL-GENOM v0.2.0</title>
+  <title>Sample QC Module &mdash; IDEAL-GENOM v1.1.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=938c9ccc"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -63,7 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api_overview.html#module-details">Module Details</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="api_overview.html#index">Index</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Sample QC Module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#module-ideal_genom.qc.sample_qc">Main Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main-class">Main Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#supporting-classes">Supporting Classes</a></li>
 </ul>
 </li>
@@ -72,6 +72,7 @@
 <li class="toctree-l3"><a class="reference internal" href="gwas_modules.html">GWAS Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="vcf_modules.html">VCF Processing Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="PopStructure.html">Population Structure Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization_modules.html">Visualization Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core_modules.html">Core Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Helpers.html">Utility Modules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_references.html">Get References</a></li>
@@ -116,18 +117,17 @@
   <section id="sample-qc-module">
 <h1>Sample QC Module<a class="headerlink" href="#sample-qc-module" title="Link to this heading"></a></h1>
 <p>The Sample QC module performs sample-level quality control on genotype data.</p>
-<section id="module-ideal_genom.qc.sample_qc">
-<span id="main-class"></span><h2>Main Class<a class="headerlink" href="#module-ideal_genom.qc.sample_qc" title="Link to this heading"></a></h2>
-<p>Module to perform sample quality control</p>
+<section id="main-class">
+<h2>Main Class<a class="headerlink" href="#main-class" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQC" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQC" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQC.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_ld_regions_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">build</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'38'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQC.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQC.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize SampleQC class for quality control of genetic data.
-This class handles quality control procedures for genetic data files in PLINK binary format
+<dd><p>Initialize SampleQC class for quality control of genetic data.</p>
+<p>This class handles quality control procedures for genetic data files in PLINK binary format
 (bed, bim, fam). It sets up the directory structure and validates input files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -236,46 +236,39 @@ The renaming is performed using PLINK2’s –set-all-var-ids parameter.
 This method uses PLINK’s –set-hh-missing flag to convert haploid genotypes to
 missing values in the genotype data. This is often useful for quality control
 of genetic data, particularly for variants on sex chromosomes.</p>
-<section id="parameters">
-<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>rename (bool, optional): Flag to control whether SNP renaming should be performed.</dt><dd><p>Defaults to True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>(</strong><strong>bool</strong> (<a class="reference internal" href="#ideal_genom.qc.sample_qc.SampleQC.hh_to_missing" title="ideal_genom.qc.sample_qc.SampleQC.hh_to_missing"><em>hh_to_missing</em></a>) – Defaults to True.</p></li>
+<li><p><strong>optional</strong><strong>)</strong> (<em>Flag to control whether haploid genotypes should be converted to missing values.</em>) – Defaults to True.</p></li>
+<li><p><strong>(</strong><strong>bool</strong> – Defaults to True.</p></li>
+<li><p><strong>optional</strong><strong>)</strong> – Defaults to True.</p></li>
+</ul>
 </dd>
-<dt>hh_to_missing (bool, optional): Flag to control whether haploid genotypes should be converted to missing values.</dt><dd><p>Defaults to True.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If rename parameter is not a boolean.:</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If hh_to_missing parameter is not a boolean.:</p></li>
+</ul>
 </dd>
 </dl>
-</section>
-<section id="returns">
-<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>None</p>
-</div></blockquote>
-</section>
-<section id="raises">
-<h3>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>TypeError: If rename parameter is not a boolean.
-TypeError: If hh_to_missing parameter is not a boolean.</p>
-</div></blockquote>
-</section>
-<section id="notes">
-<h3>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
-<blockquote>
-<div><ul class="simple">
+<p class="rubric">Notes</p>
+<ul class="simple">
 <li><p>The renamed files will be saved with ‘-renamed’ suffix</p></li>
 <li><p>Thread count is optimized based on available CPU cores</p></li>
 <li><p>The new SNP ID format will be: chromosome:position:allele1:allele2</p></li>
 <li><p>Sets self.renamed_snps to True if renaming is performed</p></li>
 </ul>
-</div></blockquote>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQC.execute_ld_pruning">
 <span class="sig-name descname"><span class="pre">execute_ld_pruning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind_pair</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[50,</span> <span class="pre">5,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQC.execute_ld_pruning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQC.execute_ld_pruning" title="Link to this definition"></a></dt>
-<dd><p>Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
-This method performs LD pruning in three steps:
+<dd><p>Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.</p>
+<p>This method performs LD pruning in three steps:
 1. Excludes complex/high LD regions
 2. Identifies SNPs for pruning using indep-pairwise test
 3. Creates final pruned dataset</p>
@@ -410,14 +403,14 @@ Must be between 0 and 0.5. Default is 0.01.</p>
 1. Generates genome-wide IBD estimates
 2. Calculates missing genotype rates</p>
 <p>The method uses optimal thread count based on available CPU cores and validates input/output files.</p>
-<section id="id1">
-<h3>Returns:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
 </section>
-<section id="id2">
-<h3>Raises:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="raises">
+<h3>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>FileNotFoundError: If required input pruned file is missing or if expected output files are not generated</p>
 </div></blockquote>
@@ -526,17 +519,16 @@ Includes additional rows for duplicated sample IDs and totals.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The method:
-- Reads large files in 10,000-row chunks to manage memory
-- Identifies samples failing multiple checks (reported as duplicates)
-- Saves two output files:</p>
-<blockquote>
-<div><ul class="simple">
+<p>The method performs the following:</p>
+<ul class="simple">
+<li><p>Reads large files in 10,000-row chunks to manage memory</p></li>
+<li><p>Identifies samples failing multiple checks (reported as duplicates)</p></li>
+<li><p>Saves two output files:</p>
+<ul>
 <li><p>fail_samples.txt: List of unique samples to remove (FID, IID)</p></li>
 <li><p>fail_summary.txt: Summary statistics of failures by type</p></li>
 </ul>
-</div></blockquote>
-<ul class="simple">
+</li>
 <li><p>Uses helper methods _analyze_heterozygosity_failures() and _analyze_ibd_failures()
 for complex analyses</p></li>
 </ul>
@@ -552,20 +544,20 @@ This method performs the following steps:
 1. Determines the appropriate binary file name based on previous processing steps
 2. Reads the fail_samples.txt file containing samples to be removed
 3. Executes PLINK command to create new binary files excluding failed samples</p>
-<section id="id3">
-<h3>Raises:<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id1">
+<h3>Raises:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>FileNotFoundError: If the fail_samples.txt file is not found in the fails directory</p>
 </div></blockquote>
 </section>
-<section id="id4">
-<h3>Returns:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id2">
+<h3>Returns:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>None</p>
 </div></blockquote>
 </section>
-<section id="id5">
-<h3>Notes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="notes">
+<h3>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><p>The output files will be created with suffix ‘-clean-samples’</p></li>
@@ -619,9 +611,12 @@ is performed to prevent memory issues with large datasets.</p>
 
 </dd></dl>
 
+</section>
+<section id="supporting-classes">
+<h2>Supporting Classes<a class="headerlink" href="#supporting-classes" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQCReport">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQCReport" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQCReport" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQCReport.__init__">
@@ -822,7 +817,7 @@ The plot is saved as ‘ibd_pihat_distribution.png’ in the output directory.</
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQCCleanUp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCCleanUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQCCleanUp" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCCleanUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQCCleanUp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQCCleanUp.__init__">
@@ -864,266 +859,6 @@ The plot is saved as ‘ibd_pihat_distribution.png’ in the output directory.</
 <dl class="py method">
 <dt class="sig sig-object py" id="ideal_genom.qc.sample_qc.SampleQCCleanUp.clean_all">
 <span class="sig-name descname"><span class="pre">clean_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp.clean_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ideal_genom.qc.sample_qc.SampleQCCleanUp.clean_all" title="Link to this definition"></a></dt>
-<dd><p>Remove all intermediate files from input and output directories.</p>
-<p>This method calls clean_input_files() and clean_results_files()
-to remove temporary files created during preprocessing and sample QC steps.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="supporting-classes">
-<h2>Supporting Classes<a class="headerlink" href="#supporting-classes" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="id0">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id7">
-<span class="sig-name descname"><span class="pre">report_sample_qc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">call_rate_smiss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sexcheck_miss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">xchr_miss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_greater_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_less_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_greater_smiss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_less_smiss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_ibd_report</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_coeff_thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.2,</span> <span class="pre">0.8]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_rate_thres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_deviation_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ibd_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.report_sample_qc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
-<dd><p>Generate comprehensive quality control visualization reports for sample-level QC.</p>
-<p>This method orchestrates the generation of all sample QC visualization reports by
-calling individual reporting methods for call rate, sex check, heterozygosity, and
-optionally IBD analysis. It generates plots and visualizations without performing
-any QC execution or sample filtering.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>call_rate_smiss</strong> (<em>Path</em>) – Path to the sample missingness file (.smiss) from PLINK –missing command</p></li>
-<li><p><strong>sexcheck_miss</strong> (<em>Path</em>) – Path to the sex check results file (.sexcheck) from PLINK –check-sex</p></li>
-<li><p><strong>xchr_miss</strong> (<em>Path</em>) – Path to the X chromosome missingness file (.smiss)</p></li>
-<li><p><strong>maf_greater_het</strong> (<em>Path</em>) – Path to heterozygosity file (.het) for SNPs with MAF &gt; threshold</p></li>
-<li><p><strong>maf_less_het</strong> (<em>Path</em>) – Path to heterozygosity file (.het) for SNPs with MAF &lt; threshold</p></li>
-<li><p><strong>maf_greater_smiss</strong> (<em>Path</em>) – Path to missingness file (.smiss) for SNPs with MAF &gt; threshold</p></li>
-<li><p><strong>maf_less_smiss</strong> (<em>Path</em>) – Path to missingness file (.smiss) for SNPs with MAF &lt; threshold</p></li>
-<li><p><strong>genome</strong> (<em>Optional</em><em>[</em><em>Path</em><em>]</em><em>, </em><em>default=None</em>) – Path to the PLINK .genome file for IBD analysis. Required if generate_ibd_report=True</p></li>
-<li><p><strong>generate_ibd_report</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – Whether to generate IBD analysis visualization</p></li>
-<li><p><strong>call_rate_thres</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.2</em>) – Call rate threshold for visualization reference line</p></li>
-<li><p><strong>std_deviation_het</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=3</em>) – Number of standard deviations for heterozygosity outlier visualization</p></li>
-<li><p><strong>maf_het</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.01</em>) – Minor allele frequency threshold used in the analysis</p></li>
-<li><p><strong>ibd_threshold</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em><em>, </em><em>default=None</em>) – PI_HAT threshold for IBD visualization reference line. Required if generate_ibd_report=True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This method generates plots as side effects and does not return data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If generate_ibd_report=True but ibd_threshold or genome is None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method generates the following visualizations in sequence:
-1. Call rate distribution plots (histogram and scatterplots)
-2. Sex check scatter plot showing F-statistics vs X chr missingness
-3. Heterozygosity rate plots for MAF &gt; threshold
-4. Heterozygosity rate plots for MAF &lt; threshold
-5. IBD PI_HAT distribution histogram (if generate_ibd_report=True)</p>
-<p>All plots are saved to the output_path directory specified during initialization.
-This method is intended to be used after execute_sample_qc_pipeline() has completed
-and all required QC result files have been generated.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">report_call_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiss_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#1B9E77'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'#D95F02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.report_call_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
-<dd><p>Generate sample call rate analysis plots.
-This method reads a PLINK-format missing rate file and creates visualization plots
-showing the distribution of missing SNPs across samples. It generates two sets of plots:
-1. Histograms showing the distribution of missing SNPs (F_MISS)
-2. Scatterplots showing different views of the call rate data</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smiss_file</strong> (<em>Path</em>) – Path to the PLINK format missing rate file (.smiss or .imiss)</p></li>
-<li><p><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Call rate threshold for visualization reference line (in terms of F_MISS)</p></li>
-<li><p><strong>plots_dir</strong> (<em>Path</em>) – Directory where plots will be saved</p></li>
-<li><p><strong>y_axis_cap</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Maximum value for y-axis in capped histogram plots. Default is 10</p></li>
-<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Color for the main plot elements. Default is ‘#1B9E77’</p></li>
-<li><p><strong>line_color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Color for threshold lines in plots. Default is ‘#D95F02’</p></li>
-<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Format for saving plots (e.g., ‘png’, ‘pdf’, ‘svg’). Default is ‘png’</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This method generates plots as side effects and does not return data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method generates two image files:
-- call_rate_{threshold}_histogram.&lt;format&gt;: Contains histogram plots
-- call_rate_{threshold}_scatterplot.&lt;format&gt;: Contains scatter plots</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id9">
-<span class="sig-name descname"><span class="pre">report_sex_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sex_check_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">xchr_imiss_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_coeff_thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.2,</span> <span class="pre">0.8]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(8,</span> <span class="pre">6)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.report_sex_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
-<dd><p>Creates a sex check visualization based on PLINK’s sex check results.
-This function reads sex check data and X chromosome missingness data, merges them,
-and generates a scatter plot to visualize potential sex discrepancies.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sex_check_filename</strong> (<em>Path</em>) – Path to PLINK’s sex check results file (typically .sexcheck file)</p></li>
-<li><p><strong>xchr_imiss_filename</strong> (<em>Path</em>) – Path to X chromosome missingness data file (.smiss or .imiss)</p></li>
-<li><p><strong>plots_dir</strong> (<em>Path</em>) – Directory where the plot will be saved</p></li>
-<li><p><strong>f_coeff_thresholds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – List of two F coefficient thresholds [lower, upper] for reference lines.
-Default is [0.2, 0.8]</p></li>
-<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Format for saving the plot (e.g., ‘png’, ‘pdf’, ‘svg’). Default is ‘png’</p></li>
-<li><p><strong>fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>, </em><em>optional</em>) – Figure size as (width, height). Default is (8, 6)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This method generates plots as side effects and does not return data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The function creates a scatter plot with:
-- Blue hollow circles for samples with Male PEDSEX
-- Green hollow circles for samples with Female PEDSEX
-- Red filled circles for problematic samples
-- Dotted red vertical lines at the specified F coefficient thresholds
-The plot is saved as ‘sex_check.{format}’ in the specified plots directory.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id10">
-<span class="sig-name descname"><span class="pre">report_heterozygosity_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">het_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">autosomal_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_deviation_het</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_cap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter_fig_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(10,</span> <span class="pre">6)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.report_heterozygosity_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
-<dd><p>Generate heterozygosity rate visualization plots for quality control analysis.
-This function loads heterozygosity and autosomal call rate data, merges them,
-and generates visualization plots showing samples with deviant heterozygosity rates.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>het_filename</strong> (<em>Path</em>) – Path to the file containing heterozygosity information (.het file)</p></li>
-<li><p><strong>autosomal_filename</strong> (<em>Path</em>) – Path to the autosomal missingness file (.smiss or .imiss)</p></li>
-<li><p><strong>std_deviation_het</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – Number of standard deviations to use as threshold for identifying deviant samples</p></li>
-<li><p><strong>maf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Minor allele frequency threshold used in the analysis</p></li>
-<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Direction of MAF comparison (‘&gt;’ or ‘&lt;’) to indicate which MAF subset is being analyzed</p></li>
-<li><p><strong>plots_dir</strong> (<em>Path</em>) – Directory where plot files will be saved</p></li>
-<li><p><strong>y_axis_cap</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – Maximum value for y-axis in capped histogram plot. Default is 80</p></li>
-<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Format for saving plots (e.g., ‘png’, ‘pdf’, ‘svg’). Default is ‘png’</p></li>
-<li><p><strong>scatter_fig_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>, </em><em>optional</em>) – Figure size for scatter plot as (width, height). Default is (10, 6)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This method generates plots as side effects and does not return data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The function generates two types of plots:
-1. Histograms of heterozygosity rates (both uncapped and capped)
-2. Scatter plot of heterozygosity rate vs missing SNP proportion
-Files are saved with names:
-- heterozygosity_rate_greater_{maf}_histogram.{format} (if split=’&gt;’)
-- heterozygosity_rate_less_{maf}_histogram.{format} (if split=’&lt;’)
-- heterozygosity_rate_greater_{maf}_scatterplot.{format} (if split=’&gt;’)
-- heterozygosity_rate_less_{maf}_scatterplot.{format} (if split=’&lt;’)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id11">
-<span class="sig-name descname"><span class="pre">report_ibd_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">genome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ibd_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.185</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCReport.report_ibd_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
-<dd><p>Generate visualization of IBD (Identity By Descent) analysis results.</p>
-<p>This method processes IBD analysis results and creates a histogram showing the
-distribution of PI_HAT values for related sample pairs. The visualization includes
-a reference line at the specified threshold to help assess relatedness in the dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>genome</strong> (<em>Path</em>) – Path to the PLINK .genome file containing pairwise IBD estimates</p></li>
-<li><p><strong>ibd_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.185</em>) – The PI_HAT threshold for the reference line in the plot.
-Typical values: &gt;0.98 for duplicates, &gt;0.5 for first-degree relatives,
-&gt;0.185 for second-degree relatives.</p></li>
-<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=100000</em>) – Number of rows to process at a time when reading the genome file.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>This method generates a plot as a side effect and does not return data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If ibd_threshold is not a float or chunk_size is not an integer.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If the genome file is not found.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The method creates a histogram visualization showing:
-- Distribution of PI_HAT values for sample pairs with PI_HAT &gt; 0.1
-- A vertical line indicating the ibd_threshold
-The plot is saved as ‘ibd_pihat_distribution.png’ in the output directory.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="id12">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ideal_genom.qc.sample_qc.</span></span><span class="sig-name descname"><span class="pre">SampleQCCleanUp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="id13">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id14">
-<span class="sig-name descname"><span class="pre">clean_input_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp.clean_input_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
-<dd><p>Remove intermediate files from input directory.</p>
-<p>This method deletes temporary files created during preprocessing steps:
-- Files ending with ‘processed’ (.bed, .bim, .fam)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Only removes files if they exist. No error is raised if files are not found.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id15">
-<span class="sig-name descname"><span class="pre">clean_results_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp.clean_results_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
-<dd><p>Remove intermediate files from output directory.</p>
-<p>This method deletes temporary files created during sample QC steps:
-- Files ending with ‘.bed’, ‘.bim’, ‘.fam’, ‘.vmiss’, ‘.smiss’, ‘.nosex’, ‘.sexcheck’, ‘.het’, ‘.genome’
-- Files ending with ‘prune.in’, ‘prune.out’
-- Files ending with ‘king.cutoff.out.id’, ‘king.cutoff.in.id’, ‘king.id’, ‘king.bin’</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>Only removes files if they exist. No error is raised if files are not found.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="id16">
-<span class="sig-name descname"><span class="pre">clean_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/ideal_genom/qc/sample_qc.html#SampleQCCleanUp.clean_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
 <dd><p>Remove all intermediate files from input and output directories.</p>
 <p>This method calls clean_input_files() and clean_results_files()
 to remove temporary files created during preprocessing and sample QC steps.</p>

@@ -441,15 +441,17 @@ class VariantQC:
         return fail_diffmiss
     
     def execute_variant_qc_pipeline(self, variant_params: dict) -> None:
-        """
-        Execute a comprehensive variant quality control pipeline.
+        """Execute a comprehensive variant quality control pipeline.
+        
         This method runs a series of quality control steps on genetic variants,
         including missing data analysis, genotype calling assessment, Hardy-Weinberg
         equilibrium testing, and variant filtering based on specified thresholds.
+        
         Parameters
         ----------
         variant_params : dict
             Dictionary containing quality control parameters with the following keys:
+            
             - 'chr-y' : bool or str
                 Flag for chromosome Y analysis
             - 'miss_data_rate' : float
@@ -462,19 +464,23 @@ class VariantQC:
                 Minor allele frequency threshold for variant filtering
             - 'geno' : float
                 Genotype call rate threshold for variant filtering
+        
         Returns
         -------
         None
             This method performs quality control operations in-place and does not
             return any values.
+        
         Notes
         -----
         The pipeline executes the following steps in order:
+        
         1. Missing data rate computation (sex-stratified analysis)
         2. Case/control nonrandom missingness test
         3. Hardy-Weinberg equilibrium test
         4. Identification of variants failing QC thresholds
         5. Removal of variants that failed quality control
+        
         Each step prints a colored status message indicating the current operation
         being performed.
         """

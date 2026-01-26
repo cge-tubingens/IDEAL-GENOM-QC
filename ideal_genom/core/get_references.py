@@ -21,43 +21,34 @@ logger = logging.getLogger(__name__)
 class Fetcher1000Genome:
 
     def __init__(self, destination: Optional[Path] = None, build: str = '38'):
-        """
-        Initialize a reference data handler.
+        """Initialize a reference data handler.
+        
         This class manages reference data files from 1000 Genomes Project.
         
-        Parameters:
+        Parameters
         ----------
-        destination: Path (optional) 
+        destination : Path, optional
             Path where reference files will be stored. If not provided, defaults to '../data/1000genomes_build_{build}'.
-        build: str (optional): 
+        build : str, optional
             Human genome build version. Defaults to '38'.
         
-        Attributes:
-        -----------
-        destination: Path 
+        Attributes
+        ----------
+        destination : Path
             Directory path where reference files are stored
-        build: str 
+        build : str
             Human genome build version being used
-        pgen_file: Path 
+        pgen_file : Path
             Path to PGEN format file
-        pvar_file: Path 
-            Path to PVAR format file 
-        -----------
-        destination: Path 
-            Directory path where reference files are stored
-        build: str 
-            Human genome build version being used
-        pgen_file: Path 
-            Path to PGEN format file
-        pvar_file: Path 
-            Path to PVAR format file 
-        psam_file: Path 
+        pvar_file : Path
+            Path to PVAR format file
+        psam_file : Path
             Path to PSAM format file
-        bed_file: Path 
+        bed_file : Path
             Path to BED format file
-        bim_file: Path 
-            Path to BIM format file 
-        fam_file: Path 
+        bim_file : Path
+            Path to BIM format file
+        fam_file : Path
             Path to FAM format file
         """
 
@@ -649,27 +640,29 @@ class FetcherLDRegions(ReferenceDataFetcher):
         self.ld_regions = None
 
     def get_ld_regions(self)-> Path:
-        """
-        Downloads or creates high LD regions file based on genome build version.
+        """Download or create high LD regions file based on genome build version.
+        
         This method handles the retrieval of high Linkage Disequilibrium (LD) regions for
         different genome builds (37 or 38). For build 37, it downloads the regions from a
         GitHub repository. For build 38, it creates the file from predefined coordinates.
         
-        Returns:
-        --------
-        Path: Path to the created/downloaded LD regions file. Returns empty Path if
-              download fails for build 37.
-        
-        Raises:
+        Returns
         -------
-            None explicitly, but may raise standard I/O related exceptions.
+        Path
+            Path to the created/downloaded LD regions file. Returns empty Path if
+            download fails for build 37.
         
-        Notes:
+        Raises
+        ------
+        None
+            Explicitly, but may raise standard I/O related exceptions.
+        
+        Notes
         -----
-            - For build 37: Downloads from genepi-freiburg/gwas repository
-            - For build 38: Creates file from hardcoded coordinates from GWAS-pipeline
-            - Files are named as 'high-LD-regions_GRCh{build}.txt'
-            - Creates destination directory if it doesn't exist
+        - For build 37: Downloads from genepi-freiburg/gwas repository
+        - For build 38: Creates file from hardcoded coordinates from GWAS-pipeline
+        - Files are named as 'high-LD-regions_GRCh{build}.txt'
+        - Creates destination directory if it doesn't exist
         """
 
         self.destination.mkdir(parents=True, exist_ok=True)

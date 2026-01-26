@@ -27,10 +27,18 @@ logger = logging.getLogger(__name__)
 
 class SampleQC:
 
-    def __init__(self, input_path: Path, input_name: str, output_path: Path, output_name: str, high_ld_regions_file: Path, build: str = '38') -> None:
+    def __init__(
+        self, 
+        input_path: Path, 
+        input_name: str, 
+        output_path: Path, 
+        output_name: str, 
+        high_ld_regions_file: Path, 
+        build: str = '38'
+    ) -> None:
         
-        """
-        Initialize SampleQC class for quality control of genetic data.
+        """Initialize SampleQC class for quality control of genetic data.
+        
         This class handles quality control procedures for genetic data files in PLINK binary format
         (bed, bim, fam). It sets up the directory structure and validates input files.
         
@@ -137,10 +145,12 @@ class SampleQC:
         self.plots_dir = self.results_dir / 'plots'
         self.plots_dir.mkdir(parents=True, exist_ok=True)
 
-    def execute_preprocessing(self, rename: bool = True, hh_to_missing: bool = True) -> None:
-        
-        """
-        Executes the SNP ID renaming process and/or Convert haploid genotypes to missing valuesusing PLINK2.
+    def execute_preprocessing(
+        self, 
+        rename: bool = True, 
+        hh_to_missing: bool = True
+    ) -> None:
+        """Executes the SNP ID renaming process and/or Convert haploid genotypes to missing valuesusing PLINK2.
         
         This method renames SNP IDs in the PLINK binary files to a standardized format of 'chr:pos:a1:a2'.
         The renaming is performed using PLINK2's --set-all-var-ids parameter.
@@ -148,24 +158,24 @@ class SampleQC:
         missing values in the genotype data. This is often useful for quality control 
         of genetic data, particularly for variants on sex chromosomes.
         
-        Parameters:
+        Parameters
         ----------
         rename (bool, optional): Flag to control whether SNP renaming should be performed. 
             Defaults to True.
         hh_to_missing (bool, optional): Flag to control whether haploid genotypes should be converted to missing values.
             Defaults to True.
 
-        Returns:
-        --------
+        Returns
+        -------
             None
 
-        Raises:
-        -------
+        Raises
+        ------
             TypeError: If rename parameter is not a boolean.
             TypeError: If hh_to_missing parameter is not a boolean.
 
-        Notes:
-        ------
+        Notes
+        -----
             - The renamed files will be saved with '-renamed' suffix
             - Thread count is optimized based on available CPU cores
             - The new SNP ID format will be: chromosome:position:allele1:allele2
@@ -232,69 +242,13 @@ class SampleQC:
 
         return
     
-#    def execute_haploid_to_missing(self, hh_to_missing: bool = True) -> None:
-#
-#        """
-#        Convert haploid genotypes to missing values in PLINK binary files.
-#        This method uses PLINK's --set-hh-missing flag to convert haploid genotypes to 
-#        missing values in the genotype data. This is often useful for quality control 
-#        of genetic data, particularly for variants on sex chromosomes.
-#        
-#        Parameters
-#        ----------
-#        hh_to_missing : bool, default=True
-#            If True, converts haploid genotypes to missing values.
-#            If False, skips the conversion step.
-#        
-#        Returns
-#        -------
-#        None
-#        
-#        Raises
-#        ------
-#        TypeError
-#            If hh_to_missing is not a boolean value.
-#        
-#        Notes
-#        -----
-#        The method uses PLINK to process the binary files (.bed, .bim, .fam) and creates
-#        new files with suffix '-hh-missing'. The input files are determined based on whether
-#        SNPs have been previously renamed (checks self.renamed_snps).
-#        """
-#
-#        if not isinstance(hh_to_missing, bool):
-#            raise TypeError("hh_to_missing must be a boolean")
-#        
-#        if not hh_to_missing:
-#            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Skipping conversion of haploid genotypes to missing values")
-#            return
-#        else:
-#            logger.info(f"STEP: Convert haploid genotypes to missing values. `hh_to_missing` set to {hh_to_missing}. Converting haploid genotypes to missing values in the study data")
-#            self.hh_to_missing = True
-#        
-#        logger.info("STEP: Convert haploid genotypes to missing values")
-#
-#        # Dynamically set the input file name based on whether SNPs are renamed
-#        input_file = self.input_name + '-renamed' if self.renamed_snps else self.input_name
-#
-#        max_threads = get_optimal_threads()
-#        memory = get_available_memory()
-#
-#        # Execute PLINK2 command: convert haploid genotypes to missing
-#        run_plink2([
-#            '--bfile', str(self.input_path / input_file),
-#            '--set-invalid-haploid-missing',
-#            '--make-bed',
-#            '--threads', str(max_threads),
-#            '--memory', str(memory),
-#            '--out', str(self.input_path / (self.input_name + '-hh-missing'))
-#        ])
-#
-#        return
-#    
-    def execute_ld_pruning(self, ind_pair: list = [50, 5, 0.2]) -> None:
-        """
-        Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
+
+    def execute_ld_pruning(
+        self, 
+        ind_pair: list = [50, 5, 0.2]
+    ) -> None:
+        """Execute LD (Linkage Disequilibrium) pruning on genetic data using PLINK.
+        
         This method performs LD pruning in three steps:
         1. Excludes complex/high LD regions
         2. Identifies SNPs for pruning using indep-pairwise test
@@ -444,7 +398,10 @@ class SampleQC:
 
         return
     
-    def execute_sex_check(self, sex_check: list = [0.2, 0.8]) -> None:
+    def execute_sex_check(
+        self, 
+        sex_check: list = [0.2, 0.8]
+    ) -> None:
         """Execute sex check using PLINK to identify potential sex discrepancies in genetic data.
         
         This method performs sex check analysis by:
@@ -528,9 +485,11 @@ class SampleQC:
 
         return
 
-    def execute_heterozygosity_rate(self, maf: float = 0.01) -> None:
-        """
-        Executes heterozygosity rate analysis on genetic data using PLINK.
+    def execute_heterozygosity_rate(
+        self, 
+        maf: float = 0.01    
+    ) -> None:
+        """Executes heterozygosity rate analysis on genetic data using PLINK.
 
         This method performs a series of PLINK commands to analyze heterozygosity rates in genetic data,
         separating SNPs based on minor allele frequency (MAF) threshold and computing heterozygosity
@@ -1003,12 +962,15 @@ class SampleQC:
         
         Notes
         -----
-        The method:
+        The method performs the following:
+        
         - Reads large files in 10,000-row chunks to manage memory
         - Identifies samples failing multiple checks (reported as duplicates)
         - Saves two output files:
+        
           * fail_samples.txt: List of unique samples to remove (FID, IID)
           * fail_summary.txt: Summary statistics of failures by type
+        
         - Uses helper methods _analyze_heterozygosity_failures() and _analyze_ibd_failures()
           for complex analyses
         

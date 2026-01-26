@@ -5,16 +5,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ideal_genom.core.utils &mdash; IDEAL-GENOM v0.2.0</title>
+  <title>ideal_genom.core.utils &mdash; IDEAL-GENOM v1.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -91,9 +91,13 @@
   <h1>Source code for ideal_genom.core.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Shared utility functions for genomic analysis pipelines.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">gzip</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
@@ -572,6 +576,101 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get system resource information: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="download_file">
+<a class="viewcode-back" href="../../../Helpers.html#ideal_genom.core.utils.download_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_file</span><span class="p">(</span><span class="n">url</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">local_filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="unzip_file_flat">
+<a class="viewcode-back" href="../../../Helpers.html#ideal_genom.core.utils.unzip_file_flat">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unzip_file_flat</span><span class="p">(</span><span class="n">in_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">target_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">remove_zip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts a specific file from a ZIP archive, decompresses it if it&#39;s a .gz file, and optionally deletes original files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        in_file (str): Path to the ZIP file.</span>
+<span class="sd">        target_file (str): The file inside the ZIP to extract.</span>
+<span class="sd">        out_dir (str): Directory where the extracted file will be saved.</span>
+<span class="sd">        remove_zip (bool): If True, delete the original ZIP file after extraction.</span>
+<span class="sd">        remove_gz (bool): If True, delete the .gz file after decompression.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path: Path to the final extracted file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Ensure output directory exists</span>
+
+    <span class="n">extracted_gz_path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">target_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># Target extracted .gz file</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="n">zip_ref</span><span class="o">.</span><span class="n">namelist</span><span class="p">():</span>
+                <span class="c1"># Extract the .gz file from ZIP</span>
+                <span class="k">with</span> <span class="n">zip_ref</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">target_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">extracted_gz_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
+                    <span class="n">dest</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted: </span><span class="si">{</span><span class="n">extracted_gz_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">target_file</span><span class="si">}</span><span class="s2"> not found in the archive.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">Path</span><span class="p">()</span>
+
+        <span class="c1"># Optionally delete the ZIP file</span>
+        <span class="k">if</span> <span class="n">remove_zip</span><span class="p">:</span>
+            <span class="n">in_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted ZIP file: </span><span class="si">{</span><span class="n">in_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">extracted_gz_path</span>
+
+    <span class="k">except</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">in_file</span><span class="si">}</span><span class="s2"> is not a valid ZIP file.&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Path</span><span class="p">()</span>  <span class="c1"># Return None if extraction fails</span></div>
+
+
+<div class="viewcode-block" id="extract_gz_file">
+<a class="viewcode-back" href="../../../Helpers.html#ideal_genom.core.utils.extract_gz_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_gz_file</span><span class="p">(</span><span class="n">gz_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">remove_gz</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts a .gz file and saves the decompressed content in the same directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gz_file (str): Path to the .gz file.</span>
+<span class="sd">        out_dir (str): Directory where the decompressed file will be saved.</span>
+<span class="sd">        remove_gz (bool): If True, delete the .gz file after extraction.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path: Path to the extracted file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gz_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">gz_file</span><span class="p">)</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Ensure output directory exists</span>
+
+    <span class="c1"># Define the decompressed file path (removes .gz extension)</span>
+    <span class="n">decompressed_file</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">gz_file</span><span class="o">.</span><span class="n">stem</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">gz_file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">decompressed_file</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>  <span class="c1"># Copy content from .gz to uncompressed file</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decompressed: </span><span class="si">{</span><span class="n">decompressed_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">remove_gz</span><span class="p">:</span>
+            <span class="n">gz_file</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>  <span class="c1"># Delete the .gz file</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removed original .gz file: </span><span class="si">{</span><span class="n">gz_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error extracting </span><span class="si">{</span><span class="n">gz_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decompressed_file</span></div>
 
 </pre></div>
 

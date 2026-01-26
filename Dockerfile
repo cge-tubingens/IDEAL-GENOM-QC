@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone the specific repository
-RUN git clone https://github.com/cge-tubingens/IDEAL-GENOM-QC .
+RUN git clone hhttps://github.com/LuisGiraldo86/IDEAL-GENOM.git .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir .
