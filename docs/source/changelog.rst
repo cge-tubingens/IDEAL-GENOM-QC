@@ -3,8 +3,29 @@ Changelog
 
 All notable changes to IDEAL-GENOM will be documented in this file.
 
-Version 1.0.0 (Current)
+Version 1.1.0 (Current)
 -----------------------
+
+**Released:** January 2026
+
+**New Features:**
+
+- Modules for visualization of GWAS results
+   - Manhattan plot
+   - Miami plot
+   - QQ plot
+   - LD heatmap
+   - Trumpet plot
+   - Effect size comparison plot (beta-beta plot)
+- Module to fetch example datasets for testing and tutorials
+
+**Improvements:**
+
+- Example notebooks for visualization modules
+
+
+Version 1.0.0
+-------------
 
 **Released:** January 2026
 

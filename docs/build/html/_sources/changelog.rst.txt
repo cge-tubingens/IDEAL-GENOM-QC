@@ -3,8 +3,25 @@ Changelog
 
 All notable changes to IDEAL-GENOM will be documented in this file.
 
-Version 1.0.0 (Current)
+Version 1.1.0 (Current)
 -----------------------
+
+**Released:** January 2026
+
+**New Features:**
+
+- TBD: Document new features added in this release
+
+**Improvements:**
+
+- TBD: Document improvements made in this release
+
+**Bug Fixes:**
+
+- TBD: Document bug fixes in this release
+
+Version 1.0.0
+-------------
 
 **Released:** January 2026
 
